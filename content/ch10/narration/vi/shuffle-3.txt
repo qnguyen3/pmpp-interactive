@@ -1,0 +1,1 @@
+Giờ hãy xem các lane khác đã làm gì. Mọi lane đều chạy mọi lần shuffle và mọi phép cộng: tổng cộng 160 phép toán. Chỉ 31 phép trong số đó dẫn tới lane 0, và chúng sáng lên thành một hình nón. 129 phép còn lại tạo ra những tổng không ai đọc. Sự lãng phí đó là cái giá mà kernel hai giai đoạn ở phần tiếp theo cố ý chấp nhận.

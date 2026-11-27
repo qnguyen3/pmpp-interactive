@@ -1,0 +1,1 @@
+Giờ hãy gộp 16 khối hẹp thành một khối sở hữu toàn bộ ô 128 nhân 128. Nó nạp dải A một lần, và dải B một lần. Số byte được yêu cầu giảm 4 lần. Ở mỗi hàng, giờ một khối rộng làm việc mà 4 khối hẹp đã làm, không có sự lặp lại.

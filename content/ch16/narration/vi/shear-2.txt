@@ -1,0 +1,1 @@
+Giờ hãy làm trượt ô. Hàng 1 trượt sang trái 1 ô con, và hàng 2 trượt 2 ô con. Hình vuông trở thành hình bình hành. Hãy nhìn các cột của ô: mỗi cột giờ nằm trên đúng một đường chéo phụ của bảng. Phép trượt lùi mỗi hàng lại đúng bằng số thứ tự hàng của nó.

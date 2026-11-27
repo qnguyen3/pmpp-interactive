@@ -1,0 +1,1 @@
+Tại sao không nạp ít hơn? Đây là một phép trộn khác, trong đó mọi đầu ra của 2 ô đầu tiên đều đến từ A. Mỗi ô đó dùng 8 phần tử của A và không phần tử nào của B. Nếu khối chỉ nạp 4 phần tử mỗi mảng, nó đã không thể ghi 8 đầu ra. Chỉ một ô đầy đủ của mỗi mảng mới luôn luôn đủ.

@@ -1,0 +1,1 @@
+Mỗi stream biên ghi một event khi kernel của nó kết thúc. Stream bên trong giữ lại lần sao chép giá trị chuẩn cho đến khi cả hai event đó đã kích hoạt, và cho đến khi kernel của chính nó kết thúc. Nên lần sao chép chạy vào khoảng 7, khi cả ba phần của giá trị chuẩn đã có. Không luồng host nào phải chờ những việc này.

@@ -18,10 +18,16 @@
 //
 // Erasable TypeScript only, no runtime imports: the browser checks import this file in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type FfnKind = 'relu' | 'swiglu';
 export const FFN_LABEL: Record<FfnKind, string> = {
-  relu: "the book's two matrices with a ReLU",
-  swiglu: "three matrices (SwiGLU, as in today's open models)",
+  get relu() {
+    return tr("the book's two matrices with a ReLU", 'hai ma trận của sách, với một ReLU');
+  },
+  get swiglu() {
+    return tr("three matrices (SwiGLU, as in today's open models)", 'ba ma trận (SwiGLU, như trong các mô hình mở ngày nay)');
+  },
 };
 export const FFN_MATRICES: Record<FfnKind, number> = { relu: 2, swiglu: 3 };
 
@@ -104,23 +110,47 @@ export function decodeBytes(n: number, s: LayerShape, batch: number, bytesPer: n
 export type Primitive = 'host' | 'gather' | 'elementwise' | 'gemm' | 'rowreduce' | 'attention';
 export const PRIMITIVES: readonly Primitive[] = ['host', 'gather', 'elementwise', 'gemm', 'rowreduce', 'attention'];
 export const PRIMITIVE_LABEL: Record<Primitive, string> = {
-  host: 'a lookup on the host',
-  gather: 'a gather (copy rows by index)',
-  elementwise: 'elementwise',
-  gemm: 'GEMM in prefill, GEMV in decode',
-  rowreduce: 'row reductions plus elementwise work',
-  attention: 'fused attention',
+  get host() {
+    return tr('a lookup on the host', 'một phép tra bảng trên host');
+  },
+  get gather() {
+    return tr('a gather (copy rows by index)', 'một phép gather (sao chép các hàng theo chỉ số)');
+  },
+  get elementwise() {
+    return tr('elementwise', 'theo từng phần tử');
+  },
+  get gemm() {
+    return tr('GEMM in prefill, GEMV in decode', 'GEMM trong prefill, GEMV trong decode');
+  },
+  get rowreduce() {
+    return tr('row reductions plus elementwise work', 'các phép rút gọn theo hàng cộng với công việc theo từng phần tử');
+  },
+  get attention() {
+    return tr('fused attention', 'attention gộp (fused)');
+  },
 };
 
 export type Milestone = 'M0' | 'M1-M3' | 'M4' | 'M5' | 'M6' | 'none';
 export const MILESTONES: readonly Milestone[] = ['M0', 'M1-M3', 'M4', 'M5', 'M6', 'none'];
 export const MILESTONE_LABEL: Record<Milestone, string> = {
-  M0: 'M0 elementwise ops',
-  'M1-M3': 'M1 to M3, the GEMMs',
-  M4: 'M4 row softmax, max, argmax',
-  M5: 'M5 sampling',
-  M6: 'M6 attention (this chapter)',
-  none: 'no milestone',
+  get M0() {
+    return tr('M0 elementwise ops', 'M0 các phép toán theo từng phần tử');
+  },
+  get 'M1-M3'() {
+    return tr('M1 to M3, the GEMMs', 'M1 đến M3, các GEMM');
+  },
+  get M4() {
+    return tr('M4 row softmax, max, argmax', 'M4 softmax, max, argmax theo hàng');
+  },
+  get M5() {
+    return tr('M5 sampling', 'M5 lấy mẫu');
+  },
+  get M6() {
+    return tr('M6 attention (this chapter)', 'M6 attention (chương này)');
+  },
+  get none() {
+    return tr('no milestone', 'không có mốc dự án');
+  },
 };
 
 export interface Block {
@@ -137,56 +167,173 @@ export interface Block {
 /** The blocks of Fig. 20.1 (p. 479), top to bottom, as the kernels that run them. */
 export const BLOCKS: readonly Block[] = [
   {
-    id: 'tokenizer', fig: '1', name: 'Tokenizer', primitive: ['host'], milestone: ['none'],
-    why: 'Text to token IDs through a table built in training (pp. 479–480). It runs on the CPU before any kernel.',
+    id: 'tokenizer', fig: '1',
+    get name() {
+      return tr('Tokenizer', 'Tokenizer');
+    },
+    primitive: ['host'], milestone: ['none'],
+    get why() {
+      return tr(
+        'Text to token IDs through a table built in training (pp. 479–480). It runs on the CPU before any kernel.',
+        'Văn bản thành ID token qua một bảng được xây trong lúc huấn luyện (pp. 479–480). Nó chạy trên CPU trước mọi kernel.',
+      );
+    },
   },
   {
-    id: 'embedding', fig: '2', name: 'Embedding', primitive: ['gather'], milestone: ['none'],
-    why: 'One row of a [vocabulary × d_model] table per token ID: a copy by index, no arithmetic (p. 480).',
+    id: 'embedding', fig: '2',
+    get name() {
+      return tr('Embedding', 'Embedding');
+    },
+    primitive: ['gather'], milestone: ['none'],
+    get why() {
+      return tr(
+        'One row of a [vocabulary × d_model] table per token ID: a copy by index, no arithmetic (p. 480).',
+        'Mỗi ID token lấy một hàng của bảng [vocabulary × d_model]: một lần sao chép theo chỉ số, không có phép tính nào (p. 480).',
+      );
+    },
   },
   {
-    id: 'position', fig: '3', name: 'Positional encoding', primitive: ['elementwise'], milestone: ['M0'],
-    why: "In the book's original transformer, a position vector added to each embedding: an elementwise add (p. 480). Today's open models rotate Q and K inside attention instead (facts E8).",
+    id: 'position', fig: '3',
+    get name() {
+      return tr('Positional encoding', 'Mã hóa vị trí');
+    },
+    primitive: ['elementwise'], milestone: ['M0'],
+    get why() {
+      return tr(
+        "In the book's original transformer, a position vector added to each embedding: an elementwise add (p. 480). Today's open models rotate Q and K inside attention instead (facts E8).",
+        'Trong transformer gốc của sách, một vector vị trí được cộng vào mỗi embedding: một phép cộng theo từng phần tử (p. 480). Các mô hình mở ngày nay thay vào đó xoay Q và K bên trong attention (facts E8).',
+      );
+    },
   },
   {
-    id: 'qkv', fig: '5', name: 'Q, K, V projections', primitive: ['gemm'], milestone: ['M1-M3'],
-    why: 'X times W_Q, W_K, W_V. N rows in prefill make it a GEMM; one row per decode step makes it a GEMV (p. 483, p. 491).',
+    id: 'qkv', fig: '5',
+    get name() {
+      return tr('Q, K, V projections', 'Các phép chiếu Q, K, V');
+    },
+    primitive: ['gemm'], milestone: ['M1-M3'],
+    get why() {
+      return tr(
+        'X times W_Q, W_K, W_V. N rows in prefill make it a GEMM; one row per decode step makes it a GEMV (p. 483, p. 491).',
+        'X nhân W_Q, W_K, W_V. N hàng trong prefill biến nó thành một GEMM; một hàng mỗi bước decode biến nó thành một GEMV (p. 483, p. 491).',
+      );
+    },
   },
   {
-    id: 'qkt', fig: '5', name: 'Q K^T', primitive: ['attention', 'gemm'], milestone: ['M6'],
-    why: 'It is a GEMM (section 20.3 runs it with your lab 15.6 kernel), but its output is N × N per head. Section 20.5 fuses it so that output never reaches memory.',
+    id: 'qkt', fig: '5',
+    get name() {
+      return tr('Q K^T', 'Q K^T');
+    },
+    primitive: ['attention', 'gemm'], milestone: ['M6'],
+    get why() {
+      return tr(
+        'It is a GEMM (section 20.3 runs it with your lab 15.6 kernel), but its output is N × N per head. Section 20.5 fuses it so that output never reaches memory.',
+        'Nó là một GEMM (mục 20.3 chạy nó bằng kernel lab 15.6 của bạn), nhưng đầu ra của nó là N × N cho mỗi head. Mục 20.5 gộp nó để đầu ra đó không bao giờ chạm tới bộ nhớ.',
+      );
+    },
   },
   {
-    id: 'softmax', fig: '5', name: 'Mask and softmax', primitive: ['attention', 'rowreduce'], milestone: ['M6'],
-    why: "Two row reductions and an elementwise pass, the shape of M4, with the causal mask as a loop bound: lab 20.1 is M6's first part. Section 20.5 folds it into the fused kernel.",
+    id: 'softmax', fig: '5',
+    get name() {
+      return tr('Mask and softmax', 'Mask và softmax');
+    },
+    primitive: ['attention', 'rowreduce'], milestone: ['M6'],
+    get why() {
+      return tr(
+        "Two row reductions and an elementwise pass, the shape of M4, with the causal mask as a loop bound: lab 20.1 is M6's first part. Section 20.5 folds it into the fused kernel.",
+        'Hai phép rút gọn theo hàng và một lượt theo từng phần tử, đúng dạng của M4, với causal mask là một cận vòng lặp: lab 20.1 là phần đầu của M6. Mục 20.5 gộp nó vào kernel gộp (fused).',
+      );
+    },
   },
   {
-    id: 'pv', fig: '5', name: 'P V', primitive: ['attention', 'gemm'], milestone: ['M6'],
-    why: 'A GEMM in the unfused pipeline (your lab 5.3 kernel), whose input P is the N × N matrix the fused kernel never writes.',
+    id: 'pv', fig: '5',
+    get name() {
+      return tr('P V', 'P V');
+    },
+    primitive: ['attention', 'gemm'], milestone: ['M6'],
+    get why() {
+      return tr(
+        'A GEMM in the unfused pipeline (your lab 5.3 kernel), whose input P is the N × N matrix the fused kernel never writes.',
+        'Một GEMM trong pipeline không gộp (kernel lab 5.3 của bạn), có đầu vào P là ma trận N × N mà kernel gộp không bao giờ ghi ra.',
+      );
+    },
   },
   {
-    id: 'oproj', fig: '5', name: 'Output projection', primitive: ['gemm'], milestone: ['M1-M3'],
-    why: 'The heads are concatenated and multiplied by W_O (p. 480): one more linear layer.',
+    id: 'oproj', fig: '5',
+    get name() {
+      return tr('Output projection', 'Phép chiếu đầu ra');
+    },
+    primitive: ['gemm'], milestone: ['M1-M3'],
+    get why() {
+      return tr(
+        'The heads are concatenated and multiplied by W_O (p. 480): one more linear layer.',
+        'Các head được nối lại và nhân với W_O (p. 480): thêm một lớp tuyến tính nữa.',
+      );
+    },
   },
   {
-    id: 'residual', fig: '7', name: 'Residual add', primitive: ['elementwise'], milestone: ['M0'],
-    why: "The Add of Add & Norm: the sub-layer's input added to its output, element by element (p. 480).",
+    id: 'residual', fig: '7',
+    get name() {
+      return tr('Residual add', 'Cộng residual');
+    },
+    primitive: ['elementwise'], milestone: ['M0'],
+    get why() {
+      return tr(
+        "The Add of Add & Norm: the sub-layer's input added to its output, element by element (p. 480).",
+        'Phần Add của Add & Norm: đầu vào của lớp con được cộng vào đầu ra của nó, từng phần tử một (p. 480).',
+      );
+    },
   },
   {
-    id: 'norm', fig: '7', name: 'LayerNorm', primitive: ['rowreduce'], milestone: ['M4'],
-    why: 'Per token row: a mean and a variance (two reductions), then (x − μ)/σ · γ + β elementwise. One block per row, as M4 does softmax.',
+    id: 'norm', fig: '7',
+    get name() {
+      return tr('LayerNorm', 'LayerNorm');
+    },
+    primitive: ['rowreduce'], milestone: ['M4'],
+    get why() {
+      return tr(
+        'Per token row: a mean and a variance (two reductions), then (x − μ)/σ · γ + β elementwise. One block per row, as M4 does softmax.',
+        'Mỗi hàng token: một trung bình và một phương sai (hai phép rút gọn), rồi (x − μ)/σ · γ + β theo từng phần tử. Một khối cho mỗi hàng, như M4 làm với softmax.',
+      );
+    },
   },
   {
-    id: 'ffn', fig: '6', name: 'Feed-forward', primitive: ['gemm'], milestone: ['M1-M3'],
-    why: 'Two linear layers with a ReLU between (p. 481): two GEMMs, the ReLU elementwise or folded into the first.',
+    id: 'ffn', fig: '6',
+    get name() {
+      return tr('Feed-forward', 'Feed-forward');
+    },
+    primitive: ['gemm'], milestone: ['M1-M3'],
+    get why() {
+      return tr(
+        'Two linear layers with a ReLU between (p. 481): two GEMMs, the ReLU elementwise or folded into the first.',
+        'Hai lớp tuyến tính với một ReLU ở giữa (p. 481): hai GEMM, ReLU chạy theo từng phần tử hoặc được gộp vào GEMM đầu tiên.',
+      );
+    },
   },
   {
-    id: 'unembed', fig: '8', name: 'Un-embedding', primitive: ['gemm'], milestone: ['M1-M3'],
-    why: 'A linear layer from d_model to the vocabulary, run on the last token only in decode (p. 481).',
+    id: 'unembed', fig: '8',
+    get name() {
+      return tr('Un-embedding', 'Un-embedding');
+    },
+    primitive: ['gemm'], milestone: ['M1-M3'],
+    get why() {
+      return tr(
+        'A linear layer from d_model to the vocabulary, run on the last token only in decode (p. 481).',
+        'Một lớp tuyến tính từ d_model sang vocabulary, trong decode chỉ chạy trên token cuối cùng (p. 481).',
+      );
+    },
   },
   {
-    id: 'choose', name: 'Choosing the next token', primitive: ['rowreduce'], milestone: ['M4', 'M5'],
-    why: 'Greedy decoding is an argmax over the logits (M4); sampling adds softmax, sorting or scanning and a random draw (M5, chapter X1). The book gives it one sentence (p. 481).',
+    id: 'choose',
+    get name() {
+      return tr('Choosing the next token', 'Chọn token tiếp theo');
+    },
+    primitive: ['rowreduce'], milestone: ['M4', 'M5'],
+    get why() {
+      return tr(
+        'Greedy decoding is an argmax over the logits (M4); sampling adds softmax, sorting or scanning and a random draw (M5, chapter X1). The book gives it one sentence (p. 481).',
+        'Greedy decoding là một argmax trên logits (M4); lấy mẫu thêm softmax, sắp xếp hoặc scan và một lần rút ngẫu nhiên (M5, chương X1). Sách chỉ dành cho nó một câu (p. 481).',
+      );
+    },
   },
 ];
 

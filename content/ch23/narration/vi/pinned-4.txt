@@ -1,0 +1,1 @@
+Đây là đường ống với 4 chunk và các buffer phân trang. Mỗi lần sao chép giữ luồng host cho đến khi xong, và một lần sao chép ra phải chờ kernel của chính nó trước. Nên host xếp hàng chunk tiếp theo muộn, và không có gì chồng lấp. Toàn bộ công việc mất 16 đơn vị, đúng bằng khi làm một mạch.

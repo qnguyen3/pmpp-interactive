@@ -211,7 +211,7 @@ export function timeline(reqs: readonly Req[], lat: Latencies): Timeline {
 export const SCENE = { dram: 200, cache: 20, shared: 4, issue: 10 } as const;
 export const LANES = 8;
 const dramLat: Latencies = { load: SCENE.dram, store: SCENE.dram, issue: SCENE.issue };
-const rowName = (t: number) => `thread ${t}`;
+const rowName = (t: number) => `thread ${t}`; // i18n-ignore: identifier also shown to the reader
 
 /** Eight threads read eight different addresses. */
 export const sceneLoads = (n = LANES) =>
@@ -232,7 +232,7 @@ export const SKEWED4 = [0, 0, 0, 0, 0, 1, 2, 3];
 /** Each thread atomically adds one to the bin it is given; chains form per bin. */
 export const sceneBins = (binOfThread: readonly number[], perAccess: number = SCENE.dram) =>
   timeline(
-    binOfThread.map((b, t) => ({ row: rowName(t), address: `bin ${b}`, kind: 'atomic' as const })),
+    binOfThread.map((b, t) => ({ row: rowName(t), address: `bin ${b}`, kind: 'atomic' as const })), // i18n-ignore: address key, compared with ===
     { load: perAccess, store: perAccess, issue: SCENE.issue },
   );
 
@@ -254,11 +254,11 @@ export function scenePrivatised(blocks = 2, perBlock = LANES / 2, shared: number
   const priv: Req[] = [];
   for (let b = 0; b < blocks; b++)
     for (let j = 0; j < perBlock; j++)
-      priv.push({ row: rowName(b * perBlock + j), address: `private ${b}`, kind: 'atomic', issueAt: j * SCENE.issue });
+      priv.push({ row: rowName(b * perBlock + j), address: `private ${b}`, kind: 'atomic', issueAt: j * SCENE.issue }); // i18n-ignore: address key, compared with ===
   const first = timeline(priv, lat);
   const blockEnd = (b: number) => Math.max(...first.bars.filter((x) => x.address === `private ${b}`).map((x) => x.end));
   const commits: Req[] = Array.from({ length: blocks }, (_, b) => ({
-    row: `block ${b} commit`, address: 'bin', kind: 'atomic', issueAt: blockEnd(b), load: global, store: global, amount: perBlock,
+    row: `block ${b} commit`, address: 'bin', kind: 'atomic', issueAt: blockEnd(b), load: global, store: global, amount: perBlock, // i18n-ignore: identifier also shown to the reader
   }));
   return timeline([...priv, ...commits], lat);
 }

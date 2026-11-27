@@ -27,6 +27,8 @@
 //
 // Erasable TypeScript only and no imports: the browser checks import this file directly.
 
+import { tr } from '../lib/locale.ts';
+
 export type Policy = 'static' | 'continuous';
 export type Mix = 'short' | 'long';
 
@@ -56,9 +58,17 @@ const uniformInt = (r: () => number, lo: number, hi: number) => lo + Math.floor(
 
 /** Output-length mixes (ours, for illustration; no server's statistics). */
 export const MIXES: Record<Mix, { label: string; mean: number; draw: (r: () => number) => number }> = {
-  short: { label: 'similar lengths (8 to 40 tokens)', mean: 24, draw: (r) => uniformInt(r, 8, 40) },
+  short: {
+    get label() {
+      return tr('similar lengths (8 to 40 tokens)', 'độ dài gần nhau (8 đến 40 token)');
+    },
+    mean: 24,
+    draw: (r) => uniformInt(r, 8, 40),
+  },
   long: {
-    label: 'long-tailed (4 in 5 short, 1 in 5 of 128 to 512 tokens)',
+    get label() {
+      return tr('long-tailed (4 in 5 short, 1 in 5 of 128 to 512 tokens)', 'đuôi dài (4 trên 5 ngắn, 1 trên 5 dài 128 đến 512 token)');
+    },
     // 0.8 · 18 + 0.2 · 320
     mean: 78.4,
     draw: (r) => (r() < 0.8 ? uniformInt(r, 4, 32) : uniformInt(r, 128, 512)),

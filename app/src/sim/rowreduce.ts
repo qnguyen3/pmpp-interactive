@@ -23,6 +23,8 @@
 // may cost less than its reads suggest). The start value of MLX CUDA's running max is not in
 // the facts; this model starts at minus infinity, so the first rescale multiplies 0 by 0.
 
+import { tr } from '../lib/locale.ts';
+
 const f = Math.fround;
 const fexp = (x: number) => f(Math.exp(f(x)));
 const fexp2 = (x: number) => f(Math.pow(2, f(x)));
@@ -40,8 +42,8 @@ export const ROW16 = [1.2, -0.5, 0.8, 2.0, 0.3, 3.1, -1.0, 1.5, 2.2, 0.6, -0.2, 
 
 export type PathId = 'twopass' | 'online';
 export const PATH_LABEL: Record<PathId, string> = {
-  twopass: 'max, then sum (three loops, as lab 10.3)',
-  online: 'online max and sum (MLX CUDA)',
+  get twopass() { return tr('max, then sum (three loops, as lab 10.3)', 'max, rồi sum (ba vòng lặp, như lab 10.3)'); },
+  get online() { return tr('online max and sum (MLX CUDA)', 'max và sum kiểu online (MLX CUDA)'); },
 };
 
 export type Op = 'max' | 'sum' | 'inv' | 'write' | 'chunk-max' | 'rescale' | 'add';
@@ -251,10 +253,10 @@ export function onlineBase2(scores: number[], scale: number): BaseResult {
 // ---------------------------------------------------------------- the classification table
 export type Structure = 'max-then-sum' | 'online' | 'one-sum' | 'not-read';
 export const STRUCTURE_LABEL: Record<Structure, string> = {
-  'max-then-sum': 'max, then sum',
-  online: 'online max and sum in one pass',
-  'one-sum': 'one sum only',
-  'not-read': 'not read in the facts',
+  get 'max-then-sum'() { return tr('max, then sum', 'max, rồi sum'); },
+  get online() { return tr('online max and sum in one pass', 'max và sum kiểu online trong một lượt'); },
+  get 'one-sum'() { return tr('one sum only', 'chỉ một sum'); },
+  get 'not-read'() { return tr('not read in the facts', 'chưa đọc trong tệp facts'); },
 };
 export type ExpFn = 'expf' | '__expf' | 'fast::exp' | 'precise::exp' | 'exp' | 'none' | 'not-read';
 export const EXP_LABEL: Record<ExpFn, string> = {
@@ -262,9 +264,9 @@ export const EXP_LABEL: Record<ExpFn, string> = {
   __expf: '__expf',
   'fast::exp': 'fast::exp',
   'precise::exp': 'precise::exp',
-  exp: 'exp (Metal, default math mode)',
-  none: 'no exponential',
-  'not-read': 'not read in the facts',
+  get exp() { return tr('exp (Metal, default math mode)', 'exp (Metal, chế độ toán mặc định)'); },
+  get none() { return tr('no exponential', 'không có hàm mũ'); },
+  get 'not-read'() { return tr('not read in the facts', 'chưa đọc trong tệp facts'); },
 };
 
 export interface KernelRow {
@@ -285,37 +287,37 @@ export interface KernelRow {
 export const KERNELS: KernelRow[] = [
   {
     id: 'llama-cuda-softmax', project: 'llama.cpp', backend: 'CUDA and HIP', op: 'softmax', kernel: 'soft_max_f32', file: 'ggml/src/ggml-cuda/softmax.cu',
-    structure: 'max-then-sum', exp: 'expf', source: 'ch10 D1',
-    why: 'block_reduce MAX into buf_iw, expf(vals[col] - max_val), a barrier, then block_reduce SUM.',
+    structure: 'max-then-sum', exp: 'expf', source: 'ch10 D1', // i18n-ignore: facts-item citation
+    get why() { return tr('block_reduce MAX into buf_iw, expf(vals[col] - max_val), a barrier, then block_reduce SUM.', 'block_reduce MAX vào buf_iw, expf(vals[col] - max_val), một rào chắn, rồi block_reduce SUM.'); },
   },
   {
     id: 'llama-metal-softmax', project: 'llama.cpp', backend: 'Metal', op: 'softmax', kernel: 'kernel_soft_max', file: 'ggml/src/ggml-metal/kernels/softmax.metal',
-    structure: 'max-then-sum', exp: 'exp', source: 'x3 B3',
-    why: 'simd_max with -INFINITY padding, then exp(...) and simd_sum with 0 padding: plain exp, so its accuracy follows the compile options.',
+    structure: 'max-then-sum', exp: 'exp', source: 'x3 B3', // i18n-ignore: facts-item citation
+    get why() { return tr('simd_max with -INFINITY padding, then exp(...) and simd_sum with 0 padding: plain exp, so its accuracy follows the compile options.', 'simd_max với phần đệm -INFINITY, rồi exp(...) và simd_sum với phần đệm 0: exp thường, nên độ chính xác của nó theo các tùy chọn biên dịch.'); },
   },
   {
     id: 'mlx-metal-softmax', project: 'MLX', backend: 'Metal', op: 'softmax', kernel: 'softmax_single_row', file: 'mlx/backend/metal/kernels/softmax.h',
-    structure: 'max-then-sum', exp: 'fast::exp', source: 'ch10 D3, x3 B3',
-    why: 'simd_max, broadcast through local_max[0], then the same with simd_sum; softmax_exp is fast::exp.',
+    structure: 'max-then-sum', exp: 'fast::exp', source: 'ch10 D3, x3 B3', // i18n-ignore: facts-item citation
+    get why() { return tr('simd_max, broadcast through local_max[0], then the same with simd_sum; softmax_exp is fast::exp.', 'simd_max, phát (broadcast) qua local_max[0], rồi làm tương tự với simd_sum; softmax_exp là fast::exp.'); },
   },
   {
-    id: 'mlx-cuda-softmax', project: 'MLX', backend: 'CUDA', op: 'softmax', kernel: 'softmax (softmax.cu)', file: 'mlx/backend/cuda/softmax.cu',
-    structure: 'online', exp: '__expf', source: 'x3 B3',
-    why: 'per chunk: new max, normalizer * softmax_exp(prevmax - maxval), then the new terms; softmax_exp is __expf.',
+    id: 'mlx-cuda-softmax', project: 'MLX', backend: 'CUDA', op: 'softmax', kernel: 'softmax (softmax.cu)', file: 'mlx/backend/cuda/softmax.cu', // i18n-ignore: kernel name, shown as code
+    structure: 'online', exp: '__expf', source: 'x3 B3', // i18n-ignore: facts-item citation
+    get why() { return tr('per chunk: new max, normalizer * softmax_exp(prevmax - maxval), then the new terms; softmax_exp is __expf.', 'mỗi chunk: max mới, normalizer * softmax_exp(prevmax - maxval), rồi các số hạng mới; softmax_exp là __expf.'); },
   },
   {
-    id: 'torch-cuda-softmax', project: 'PyTorch', backend: 'CUDA', op: 'softmax', kernel: 'persistent softmax (rows up to 2048)', file: 'aten/src/ATen/native/cuda/PersistentSoftmax.cuh',
-    structure: 'not-read', exp: 'not-read', source: 'x3 B3, ch10 D4',
-    why: 'the facts record the routing (warp per row, at most 2048 elements and 8192 bytes) and "only __shfl_ instructions", not the order of its reductions or its exponential.',
+    id: 'torch-cuda-softmax', project: 'PyTorch', backend: 'CUDA', op: 'softmax', kernel: 'persistent softmax (rows up to 2048)', file: 'aten/src/ATen/native/cuda/PersistentSoftmax.cuh', // i18n-ignore: kernel name, shown as code
+    structure: 'not-read', exp: 'not-read', source: 'x3 B3, ch10 D4', // i18n-ignore: facts-item citation
+    get why() { return tr('the facts record the routing (warp per row, at most 2048 elements and 8192 bytes) and "only __shfl_ instructions", not the order of its reductions or its exponential.', 'tệp facts ghi lại cách định tuyến (một warp mỗi hàng, tối đa 2048 phần tử và 8192 byte) và "chỉ các lệnh __shfl_", không ghi thứ tự các phép rút gọn hay hàm mũ của nó.'); },
   },
   {
     id: 'torch-mps-softmax', project: 'PyTorch', backend: 'MPS', op: 'softmax', kernel: 'SoftMax.metal', file: 'aten/src/ATen/native/mps/kernels/SoftMax.metal',
-    structure: 'not-read', exp: 'precise::exp', source: 'x3 B3',
-    why: 'precise::exp throughout, with simd_max and simd_sum; whether the max and the sum are separate passes was not recorded.',
+    structure: 'not-read', exp: 'precise::exp', source: 'x3 B3', // i18n-ignore: facts-item citation
+    get why() { return tr('precise::exp throughout, with simd_max and simd_sum; whether the max and the sum are separate passes was not recorded.', 'precise::exp xuyên suốt, với simd_max và simd_sum; việc max và sum có là các lượt riêng hay không thì chưa được ghi lại.'); },
   },
   {
     id: 'llama-cuda-rmsnorm', project: 'llama.cpp', backend: 'CUDA and HIP', op: 'RMSNorm', kernel: 'rms_norm_f32', file: 'ggml/src/ggml-cuda/norm.cu',
-    structure: 'one-sum', exp: 'none', source: 'x3 B2',
-    why: 'one block_reduce SUM of squares, then rsqrtf(mean + eps): no maximum and no exponential.',
+    structure: 'one-sum', exp: 'none', source: 'x3 B2', // i18n-ignore: facts-item citation
+    get why() { return tr('one block_reduce SUM of squares, then rsqrtf(mean + eps): no maximum and no exponential.', 'một block_reduce SUM các bình phương, rồi rsqrtf(mean + eps): không có phép lấy max và không có hàm mũ.'); },
   },
 ];

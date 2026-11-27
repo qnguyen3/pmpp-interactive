@@ -1,0 +1,1 @@
+Mọi luồng trong một khối chạy vòng lặp đó cùng lúc. Khối 0, 0 có 4 luồng. Cùng nhau, chúng đi qua 2 hàng của M và 2 cột của N, và 4 tổng đang chạy tăng song song. Khi vòng lặp kết thúc, mỗi luồng lưu tổng của nó vào phần tử riêng của nó trong P.

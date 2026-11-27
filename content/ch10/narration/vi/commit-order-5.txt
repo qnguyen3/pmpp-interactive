@@ -1,0 +1,1 @@
+Cái giá là thêm một lần khởi chạy, và một số float cho mỗi khối. Ở đây là 8 số float. Với một triệu logit, và khối 1024 luồng, là 489. Với max và argmax, hoàn toàn không có phép nguyên tử float nào chạy được trên mọi nền tảng. Vì vậy hai lượt cũng là con đường chạy được ở mọi nơi. Đó là con đường argmax trên Metal của llama.cpp chọn.

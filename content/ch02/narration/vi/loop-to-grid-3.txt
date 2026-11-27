@@ -1,0 +1,1 @@
+GPU không nhận các luồng lẻ loi. Luồng đi theo khối, và mọi khối trong một lần khởi chạy đều có cùng kích thước. Với 4 luồng mỗi khối, 10 luồng cần 3 khối. [short pause] Và 3 khối 4 luồng là 12 luồng. Tức là nhiều hơn số lượt của vòng lặp 2 luồng.

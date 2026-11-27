@@ -1,0 +1,1 @@
+Các điểm của khối này lấp đầy một ngăn. Quanh tâm của ngăn, ta vẽ một siêu đường tròn: bán kính cắt cộng với nửa đường chéo của ngăn. Bất kỳ ngăn nào nó chạm tới đều có thể chứa một nguyên tử mà một điểm nào đó của khối cần. Ở đây là 21 ngăn, được viết một lần trên host thành một danh sách độ lệch tương đối.

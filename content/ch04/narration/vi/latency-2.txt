@@ -1,0 +1,1 @@
+Giờ có 3 warp thường trú. Khi warp đầu tiên bắt đầu chờ, bộ lập lịch phát lệnh từ một warp khác đã sẵn sàng. Rồi từ warp thứ ba. Các lần chờ của chúng chồng lên nhau, nên các khoảng trống co lại. Giờ đơn vị bận 6 chu kỳ trong mỗi 8 chu kỳ.

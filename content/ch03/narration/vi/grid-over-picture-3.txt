@@ -1,0 +1,1 @@
+Hãy nhìn phần thừa ra. Bên phải, 4 cột luồng không có điểm ảnh nào. Ở dưới cùng, 2 hàng không có điểm ảnh nào. Cộng lại là 408 luồng không có việc gì. Nên kernel kiểm tra cột và hàng của nó trước khi chạm vào bộ nhớ, và 408 luồng đó chỉ việc dừng lại.

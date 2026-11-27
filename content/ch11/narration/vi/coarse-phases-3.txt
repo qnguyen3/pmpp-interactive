@@ -1,0 +1,1 @@
+Pha một. Sau một rào chắn, mỗi luồng đọc dải phần tử của riêng mình từ bộ nhớ chia sẻ, từng phần tử một, và giữ một tổng tích lũy trong thanh ghi. Luồng 1 biến 0, 4, 1 và 2 thành 0, 4, 5 và 7. Ở đây không cần rào chắn, và không có gì được chia sẻ. Mỗi luồng làm việc một mình.

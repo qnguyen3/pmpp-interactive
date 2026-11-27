@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { ones, smallValues, warpReduceTrace, type Trace } from '../../sim/shuffle';
+import { tr } from '../../lib/i18n';
 
 // "Lanes exchanging values": one warp reducing in registers, one row per step, time
 // running down the page. Every row is a step of a Trace from src/sim/shuffle.ts, the
@@ -47,7 +48,7 @@ const opName = (t: Trace) => (t.pattern === 'down' ? 'down' : 'xor');
 /** Height of a grid with n rows. */
 export const gridHeight = (rows: number, gap = GAP) => TOP + rows * ROW_H + (rows - 1) * gap;
 
-export function WarpGrid({ trace, upto, arrows, cone = false, coneRows, live = false, ring = [], startLabel = 'start', gap = GAP }: GridProps) {
+export function WarpGrid({ trace, upto, arrows, cone = false, coneRows, live = false, ring = [], startLabel = tr('start', 'bắt đầu'), gap = GAP }: GridProps) {
   const hw = trace.hardwareWidth;
   const cw = LANES_W / hw;
   const x = (lane: number) => LABEL_W + lane * cw;
@@ -159,7 +160,7 @@ export function WarpGrid({ trace, upto, arrows, cone = false, coneRows, live = f
           <text key={i} x={x(i) + cw / 2} y={TOP - 8} fontSize="9" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{i}</text>
         ) : null,
       )}
-      <text x={LABEL_W - 8} y={TOP - 8} fontSize="9" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>lane</text>
+      <text x={LABEL_W - 8} y={TOP - 8} fontSize="9" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>{tr('lane', 'lane')}</text>
       {arrowEls}
       {rows}
     </g>
@@ -183,7 +184,7 @@ const VIEW_H = gridHeight(7, SCENE_GAP) + 58;
 function Stage({ children, headline, counters = [] }: { children: ReactNode; headline: ReactNode; counters?: { label: string; value: string }[] }) {
   const yb = VIEW_H - 14;
   return (
-    <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} role="img" aria-label="Animation of one warp reducing values in registers, one row per step"
+    <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} role="img" aria-label={tr('Animation of one warp reducing values in registers, one row per step', 'Hoạt hình một warp rút gọn các giá trị trong thanh ghi, mỗi bước một hàng')}
       style={{ width: '100%', maxWidth: VIEW_W, minWidth: MIN_W, display: 'block' }}>
       {children}
       <text x={8} y={yb} fontSize="13" fontWeight="600" data-headline>{headline}</text>
@@ -203,12 +204,14 @@ const steps = (t: Trace, p: number, a: number, b: number) => Math.min(t.steps.le
 const beats: Beat[] = [
   {
     clip: 'shuffle-1',
-    label: 'Values in registers',
+    get label() {
+      return tr('Values in registers', 'Giá trị trong thanh ghi');
+    },
     draw: (p) => {
       const t = SCENE.down;
       const k = p < 0.55 ? 0 : 1;
       return (
-        <Stage headline={p < 0.3 ? '32 lanes, one value each, all in registers' : p < 0.55 ? 'every lane asks for the value 16 lanes above it' : 'lanes 0 to 15 receive; lanes 16 to 31 keep their own'}>
+        <Stage headline={p < 0.3 ? tr('32 lanes, one value each, all in registers', '32 lane, mỗi lane một giá trị, tất cả trong thanh ghi') : p < 0.55 ? tr('every lane asks for the value 16 lanes above it', 'mọi lane đều xin giá trị của lane cao hơn nó 16') : tr('lanes 0 to 15 receive; lanes 16 to 31 keep their own', 'lane 0 đến 15 nhận; lane 16 đến 31 giữ giá trị của mình')}>
           <WarpGrid gap={SCENE_GAP} trace={t} upto={k} arrows={p >= 0.3 ? 0 : null} />
           {p >= 0.3 && k === 0 ? <PendingArrows t={t} /> : null}
         </Stage>
@@ -217,13 +220,15 @@ const beats: Beat[] = [
   },
   {
     clip: 'shuffle-2',
-    label: 'Halve, add, repeat',
+    get label() {
+      return tr('Halve, add, repeat', 'Chia đôi, cộng, lặp lại');
+    },
     draw: (p) => {
       const t = SCENE.down;
       const k = Math.max(1, steps(t, p, 0, 0.85));
       const done = k === t.steps.length;
       return (
-        <Stage headline={done ? `after 5 steps lane 0 holds ${t.lane0}, the sum of all 32` : `stride ${t.steps[k - 1].stride}: the part that still matters halves`}>
+        <Stage headline={done ? tr(`after 5 steps lane 0 holds ${t.lane0}, the sum of all 32`, `sau 5 bước lane 0 giữ ${t.lane0}, tổng của cả 32`) : tr(`stride ${t.steps[k - 1].stride}: the part that still matters halves`, `bước nhảy ${t.steps[k - 1].stride}: phần còn có ý nghĩa giảm một nửa`)}>
           <WarpGrid gap={SCENE_GAP} trace={t} upto={k} live ring={done ? [0] : []} />
         </Stage>
       );
@@ -231,17 +236,19 @@ const beats: Beat[] = [
   },
   {
     clip: 'shuffle-3',
-    label: 'Everyone computes',
+    get label() {
+      return tr('Everyone computes', 'Ai cũng tính');
+    },
     draw: (p) => {
       const t = SCENE.down;
       const rows = t.steps.length + 1;
       const coneRows = Math.max(1, Math.ceil(ramp(p, 0.2, 0.7) * rows));
       return (
-        <Stage headline={p < 0.2 ? 'every lane ran every shuffle and every add' : p < 0.75 ? 'the cone: what reaches lane 0' : 'the rest is work nobody reads'}
+        <Stage headline={p < 0.2 ? tr('every lane ran every shuffle and every add', 'mọi lane đều chạy mọi shuffle và mọi phép cộng') : p < 0.75 ? tr('the cone: what reaches lane 0', 'hình nón: những gì đến được lane 0') : tr('the rest is work nobody reads', 'phần còn lại là việc không ai đọc')}
           counters={[
-            { label: 'lane-operations', value: String(t.laneOps) },
-            { label: 'reach lane 0', value: p >= 0.45 ? String(t.useful) : '…' },
-            { label: 'wasted', value: p >= 0.75 ? String(t.wasted) : '…' },
+            { label: tr('lane-operations', 'thao tác lane'), value: String(t.laneOps) },
+            { label: tr('reach lane 0', 'đến được lane 0'), value: p >= 0.45 ? String(t.useful) : '…' },
+            { label: tr('wasted', 'lãng phí'), value: p >= 0.75 ? String(t.wasted) : '…' },
           ]}>
           <WarpGrid gap={SCENE_GAP} trace={t} upto={t.steps.length} arrows={null} cone={p >= 0.2} coneRows={coneRows} />
         </Stage>
@@ -250,14 +257,16 @@ const beats: Beat[] = [
   },
   {
     clip: 'shuffle-4',
-    label: 'Butterfly',
+    get label() {
+      return tr('Butterfly', 'Butterfly');
+    },
     draw: (p) => {
       const t = SCENE.xor;
       const k = Math.max(1, steps(t, p, 0.05, 0.8));
       const done = k === t.steps.length;
       return (
-        <Stage headline={done ? `every lane holds ${t.total}` : `xor ${t.steps[k - 1].stride}: partners trade in both directions`}
-          counters={[{ label: 'lane-operations', value: String(t.laneOps) }]}>
+        <Stage headline={done ? tr(`every lane holds ${t.total}`, `mọi lane đều giữ ${t.total}`) : tr(`xor ${t.steps[k - 1].stride}: partners trade in both directions`, `xor ${t.steps[k - 1].stride}: các cặp trao đổi theo cả hai chiều`)}
+          counters={[{ label: tr('lane-operations', 'thao tác lane'), value: String(t.laneOps) }]}>
           <WarpGrid gap={SCENE_GAP} trace={t} upto={k} ring={done ? t.holders : []} />
         </Stage>
       );
@@ -265,43 +274,47 @@ const beats: Beat[] = [
   },
   {
     clip: 'shuffle-5',
-    label: 'A lane that left early',
+    get label() {
+      return tr('A lane that left early', 'Một lane rời đi sớm');
+    },
     draw: (p) => {
       if (p < 0.72) {
         const t = SCENE.gone;
         const k = steps(t, p, 0.1, 0.62);
         const firstQ = t.steps.findIndex((s) => s.lanes[0].after == null);
         return (
-          <Stage headline={k === 0 ? `lanes ${SCENE.tailFrom} and up have returned` : k > firstQ ? 'the question mark has reached lane 0: the total is undefined' : 'reading a lane that left gives an undefined value'}>
-            <WarpGrid gap={SCENE_GAP} trace={t} upto={k} startLabel="start" />
+          <Stage headline={k === 0 ? tr(`lanes ${SCENE.tailFrom} and up have returned`, `các lane từ ${SCENE.tailFrom} trở lên đã return`) : k > firstQ ? tr('the question mark has reached lane 0: the total is undefined', 'dấu hỏi đã đến lane 0: tổng là không xác định') : tr('reading a lane that left gives an undefined value', 'đọc một lane đã rời đi cho ra một giá trị không xác định')}>
+            <WarpGrid gap={SCENE_GAP} trace={t} upto={k} startLabel={tr('start', 'bắt đầu')} />
           </Stage>
         );
       }
       const z = SCENE.zero;
       return (
-        <Stage headline={`stay and add 0: lane 0 holds ${z.lane0}, the sum of lanes 0 to ${SCENE.tailFrom - 1}`}>
-          <WarpGrid gap={SCENE_GAP} trace={z} upto={z.steps.length} ring={[0]} startLabel="0 past the end" />
+        <Stage headline={tr(`stay and add 0: lane 0 holds ${z.lane0}, the sum of lanes 0 to ${SCENE.tailFrom - 1}`, `ở lại và cộng 0: lane 0 giữ ${z.lane0}, tổng của lane 0 đến ${SCENE.tailFrom - 1}`)}>
+          <WarpGrid gap={SCENE_GAP} trace={z} upto={z.steps.length} ring={[0]} startLabel={tr('0 past the end', '0 khi vượt quá cuối')} />
         </Stage>
       );
     },
   },
   {
     clip: 'shuffle-6',
-    label: 'Sixty-four lanes',
+    get label() {
+      return tr('Sixty-four lanes', 'Sáu mươi tư lane');
+    },
     draw: (p) => {
       if (p < 0.7) {
         const t = SCENE.wave64;
         const k = steps(t, p, 0.05, 0.55);
         const done = k === t.steps.length;
         return (
-          <Stage headline={done ? `lane 0 holds ${t.final[0]}, lane 32 holds ${t.final[32]}, nobody holds ${t.total}` : 'a 64-lane wavefront, a loop written for 32'}>
+          <Stage headline={done ? tr(`lane 0 holds ${t.final[0]}, lane 32 holds ${t.final[32]}, nobody holds ${t.total}`, `lane 0 giữ ${t.final[0]}, lane 32 giữ ${t.final[32]}, không ai giữ ${t.total}`) : tr('a 64-lane wavefront, a loop written for 32', 'một wavefront 64 lane, một vòng lặp viết cho 32')}>
             <WarpGrid gap={SCENE_GAP} trace={t} upto={k} live ring={done ? [0, 32] : []} />
           </Stage>
         );
       }
       const f = SCENE.fixed64;
       return (
-        <Stage headline={`loop from warpSize / 2: 6 steps, lane 0 holds ${f.lane0}`}>
+        <Stage headline={tr(`loop from warpSize / 2: 6 steps, lane 0 holds ${f.lane0}`, `lặp từ warpSize / 2: 6 bước, lane 0 giữ ${f.lane0}`)}>
           <WarpGrid gap={SCENE_GAP} trace={f} upto={f.steps.length} live ring={[0]} />
         </Stage>
       );
@@ -324,5 +337,5 @@ function PendingArrows({ t }: { t: Trace }) {
 }
 
 export function ShuffleScene() {
-  return <Scene chapter="ch10" title="Lanes exchanging values" beats={beats} />;
+  return <Scene chapter="ch10" title={tr('Lanes exchanging values', 'Các lane trao đổi giá trị')} beats={beats} />;
 }

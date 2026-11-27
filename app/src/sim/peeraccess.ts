@@ -29,6 +29,7 @@
 //
 // No imports and only erasable TypeScript, so browser checks can load this file
 // directly with Node.
+import { tr } from '../lib/locale.ts';
 
 export const MAX_PEERS_WITHOUT_NVSWITCH = 8;
 
@@ -58,33 +59,33 @@ export type EnableResult =
   | { ok: false; reason: Refusal; call: string; text: string };
 
 /** The call a program would make with GPU `from` as the current device, to reach GPU `to`. */
-export const enableCall = (from: number, to: number) => `on GPU ${from}: cudaDeviceEnablePeerAccess(${to}, 0)`;
+export const enableCall = (from: number, to: number) => tr(`on GPU ${from}: cudaDeviceEnablePeerAccess(${to}, 0)`, `trên GPU ${from}: cudaDeviceEnablePeerAccess(${to}, 0)`);
 
 /** Whether GPU `from` may be granted access to GPU `to`'s memory now. */
 export function canEnable(sys: PeerSystem, g: Grants, from: number, to: number): EnableResult {
   const call = enableCall(from, to);
   if (from === to)
-    return { ok: false, reason: 'self', call, text: `GPU ${from}'s own memory needs no grant.` };
+    return { ok: false, reason: 'self', call, text: tr(`GPU ${from}'s own memory needs no grant.`, `Bộ nhớ của chính GPU ${from} không cần cấp quyền.`) }; // i18n-ignore: reason is an identifier, not shown
   if (sys.iommu && !sys.nvswitch)
     return {
       ok: false,
-      reason: 'iommu',
+      reason: 'iommu', // i18n-ignore: identifier compared by the page, not shown
       call,
-      text: 'Refused: on bare-metal Linux with the IOMMU on, CUDA does not support PCIe peer-to-peer (A8).',
+      text: tr('Refused: on bare-metal Linux with the IOMMU on, CUDA does not support PCIe peer-to-peer (A8).', 'Bị từ chối: trên Linux chạy trực tiếp trên phần cứng (bare-metal) khi bật IOMMU, CUDA không hỗ trợ peer-to-peer qua PCIe (A8).'),
     };
   if (sys.iommu)
     return {
       ok: false,
-      reason: 'undocumented',
+      reason: 'undocumented', // i18n-ignore: identifier compared by the page, not shown
       call,
-      text: "Not documented: NVIDIA's IOMMU rule is about PCIe peer-to-peer, and our sources say nothing about NVSwitch with the IOMMU on (A8). The model grants nothing it cannot source.",
+      text: tr("Not documented: NVIDIA's IOMMU rule is about PCIe peer-to-peer, and our sources say nothing about NVSwitch with the IOMMU on (A8). The model grants nothing it cannot source.", 'Không có tài liệu: quy tắc IOMMU của NVIDIA nói về peer-to-peer qua PCIe, và các nguồn của chúng tôi không nói gì về NVSwitch khi bật IOMMU (A8). Mô hình không cấp quyền nào mà nó không có nguồn dẫn chứng.'),
     };
   if (!sys.nvswitch && !g[from][to] && outgoing(g, from) >= MAX_PEERS_WITHOUT_NVSWITCH)
     return {
       ok: false,
-      reason: 'limit',
+      reason: 'limit', // i18n-ignore: identifier compared by the page, not shown
       call,
-      text: `Refused: GPU ${from} already has ${MAX_PEERS_WITHOUT_NVSWITCH} peers, the most a device supports without NVSwitch (A8).`,
+      text: tr(`Refused: GPU ${from} already has ${MAX_PEERS_WITHOUT_NVSWITCH} peers, the most a device supports without NVSwitch (A8).`, `Bị từ chối: GPU ${from} đã có ${MAX_PEERS_WITHOUT_NVSWITCH} peer, mức tối đa một thiết bị hỗ trợ khi không có NVSwitch (A8).`),
     };
   return { ok: true, call };
 }
@@ -113,17 +114,17 @@ export interface Deref {
 
 /** A kernel on GPU `gpu` loads through a pointer to GPU `owner`'s memory. */
 export function deref(g: Grants, gpu: number, owner: number): Deref {
-  if (gpu === owner) return { ok: true, how: 'local', text: `A load from GPU ${gpu}'s own memory.` };
+  if (gpu === owner) return { ok: true, how: 'local', text: tr(`A load from GPU ${gpu}'s own memory.`, `Một lần nạp từ bộ nhớ của chính GPU ${gpu}.`) };
   if (g[gpu][owner])
     return {
       ok: true,
       how: 'peer',
-      text: `A direct load over the fabric: GPU ${gpu} was granted access to GPU ${owner}. The pointer has the same value on both GPUs (A8).`,
+      text: tr(`A direct load over the fabric: GPU ${gpu} was granted access to GPU ${owner}. The pointer has the same value on both GPUs (A8).`, `Một lần nạp trực tiếp qua kết nối (fabric): GPU ${gpu} đã được cấp quyền truy cập GPU ${owner}. Con trỏ có cùng giá trị trên cả hai GPU (A8).`),
     };
   return {
     ok: false,
     how: 'refused',
-    text: `An error: GPU ${gpu} has no access to GPU ${owner}'s memory. A copy still works without it: cudaMemcpyPeer (A8).`,
+    text: tr(`An error: GPU ${gpu} has no access to GPU ${owner}'s memory. A copy still works without it: cudaMemcpyPeer (A8).`, `Lỗi: GPU ${gpu} không có quyền truy cập bộ nhớ của GPU ${owner}. Sao chép vẫn hoạt động khi không có quyền này: cudaMemcpyPeer (A8).`),
   };
 }
 
@@ -198,12 +199,12 @@ export interface HaloExchange {
 export function haloExchange(approach: 'copy' | 'peer', g?: Grants): HaloExchange {
   if (approach === 'copy') {
     const steps: HaloStep[] = [
-      { who: 'both', kind: 'kernel', text: 'Each GPU runs step k on its half and writes its boundary rows.' },
-      { who: 'host', kind: 'wait', text: 'The host waits for GPU 0 to finish.' },
-      { who: 'host', kind: 'wait', text: 'The host waits for GPU 1 to finish.' },
-      { who: 'host', kind: 'copy', text: "The host sets up a copy of GPU 0's boundary into a halo buffer on GPU 1." },
-      { who: 'host', kind: 'copy', text: "The host sets up a copy of GPU 1's boundary into a halo buffer on GPU 0." },
-      { who: 'both', kind: 'kernel', text: 'Each GPU runs step k + 1, reading its neighbour\'s rows from its own halo buffer.' },
+      { who: 'both', kind: 'kernel', text: tr('Each GPU runs step k on its half and writes its boundary rows.', 'Mỗi GPU chạy bước k trên nửa của mình và ghi các hàng biên của nó.') },
+      { who: 'host', kind: 'wait', text: tr('The host waits for GPU 0 to finish.', 'Host chờ GPU 0 xong.') },
+      { who: 'host', kind: 'wait', text: tr('The host waits for GPU 1 to finish.', 'Host chờ GPU 1 xong.') },
+      { who: 'host', kind: 'copy', text: tr("The host sets up a copy of GPU 0's boundary into a halo buffer on GPU 1.", 'Host thiết lập một lần sao chép biên của GPU 0 vào một buffer vùng biên (halo) trên GPU 1.') },
+      { who: 'host', kind: 'copy', text: tr("The host sets up a copy of GPU 1's boundary into a halo buffer on GPU 0.", 'Host thiết lập một lần sao chép biên của GPU 1 vào một buffer vùng biên (halo) trên GPU 0.') },
+      { who: 'both', kind: 'kernel', text: tr('Each GPU runs step k + 1, reading its neighbour\'s rows from its own halo buffer.', 'Mỗi GPU chạy bước k + 1, đọc các hàng của GPU láng giềng từ buffer vùng biên của chính nó.') },
     ];
     return { approach, steps, staging: 2, hostCopies: 2, hostWaits: 2, ordering: 1, ready: true, missing: [] };
   }
@@ -213,10 +214,10 @@ export function haloExchange(approach: 'copy' | 'peer', g?: Grants): HaloExchang
     if (!g[1]?.[0]) missing.push([1, 0]);
   }
   const steps: HaloStep[] = [
-    { who: 'both', kind: 'kernel', text: 'Each GPU runs step k on its half and writes its boundary rows.' },
-    { who: 'both', kind: 'order', text: 'Both GPUs finish step k before either starts step k + 1.' },
-    { who: 'gpu0', kind: 'load', text: "GPU 0 runs step k + 1 and loads GPU 1's boundary rows through the peer pointer." },
-    { who: 'gpu1', kind: 'load', text: "GPU 1 runs step k + 1 and loads GPU 0's boundary rows through the peer pointer." },
+    { who: 'both', kind: 'kernel', text: tr('Each GPU runs step k on its half and writes its boundary rows.', 'Mỗi GPU chạy bước k trên nửa của mình và ghi các hàng biên của nó.') },
+    { who: 'both', kind: 'order', text: tr('Both GPUs finish step k before either starts step k + 1.', 'Cả hai GPU xong bước k trước khi một trong hai bắt đầu bước k + 1.') },
+    { who: 'gpu0', kind: 'load', text: tr("GPU 0 runs step k + 1 and loads GPU 1's boundary rows through the peer pointer.", 'GPU 0 chạy bước k + 1 và nạp các hàng biên của GPU 1 qua con trỏ peer.') },
+    { who: 'gpu1', kind: 'load', text: tr("GPU 1 runs step k + 1 and loads GPU 0's boundary rows through the peer pointer.", 'GPU 1 chạy bước k + 1 và nạp các hàng biên của GPU 0 qua con trỏ peer.') },
   ];
   return { approach, steps, staging: 0, hostCopies: 0, hostWaits: 0, ordering: 1, ready: missing.length === 0, missing };
 }

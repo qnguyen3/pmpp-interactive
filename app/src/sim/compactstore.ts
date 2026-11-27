@@ -36,14 +36,23 @@
 // Erasable TypeScript only.
 import { warpAccess } from './coalesce';
 import { BOOK_KEEP, exclusiveScan } from './stablescan';
+import { tr } from '../lib/locale.ts';
 
 export type Design = 'direct' | 'staged' | 'staged-coarse' | 'direct-coarse';
 export const DESIGNS: Design[] = ['direct', 'staged', 'staged-coarse', 'direct-coarse'];
 export const DESIGN_LABEL: Record<Design, string> = {
-  direct: 'Fig. 12.8: each kept thread stores its own key',
-  staged: 'Fig. 12.9: stage in shared memory, then copy out',
-  'staged-coarse': 'Fig. 12.10: staged and coarsened',
-  'direct-coarse': 'coarsened, no staging (ours)',
+  get direct() {
+    return tr('Fig. 12.8: each kept thread stores its own key', 'Fig. 12.8: mỗi luồng được giữ tự ghi khóa của mình');
+  },
+  get staged() {
+    return tr('Fig. 12.9: stage in shared memory, then copy out', 'Fig. 12.9: trung chuyển qua bộ nhớ chia sẻ, rồi sao chép ra');
+  },
+  get 'staged-coarse'() {
+    return tr('Fig. 12.10: staged and coarsened', 'Fig. 12.10: có trung chuyển và gộp việc');
+  },
+  get 'direct-coarse'() {
+    return tr('coarsened, no staging (ours)', 'gộp việc, không trung chuyển (của khóa học này)');
+  },
 };
 export const isStaged = (d: Design) => d === 'staged' || d === 'staged-coarse';
 export const isCoarse = (d: Design) => d === 'staged-coarse' || d === 'direct-coarse';
@@ -211,9 +220,15 @@ export function storeMap(input: Config): StoreMap {
 // ---------------------------------------------------------------- keep patterns
 export type Pattern = 'random' | 'runs' | 'alternate';
 export const PATTERN_LABEL: Record<Pattern, string> = {
-  random: 'random',
-  runs: 'in runs',
-  alternate: 'every other key',
+  get random() {
+    return tr('random', 'ngẫu nhiên');
+  },
+  get runs() {
+    return tr('in runs', 'theo dải');
+  },
+  get alternate() {
+    return tr('every other key', 'cứ cách một khóa');
+  },
 };
 
 function lcg(seed: number) {

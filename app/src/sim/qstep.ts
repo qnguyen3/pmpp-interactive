@@ -27,6 +27,7 @@
 import { BOOK_DEVICE, M8_DEFAULT, effectivePeak, type Device, type ReportsLike, type StepShape } from './batching';
 import { F32, Q4_0, Q8_0, bytesPerWeight, formatById, matrixBytes, type WeightFormat } from './qformats';
 import { f32, fakeQuant, rng, gauss, type MatFormat } from './quant';
+import { tr } from '../lib/locale.ts';
 
 export { BOOK_DEVICE, M8_DEFAULT };
 export type StepFormat = 'f32' | 'q8_0' | 'q4_0';
@@ -79,11 +80,11 @@ export function stepBytes(shape: StepShape, formats: StepFormats, B: number, dev
   const headW = matrixBytes(fe, vocab, d);
   const embW = matrixBytes(fe, B, d); // B rows of E, whole blocks
   const pieces: StepPiece[] = [
-    piece('embed', 'embedding gather', embW, a * B * d + 4 * B, 0, 1),
-    piece('linear', 'layer linears', layers * linW, layers * a * B * (d + d), layers * 2 * B * d * d, layers),
-    piece('bias', 'bias adds', 0, layers * a * (2 * B * d + d), layers * B * d, layers),
-    piece('residual', 'residual adds', 0, layers * 3 * a * B * d, layers * B * d, layers),
-    piece('head', 'LM head', headW, a * B * (d + vocab), 2 * B * d * vocab, 1),
+    piece('embed', tr('embedding gather', 'gather embedding'), embW, a * B * d + 4 * B, 0, 1),
+    piece('linear', tr('layer linears', 'các lớp tuyến tính'), layers * linW, layers * a * B * (d + d), layers * 2 * B * d * d, layers),
+    piece('bias', tr('bias adds', 'cộng bias'), 0, layers * a * (2 * B * d + d), layers * B * d, layers),
+    piece('residual', tr('residual adds', 'cộng residual'), 0, layers * 3 * a * B * d, layers * B * d, layers),
+    piece('head', tr('LM head', 'LM head'), headW, a * B * (d + vocab), 2 * B * d * vocab, 1),
     piece('softmax', 'softmax', 0, 2 * a * B * vocab, 5 * B * vocab, 1),
     piece('argmax', 'argmax', 0, a * B * vocab + 4 * B, B * vocab, 1),
   ];
@@ -283,6 +284,6 @@ export function greedyRun(m: ToyModel, f: ToyFormats, steps = TOY.steps, start =
 /** Bytes of the toy model's weights in its formats (for the explorer's caption). */
 export function toyWeightBytes(m: ToyModel, f: ToyFormats): number {
   const one = (fmt: MatFormat, rows: number, cols: number) =>
-    fmt === 'affine3' || fmt === 'affine2' ? matrixBytes(formatById(`mlx-${fmt === 'affine3' ? 3 : 2}-g64-f16`), rows, cols) : matrixBytes(fmtOf(fmt), rows, cols);
+    fmt === 'affine3' || fmt === 'affine2' ? matrixBytes(formatById(`mlx-${fmt === 'affine3' ? 3 : 2}-g64-f16`), rows, cols) : matrixBytes(fmtOf(fmt), rows, cols); // i18n-ignore: format id
   return one(f.E, m.vocab, m.d) + f.W.reduce((s, w) => s + one(w, m.d, m.d), 0);
 }

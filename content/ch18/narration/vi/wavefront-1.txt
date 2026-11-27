@@ -1,0 +1,1 @@
+Đây là một lưới đi dây 15 nhân 15 với hai chỗ bị chặn. Mỗi ô trống là một đỉnh, và mỗi bước mà một sợi dây có thể đi sang một ô bên cạnh là một cạnh. Một lần tìm kiếm từ nguồn gán nhãn 4 ô ở mức 1, 8 ô ở mức 2, và 12 ô ở mức 3, một làn sóng uốn quanh các chỗ bị chặn.

@@ -1,0 +1,1 @@
+Trên HIP, các lời gọi có cùng tên. Header thì khác, và lệnh khởi chạy cần đủ cả sáu đối số. Metal hoàn toàn không có rào chắn lưới, nên nó chạy một dispatch cho mỗi mức trên một encoder tuần tự, và một dispatch gián tiếp có thể đọc kích thước của mức kế tiếp từ một buffer trên GPU. Kỹ thuật này tồn tại ở mọi nơi, chỉ trừ chính việc khởi chạy một lần.

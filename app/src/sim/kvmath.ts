@@ -31,6 +31,8 @@
 //
 // Erasable TypeScript only and no imports: the browser checks import this file directly.
 
+import { tr } from '../lib/locale.ts';
+
 export const KiB = 1024;
 export const MiB = 1024 ** 2;
 export const GiB = 1024 ** 3;
@@ -231,11 +233,54 @@ export interface ElementSize {
 
 /** Bytes per element: the labs' fp32, 16-bit, and llama.cpp's cache types (facts D3). */
 export const ELEMENT_SIZES: ElementSize[] = [
-  { key: 'f32', label: 'fp32, 4 bytes', bytes: 4, note: "the labs' precision" },
-  { key: 'f16', label: 'fp16 or bf16, 2 bytes', bytes: 2, note: "the book's examples; llama.cpp's default cache type" },
-  { key: 'f8', label: 'fp8 e4m3, 1 byte', bytes: 1, note: 'llama.cpp cache type f8_e4m3' },
-  { key: 'q8_0', label: 'q8_0, 34 bytes per 32 values', bytes: 34 / 32, note: 'llama.cpp: a half-precision scale plus 32 int8 values' },
-  { key: 'q4_0', label: 'q4_0, 18 bytes per 32 values', bytes: 18 / 32, note: 'llama.cpp: a half-precision scale plus 16 bytes of 4-bit values' },
+  {
+    key: 'f32',
+    get label() {
+      return tr('fp32, 4 bytes', 'fp32, 4 byte');
+    },
+    bytes: 4,
+    get note() {
+      return tr("the labs' precision", 'độ chính xác của các lab');
+    },
+  },
+  {
+    key: 'f16',
+    get label() {
+      return tr('fp16 or bf16, 2 bytes', 'fp16 hoặc bf16, 2 byte');
+    },
+    bytes: 2,
+    get note() {
+      return tr("the book's examples; llama.cpp's default cache type", 'các ví dụ của sách; kiểu cache mặc định của llama.cpp');
+    },
+  },
+  {
+    key: 'f8',
+    label: 'fp8 e4m3, 1 byte', // i18n-ignore: reads the same in Vietnamese (type name, number, unit)
+    bytes: 1,
+    get note() {
+      return tr('llama.cpp cache type f8_e4m3', 'kiểu cache f8_e4m3 của llama.cpp');
+    },
+  },
+  {
+    key: 'q8_0',
+    get label() {
+      return tr('q8_0, 34 bytes per 32 values', 'q8_0, 34 byte cho mỗi 32 giá trị');
+    },
+    bytes: 34 / 32,
+    get note() {
+      return tr('llama.cpp: a half-precision scale plus 32 int8 values', 'llama.cpp: một scale độ chính xác một nửa (half) cộng 32 giá trị int8');
+    },
+  },
+  {
+    key: 'q4_0',
+    get label() {
+      return tr('q4_0, 18 bytes per 32 values', 'q4_0, 18 byte cho mỗi 32 giá trị');
+    },
+    bytes: 18 / 32,
+    get note() {
+      return tr('llama.cpp: a half-precision scale plus 16 bytes of 4-bit values', 'llama.cpp: một scale độ chính xác một nửa (half) cộng 16 byte giá trị 4-bit');
+    },
+  },
 ];
 
 export interface Preset {
@@ -257,61 +302,97 @@ export interface Preset {
 export const PRESETS: Preset[] = [
   {
     key: 'llama2-7b',
-    label: 'Llama 2 7B (the book’s example)',
+    get label() {
+      return tr('Llama 2 7B (the book’s example)', 'Llama 2 7B (ví dụ của sách)');
+    },
     shape: { l: 32, hq: 32, hkv: 32, d: 128 },
     context: 4096,
     params: 7e9,
-    paramsNote: 'the book’s round 7 billion (p. 505)',
-    source: 'book p. 506; facts E2 (32 layers, 32 heads, 4,096 wide, 4k context, no GQA)',
+    get paramsNote() {
+      return tr('the book’s round 7 billion (p. 505)', 'con số tròn 7 tỷ của sách (p. 505)');
+    },
+    get source() {
+      return tr('book p. 506; facts E2 (32 layers, 32 heads, 4,096 wide, 4k context, no GQA)', 'sách p. 506; facts E2 (32 lớp, 32 head, rộng 4,096, ngữ cảnh 4k, không GQA)');
+    },
   },
   {
     key: 'gpt3',
-    label: 'GPT-3 175B',
+    label: 'GPT-3 175B', // i18n-ignore: model name
     shape: { l: 96, hq: 96, hkv: 96, d: 128 },
     context: 2048,
     params: 175.0e9,
-    paramsNote: '175.0B (facts E2, GPT-3 Table 2.1)',
-    source: 'facts E2: 96 layers, 96 heads of 128, a 2,048-token window',
-    note: 'The book’s 18 GB uses 4,096 tokens, twice GPT-3’s window.',
+    paramsNote: '175.0B (facts E2, GPT-3 Table 2.1)', // i18n-ignore: parameter count and citation
+    get source() {
+      return tr('facts E2: 96 layers, 96 heads of 128, a 2,048-token window', 'facts E2: 96 lớp, 96 head kích thước 128, cửa sổ 2,048 token');
+    },
+    get note() {
+      return tr('The book’s 18 GB uses 4,096 tokens, twice GPT-3’s window.', 'Con số 18 GB của sách dùng 4,096 token, gấp đôi cửa sổ của GPT-3.');
+    },
   },
   {
     key: 'palm2-printed',
-    label: 'The book’s “PaLM 2” row, as printed',
+    get label() {
+      return tr('The book’s “PaLM 2” row, as printed', 'Hàng “PaLM 2” của sách, đúng như in');
+    },
     shape: { l: 64, hq: 32, hkv: 32, d: 256 },
-    source: 'book p. 506: 64 layers, hidden dimension 8,192 (split here as 32 heads of 256, PaLM 62B’s)',
-    note: 'PaLM 2’s architecture was never published (facts E2). These numbers are PaLM 62B’s, computed as if it used MHA.',
+    get source() {
+      return tr('book p. 506: 64 layers, hidden dimension 8,192 (split here as 32 heads of 256, PaLM 62B’s)', 'sách p. 506: 64 lớp, chiều ẩn 8,192 (ở đây chia thành 32 head kích thước 256, như PaLM 62B)');
+    },
+    get note() {
+      return tr('PaLM 2’s architecture was never published (facts E2). These numbers are PaLM 62B’s, computed as if it used MHA.', 'Kiến trúc của PaLM 2 chưa bao giờ được công bố (facts E2). Các con số này là của PaLM 62B, được tính như thể nó dùng MHA.');
+    },
   },
   {
     key: 'palm-62b',
-    label: 'PaLM 62B, as it really is (MQA)',
+    get label() {
+      return tr('PaLM 62B, as it really is (MQA)', 'PaLM 62B, đúng như thực tế (MQA)');
+    },
     shape: { l: 64, hq: 32, hkv: 1, d: 256 },
     params: 62e9,
-    paramsNote: '62B (facts E2)',
-    source: 'facts E2: 64 layers, 32 heads, d_model 8,192, head size 256, multi-query attention',
+    paramsNote: '62B (facts E2)', // i18n-ignore: parameter count and citation
+    get source() {
+      return tr('facts E2: 64 layers, 32 heads, d_model 8,192, head size 256, multi-query attention', 'facts E2: 64 lớp, 32 head, d_model 8,192, kích thước head 256, multi-query attention');
+    },
   },
   {
     key: 'mistral-7b',
-    label: 'Mistral 7B (GQA, 8 K/V heads)',
+    get label() {
+      return tr('Mistral 7B (GQA, 8 K/V heads)', 'Mistral 7B (GQA, 8 head K/V)');
+    },
     shape: { l: 32, hq: 32, hkv: 8, d: 128 },
     context: 8192,
-    source: 'facts E2: 32 layers, 32 heads of 128, 8 K/V heads, context 8,192',
-    note: 'No parameter count in our facts file: type one if you want the weights counted.',
+    get source() {
+      return tr('facts E2: 32 layers, 32 heads of 128, 8 K/V heads, context 8,192', 'facts E2: 32 lớp, 32 head kích thước 128, 8 head K/V, ngữ cảnh 8,192');
+    },
+    get note() {
+      return tr('No parameter count in our facts file: type one if you want the weights counted.', 'Tệp facts của chúng tôi không có số tham số: hãy nhập một số nếu bạn muốn tính cả trọng số.');
+    },
   },
   {
     key: 'mixtral',
-    label: 'Mixtral (Mistral 7B’s attention, 8 experts per layer)',
+    get label() {
+      return tr('Mixtral (Mistral 7B’s attention, 8 experts per layer)', 'Mixtral (attention của Mistral 7B, 8 expert mỗi lớp)');
+    },
     shape: { l: 32, hq: 32, hkv: 8, d: 128 },
     params: 47e9,
-    paramsNote: '47B resident, 13B used per token (facts E7)',
-    source: 'facts E7: the same architecture as Mistral 7B, 8 feed-forward experts per layer',
-    note: 'Every expert must be in memory, so the weights count all 47B.',
+    get paramsNote() {
+      return tr('47B resident, 13B used per token (facts E7)', '47B thường trú, 13B được dùng cho mỗi token (facts E7)');
+    },
+    get source() {
+      return tr('facts E7: the same architecture as Mistral 7B, 8 feed-forward experts per layer', 'facts E7: cùng kiến trúc với Mistral 7B, 8 expert feed-forward mỗi lớp');
+    },
+    get note() {
+      return tr('Every expert must be in memory, so the weights count all 47B.', 'Mọi expert đều phải nằm trong bộ nhớ, nên phần trọng số tính đủ cả 47B.');
+    },
   },
   {
     key: 'deepseek-v2',
-    label: 'DeepSeek-V2 (MLA)',
+    label: 'DeepSeek-V2 (MLA)', // i18n-ignore: model name
     shape: { l: 60, hq: 128, hkv: 128, d: 128, mla: { dc: 512, dr: 64 } },
     source: 'facts E2, E5: 60 layers, 128 heads of 128, d_c = 512, d_h^R = 64',
-    note: 'No parameter count in our facts file: type one if you want the weights counted.',
+    get note() {
+      return tr('No parameter count in our facts file: type one if you want the weights counted.', 'Tệp facts của chúng tôi không có số tham số: hãy nhập một số nếu bạn muốn tính cả trọng số.');
+    },
   },
 ];
 

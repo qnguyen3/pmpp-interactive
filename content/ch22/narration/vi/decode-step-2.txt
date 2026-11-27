@@ -1,0 +1,1 @@
+Giờ 8 yêu cầu dùng chung một bước. Dòng trọng số vẫn dài như trước, vì mỗi trọng số vẫn chỉ được đọc một lần. Nhưng 8 hàng gặp mỗi trọng số, nên làn tính toán bận gấp 8 lần. Và 8 token được tạo ra trong gần như cùng thời gian. Trọng số là chi phí, và giờ 8 yêu cầu cùng chia nhau chi phí đó.

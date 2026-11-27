@@ -1,0 +1,1 @@
+Một khối gồm 32 activation. Một warp tìm độ lớn lớn nhất trong số đó. Hệ số tỉ lệ là giá trị lớn nhất đó chia cho 127. Mỗi activation được chia cho hệ số tỉ lệ rồi làm tròn thành một byte có dấu, trong khoảng từ âm 127 đến 127. Các byte được cộng lại, và tổng của chúng nhân với hệ số tỉ lệ được lưu thành s, để dùng sau.

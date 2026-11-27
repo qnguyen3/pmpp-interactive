@@ -1,0 +1,1 @@
+Đây là bốn mươi token còn lại sau nhiệt độ, vẽ thành một thanh xếp chồng. Tổng của chúng là chiều dài của thanh. Nhân u với tổng và bạn có mục tiêu, được đánh dấu trên thanh. Token ta cần là token đầu tiên có tổng tích lũy lớn hơn hẳn mục tiêu.

@@ -1,0 +1,1 @@
+Một rào chắn thứ hai, rồi cửa sổ dịch tiếp. Mỗi luồng chép giá trị hiện tại của chính nó vào buffer trước, và giá trị kế tiếp của chính nó vào buffer hiện tại. Rào chắn thứ nhất bảo vệ một phụ thuộc thật: bạn không thể đọc thứ chưa được ghi. Rào chắn thứ hai bảo vệ một phụ thuộc giả: không ai được ghi đè một giá trị mà luồng láng giềng chưa đọc.

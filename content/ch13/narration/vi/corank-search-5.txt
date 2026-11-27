@@ -1,0 +1,1 @@
+Mọi luồng chạy cùng một phép tìm kiếm, cùng lúc, một cách độc lập. Luồng 0 bắt đầu ở 0 và 0, luồng 1 ở 2 và 1, luồng 2 ở 5 và 1, và điểm kết thúc là 5 và 4. Luồng 1 chỉ lấy phần tử của A, luồng 2 chỉ lấy phần tử của B. Rồi mỗi luồng trộn các lát của riêng mình. Không ai phải chờ.

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { blockHistogram } from '../../sim/convcached';
 import {
   SCENE_A,
@@ -114,20 +115,20 @@ function LineMap({ x, y, cell, inL2, marks, tiles = [], title, ring }: MapProps)
   );
 }
 
-function Counter({ y, name, label, hits, of, word = 'found in L2' }: { y: number; name: string; label: string; hits: number; of: number; word?: string }) {
+function Counter({ y, name, label, hits, of, word = tr('found in L2', 'có trong L2') }: { y: number; name: string; label: string; hits: number; of: number; word?: string }) {
   return (
     <g data-counter={name} data-hits={hits} data-of={of}>
       <text x={432} y={y} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>{label}</text>
-      <text x={432} y={y + 16} fontSize="13" fontWeight="650">{hits} of {of} {word}</text>
+      <text x={432} y={y + 16} fontSize="13" fontWeight="650">{hits} {tr('of', 'trên')} {of} {word}</text>
     </g>
   );
 }
 
 function Legend({ y }: { y: number }) {
   const items: [string, string, string][] = [
-    ['var(--global-wash)', 'var(--global)', 'line in L2'],
-    ['var(--fail-wash)', 'var(--fail)', 'just read: miss, from DRAM'],
-    ['var(--ok-wash)', 'var(--ok)', 'just read: hit in L2'],
+    ['var(--global-wash)', 'var(--global)', tr('line in L2', 'dòng có trong L2')],
+    ['var(--fail-wash)', 'var(--fail)', tr('just read: miss, from DRAM', 'vừa đọc: trượt, lấy từ DRAM')],
+    ['var(--ok-wash)', 'var(--ok)', tr('just read: hit in L2', 'vừa đọc: trúng ở L2')],
   ];
   return (
     <g>
@@ -137,14 +138,14 @@ function Legend({ y }: { y: number }) {
           <text x={460} y={y + i * 17} fontSize="11">{label}</text>
         </g>
       ))}
-      <text x={432} y={y + 3 * 17} fontSize="11" style={{ fill: 'var(--ink-2)' }}>one bar = one cache line = one tile row of {CFG.lineFloats} floats</text>
+      <text x={432} y={y + 3 * 17} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>một thanh = một dòng cache = một hàng của ô gồm {CFG.lineFloats} số float</>}>one bar = one cache line = one tile row of {CFG.lineFloats} floats</Translated></text>
     </g>
   );
 }
 
 function Frame({ beat, headline, children, note }: { beat: number; headline: string; children: ReactNode; note?: string }) {
   return (
-    <svg viewBox="0 0 720 330" role="img" aria-label="Our toy cache model: which halo reads hit in L2" data-beat={beat}
+    <svg viewBox="0 0 720 330" role="img" aria-label={tr('Our toy cache model: which halo reads hit in L2', 'Mô hình cache đồ chơi của chúng tôi: những lần đọc vùng biên (halo) nào trúng ở L2')} data-beat={beat}
       style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       <text x={16} y={20} fontSize="13" fontWeight="650" data-headline>{headline}</text>
       {children}
@@ -154,7 +155,7 @@ function Frame({ beat, headline, children, note }: { beat: number; headline: str
 }
 
 const MAP = { x: 16, y: 48, cell: 6 };
-const NOTE = `Our toy model, not a measurement: a ${CFG.capacity}-line LRU cache, one block at a time, image ${W} × ${H} floats, radius ${R}.`;
+const NOTE = () => tr(`Our toy model, not a measurement: a ${CFG.capacity}-line LRU cache, one block at a time, image ${W} × ${H} floats, radius ${R}.`, `Mô hình đồ chơi của chúng tôi, không phải số đo: một cache LRU ${CFG.capacity} dòng, mỗi lần một khối, ảnh ${W} × ${H} số float, bán kính ${R}.`);
 
 function marksOf(run: CacheRun, from: number, to: number, keep?: (e: CacheEvent) => boolean) {
   const m = new Map<number, boolean>();
@@ -178,10 +179,10 @@ function beatA(p: number) {
   const loads = tally(done.filter((x) => x.phase === 'load'));
   const halo = tally(done.filter((x) => x.phase === 'halo'));
   return (
-    <Frame beat={1} headline={k - s <= 8 ? 'Block A loads its own tile: every line comes from DRAM, through L2' : 'Then A reads its halo from global memory: those lines land in L2 too'} note={NOTE}>
-      <LineMap {...MAP} inL2={new Set(contentsAt(CFG, k)[0])} marks={marksOf(run, s, k)} tiles={[{ bx: 0, by: 0, label: 'A', tone: 'shared' }]} title="the image, one bar per cache line" />
-      <Counter y={66} name="a-load" label="A's own lines (into shared memory)" hits={loads.hits} of={loads.of} />
-      <Counter y={108} name="a-halo" label="A's halo lines (read from global)" hits={halo.hits} of={halo.of} />
+    <Frame beat={1} headline={k - s <= 8 ? tr('Block A loads its own tile: every line comes from DRAM, through L2', 'Khối A nạp ô của chính nó: mọi dòng đều đến từ DRAM, qua L2') : tr('Then A reads its halo from global memory: those lines land in L2 too', 'Rồi A đọc vùng biên của nó từ bộ nhớ toàn cục: các dòng đó cũng nằm lại trong L2')} note={NOTE()}>
+      <LineMap {...MAP} inL2={new Set(contentsAt(CFG, k)[0])} marks={marksOf(run, s, k)} tiles={[{ bx: 0, by: 0, label: 'A', tone: 'shared' }]} title={tr('the image, one bar per cache line', 'ảnh, mỗi dòng cache một thanh')} />
+      <Counter y={66} name="a-load" /* i18n-ignore: data key */ label={tr("A's own lines (into shared memory)", 'các dòng của chính A (vào bộ nhớ chia sẻ)')} hits={loads.hits} of={loads.of} />
+      <Counter y={108} name="a-halo" /* i18n-ignore: data key */ label={tr("A's halo lines (read from global)", 'các dòng vùng biên của A (đọc từ bộ nhớ toàn cục)')} hits={halo.hits} of={halo.of} />
       <Legend y={170} />
     </Frame>
   );
@@ -196,15 +197,15 @@ function beatB(p: number) {
   const left = tally(done.filter((x) => x.phase === 'halo' && aSet.has(x.line)));
   const other = tally(done.filter((x) => x.phase === 'halo' && !aSet.has(x.line)));
   return (
-    <Frame beat={2} headline={left.of === F.bLeft ? `B's left halo is A's interior: ${left.hits} of ${left.of} lines found in L2` : 'Block B, next door, loads its own tile'} note={NOTE}>
+    <Frame beat={2} headline={left.of === F.bLeft ? tr(`B's left halo is A's interior: ${left.hits} of ${left.of} lines found in L2`, `Vùng biên trái của B là phần trong của A: ${left.hits} trên ${left.of} dòng có trong L2`) : tr('Block B, next door, loads its own tile', 'Khối B, ngay bên cạnh, nạp ô của chính nó')} note={NOTE()}>
       <LineMap {...MAP} inL2={new Set(contentsAt(CFG, k)[0])} marks={marksOf(run, s, k)} ring={aSet}
-        tiles={[{ bx: 0, by: 0, label: 'A', tone: 'ink' }, { bx: 1, by: 0, label: 'B', tone: 'shared' }]} title="the image, one bar per cache line" />
-      <Counter y={66} name="b-load" label="B's own lines" hits={own.hits} of={own.of} />
-      <Counter y={108} name="b-left" label="B's halo reads of A's lines (dashed)" hits={left.hits} of={left.of} />
-      <Counter y={150} name="b-other" label="B's other halo lines" hits={other.hits} of={other.of} />
+        tiles={[{ bx: 0, by: 0, label: 'A', tone: 'ink' }, { bx: 1, by: 0, label: 'B', tone: 'shared' }]} title={tr('the image, one bar per cache line', 'ảnh, mỗi dòng cache một thanh')} />
+      <Counter y={66} name="b-load" /* i18n-ignore: data key */ label={tr("B's own lines", 'các dòng của chính B')} hits={own.hits} of={own.of} />
+      <Counter y={108} name="b-left" /* i18n-ignore: data key */ label={tr("B's halo reads of A's lines (dashed)", 'các lần B đọc vùng biên vào dòng của A (nét đứt)')} hits={left.hits} of={left.of} />
+      <Counter y={150} name="b-other" /* i18n-ignore: data key */ label={tr("B's other halo lines", 'các dòng vùng biên khác của B')} hits={other.hits} of={other.of} />
       <text x={432} y={200} fontSize="11" style={{ fill: 'var(--ink-2)' }} data-taps={`${B_TAPS.shared},${B_TAPS.global},${B_TAPS.ghost}`}>
-        <tspan x={432}>B's {B_TAPS.threads} threads make {B_TAPS.taps.toLocaleString('en-US')} taps:</tspan>
-        <tspan x={432} dy={14}>{B_TAPS.shared.toLocaleString('en-US')} shared, {B_TAPS.global} global, {B_TAPS.ghost} ghost</tspan>
+        <tspan x={432}><Translated vi={<>{B_TAPS.threads} luồng của B thực hiện {B_TAPS.taps.toLocaleString('en-US')} tap:</>}>B's {B_TAPS.threads} threads make {B_TAPS.taps.toLocaleString('en-US')} taps:</Translated></tspan>
+        <tspan x={432} dy={14}><Translated vi={<>{B_TAPS.shared.toLocaleString('en-US')} chia sẻ, {B_TAPS.global} toàn cục, {B_TAPS.ghost} ô ma</>}>{B_TAPS.shared.toLocaleString('en-US')} shared, {B_TAPS.global} global, {B_TAPS.ghost} ghost</Translated></tspan>
       </text>
       <Legend y={250} />
     </Frame>
@@ -224,21 +225,21 @@ function beatC(p: number) {
   const runningBlock = between ? run.blocks[cur.block] : run.blocks[SCENE_C];
   return (
     <Frame beat={3}
-      headline={between ? `Blocks ${SCENE_B + 1} to ${SCENE_C - 1} run; the ${CFG.capacity}-line cache turns over`
-        : onA.of === F.cOnABottom ? `C reads A's bottom rows as halo: ${onA.hits} of ${onA.of} lines still in L2` : 'C, the first block of the next row'}
-      note={NOTE}>
+      headline={between ? tr(`Blocks ${SCENE_B + 1} to ${SCENE_C - 1} run; the ${CFG.capacity}-line cache turns over`, `Các khối ${SCENE_B + 1} đến ${SCENE_C - 1} chạy; cache ${CFG.capacity} dòng được thay mới hoàn toàn`)
+        : onA.of === F.cOnABottom ? tr(`C reads A's bottom rows as halo: ${onA.hits} of ${onA.of} lines still in L2`, `C đọc các hàng dưới cùng của A làm vùng biên: ${onA.hits} trên ${onA.of} dòng vẫn còn trong L2`) : tr('C, the first block of the next row', 'C, khối đầu tiên của hàng kế tiếp')}
+      note={NOTE()}>
       <LineMap {...MAP} inL2={new Set(contentsAt(CFG, k)[0])} marks={between ? new Map() : marksOf(run, sC, k)} ring={aBottom}
         tiles={[{ bx: 0, by: 0, label: 'A', tone: 'ink' },
           ...(between ? [{ bx: runningBlock.bx, by: runningBlock.by, label: '·', tone: 'shared' as const }] : [{ bx: 0, by: 1, label: 'C', tone: 'shared' as const }])]}
-        title="the image, one bar per cache line" />
+        title={tr('the image, one bar per cache line', 'ảnh, mỗi dòng cache một thanh')} />
       <g data-counter="since-b" data-hits={between ? cur.block - SCENE_B : SCENE_C - SCENE_B - 1} data-of={F.evictedBeforeC}>
-        <text x={432} y={66} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>blocks run since B</text>
+        <text x={432} y={66} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="số khối đã chạy kể từ B">blocks run since B</Translated></text>
         <text x={432} y={82} fontSize="13" fontWeight="650">{between ? Math.max(0, cur.block - SCENE_B) : SCENE_C - SCENE_B - 1}</text>
-        <text x={432} y={104} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>lines evicted between B and C</text>
+        <text x={432} y={104} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="số dòng bị loại khỏi cache giữa B và C">lines evicted between B and C</Translated></text>
         <text x={432} y={120} fontSize="13" fontWeight="650">{F.evictedBeforeC}</text>
       </g>
-      <Counter y={150} name="c-on-a" label="C's reads of A's bottom rows (dashed)" hits={onA.hits} of={onA.of} />
-      <Counter y={192} name="c-halo" label="all of C's halo lines" hits={halo.hits} of={halo.of} />
+      <Counter y={150} name="c-on-a" /* i18n-ignore: data key */ label={tr("C's reads of A's bottom rows (dashed)", 'các lần C đọc các hàng dưới cùng của A (nét đứt)')} hits={onA.hits} of={onA.of} />
+      <Counter y={192} name="c-halo" /* i18n-ignore: data key */ label={tr("all of C's halo lines", 'tất cả các dòng vùng biên của C')} hits={halo.hits} of={halo.of} />
       <Legend y={250} />
     </Frame>
   );
@@ -260,20 +261,20 @@ function beatSplit(p: number) {
     ];
     return (
       <LineMap x={x} y={64} cell={cell} inL2={new Set(c[s])} marks={marksOf(run, sA, k, (e) => e.slice === s)} tiles={tiles}
-        ring={s === F.sliceB ? aSet : undefined} title={`L2 of die ${s} (${SCENE_SPLIT_L2.capacity / SCENE_SPLIT_L2.slices} lines)`} />
+        ring={s === F.sliceB ? aSet : undefined} title={tr(`L2 of die ${s} (${SCENE_SPLIT_L2.capacity / SCENE_SPLIT_L2.slices} lines)`, `L2 của die ${s} (${SCENE_SPLIT_L2.capacity / SCENE_SPLIT_L2.slices} dòng)`)} />
     );
   };
   return (
-    <Frame beat={4} headline={left.of === F.splitBLeft ? `Split L2: B's reads of A's lines, ${left.hits} of ${left.of} in its die's L2` : `Split L2: A runs on die ${F.sliceA}, B on die ${F.sliceB}`}
-      note={`Our toy model: two dies, each with half of the ${SCENE_SPLIT_L2.capacity} lines; blocks dealt to dies at random (seed ${SCENE_SPLIT_L2.seed}).`}>
+    <Frame beat={4} headline={left.of === F.splitBLeft ? tr(`Split L2: B's reads of A's lines, ${left.hits} of ${left.of} in its die's L2`, `L2 tách đôi: các lần B đọc dòng của A, ${left.hits} trên ${left.of} có trong L2 của die của nó`) : tr(`Split L2: A runs on die ${F.sliceA}, B on die ${F.sliceB}`, `L2 tách đôi: A chạy trên die ${F.sliceA}, B trên die ${F.sliceB}`)}
+      note={tr(`Our toy model: two dies, each with half of the ${SCENE_SPLIT_L2.capacity} lines; blocks dealt to dies at random (seed ${SCENE_SPLIT_L2.seed}).`, `Mô hình đồ chơi của chúng tôi: hai die, mỗi die giữ một nửa trong ${SCENE_SPLIT_L2.capacity} dòng; các khối được chia ngẫu nhiên cho các die (seed ${SCENE_SPLIT_L2.seed}).`)}>
       <g data-dies={`${F.sliceA},${F.sliceB}`}>
         {die(0, 16)}
         {die(1, 368)}
       </g>
-      <Counter y={252} name="split-b-left" label="B's halo reads of A's lines (dashed)" hits={left.hits} of={left.of} word="found in B's L2" />
+      <Counter y={252} name="split-b-left" /* i18n-ignore: data key */ label={tr("B's halo reads of A's lines (dashed)", 'các lần B đọc vùng biên vào dòng của A (nét đứt)')} hits={left.hits} of={left.of} word={tr("found in B's L2", 'có trong L2 của B')} />
       <text x={16} y={258} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>
-        <tspan x={16}>A loaded its lines into die {F.sliceA}'s L2.</tspan>
-        <tspan x={16} dy={15}>B runs on die {F.sliceB} and looks only there.</tspan>
+        <tspan x={16}><Translated vi={<>A đã nạp các dòng của nó vào L2 của die {F.sliceA}.</>}>A loaded its lines into die {F.sliceA}'s L2.</Translated></tspan>
+        <tspan x={16} dy={15}><Translated vi={<>B chạy trên die {F.sliceB} và chỉ tìm ở đó.</>}>B runs on die {F.sliceB} and looks only there.</Translated></tspan>
       </text>
     </Frame>
   );
@@ -282,15 +283,15 @@ function beatSplit(p: number) {
 function beatBars(p: number) {
   const b = F.bytes;
   const bars: [string, string, number][] = [
-    ['ideal', 'all hits: each line from DRAM once (the ideal)', b.ideal],
-    ['one', 'the model, one shared L2 (part 3)', b.one],
-    ['split', 'the model, L2 split per die (part 4)', b.split],
-    ['none', 'all misses: no reuse between blocks', b.noReuse],
+    ['ideal', tr('all hits: each line from DRAM once (the ideal)', 'trúng hết: mỗi dòng lấy từ DRAM một lần (lý tưởng)'), b.ideal],
+    ['one', tr('the model, one shared L2 (part 3)', 'mô hình, một L2 dùng chung (phần 3)'), b.one],
+    ['split', tr('the model, L2 split per die (part 4)', 'mô hình, L2 tách theo từng die (phần 4)'), b.split],
+    ['none', tr('all misses: no reuse between blocks', 'trượt hết: không tái sử dụng giữa các khối'), b.noReuse],
   ];
   const max = Math.max(...bars.map((x) => x[2]));
   const g = ramp(p, 0.05, 0.5);
   return (
-    <Frame beat={5} headline="DRAM bytes per output: which bar does your GPU give you?" note={`Bytes per output: cache lines fetched × ${lineBytes(CFG.lineFloats)} bytes, plus one 4-byte store, over the outputs. Our toy model.`}>
+    <Frame beat={5} headline={tr('DRAM bytes per output: which bar does your GPU give you?', 'Số byte DRAM mỗi đầu ra: GPU của bạn cho bạn thanh nào?')} note={tr(`Bytes per output: cache lines fetched × ${lineBytes(CFG.lineFloats)} bytes, plus one 4-byte store, over the outputs. Our toy model.`, `Số byte mỗi đầu ra: số dòng cache đã nạp × ${lineBytes(CFG.lineFloats)} byte, cộng một lần ghi 4 byte, chia cho số đầu ra. Mô hình đồ chơi của chúng tôi.`)}>
       {bars.map(([id, label, v], i) => (
         <g key={id} data-bar={id} data-bytes={v}>
           <text x={16} y={64 + i * 52} fontSize="12">{label}</text>
@@ -299,20 +300,22 @@ function beatBars(p: number) {
         </g>
       ))}
       <text x={16} y={290} fontSize="12" style={{ fill: 'var(--ink-2)' }} opacity={ramp(p, 0.55, 0.75)}>
-        The book: a "significant probability" of hits. A profiler's L2 hit rate, or lab 7.2's timings, tell you which.
+        <Translated vi={<>Sách: một &ldquo;xác suất đáng kể&rdquo; là trúng. Tỷ lệ trúng L2 của một profiler, hoặc số đo thời gian của lab 7.2, sẽ cho bạn biết là thanh nào.</>}>
+          The book: a "significant probability" of hits. A profiler's L2 hit rate, or lab 7.2's timings, tell you which.
+        </Translated>
       </text>
     </Frame>
   );
 }
 
 const beats: Beat[] = [
-  { clip: 'halo-from-cache-1', label: 'Block A', draw: beatA },
-  { clip: 'halo-from-cache-2', label: 'Next door', draw: beatB },
-  { clip: 'halo-from-cache-3', label: 'A row later', draw: beatC },
-  { clip: 'halo-from-cache-4', label: 'Split L2', draw: beatSplit },
-  { clip: 'halo-from-cache-5', label: 'Which bar', draw: beatBars },
+  { clip: 'halo-from-cache-1', get label() { return tr('Block A', 'Khối A'); }, draw: beatA },
+  { clip: 'halo-from-cache-2', get label() { return tr('Next door', 'Ngay bên cạnh'); }, draw: beatB },
+  { clip: 'halo-from-cache-3', get label() { return tr('A row later', 'Một hàng sau'); }, draw: beatC },
+  { clip: 'halo-from-cache-4', get label() { return tr('Split L2', 'L2 tách đôi'); }, draw: beatSplit },
+  { clip: 'halo-from-cache-5', get label() { return tr('Which bar', 'Thanh nào'); }, draw: beatBars },
 ];
 
 export function HaloFromCacheScene() {
-  return <Scene chapter="ch07" title="Where the halo comes from" beats={beats} />;
+  return <Scene chapter="ch07" title={tr('Where the halo comes from', 'Vùng biên (halo) đến từ đâu')} beats={beats} />;
 }

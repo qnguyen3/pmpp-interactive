@@ -1,0 +1,1 @@
+Giờ cùng lần khởi chạy đó với 22 chia 8, và không làm tròn lên. Lấy phần nguyên, kết quả là 2. Vậy khối 2 không bao giờ được tạo ra. Không có gì báo lỗi. [short pause] Các phần tử từ 16 đến 21 của C giữ nguyên bất cứ thứ gì vùng cấp phát đang chứa.

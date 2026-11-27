@@ -15,11 +15,31 @@
 // are modelled (store_vector's body was not read). The pointer offset applies to the view of
 // every operand; the allocation itself is taken to be aligned to every vector width used.
 
+import { tr } from '../lib/locale.ts';
+
 export type Style = 'per-element' | 'binary_vv' | 'grid-stride';
 export const STYLES: { id: Style; label: string; who: string }[] = [
-  { id: 'per-element', label: 'one thread per element', who: 'llama.cpp CUDA unary_op_kernel' },
-  { id: 'binary_vv', label: 'N_READS per thread', who: 'MLX CUDA binary_vv' },
-  { id: 'grid-stride', label: 'grid-stride loop', who: 'llama.cpp Metal kernel_swiglu' },
+  {
+    id: 'per-element',
+    get label() {
+      return tr('one thread per element', 'mỗi luồng một phần tử');
+    },
+    who: 'llama.cpp CUDA unary_op_kernel', // i18n-ignore: library and kernel name
+  },
+  {
+    id: 'binary_vv',
+    get label() {
+      return tr('N_READS per thread', 'N_READS phần tử mỗi luồng');
+    },
+    who: 'MLX CUDA binary_vv', // i18n-ignore: library and kernel name
+  },
+  {
+    id: 'grid-stride',
+    get label() {
+      return tr('grid-stride loop', 'vòng lặp grid-stride');
+    },
+    who: 'llama.cpp Metal kernel_swiglu', // i18n-ignore: library and kernel name
+  },
 ];
 export const N_READS_CHOICES = [1, 2, 4, 8] as const;
 export const BLOCK_CHOICES = [32, 64, 128, 256] as const;
@@ -41,11 +61,21 @@ export interface LaunchCfg {
 /** How one thread spent its time. */
 export type Path = 'vector' | 'tail' | 'misaligned' | 'scalar' | 'idle';
 export const PATH_LABEL: Record<Path, string> = {
-  vector: 'vector load',
-  tail: 'scalar tail',
-  misaligned: 'scalar, misaligned',
-  scalar: 'one element',
-  idle: 'idle after the guard',
+  get vector() {
+    return tr('vector load', 'nạp vector');
+  },
+  get tail() {
+    return tr('scalar tail', 'phần đuôi vô hướng');
+  },
+  get misaligned() {
+    return tr('scalar, misaligned', 'vô hướng, lệch căn chỉnh');
+  },
+  get scalar() {
+    return tr('one element', 'một phần tử');
+  },
+  get idle() {
+    return tr('idle after the guard', 'rảnh sau điều kiện chặn');
+  },
 };
 
 /** One load instruction of `a` as a warp issues it: the element index each active lane reads. */

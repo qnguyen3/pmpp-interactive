@@ -1,0 +1,1 @@
+Cách gộp đọc dòng dữ liệu ngắn một lần. Việc giải nén diễn ra bên trong kernel, trong các thanh ghi, giữa lần nạp và phép nhân. Mặt nạ và phép dịch bit tốn lệnh, không tốn byte. Không có gì thêm đi qua đường ống, nên đồng hồ dừng ở khoảng một phần bảy thời gian của float32.

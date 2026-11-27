@@ -27,6 +27,7 @@
 //
 // No imports and only erasable TypeScript, so browser checks can load this file
 // directly with Node.
+import { tr } from '../lib/locale.ts';
 
 export const KiB = 1024;
 export const MiB = 1024 * KiB;
@@ -81,11 +82,11 @@ export interface Mark {
 }
 
 export const MARKS: Mark[] = [
-  { bits: 32, label: '4 GiB', what: 'early CUDA GPUs', source: 'book pp. 625–626' },
-  { bits: 40, label: '1 TiB', what: "Fermi's unified address space", source: 'Fermi whitepaper (appC-facts A6)' },
-  { bits: 48, label: '256 TiB', what: 'x86-64, 4-level paging', source: 'book p. 626; Linux docs (A7)' },
-  { bits: 49, label: '512 TiB', what: "Pascal's GPU virtual addresses", source: 'book pp. 627–628; NVIDIA (A11)' },
-  { bits: 57, label: '128 PiB', what: 'x86-64, 5-level paging', source: 'Linux docs (A7)' },
+  { bits: 32, label: '4 GiB', get what() { return tr('early CUDA GPUs', 'các GPU CUDA đời đầu'); }, get source() { return tr('book pp. 625–626', 'sách pp. 625–626'); } }, // i18n-ignore: label is a byte figure in binary units
+  { bits: 40, label: '1 TiB', get what() { return tr("Fermi's unified address space", 'không gian địa chỉ hợp nhất của Fermi'); }, get source() { return tr('Fermi whitepaper (appC-facts A6)', 'sách trắng Fermi (appC-facts A6)'); } }, // i18n-ignore: label is a byte figure in binary units
+  { bits: 48, label: '256 TiB', get what() { return tr('x86-64, 4-level paging', 'x86-64, phân trang 4 cấp'); }, get source() { return tr('book p. 626; Linux docs (A7)', 'sách p. 626; tài liệu Linux (A7)'); } }, // i18n-ignore: label is a byte figure in binary units
+  { bits: 49, label: '512 TiB', get what() { return tr("Pascal's GPU virtual addresses", 'địa chỉ ảo GPU của Pascal'); }, get source() { return tr('book pp. 627–628; NVIDIA (A11)', 'sách pp. 627–628; NVIDIA (A11)'); } }, // i18n-ignore: label is a byte figure in binary units
+  { bits: 57, label: '128 PiB', get what() { return tr('x86-64, 5-level paging', 'x86-64, phân trang 5 cấp'); }, get source() { return tr('Linux docs (A7)', 'tài liệu Linux (A7)'); } }, // i18n-ignore: label is a byte figure in binary units
 ];
 
 // ---------------------------------------------------------------- the index limit
@@ -102,7 +103,7 @@ export interface IndexInfo {
 
 export const INDEX: Record<IndexType, IndexInfo> = {
   int32: { key: 'int32', c: 'int', log2Count: 31 },
-  uint32: { key: 'uint32', c: 'unsigned int', log2Count: 32 },
+  uint32: { key: 'uint32', c: 'unsigned int', log2Count: 32 }, // i18n-ignore: C type name
   int64: { key: 'int64', c: 'int64_t', log2Count: 63 },
 };
 
@@ -113,10 +114,10 @@ export interface ElementType {
 }
 
 export const ELEMENTS: ElementType[] = [
-  { bytes: 4, label: 'float, 4 bytes' },
-  { bytes: 2, label: 'half or bfloat16, 2 bytes' },
-  { bytes: 1, label: 'int8 or fp8, 1 byte' },
-  { bytes: 0.5, label: '4-bit, two per byte' },
+  { bytes: 4, get label() { return tr('float, 4 bytes', 'float, 4 byte'); } },
+  { bytes: 2, get label() { return tr('half or bfloat16, 2 bytes', 'half hoặc bfloat16, 2 byte'); } },
+  { bytes: 1, get label() { return tr('int8 or fp8, 1 byte', 'int8 hoặc fp8, 1 byte'); } },
+  { bytes: 0.5, get label() { return tr('4-bit, two per byte', '4 bit, hai giá trị mỗi byte'); } },
 ];
 
 export interface ArrayLimit {
@@ -167,9 +168,9 @@ export interface MemoryFigure {
 }
 
 const MEMORY_FIELDS: { field: MemoryFigure['field']; meaning: string }[] = [
-  { field: 'totalGlobalMem', meaning: 'global memory on the device' },
-  { field: 'maxBufferLength', meaning: 'the largest single buffer' },
-  { field: 'recommendedMaxWorkingSetSize', meaning: 'the recommended working set' },
+  { field: 'totalGlobalMem', get meaning() { return tr('global memory on the device', 'bộ nhớ toàn cục trên thiết bị'); } },
+  { field: 'maxBufferLength', get meaning() { return tr('the largest single buffer', 'buffer đơn lớn nhất'); } },
+  { field: 'recommendedMaxWorkingSetSize', get meaning() { return tr('the recommended working set', 'tập làm việc (working set) được khuyến nghị'); } },
 ];
 
 /** Emulator backends describe the CPU emulator, not a GPU. */
@@ -194,9 +195,9 @@ export function memoryFigures(reports: ReportsLike): MemoryFigure[] {
 
 /** CPU user-space widths the C.7 explorer offers (A7). */
 export const CPU_WIDTHS = [
-  { bits: 47, label: '47 bits: Linux user space by default' },
-  { bits: 48, label: "48 bits: the book's figure, all of 4-level paging" },
-  { bits: 56, label: '56 bits: 5-level paging, when a program asks' },
+  { bits: 47, get label() { return tr('47 bits: Linux user space by default', '47 bit: không gian người dùng mặc định của Linux'); } },
+  { bits: 48, get label() { return tr("48 bits: the book's figure, all of 4-level paging", '48 bit: con số của sách, toàn bộ phân trang 4 cấp'); } },
+  { bits: 56, get label() { return tr('56 bits: 5-level paging, when a program asks', '56 bit: phân trang 5 cấp, khi một chương trình yêu cầu'); } },
 ] as const;
 
 /** GPU virtual widths the C.7 explorer offers. */

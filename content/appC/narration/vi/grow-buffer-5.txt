@@ -1,0 +1,1 @@
+Giờ việc mở rộng chỉ là ánh xạ thêm một phần ngay sau phần cuối, cộng thêm một lần cấp quyền. Không có gì bị chép, và địa chỉ gốc không bao giờ đổi, nên mọi kernel vẫn giữ con trỏ nó đang có. Khi buffer chứa 32 token, 8 phần đã được ánh xạ và không có gì di chuyển. Đó là cách một KV cache có thể lớn dần theo từng token.

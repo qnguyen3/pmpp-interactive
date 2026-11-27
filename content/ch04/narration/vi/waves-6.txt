@@ -1,0 +1,1 @@
+Có 2 lối ra. Cho số khối là bội số của 264, và các chỗ trống biến mất. Cách đó hiệu quả khi các khối tốn thời gian như nhau. Khi không như nhau, các chỗ được giải phóng từng cái một, và các đợt nhòe vào nhau. Lúc đó nhiều đợt lại có ích, vì mỗi chỗ trống nhận ngay khối tiếp theo.

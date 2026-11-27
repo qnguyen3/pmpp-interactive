@@ -1,0 +1,1 @@
+Trên một warp gồm 32 lane, Brent-Kung mất 9 bước. Trong hầu hết các bước, chỉ vài lane cộng, còn lại ngồi không, nhưng vẫn chiếm chỗ trong warp. Kogge-Stone giữ hầu hết các lane bận rộn và xong trong 5 bước. Vì vậy, khi việc gộp việc cho luồng đã làm phần lớn công việc, sách giữ Kogge-Stone bên trong warp.

@@ -1,0 +1,1 @@
+Ở hầu hết các bước, logit cao nhất đứng cao hơn hẳn logit về nhì: ít nhất bốn phần mười, thường là hơn một. Chênh lệch làm tròn giữa hai lần chạy chỉ khoảng một phần mười nghìn. Một chênh lệch nhỏ như vậy không thể đảo thứ tự hai vị trí đầu, nên các token khớp nhau, hết bước này đến bước khác.

@@ -1,0 +1,1 @@
+Giờ hãy giữ X nguyên như cũ, và không bao giờ dựng B trong bộ nhớ toàn cục. Khối này sở hữu 2 điểm ảnh của mỗi bản đồ đầu ra: 14 và 20 từ bản đồ 0, 12 và 24 từ bản đồ 1. B chỉ được vẽ bằng một đường viền nét đứt, vì nó không bao giờ tồn tại trọn vẹn ở bất cứ đâu.

@@ -33,13 +33,16 @@
 
 import { closedForm, lg, span, stepsWithUnits, type Charge } from './prefixnet';
 import { coarsenedSteps, coarsenedWork } from './coarsescan';
+import { tr } from '../lib/locale.ts';
 
 export type AlgoId = 'kogge-stone' | 'brent-kung' | 'coarsened';
 export const ALGOS: AlgoId[] = ['kogge-stone', 'brent-kung', 'coarsened'];
 export const ALGO_LABEL: Record<AlgoId, string> = {
   'kogge-stone': 'Kogge-Stone',
   'brent-kung': 'Brent-Kung',
-  coarsened: 'Coarsened three-phase',
+  get coarsened() {
+    return tr('Coarsened three-phase', 'Ba pha có gộp việc');
+  },
 };
 
 export interface AlgoRow {

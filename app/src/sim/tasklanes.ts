@@ -39,6 +39,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Mode = 'stream' | 'streams' | 'encoder' | 'graph';
 
 export interface LanesInput {
@@ -210,9 +212,9 @@ export function simulate(input: LanesInput): LanesResult {
     }
     rows = rowEnds.map((_, j) => (j === 0 ? 'encoder' : ''));
   } else if (mode === 'streams') {
-    const label = isFinite(input.queues ?? Infinity) ? 'queue' : 'stream';
+    const label = isFinite(input.queues ?? Infinity) ? tr('queue', 'hàng đợi') : 'stream';
     rows = Array.from({ length: q }, (_, j) => `${label} ${j}`);
-  } else rows = [mode === 'graph' ? 'graph' : mode === 'encoder' ? 'serial encoder' : 'stream'];
+  } else rows = [mode === 'graph' ? 'graph' : mode === 'encoder' ? tr('serial encoder', 'encoder tuần tự') : 'stream'];
 
   // Totals and occupancy.
   const total = Math.max(hostEnd, ...runs.map((r) => r.end));
@@ -263,12 +265,52 @@ export function simulate(input: LanesInput): LanesResult {
 
 /** The modes compared side by side in the lesson, for the same kernels and launch cost. */
 export const COMPARED: { key: string; label: string; mode: Mode; queues?: number; concurrent?: boolean }[] = [
-  { key: 'stream', label: 'One stream', mode: 'stream' },
-  { key: 'streams', label: 'A stream each, unlimited queues', mode: 'streams', queues: Infinity },
-  { key: 'streams4', label: `A stream each, ${HIP_DEFAULT_QUEUES} queues (HIP's default)`, mode: 'streams', queues: HIP_DEFAULT_QUEUES },
-  { key: 'encoder', label: 'Metal concurrent encoder', mode: 'encoder', concurrent: true },
-  { key: 'serial', label: 'Metal serial encoder', mode: 'encoder', concurrent: false },
-  { key: 'graph', label: 'Graph, launched once', mode: 'graph' },
+  {
+    key: 'stream',
+    get label() {
+      return tr('One stream', 'Một stream');
+    },
+    mode: 'stream',
+  },
+  {
+    key: 'streams',
+    get label() {
+      return tr('A stream each, unlimited queues', 'Mỗi kernel một stream, không giới hạn hàng đợi');
+    },
+    mode: 'streams',
+    queues: Infinity,
+  },
+  {
+    key: 'streams4',
+    get label() {
+      return tr(`A stream each, ${HIP_DEFAULT_QUEUES} queues (HIP's default)`, `Mỗi kernel một stream, ${HIP_DEFAULT_QUEUES} hàng đợi (mặc định của HIP)`);
+    },
+    mode: 'streams',
+    queues: HIP_DEFAULT_QUEUES,
+  },
+  {
+    key: 'encoder',
+    get label() {
+      return tr('Metal concurrent encoder', 'Encoder đồng thời của Metal');
+    },
+    mode: 'encoder',
+    concurrent: true,
+  },
+  {
+    key: 'serial',
+    get label() {
+      return tr('Metal serial encoder', 'Encoder tuần tự của Metal');
+    },
+    mode: 'encoder',
+    concurrent: false,
+  },
+  {
+    key: 'graph',
+    get label() {
+      return tr('Graph, launched once', 'Graph, khởi chạy một lần');
+    },
+    mode: 'graph',
+  },
 ];
 
 /** Every compared mode for the same k, f, d, L and dependencies. */

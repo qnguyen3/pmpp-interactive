@@ -1,0 +1,1 @@
+Giai đoạn 0. Mỗi luồng nạp đúng một phần tử của M, và một phần tử của N, vào các ô chia sẻ. Rồi mọi luồng chờ ở một rào chắn, cho đến khi tất cả các lần nạp đã xong. [short pause] Bây giờ chúng tính. Mỗi luồng đọc thứ nó cần từ bộ nhớ chia sẻ, và cộng 2 tích vào tổng đang chạy của mình.

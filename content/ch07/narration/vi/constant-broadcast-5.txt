@@ -1,0 +1,1 @@
+Bảng dành cho GPU Apple gần như trống. Tài liệu của Apple không nói gì về bộ nhớ đệm hằng. Các bài nói tại hội nghị của họ gọi không gian địa chỉ hằng là đường đi cho dữ liệu chỉ đọc được dùng lại nhiều, và mô tả việc nạp trước dữ liệu nhỏ có kích thước biết trước. Không có quy tắc nào để mô hình hóa, nên bài thực hành đo thay vì dự đoán.

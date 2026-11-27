@@ -1,0 +1,1 @@
+Số nguyên 32 bit đưa cả khối tới 516,128, cận trên mà bạn có thể tính bằng tay, và nó còn rất xa giới hạn khoảng 2 tỉ của mình. Float giữ chính xác cùng giá trị đó, vì nó nhỏ hơn 2 mũ 24, điểm mà từ đó float không còn giữ được mọi số nguyên.

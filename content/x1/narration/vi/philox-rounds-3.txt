@@ -1,0 +1,1 @@
+Giữa các vòng, khóa tăng thêm hai hằng số cố định, nên mỗi vòng trộn vào một thứ mới. Giờ hãy so sánh hai hàng cạnh nhau. Chúng bắt đầu chỉ khác nhau một bit, ở từ stream. Sau vòng một, đúng một trong bốn từ đầu ra khác nhau.

@@ -1,0 +1,1 @@
+Đây là hai hàng của một batch ở bước không. Bộ đếm của mỗi hàng là bốn từ ba mươi hai bit: hai cho bước, hai cho stream. Khóa là hai từ nữa, tạo từ seed. Không có trạng thái ở đâu cả. Các bit ngẫu nhiên chỉ là một hàm của vị trí bạn đang ở.

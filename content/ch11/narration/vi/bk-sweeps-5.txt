@@ -1,0 +1,1 @@
+Mức 3. Mọi vị trí chẵn từ 2 đến 14 cộng giá trị của vị trí bên trái, vốn đã xong, và giờ cả 16 vị trí đều hoàn tất. Brent-Kung dùng 26 phép cộng trong 7 bước. Kogge-Stone, trên cùng 16 đầu vào, dùng 49 phép cộng trong 4 bước. Ít phép cộng hơn, nhiều bước hơn.

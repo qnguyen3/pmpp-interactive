@@ -1,0 +1,1 @@
+Đây là 6 khối, và một thiết bị chỉ chứa được 3 khối cùng lúc. Mỗi khối scan đoạn mảng của riêng nó. Sau đó nó cần thêm một con số nữa mới có thể hoàn tất: tổng của mọi đoạn đứng trước nó. Các khối khác chờ trong hàng đợi cho đến khi có chỗ trống.

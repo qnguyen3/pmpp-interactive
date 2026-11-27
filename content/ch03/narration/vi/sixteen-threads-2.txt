@@ -1,0 +1,1 @@
+Hãy theo dõi một luồng: luồng 0, 0 của khối 0, 0. Nó giữ phần tử trên cùng bên trái của P. Biến đếm vòng lặp k của nó chạy 0, 1, 2, 3. Mỗi bước lấy phần tử tiếp theo dọc hàng 0 của M, phần tử tiếp theo xuống cột 0 của N, nhân chúng với nhau, và cộng tích vào một tổng đang chạy.

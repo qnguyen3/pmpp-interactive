@@ -1,0 +1,1 @@
+Mười hai logits, và dưới mỗi logit là số lần token đó xuất hiện trong ngữ cảnh. Chỉ những token đã dùng mới thay đổi. Một logit dương được chia cho mức phạt lặp lại, 1.25, còn một logit âm thì được nhân. Rồi phạt tần suất và phạt hiện diện được trừ đi. Token 7, đã dùng ba lần, rơi từ hạng nhất xuống hạng nhì. Mọi thay đổi chỉ cần số đếm của chính token đó.

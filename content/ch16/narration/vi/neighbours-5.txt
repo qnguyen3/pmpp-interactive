@@ -1,0 +1,1 @@
+Cuối cùng, mỗi khối bền vững (persistent block) của sách sở hữu một hàng ô. Giả sử hàng 3 và hàng 2 nhận được lane. Hàng 3 chờ hàng 2, hàng 2 chờ hàng 1, mà hàng 1 không bao giờ có lane. Không gì nhúc nhích. Hãy phát ô ra từ một bộ đếm, và lần chạy hoàn tất. Chỉ CUDA ghi rõ trong tài liệu rằng công việc đã bắt đầu sẽ tiếp tục chạy, nên trên Metal vẫn giữ cách khởi chạy lại.

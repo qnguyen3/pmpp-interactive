@@ -1,0 +1,1 @@
+Trong khi đó, host chờ stream trên cùng, rồi nằm trong bước trao đổi phía trên, bước này chặn đến khoảng 5. Chỉ khi đó nó mới chuyển sang stream dưới cùng, mà kernel đã xong từ khoảng 1. Bước trao đổi phía dưới bắt đầu muộn 4 đơn vị, và giờ kết thúc sau kernel bên trong. Sách gọi khoảng trống này là chi phí đồng bộ hóa.

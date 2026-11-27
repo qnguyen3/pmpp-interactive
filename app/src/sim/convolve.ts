@@ -33,13 +33,21 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- boundary policies
 export type Policy = 'zero' | 'replicate' | 'wrap';
 export const POLICIES: readonly Policy[] = ['zero', 'replicate', 'wrap'];
 export const POLICY_LABEL: Record<Policy, string> = {
-  zero: 'zero ghost cells',
-  replicate: 'replicate the edge',
-  wrap: 'wrap around',
+  get zero() {
+    return tr('zero ghost cells', 'ô ma bằng 0');
+  },
+  get replicate() {
+    return tr('replicate the edge', 'nhân bản giá trị biên');
+  },
+  get wrap() {
+    return tr('wrap around', 'quay vòng');
+  },
 };
 
 export interface Opts {
@@ -438,10 +446,18 @@ export function pyramidFilter(r: number): Grid {
 // ---------------------------------------------------------------- which warps diverge
 export type WarpClass = 'uniform' | 'ghost' | 'guard' | 'idle';
 export const WARP_CLASS_LABEL: Record<WarpClass, string> = {
-  uniform: 'every lane takes the same path',
-  ghost: 'lanes disagree at the ghost test',
-  guard: 'lanes disagree at the output guard',
-  idle: 'no lane has an output',
+  get uniform() {
+    return tr('every lane takes the same path', 'mọi lane đi cùng một đường');
+  },
+  get ghost() {
+    return tr('lanes disagree at the ghost test', 'các lane không thống nhất tại phép kiểm tra ô ma');
+  },
+  get guard() {
+    return tr('lanes disagree at the output guard', 'các lane không thống nhất tại điều kiện chặn đầu ra');
+  },
+  get idle() {
+    return tr('no lane has an output', 'không lane nào có đầu ra');
+  },
 };
 
 /** A run of one warp's threads that lies in one row of the grid of threads. */

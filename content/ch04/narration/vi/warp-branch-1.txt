@@ -1,0 +1,1 @@
+Đây là một warp. Trong sách, nó có 32 luồng, ở đây vẽ thành 32 lane. Phần cứng nạp một lệnh, và mọi lane đều thực thi lệnh đó, mỗi lane trên dữ liệu của riêng nó. Rồi lệnh tiếp theo, và lệnh tiếp nữa. Một lần nạp lệnh, mọi lane, cùng nhịp.

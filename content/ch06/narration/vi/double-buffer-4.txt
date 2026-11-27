@@ -1,0 +1,1 @@
+Hãy nhìn lại lỗi thứ nhất. Luồng 3 và luồng 0 chưa bao giờ cần cùng một giá trị. Chúng va chạm chỉ vì lần đọc của vòng lặp này và lần ghi của vòng lặp sau dùng cùng một vị trí. Sự phụ thuộc đó là giả. Vậy hãy cho các lần ghi một chỗ riêng: một buffer thứ hai.

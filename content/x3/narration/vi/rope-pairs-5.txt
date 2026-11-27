@@ -1,0 +1,1 @@
+Trình chuyển đổi của llama.cpp sửa điều này trước khi mô hình kịp chạy. Nó hoán vị các hàng của trọng số query và key, để mỗi cặp liên tiếp giờ chứa đúng hai giá trị mà cách chia đôi lẽ ra đã ghép với nhau. Kernel giữ nguyên, các trọng số dịch chuyển, và điểm số lại khớp với bản tham chiếu.

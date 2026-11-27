@@ -1,0 +1,1 @@
+Vì sao độ sâu của mỗi bước không quan trọng? Với một cặp ô, số phép toán tăng theo m nhân n nhân k. Số byte tăng theo k nhân m cộng n. Kéo k từ 8 lên 32. Cả hai thanh đều tăng cùng một hệ số, và tỉ lệ vẫn ở mức 32 phép toán trên mỗi byte.

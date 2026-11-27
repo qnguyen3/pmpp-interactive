@@ -33,6 +33,7 @@ import {
   uniformKeys,
   type Design,
 } from './radixlocal';
+import { tr } from '../lib/locale.ts';
 
 export type Dist = 'uniform' | 'softmax';
 
@@ -48,14 +49,54 @@ export interface Problem {
 export const VOCAB = 151936;
 
 export const PROBLEMS: Problem[] = [
-  { id: 'n20', label: '2²⁰ random keys', rows: 1, rowLength: 2 ** 20, dist: 'uniform' },
-  { id: 'n24', label: '2²⁴ random keys', rows: 1, rowLength: 2 ** 24, dist: 'uniform' },
-  { id: 'row', label: 'one 151,936-token row', rows: 1, rowLength: VOCAB, dist: 'softmax' },
-  { id: 'batch', label: '64 such rows', rows: 64, rowLength: VOCAB, dist: 'softmax' },
+  {
+    id: 'n20',
+    get label() {
+      return tr('2²⁰ random keys', '2²⁰ khóa ngẫu nhiên');
+    },
+    rows: 1,
+    rowLength: 2 ** 20,
+    dist: 'uniform',
+  },
+  {
+    id: 'n24',
+    get label() {
+      return tr('2²⁴ random keys', '2²⁴ khóa ngẫu nhiên');
+    },
+    rows: 1,
+    rowLength: 2 ** 24,
+    dist: 'uniform',
+  },
+  {
+    id: 'row',
+    get label() {
+      return tr('one 151,936-token row', 'một hàng 151,936 token');
+    },
+    rows: 1,
+    rowLength: VOCAB,
+    dist: 'softmax',
+  },
+  {
+    id: 'batch',
+    get label() {
+      return tr('64 such rows', '64 hàng như thế');
+    },
+    rows: 64,
+    rowLength: VOCAB,
+    dist: 'softmax',
+  },
 ];
 
 /** The book's sixteen 4-bit keys as a problem (Figs. 14.10 to 14.13). */
-export const BOOK_PROBLEM: Problem = { id: 'book', label: "the book's sixteen keys", rows: 1, rowLength: BOOK_KEYS.length, dist: 'uniform' };
+export const BOOK_PROBLEM: Problem = {
+  id: 'book',
+  get label() {
+    return tr("the book's sixteen keys", 'mười sáu khóa của sách');
+  },
+  rows: 1,
+  rowLength: BOOK_KEYS.length,
+  dist: 'uniform',
+};
 
 export const passes = passCount;
 export const LAUNCHES_PER_PASS = 3;

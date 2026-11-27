@@ -1,0 +1,1 @@
+Đầu tiên là chế độ giới hạn. Đó là CUDA 6 trên Kepler và Maxwell, và ngày nay vẫn là Windows và WSL. Khi khởi chạy, mọi trang được quản lý mà CPU đang giữ được chuyển sang GPU cùng một lúc, cả 8 trang. Cho đến khi chương trình đồng bộ hóa, CPU hoàn toàn không được chạm vào bộ nhớ được quản lý.

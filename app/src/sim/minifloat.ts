@@ -43,6 +43,7 @@
 // about time, hardware or memory.
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
+import { tr } from '../lib/locale.ts';
 
 export type Specials = 'ieee' | 'fn' | 'fnuz' | 'none' | 'reserved' | 'e8m0';
 export type Subnormals = 'denorm' | 'abrupt' | 'nozero';
@@ -80,48 +81,48 @@ export interface Format {
 // ---------------------------------------------------------------- presets
 export const FP32: Format = {
   id: 'fp32', name: 'FP32', e: 8, m: 23, bias: 127, signed: true, specials: 'ieee', subnormals: 'denorm', quietBit: true,
-  source: 'IEEE 754 binary32: book §A.3, p. 590; NVIDIA guide 5.6.1.1 and Table 51 (appA-facts A2)',
+  get source() { return tr('IEEE 754 binary32: book §A.3, p. 590; NVIDIA guide 5.6.1.1 and Table 51 (appA-facts A2)', 'IEEE 754 binary32: sách §A.3, p. 590; hướng dẫn của NVIDIA 5.6.1.1 và Table 51 (appA-facts A2)'); },
 };
 export const FP16: Format = {
   id: 'fp16', name: 'FP16', e: 5, m: 10, bias: 15, signed: true, specials: 'ieee', subnormals: 'denorm', quietBit: true, notInBook: true,
-  source: 'IEEE 754 binary16: NVIDIA Tables 50 and 51, Clang, PyTorch 1-5-10 (appA-facts A2)',
+  get source() { return tr('IEEE 754 binary16: NVIDIA Tables 50 and 51, Clang, PyTorch 1-5-10 (appA-facts A2)', 'IEEE 754 binary16: NVIDIA Tables 50 và 51, Clang, PyTorch 1-5-10 (appA-facts A2)'); },
 };
 export const BF16: Format = {
   id: 'bf16', name: 'BF16', e: 8, m: 7, bias: 127, signed: true, specials: 'ieee', subnormals: 'denorm', quietBit: true, notInBook: true,
-  source: 'bfloat16, not an IEEE format: NVIDIA Tables 50 and 51, OFP8 §4.1, PyTorch 1-8-7 (appA-facts A2)',
+  get source() { return tr('bfloat16, not an IEEE format: NVIDIA Tables 50 and 51, OFP8 §4.1, PyTorch 1-8-7 (appA-facts A2)', 'bfloat16, không phải định dạng IEEE: NVIDIA Tables 50 và 51, OFP8 §4.1, PyTorch 1-8-7 (appA-facts A2)'); },
 };
 export const E4M3: Format = {
-  id: 'e4m3', name: 'FP8 E4M3', e: 4, m: 3, bias: 7, signed: true, specials: 'fn', subnormals: 'denorm', notInBook: true,
-  source: 'OCP OFP8 r1.1 Table 1 (appA-facts A3)',
+  id: 'e4m3', name: 'FP8 E4M3', e: 4, m: 3, bias: 7, signed: true, specials: 'fn', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr('OCP OFP8 r1.1 Table 1 (appA-facts A3)', 'OCP OFP8 r1.1, Table 1 (appA-facts A3)'); },
 };
 export const E5M2: Format = {
-  id: 'e5m2', name: 'FP8 E5M2', e: 5, m: 2, bias: 15, signed: true, specials: 'ieee', subnormals: 'denorm', notInBook: true,
-  source: 'OCP OFP8 r1.1 Table 2 (appA-facts A3); NaN mantissa meaning "not defined"',
+  id: 'e5m2', name: 'FP8 E5M2', e: 5, m: 2, bias: 15, signed: true, specials: 'ieee', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr('OCP OFP8 r1.1 Table 2 (appA-facts A3); NaN mantissa meaning "not defined"', 'OCP OFP8 r1.1, Table 2 (appA-facts A3); mantissa của NaN mang nghĩa "không xác định"'); },
 };
 export const E2M1: Format = {
-  id: 'e2m1', name: 'FP4 E2M1', e: 2, m: 1, bias: 1, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true,
-  source: 'OCP MX v1.1 Table 5 (appA-facts A4)',
+  id: 'e2m1', name: 'FP4 E2M1', e: 2, m: 1, bias: 1, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr('OCP MX v1.1 Table 5 (appA-facts A4)', 'OCP MX v1.1, Table 5 (appA-facts A4)'); },
 };
 export const E2M3: Format = {
-  id: 'e2m3', name: 'FP6 E2M3', e: 2, m: 3, bias: 1, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true,
-  source: 'OCP MX v1.1 Table 4 (appA-facts A4)',
+  id: 'e2m3', name: 'FP6 E2M3', e: 2, m: 3, bias: 1, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr('OCP MX v1.1 Table 4 (appA-facts A4)', 'OCP MX v1.1, Table 4 (appA-facts A4)'); },
 };
 export const E3M2: Format = {
-  id: 'e3m2', name: 'FP6 E3M2', e: 3, m: 2, bias: 3, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true,
-  source: 'OCP MX v1.1 Table 4 (appA-facts A4)',
+  id: 'e3m2', name: 'FP6 E3M2', e: 3, m: 2, bias: 3, signed: true, specials: 'none', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr('OCP MX v1.1 Table 4 (appA-facts A4)', 'OCP MX v1.1, Table 4 (appA-facts A4)'); },
 };
 export const UE8M0: Format = {
   id: 'ue8m0', name: 'UE8M0', e: 8, m: 0, bias: 127, signed: false, specials: 'e8m0', subnormals: 'nozero', notInBook: true,
-  source: 'OCP MX v1.1 Table 7 (appA-facts A4): bias 127, exponents -127 to 127, NaN 11111111, no zero',
+  get source() { return tr('OCP MX v1.1 Table 7 (appA-facts A4): bias 127, exponents -127 to 127, NaN 11111111, no zero', 'OCP MX v1.1, Table 7 (appA-facts A4): bias 127, số mũ từ -127 đến 127, NaN 11111111, không có số 0'); },
 };
 export const E4M3FNUZ: Format = {
-  id: 'e4m3fnuz', name: 'FP8 E4M3 FNUZ', e: 4, m: 3, bias: 8, signed: true, specials: 'fnuz', subnormals: 'denorm', notInBook: true,
-  source: "AMD (appA-facts B2): bias 8 from the header amd_hip_fp8.h, not stated in the docs; no infinity, no -0, NaN 0x80 from the docs",
+  id: 'e4m3fnuz', name: 'FP8 E4M3 FNUZ', e: 4, m: 3, bias: 8, signed: true, specials: 'fnuz', subnormals: 'denorm', notInBook: true, // i18n-ignore: format name
+  get source() { return tr("AMD (appA-facts B2): bias 8 from the header amd_hip_fp8.h, not stated in the docs; no infinity, no -0, NaN 0x80 from the docs", 'AMD (appA-facts B2): bias 8 lấy từ header amd_hip_fp8.h, tài liệu không nêu; không có vô cực, không có -0, NaN 0x80 theo tài liệu'); },
 };
 /** The book's 5-bit format of §A.2 (1-2-2, excess-1), with IEEE's choice of denormals. */
 export const TOY5: Format = {
-  id: 'toy5', name: "The book's 5-bit format (1-2-2)", e: 2, m: 2, bias: 1, signed: true, specials: 'reserved', subnormals: 'denorm',
-  source: 'book §A.2, p. 586, Fig. A.4 (denorm columns)',
+  id: 'toy5', get name() { return tr("The book's 5-bit format (1-2-2)", 'Định dạng 5 bit của sách (1-2-2)'); }, e: 2, m: 2, bias: 1, signed: true, specials: 'reserved', subnormals: 'denorm',
+  get source() { return tr('book §A.2, p. 586, Fig. A.4 (denorm columns)', 'sách §A.2, p. 586, Fig. A.4 (các cột denorm)'); },
 };
 /**
  * The book's 6-bit format of §A.1 (1-3-2, excess-3). §A.1 reads every pattern with Eq. (A.1),
@@ -129,8 +130,8 @@ export const TOY5: Format = {
  * for the 5-bit format. Smallest positive value 1/8, as in Exercise 2's answer.
  */
 export const TOY6: Format = {
-  id: 'toy6', name: "The book's 6-bit format (1-3-2)", e: 3, m: 2, bias: 3, signed: true, specials: 'reserved', subnormals: 'nozero',
-  source: 'book §A.1, pp. 584–586 (Eq. A.1 for every pattern, so no zero)',
+  id: 'toy6', get name() { return tr("The book's 6-bit format (1-3-2)", 'Định dạng 6 bit của sách (1-3-2)'); }, e: 3, m: 2, bias: 3, signed: true, specials: 'reserved', subnormals: 'nozero',
+  get source() { return tr('book §A.1, pp. 584–586 (Eq. A.1 for every pattern, so no zero)', 'sách §A.1, pp. 584–586 (Eq. A.1 cho mọi mẫu bit, nên không có số 0)'); },
 };
 
 export const PRESETS: Format[] = [TOY6, TOY5, FP32, FP16, BF16, E4M3, E5M2, E2M1, E2M3, E3M2, UE8M0, E4M3FNUZ];
@@ -153,7 +154,7 @@ export function makeFormat(e: number, m: number, subnormals: Subnormals): Format
     signed: true,
     specials: 'reserved',
     subnormals,
-    source: 'book §A.1 and §A.2 (pp. 584–589): excess coding, top code reserved, three conventions near 0',
+    source: tr('book §A.1 and §A.2 (pp. 584–589): excess coding, top code reserved, three conventions near 0', 'sách §A.1 và §A.2 (pp. 584–589): mã hóa excess, mã trên cùng được dành riêng, ba quy ước gần 0'),
   };
 }
 

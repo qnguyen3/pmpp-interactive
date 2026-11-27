@@ -1,0 +1,1 @@
+Không lượt nào cần kết quả của lượt khác. Vậy chẳng có gì buộc chúng phải xếp hàng chờ. Hãy nhấc từng lượt ra khỏi vòng lặp và giao nó cho một luồng riêng. Giờ có 10 luồng, và mỗi luồng giữ một bản i riêng của mình.

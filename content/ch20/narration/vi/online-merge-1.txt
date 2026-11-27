@@ -1,0 +1,1 @@
+Đây là một hàng gồm mười hai điểm số attention, và mười hai hàng value mà các điểm số đó sẽ được dùng để lấy trung bình. Một softmax thông thường trước hết tìm giá trị lớn nhất trong cả mười hai, rồi cộng cả mười hai hàm mũ, và chỉ khi đó mới cho ra một xác suất. Trong một kernel phân ô, mười hai điểm số đó không bao giờ cùng nằm ở một chỗ cùng một lúc.

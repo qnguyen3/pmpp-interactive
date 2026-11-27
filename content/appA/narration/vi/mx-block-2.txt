@@ -1,0 +1,1 @@
+Trước hết khối cần độ lớn lớn nhất của nó. Đó là một phép rút gọn lấy max, cùng dạng cây như ở chương 10. Từng cặp phần tử so sánh, phần tử lớn hơn được giữ lại, và sau 5 vòng chỉ còn một giá trị. [short pause] Ở đây đó là giá trị ngoại lai, 12. Mọi quyết định khác trong khối này giờ đều phụ thuộc vào nó.

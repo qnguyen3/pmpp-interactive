@@ -1,0 +1,1 @@
+Gộp việc cho luồng với hệ số 2, như ở hình 12.10. Một khối tám luồng giờ nhận cả mười sáu khóa. Đoạn của nó dài 8 khóa: 1 khúc thay vì 2. Nó vẫn cần 2 lệnh ghi, mỗi warp một lệnh. Và một phép scan bên trong khối giờ phục vụ mười sáu khóa thay vì tám.

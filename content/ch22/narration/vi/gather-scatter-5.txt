@@ -1,0 +1,1 @@
+Gather cũng không miễn phí. Các luồng của nó đọc những đầu vào chồng lấn nhau: các đầu vào ở giữa được đọc 3 lần, và đó là sự tái sử dụng mà một khối có thể giữ trên chip trong bộ nhớ chia sẻ. Và với một số bài toán, chủ của một đầu ra không thể biết đầu vào nào là của mình. Một luồng phụ trách một bin histogram phải xem xét mọi đầu vào.

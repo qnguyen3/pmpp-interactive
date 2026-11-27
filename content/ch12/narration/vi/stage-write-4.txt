@@ -1,0 +1,1 @@
+Hãy đếm xem mỗi phiên bản đã phát ra những gì. Ghi rải trực tiếp: 4 lệnh ghi, chạm vào 4 đoạn bộ nhớ, di chuyển 64 byte cho 32 byte hữu ích. Phiên bản qua vùng đệm: 2 lệnh ghi và 2 đoạn đầy. Cùng một đầu ra, với một nửa số lệnh ghi. Cái giá là một chuyến đi qua bộ nhớ chia sẻ và một rào chắn.

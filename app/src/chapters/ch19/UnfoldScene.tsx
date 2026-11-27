@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { BOOK_F, BOOK_X, UNFOLD_SCENE, bToX } from '../../sim/unfold';
 
 // "Unfolding the input into a matrix": the book's example (Figs. 19.2 and 19.8),
@@ -58,10 +59,10 @@ interface XOpts {
 function InputMaps({ hot, copies }: XOpts) {
   return (
     <g>
-      <Label x={20} y={16}>X: 3 input maps, 3 × 3 (global memory)</Label>
+      <Label x={20} y={16}><Translated vi="X: 3 map đầu vào, 3 × 3 (bộ nhớ toàn cục)">X: 3 input maps, 3 × 3 (global memory)</Translated></Label>
       {[0, 1, 2].map((c) => (
         <g key={c}>
-          <text x={XX(c)} y={XY - 6} fontSize="11" style={{ fill: 'var(--ink-2)' }}>map {c}</text>
+          <text x={XX(c)} y={XY - 6} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>map {c}</>}>map {c}</Translated></text>
           {Array.from({ length: 9 }, (_, i) => {
             const h = Math.floor(i / 3);
             const w = i % 3;
@@ -85,7 +86,7 @@ function Counters({ copies }: { copies: number[] }) {
   const top = 266;
   return (
     <g>
-      <text x={20} y={top - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink)' }}>copies of each input pixel in B so far</text>
+      <text x={20} y={top - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink)' }}><Translated vi="số bản sao của mỗi pixel đầu vào trong B đến giờ">copies of each input pixel in B so far</Translated></text>
       {[0, 1, 2].map((c) => (
         <g key={c}>
           {copies.map((n, i) => {
@@ -119,14 +120,14 @@ function Filters({ t, hot, wash }: { t: number; hot?: (m: number, k: number) => 
     }
   return (
     <g>
-      <Label x={20} y={FY - 40 + (t > 0.5 ? 12 : 0)}>{t > 0.5 ? 'F: 2 × 12, the same array read row by row' : 'F: 6 filters, 2 × 2 (one row per output map)'}</Label>
+      <Label x={20} y={FY - 40 + (t > 0.5 ? 12 : 0)}>{t > 0.5 ? tr('F: 2 × 12, the same array read row by row', 'F: 2 × 12, cùng mảng đó đọc theo từng hàng') : tr('F: 6 filters, 2 × 2 (one row per output map)', 'F: 6 bộ lọc, 2 × 2 (mỗi map đầu ra một hàng)')}</Label>
       {cells}
       {t >= 1
         ? [4, 8].map((k) => <line key={k} x1={FX + k * C_F} x2={FX + k * C_F} y1={FY - 2} y2={FY + 2 * C_F + 2} stroke="var(--ink)" strokeWidth="1.6" />)
         : null}
       {t >= 1 ? (
         <text x={FX} y={FY + 2 * C_F + 16} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-          row m: output map m's filters for input maps 0, 1, 2
+          <Translated vi="hàng m: các bộ lọc của map đầu ra m cho map đầu vào 0, 1, 2">row m: output map m's filters for input maps 0, 1, 2</Translated>
         </text>
       ) : null}
     </g>
@@ -156,11 +157,11 @@ function Unfolded({ cols, moving, t = 0, movingRows, hot, outline }: {
   return (
     <g>
       <Label x={BX} y={16}>B: 12 × 4</Label>
-      <text x={BX} y={30} fontSize="11" style={{ fill: 'var(--ink-2)' }}>one column per output pixel</text>
+      <text x={BX} y={30} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="mỗi pixel đầu ra một cột">one column per output pixel</Translated></text>
       {cells}
       {[4, 8].map((u) => <line key={u} x1={BX - 2} x2={BX + 4 * C_F + 2} y1={BY + u * C_F} y2={BY + u * C_F} stroke="var(--ink)" strokeWidth="1.6" />)}
       {[0, 1, 2].map((c) => (
-        <text key={c} x={BX + 4 * C_F + 6} y={BY + c * 4 * C_F + 2 * C_F + 4} fontSize="11" style={{ fill: 'var(--ink-2)' }}>map {c}</text>
+        <text key={c} x={BX + 4 * C_F + 6} y={BY + c * 4 * C_F + 2 * C_F + 4} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>map {c}</>}>map {c}</Translated></text>
       ))}
       {outline ? <rect x={BX - 3} y={BY - 3} width={4 * C_F + 6} height={12 * C_F + 6} fill="none" stroke="var(--ink)" strokeWidth="1.5" /> : null}
       {flying}
@@ -184,10 +185,10 @@ function YMatrix({ shown, hot }: { shown: number; hot?: number }) {
 function YMaps({ fade = 1, hot }: { fade?: number; hot?: number }) {
   return (
     <g opacity={fade}>
-      <Label x={YX} y={YY + 2 * C_Y + 36}>the output maps</Label>
+      <Label x={YX} y={YY + 2 * C_Y + 36}><Translated vi="các map đầu ra">the output maps</Translated></Label>
       {[0, 1].map((m) => (
         <g key={m}>
-          <text x={YX + m * 92} y={YY + 2 * C_Y + 54} fontSize="11" style={{ fill: 'var(--ink-2)' }}>map {m}</text>
+          <text x={YX + m * 92} y={YY + 2 * C_Y + 54} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>map {m}</>}>map {m}</Translated></text>
           {[0, 1, 2, 3].map((k) => (
             <Cell key={k} x={YX + m * 92 + (k % 2) * C_Y + C_Y / 2} y={YY + 2 * C_Y + 60 + Math.floor(k / 2) * C_Y + C_Y / 2} size={C_Y}
               value={S.Y[m * 4 + k]} hot={hot === m * 4 + k} />
@@ -204,7 +205,7 @@ function Headline({ children }: { children: ReactNode }) {
 
 function Stage({ children }: { children: ReactNode }) {
   return (
-    <svg viewBox="0 0 720 368" role="img" aria-label="Animation: unfolding the input into a matrix" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+    <svg viewBox="0 0 720 368" role="img" aria-label={tr('Animation: unfolding the input into a matrix', 'Hoạt ảnh: unfold đầu vào thành một ma trận')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       {children}
     </svg>
   );
@@ -216,7 +217,9 @@ const col0 = Array.from({ length: 12 }, (_, u) => bToX(s, u, 0));
 const beats: Beat[] = [
   {
     clip: 'unfold-1',
-    label: 'One output',
+    get label() {
+      return tr('One output', 'Một đầu ra');
+    },
     draw: (p) => {
       const ch = p < 0.15 ? -1 : Math.min(2, Math.floor((p - 0.15) / 0.22));
       const done = p >= 0.81;
@@ -226,30 +229,34 @@ const beats: Beat[] = [
           <InputMaps hot={(c, h, w) => ch >= 0 && !done && patch0(c, h, w, ch)} />
           <Filters t={0} hot={(m, k) => m === 0 && ch >= 0 && !done && Math.floor(k / 4) === ch} wash={(m) => m === 0} />
           <YMaps hot={0} fade={1} />
-          <text x={YX} y={244} fontSize="12" style={{ fill: 'var(--ink-2)' }}>output map 0, pixel (0, 0):</text>
+          <text x={YX} y={244} fontSize="12" style={{ fill: 'var(--ink-2)' }}><Translated vi="map đầu ra 0, pixel (0, 0):">output map 0, pixel (0, 0):</Translated></text>
           {sums.map((v, c) => (
-            <text key={c} x={YX} y={262 + c * 17} fontSize="12" style={{ fill: 'var(--ink)' }}>map {c} patch · filter = {v}</text>
+            <text key={c} x={YX} y={262 + c * 17} fontSize="12" style={{ fill: 'var(--ink)' }}><Translated vi={<>vùng của map {c} · bộ lọc = {v}</>}>map {c} patch · filter = {v}</Translated></text>
           ))}
           {done ? <text x={YX} y={318} fontSize="13" fontWeight="600" style={{ fill: 'var(--reg)' }}>{S.perChannel.join(' + ')} = {S.Y[0]}</text> : null}
-          <Headline>one output pixel = one patch of every input map times its filter, summed</Headline>
+          <Headline><Translated vi="một pixel đầu ra = tổng của một vùng trên mỗi map đầu vào nhân với bộ lọc của nó">one output pixel = one patch of every input map times its filter, summed</Translated></Headline>
         </Stage>
       );
     },
   },
   {
     clip: 'unfold-2',
-    label: 'F is already a matrix',
+    get label() {
+      return tr('F is already a matrix', 'F đã là một ma trận');
+    },
     draw: (p) => (
       <Stage>
         <InputMaps />
         <Filters t={ramp(p, 0.12, 0.62)} wash={(m) => p > 0.7 && m === 0} />
-        <Headline>{p < 0.62 ? 'M × C × K × K, row-major …' : '… is already M × (C·K·K): no data moves'}</Headline>
+        <Headline>{p < 0.62 ? tr('M × C × K × K, row-major …', 'M × C × K × K, thứ tự hàng (row-major) …') : tr('… is already M × (C·K·K): no data moves', '… đã là M × (C·K·K): không dữ liệu nào phải di chuyển')}</Headline>
       </Stage>
     ),
   },
   {
     clip: 'unfold-3',
-    label: 'Column 0',
+    get label() {
+      return tr('Column 0', 'Cột 0');
+    },
     draw: (p) => {
       const c = Math.min(2, Math.floor(ramp(p, 0.08, 0.92) * 3));
       const t = ramp(p, 0.08 + c * 0.28, 0.08 + c * 0.28 + 0.22);
@@ -260,14 +267,16 @@ const beats: Beat[] = [
           <Filters t={1} wash={(m, k) => m === 0 && Math.floor(k / 4) <= c && p >= 0.08} />
           <Unfolded cols={0} moving={p >= 0.08 ? 0 : undefined} t={t} movingRows={p >= 0.08 ? rows : rows.map(() => 0)} />
           <YMatrix shown={0} />
-          <Headline>{`column 0 = pixel 0's patches, map 0, then map 1, then map 2: ${col0.filter((x) => x.c <= c).length} of 12 entries`}</Headline>
+          <Headline>{tr(`column 0 = pixel 0's patches, map 0, then map 1, then map 2: ${col0.filter((x) => x.c <= c).length} of 12 entries`, `cột 0 = các vùng của pixel 0, map 0, rồi map 1, rồi map 2: ${col0.filter((x) => x.c <= c).length} trên 12 phần tử`)}</Headline>
         </Stage>
       );
     },
   },
   {
     clip: 'unfold-4',
-    label: 'All four columns',
+    get label() {
+      return tr('All four columns', 'Cả bốn cột');
+    },
     draw: (p) => {
       const j = 1 + Math.min(2, Math.floor(ramp(p, 0.05, 0.86) * 3));
       const t = ramp(p, 0.05 + (j - 1) * 0.27, 0.05 + (j - 1) * 0.27 + 0.2);
@@ -283,8 +292,8 @@ const beats: Beat[] = [
           <YMatrix shown={0} />
           <Headline>
             {p < 0.88
-              ? `column ${vv}: pixel ${vv}'s patches. Counters show copies of each input pixel so far.`
-              : `${S.entries} entries from ${S.inputs} values: corners 1, edges 2, centre 4`}
+              ? tr(`column ${vv}: pixel ${vv}'s patches. Counters show copies of each input pixel so far.`, `cột ${vv}: các vùng của pixel ${vv}. Bộ đếm cho thấy số bản sao của mỗi pixel đầu vào đến giờ.`)
+              : tr(`${S.entries} entries from ${S.inputs} values: corners 1, edges 2, centre 4`, `${S.entries} phần tử từ ${S.inputs} giá trị: góc 1, cạnh 2, giữa 4`)}
           </Headline>
         </Stage>
       );
@@ -292,7 +301,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'unfold-5',
-    label: 'F times B',
+    get label() {
+      return tr('F times B', 'F nhân B');
+    },
     draw: (p) => {
       const first = p < 0.45;
       const shown = first ? (p > 0.32 ? 1 : 0) : Math.min(8, 1 + Math.floor(ramp(p, 0.45, 0.8) * 7.99));
@@ -304,16 +315,18 @@ const beats: Beat[] = [
           <YMatrix shown={shown} hot={first ? 0 : undefined} />
           <YMaps fade={ramp(p, 0.82, 0.95)} />
           {first ? (
-            <text x={YX} y={YY + 2 * C_Y + 20} fontSize="12" style={{ fill: 'var(--reg)' }}>row 0 · column 0 = 12 products = {S.Y[0]}</text>
+            <text x={YX} y={YY + 2 * C_Y + 20} fontSize="12" style={{ fill: 'var(--reg)' }}><Translated vi={<>hàng 0 · cột 0 = 12 tích = {S.Y[0]}</>}>row 0 · column 0 = 12 products = {S.Y[0]}</Translated></text>
           ) : null}
-          <Headline>{p < 0.82 ? 'every entry of Y is a row of F times a column of B' : 'row m of Y is output map m, already row-major: no reshuffle'}</Headline>
+          <Headline>{p < 0.82 ? tr('every entry of Y is a row of F times a column of B', 'mỗi phần tử của Y là một hàng của F nhân một cột của B') : tr('row m of Y is output map m, already row-major: no reshuffle', 'hàng m của Y là map đầu ra m, đã theo thứ tự hàng: không cần sắp xếp lại')}</Headline>
         </Stage>
       );
     },
   },
   {
     clip: 'unfold-6',
-    label: 'Scale up',
+    get label() {
+      return tr('Scale up', 'Phóng to quy mô');
+    },
     draw: (p) => {
       const x0 = 70;
       const x1 = 470;
@@ -326,7 +339,7 @@ const beats: Beat[] = [
       const upTo = 3 + ramp(p, 0.05, 0.6) * (maxSide - 3);
       return (
         <Stage>
-          <Label x={20} y={20} tier="ink">elements of B per element of X (Eq. 19.4), for square maps of side H</Label>
+          <Label x={20} y={20} tier="ink"><Translated vi="số phần tử của B trên mỗi phần tử của X (Eq. 19.4), với map vuông cạnh H">elements of B per element of X (Eq. 19.4), for square maps of side H</Translated></Label>
           <line x1={x0} x2={x1} y1={y0} y2={y0} stroke="var(--ink-3)" />
           <line x1={x0} x2={x0} y1={y0} y2={y1} stroke="var(--ink-3)" />
           {[0, 5, 10, 15, 20, 25].map((r) => (
@@ -335,19 +348,19 @@ const beats: Beat[] = [
           {[3, 16, 32, 48, 64].map((h) => (
             <text key={h} x={X(h)} y={y0 + 16} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{h}</text>
           ))}
-          <text x={(x0 + x1) / 2} y={y0 + 30} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>input map side H</text>
+          <text x={(x0 + x1) / 2} y={y0 + 30} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi="cạnh H của map đầu vào">input map side H</Translated></text>
           {S.curves.map(({ K, points }) => {
             const pts = points.filter((q) => !Number.isNaN(q.ratio) && q.side <= upTo);
             return (
               <g key={K}>
                 <line x1={x0} x2={x1} y1={Y(K * K)} y2={Y(K * K)} stroke="var(--ink-3)" strokeDasharray="4 3" />
-                <text x={x1 + 6} y={Y(K * K) + 4} fontSize="11" style={{ fill: 'var(--global)' }}>K = {K}: limit {K * K}</text>
+                <text x={x1 + 6} y={Y(K * K) + 4} fontSize="11" style={{ fill: 'var(--global)' }}><Translated vi={<>K = {K}: giới hạn {K * K}</>}>K = {K}: limit {K * K}</Translated></text>
                 <polyline fill="none" stroke="var(--global)" strokeWidth="2" points={pts.map((q) => `${X(q.side)},${Y(q.ratio)}`).join(' ')} />
               </g>
             );
           })}
           <circle cx={X(3)} cy={Y(16 / 9)} r="4" fill="var(--ink)" />
-          <text x={X(3) + 10} y={Y(16 / 9) + 12} fontSize="11" style={{ fill: 'var(--ink)' }}>the book's example: {(16 / 9).toFixed(2)}</text>
+          <text x={X(3) + 10} y={Y(16 / 9) + 12} fontSize="11" style={{ fill: 'var(--ink)' }}><Translated vi={<>ví dụ của sách: {(16 / 9).toFixed(2)}</>}>the book's example: {(16 / 9).toFixed(2)}</Translated></text>
           {upTo >= 32 ? (
             <>
               <circle cx={X(32)} cy={Y(S.c1Ratio)} r="4" fill="var(--ink)" />
@@ -356,15 +369,15 @@ const beats: Beat[] = [
           ) : null}
           {p > 0.68 ? (
             <g>
-              <text x={592} y={150} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>explicit B costs</text>
-              <text x={592} y={170} fontSize="12" style={{ fill: 'var(--ink)' }}>read X</text>
-              <text x={592} y={188} fontSize="12" style={{ fill: 'var(--ink)' }}>write B</text>
-              <text x={592} y={206} fontSize="12" style={{ fill: 'var(--ink)' }}>read B back</text>
-              <text x={592} y={226} fontSize="11" style={{ fill: 'var(--ink-2)' }}>one more pass over</text>
-              <text x={592} y={240} fontSize="11" style={{ fill: 'var(--ink-2)' }}>global memory</text>
+              <text x={592} y={150} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="B tường minh tốn">explicit B costs</Translated></text>
+              <text x={592} y={170} fontSize="12" style={{ fill: 'var(--ink)' }}><Translated vi="đọc X">read X</Translated></text>
+              <text x={592} y={188} fontSize="12" style={{ fill: 'var(--ink)' }}><Translated vi="ghi B">write B</Translated></text>
+              <text x={592} y={206} fontSize="12" style={{ fill: 'var(--ink)' }}><Translated vi="đọc lại B">read B back</Translated></text>
+              <text x={592} y={226} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="thêm một lượt qua">one more pass over</Translated></text>
+              <text x={592} y={240} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="bộ nhớ toàn cục">global memory</Translated></text>
             </g>
           ) : null}
-          <Headline>the ratio approaches K², whatever C and M are</Headline>
+          <Headline><Translated vi="tỉ lệ tiến tới K², bất kể C và M là bao nhiêu">the ratio approaches K², whatever C and M are</Translated></Headline>
         </Stage>
       );
     },
@@ -372,5 +385,5 @@ const beats: Beat[] = [
 ];
 
 export function UnfoldScene() {
-  return <Scene chapter="ch19" title="Unfolding the input into a matrix" beats={beats} />;
+  return <Scene chapter="ch19" title={tr('Unfolding the input into a matrix', 'Unfold đầu vào thành một ma trận')} beats={beats} />;
 }

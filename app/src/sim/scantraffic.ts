@@ -37,10 +37,14 @@
 // Erasable TypeScript only, and no value imports: the browser checks import this file
 // directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- the book's example device
 /** The book's example device (p. 272). Used only as the book's example. */
 export const BOOK_DEVICE = {
-  name: "The book's example (H100 SXM)",
+  get name() {
+    return tr("The book's example (H100 SXM)", 'Ví dụ của sách (H100 SXM)');
+  },
   /** Peak global-memory bandwidth, GB/s (3.35 TB/s). */
   bandwidthGBs: 3350,
   /** FP32 peak as the book prints it, TFLOPS. */
@@ -60,13 +64,24 @@ export function threshold(tflops: number, bandwidthGBs: number): number {
 // ---------------------------------------------------------------- one scan: intensity and ceiling
 export type Elem = 'float' | 'half';
 export const ELEM_BYTES: Record<Elem, number> = { float: 4, half: 2 };
-export const ELEM_LABEL: Record<Elem, string> = { float: 'float (4 bytes)', half: 'half (2 bytes)' };
+export const ELEM_LABEL: Record<Elem, string> = {
+  get float() {
+    return tr('float (4 bytes)', 'float (4 byte)');
+  },
+  get half() {
+    return tr('half (2 bytes)', 'half (2 byte)');
+  },
+};
 
 /** What the scan writes: its result only, or its result plus a one-byte flag per element (lab 11.6's keep mask). */
 export type Written = 'scan' | 'scan+mask';
 export const WRITTEN_LABEL: Record<Written, string> = {
-  scan: 'the scan only',
-  'scan+mask': 'the scan and a one-byte flag',
+  get scan() {
+    return tr('the scan only', 'chỉ kết quả scan');
+  },
+  get 'scan+mask'() {
+    return tr('the scan and a one-byte flag', 'kết quả scan và một cờ một byte');
+  },
 };
 
 export interface ScanBytes {
@@ -104,9 +119,15 @@ export function ceiling(bandwidthGBs: number, bytesPerElement: number): number {
 export type Design = 'single' | 'ssa' | 'rss';
 export const DESIGNS: readonly Design[] = ['single', 'ssa', 'rss'];
 export const DESIGN_LABEL: Record<Design, string> = {
-  single: 'single pass (one kernel)',
-  ssa: 'scan-scan-add (three kernels)',
-  rss: 'reduce-scan-scan (three kernels)',
+  get single() {
+    return tr('single pass (one kernel)', 'một lượt (một kernel)');
+  },
+  get ssa() {
+    return tr('scan-scan-add (three kernels)', 'scan-scan-add (ba kernel)');
+  },
+  get rss() {
+    return tr('reduce-scan-scan (three kernels)', 'reduce-scan-scan (ba kernel)');
+  },
 };
 
 export interface Access {
@@ -149,74 +170,74 @@ export function designTraffic(design: Design, S: number, elemBytes = 4, bookkeep
   if (design === 'ssa') {
     kernels = [
       {
-        kernel: 'kernel 1',
-        does: 'scan each block segment',
+        kernel: 'kernel 1', // i18n-ignore: identifier also shown to the reader
+        does: tr('scan each block segment', 'scan từng đoạn của khối'),
         accesses: [
-          { what: 'input', kind: 'load', perElement: 1, bytes: e },
-          { what: 'scanned segments', kind: 'store', perElement: 1, bytes: e },
-          { what: 'block sums', kind: 'store', perElement: s, bytes: e, bookkeeping: true },
+          { what: tr('input', 'đầu vào'), kind: 'load', perElement: 1, bytes: e },
+          { what: tr('scanned segments', 'các đoạn đã scan'), kind: 'store', perElement: 1, bytes: e },
+          { what: tr('block sums', 'tổng của các khối'), kind: 'store', perElement: s, bytes: e, bookkeeping: true },
         ],
       },
       {
-        kernel: 'kernel 2',
-        does: 'scan the block sums (one block)',
+        kernel: 'kernel 2', // i18n-ignore: identifier also shown to the reader
+        does: tr('scan the block sums (one block)', 'scan các tổng của khối (một khối)'),
         accesses: [
-          { what: 'block sums', kind: 'load', perElement: s, bytes: e },
-          { what: 'scanned block sums', kind: 'store', perElement: s, bytes: e },
+          { what: tr('block sums', 'tổng của các khối'), kind: 'load', perElement: s, bytes: e },
+          { what: tr('scanned block sums', 'tổng của các khối đã scan'), kind: 'store', perElement: s, bytes: e },
         ],
       },
       {
-        kernel: 'kernel 3',
-        does: 'add the earlier blocks\' total',
+        kernel: 'kernel 3', // i18n-ignore: identifier also shown to the reader
+        does: tr('add the earlier blocks\' total', 'cộng tổng của các khối trước'),
         accesses: [
-          { what: 'scanned segments', kind: 'load', perElement: 1, bytes: e },
-          { what: 'scanned block sums', kind: 'load', perElement: s, bytes: e, bookkeeping: true },
-          { what: 'output', kind: 'store', perElement: 1, bytes: e },
+          { what: tr('scanned segments', 'các đoạn đã scan'), kind: 'load', perElement: 1, bytes: e },
+          { what: tr('scanned block sums', 'tổng của các khối đã scan'), kind: 'load', perElement: s, bytes: e, bookkeeping: true },
+          { what: tr('output', 'đầu ra'), kind: 'store', perElement: 1, bytes: e },
         ],
       },
     ];
   } else if (design === 'rss') {
     kernels = [
       {
-        kernel: 'kernel 1',
-        does: 'reduce each block segment',
+        kernel: 'kernel 1', // i18n-ignore: identifier also shown to the reader
+        does: tr('reduce each block segment', 'rút gọn từng đoạn của khối'),
         accesses: [
-          { what: 'input', kind: 'load', perElement: 1, bytes: e },
-          { what: 'block sums', kind: 'store', perElement: s, bytes: e },
+          { what: tr('input', 'đầu vào'), kind: 'load', perElement: 1, bytes: e },
+          { what: tr('block sums', 'tổng của các khối'), kind: 'store', perElement: s, bytes: e },
         ],
       },
       {
-        kernel: 'kernel 2',
-        does: 'scan the block sums (one block)',
+        kernel: 'kernel 2', // i18n-ignore: identifier also shown to the reader
+        does: tr('scan the block sums (one block)', 'scan các tổng của khối (một khối)'),
         accesses: [
-          { what: 'block sums', kind: 'load', perElement: s, bytes: e },
-          { what: 'scanned block sums', kind: 'store', perElement: s, bytes: e },
+          { what: tr('block sums', 'tổng của các khối'), kind: 'load', perElement: s, bytes: e },
+          { what: tr('scanned block sums', 'tổng của các khối đã scan'), kind: 'store', perElement: s, bytes: e },
         ],
       },
       {
-        kernel: 'kernel 3',
-        does: 'add the earlier blocks\' total to the first element, scan the segment',
+        kernel: 'kernel 3', // i18n-ignore: identifier also shown to the reader
+        does: tr('add the earlier blocks\' total to the first element, scan the segment', 'cộng tổng của các khối trước vào phần tử đầu tiên, rồi scan đoạn đó'),
         accesses: [
-          { what: 'input', kind: 'load', perElement: 1, bytes: e },
-          { what: 'scanned block sums', kind: 'load', perElement: s, bytes: e, bookkeeping: true },
-          { what: 'output', kind: 'store', perElement: 1, bytes: e },
+          { what: tr('input', 'đầu vào'), kind: 'load', perElement: 1, bytes: e },
+          { what: tr('scanned block sums', 'tổng của các khối đã scan'), kind: 'load', perElement: s, bytes: e, bookkeeping: true },
+          { what: tr('output', 'đầu ra'), kind: 'store', perElement: 1, bytes: e },
         ],
       },
     ];
   } else {
     kernels = [
       {
-        kernel: 'one kernel',
-        does: 'scan, look back, add, store',
+        kernel: 'one kernel', // i18n-ignore: identifier also shown to the reader
+        does: tr('scan, look back, add, store', 'scan, nhìn lại (look back), cộng, ghi'),
         accesses: [
-          { what: 'input', kind: 'load', perElement: 1, bytes: e },
-          { what: 'output', kind: 'store', perElement: 1, bytes: e },
-          { what: 'block counter (atomic read)', kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
-          { what: 'block counter (atomic write)', kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
-          { what: 'previous block\'s flag (at least one read)', kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
-          { what: 'previous block\'s partial sum', kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
-          { what: 'own partial sum', kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
-          { what: 'own flag', kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('input', 'đầu vào'), kind: 'load', perElement: 1, bytes: e },
+          { what: tr('output', 'đầu ra'), kind: 'store', perElement: 1, bytes: e },
+          { what: tr('block counter (atomic read)', 'bộ đếm khối (đọc nguyên tử)'), kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('block counter (atomic write)', 'bộ đếm khối (ghi nguyên tử)'), kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('previous block\'s flag (at least one read)', 'cờ của khối trước (ít nhất một lần đọc)'), kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('previous block\'s partial sum', 'tổng riêng phần của khối trước'), kind: 'load', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('own partial sum', 'tổng riêng phần của chính khối'), kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
+          { what: tr('own flag', 'cờ của chính khối'), kind: 'store', perElement: s, bytes: 4, bookkeeping: true },
         ],
       },
     ];
@@ -226,10 +247,10 @@ export function designTraffic(design: Design, S: number, elemBytes = 4, bookkeep
   const bytesPerElement = counted.reduce((t, a) => t + a.perElement * a.bytes, 0);
   const formula =
     design === 'ssa'
-      ? `(${4 * e} + ${2 * e}/S)·N bytes`
+      ? tr(`(${4 * e} + ${2 * e}/S)·N bytes`, `(${4 * e} + ${2 * e}/S)·N byte`)
       : design === 'rss'
-        ? `(${3 * e} + ${3 * e}/S)·N bytes`
-        : `${2 * e}·N bytes`;
+        ? tr(`(${3 * e} + ${3 * e}/S)·N bytes`, `(${3 * e} + ${3 * e}/S)·N byte`)
+        : tr(`${2 * e}·N bytes`, `${2 * e}·N byte`);
   return { design, segment: S, elemBytes: e, kernels, elementsPerElement, bytesPerElement, formula };
 }
 

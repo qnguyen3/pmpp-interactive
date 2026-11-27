@@ -1,0 +1,1 @@
+Copy engine di chuyển dữ liệu mà không cần CPU, và nó làm việc với địa chỉ vật lý. Nó đọc trực tiếp từng khung một. Giờ giả sử hệ điều hành gán lại một khung giữa chừng lần sao chép. Bộ máy sẽ đọc dữ liệu thuộc về người khác. Vì vậy driver sẽ không trỏ copy engine vào bộ nhớ phân trang.

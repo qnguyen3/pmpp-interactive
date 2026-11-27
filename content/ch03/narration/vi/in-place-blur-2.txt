@@ -1,0 +1,1 @@
+Giờ hãy bỏ buffer thứ hai đi. Kernel đọc và ghi trên cùng một bức ảnh. 7 luồng đầu tiên ghi số không đè lên số không, và không có gì thay đổi. Rồi luồng của hàng 1, cột 1 lưu giá trị trung bình của nó, 28. Luồng lân cận chạy tiếp theo. Nó đọc được 28 ở chỗ mà đầu vào vốn là không.

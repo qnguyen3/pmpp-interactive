@@ -1,0 +1,1 @@
+Rẽ góc. Giờ warp đọc xuống dọc theo mép trái của ô. Các địa chỉ đó liên tiếp, nên 4 sector phục vụ cả warp, và lần nạp được hợp nhất. Nhưng hãy xem mỗi giá trị đi đâu. Luồng x ghi hàng x của ô chia sẻ, nên cả warp cùng nhau ghi một cột của ô đó.

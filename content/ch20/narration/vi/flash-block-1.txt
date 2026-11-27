@@ -1,0 +1,1 @@
+Khối một nhận một dải gồm bốn hàng của Q, các hàng 4 đến 7. Trong phiên bản nhỏ này một warp có bốn lane. Mỗi warp nạp hai hàng của nó vào thanh ghi, chia đều cho các lane: lane 0 nhận cột 0 và 4, lane 1 nhận 1 và 5, và cứ thế. Các lane kề nhau đọc các phần tử kề nhau.

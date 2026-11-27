@@ -46,12 +46,21 @@ import {
   type Format,
   type Mode,
 } from './minifloat';
+import { tr } from '../lib/locale.ts';
 
 export const MODE_LABEL: Record<Mode, string> = {
-  rne: 'to nearest, ties to even',
-  rtz: 'toward zero',
-  up: 'up (toward +∞)',
-  down: 'down (toward −∞)',
+  get rne() {
+    return tr('to nearest, ties to even', 'về gần nhất, hòa thì về chẵn');
+  },
+  get rtz() {
+    return tr('toward zero', 'về phía 0');
+  },
+  get up() {
+    return tr('up (toward +∞)', 'lên (về phía +∞)');
+  },
+  get down() {
+    return tr('down (toward −∞)', 'xuống (về phía −∞)');
+  },
 };
 export const MODES: Mode[] = ['rne', 'rtz', 'up', 'down'];
 
@@ -337,12 +346,12 @@ export function alignTrace(f: Format, a0: number, b0: number, mode: Mode = 'rne'
 
 /** The stepper's presets, with the text the operand fields show. */
 export const ALIGN_PRESETS: { id: string; label: string; fmt: Format; a: number; b: number; aText: string; bText: string }[] = [
-  { id: 'book', label: "the book's 2 + 0.25 (5-bit format)", fmt: TOY5, a: 2, b: 0.25, aText: '2', bText: '0.25' },
-  { id: 'half-ulp', label: '1 + 2⁻¹¹ in FP16', fmt: FP16, a: 1, b: 2 ** -11, aText: '1', bText: '2^-11' },
-  { id: 'stall', label: '2048 + 1 in FP16', fmt: FP16, a: 2048, b: 1, aText: '2048', bText: '1' },
-  { id: 'probe', label: '1 + 0.75 ULP in FP32', fmt: FP32, a: 1, b: 0.75 * 2 ** -23, aText: '1', bText: '0.75×2^-23' },
-  { id: 'cancel', label: '1.5 − 1.25 in FP16', fmt: FP16, a: 1.5, b: -1.25, aText: '1.5', bText: '-1.25' },
-  { id: 'addend', label: '1000 + 0.3 in FP16', fmt: FP16, a: 1000, b: 0.3, aText: '1000', bText: '0.3' },
+  { id: 'book', get label() { return tr("the book's 2 + 0.25 (5-bit format)", '2 + 0.25 của sách (định dạng 5 bit)'); }, fmt: TOY5, a: 2, b: 0.25, aText: '2', bText: '0.25' },
+  { id: 'half-ulp', get label() { return tr('1 + 2⁻¹¹ in FP16', '1 + 2⁻¹¹ trong FP16'); }, fmt: FP16, a: 1, b: 2 ** -11, aText: '1', bText: '2^-11' },
+  { id: 'stall', get label() { return tr('2048 + 1 in FP16', '2048 + 1 trong FP16'); }, fmt: FP16, a: 2048, b: 1, aText: '2048', bText: '1' },
+  { id: 'probe', get label() { return tr('1 + 0.75 ULP in FP32', '1 + 0.75 ULP trong FP32'); }, fmt: FP32, a: 1, b: 0.75 * 2 ** -23, aText: '1', bText: '0.75×2^-23' },
+  { id: 'cancel', get label() { return tr('1.5 − 1.25 in FP16', '1.5 − 1.25 trong FP16'); }, fmt: FP16, a: 1.5, b: -1.25, aText: '1.5', bText: '-1.25' },
+  { id: 'addend', get label() { return tr('1000 + 0.3 in FP16', '1000 + 0.3 trong FP16'); }, fmt: FP16, a: 1000, b: 0.3, aText: '1000', bText: '0.3' },
 ];
 
 /** An operand as typed: a decimal number, a power of two written 2^-11, or a multiple of one, 0.75×2^-23. */
@@ -474,19 +483,21 @@ export function bf16FromBits(u0: number): Bf16Conversion {
 
 export const BF16_PRESETS: { id: string; label: string; bits: number }[] = [
   { id: 'pi', label: 'π', bits: bitsFromF32(Math.PI) },
-  { id: 'tie-even', label: 'a tie, kept bit even: 1 + 2⁻⁸', bits: 0x3f808000 },
-  { id: 'tie-odd', label: 'a tie, kept bit odd: 1 + 3·2⁻⁸', bits: 0x3f818000 },
-  { id: 'carry', label: 'a carry into the exponent: just under 2', bits: 0x3fffffff },
-  { id: 'max', label: 'the largest FP32', bits: 0x7f7fffff },
+  { id: 'tie-even', get label() { return tr('a tie, kept bit even: 1 + 2⁻⁸', 'trường hợp hòa, bit giữ lại chẵn: 1 + 2⁻⁸'); }, bits: 0x3f808000 },
+  { id: 'tie-odd', get label() { return tr('a tie, kept bit odd: 1 + 3·2⁻⁸', 'trường hợp hòa, bit giữ lại lẻ: 1 + 3·2⁻⁸'); }, bits: 0x3f818000 },
+  { id: 'carry', get label() { return tr('a carry into the exponent: just under 2', 'nhớ sang số mũ: ngay dưới 2'); }, bits: 0x3fffffff },
+  { id: 'max', get label() { return tr('the largest FP32', 'số FP32 lớn nhất'); }, bits: 0x7f7fffff },
   { id: 'third', label: '−1/3', bits: bitsFromF32(-1 / 3) },
-  { id: 'snan', label: 'a NaN with its payload in the low bits', bits: 0x7f800001 },
+  { id: 'snan', get label() { return tr('a NaN with its payload in the low bits', 'một NaN có payload ở các bit thấp'); }, bits: 0x7f800001 },
 ];
 
 // ---------------------------------------------------------------- A.3: what comes out?
 export type Outcome = 'zero' | 'finite' | '+inf' | '-inf' | 'nan' | 'true' | 'false';
 export const OUTCOME_LABEL: Record<Outcome, string> = {
   zero: '0',
-  finite: 'a non-zero number',
+  get finite() {
+    return tr('a non-zero number', 'một số khác 0');
+  },
   '+inf': '+∞',
   '-inf': '−∞',
   nan: 'NaN',
@@ -534,18 +545,18 @@ export function specialTable(): SpecialRow[] {
   const NAN = decode(F, 0x7fc00000).value;
   const MAX = maxFinite(F);
   const rows: Omit<SpecialRow, 'outcome'>[] = [
-    { id: 'zero-zero', expr: '0 / 0', fmt: F, value: div(F, 0, 0), rule: 'Mathematically undefined, so the result is NaN.', source: 'book §A.3, p. 590' },
-    { id: 'one-zero', expr: '1 / 0', fmt: F, value: div(F, 1, 0), rule: 'Division by zero gives infinity with the sign of the quotient; no exception, no trap.', source: 'NVIDIA guide 5.6.1.3 (appA-facts A7)' },
-    { id: 'minus-one-zero', expr: '−1 / 0', fmt: F, value: div(F, -1, 0), rule: 'The same, with a negative sign.', source: 'NVIDIA guide 5.6.1.3 (appA-facts A7)' },
-    { id: 'inf-inf', expr: '∞ − ∞', fmt: F, value: add(F, INF, -INF), rule: 'Undefined: one of the book\'s four NaN-producing operations.', source: 'book §A.3, p. 591' },
-    { id: 'zero-inf', expr: '0 × ∞', fmt: F, value: mul(F, 0, INF), rule: 'Undefined: another of the four.', source: 'book §A.3, p. 591' },
-    { id: 'one-inf', expr: '1 / ∞', fmt: F, value: div(F, 1, INF), rule: 'Any representable number divided by ±∞ is 0.', source: 'book §A.3, p. 590' },
-    { id: 'one-nan', expr: '1 + NaN', fmt: F, value: add(F, 1, NAN), rule: 'A quiet NaN goes in, a quiet NaN comes out, silently.', source: 'book §A.3, p. 591' },
-    { id: 'nan-eq', expr: 'NaN == NaN', fmt: F, value: NAN === NAN, rule: 'Every ordered comparison involving a NaN, == included, is false. A NaN does not equal itself.', source: 'NVIDIA guide 5.6.1.3 (appA-facts A7)' },
-    { id: 'nan-ne', expr: 'NaN != NaN', fmt: F, value: NAN !== NAN, rule: 'The unordered comparison is true, so x != x is true exactly for a NaN, unless fast math lets the compiler assume there are none.', source: 'NVIDIA guide 5.6.1.3 (appA-facts A7)' },
-    { id: 'max-two', expr: 'FLT_MAX × 2', fmt: F, value: mul(F, MAX, 2), rule: 'Overflow saturates to infinity; integer arithmetic would wrap or be undefined instead.', source: 'book §A.3, p. 590' },
-    { id: 'fp16-max', expr: '65504 + 32 in FP16', fmt: FP16, value: add(FP16, 65504, 32), rule: 'The exact 65536 lies past 65504 plus half a step (65520), so it rounds to infinity.', source: 'FP16 maximum from NVIDIA Table 51 (appA-facts A2); the rounding is ours' },
-    { id: 'fmaxf', expr: 'fmaxf(NaN, 1)', fmt: F, value: fmaxf(NAN, 1), rule: 'fmaxf treats a NaN as missing data and returns the other argument, so a max reduction drops NaNs.', source: 'CUDA Math API fmaxf (ch10-facts A10)' },
+    { id: 'zero-zero', expr: '0 / 0', fmt: F, value: div(F, 0, 0), rule: tr('Mathematically undefined, so the result is NaN.', 'Không xác định về mặt toán học, nên kết quả là NaN.'), source: tr('book §A.3, p. 590', 'sách §A.3, tr. 590') },
+    { id: 'one-zero', expr: '1 / 0', fmt: F, value: div(F, 1, 0), rule: tr('Division by zero gives infinity with the sign of the quotient; no exception, no trap.', 'Chia cho 0 cho ra vô cực mang dấu của thương; không có ngoại lệ, không có trap.'), source: tr('NVIDIA guide 5.6.1.3 (appA-facts A7)', 'hướng dẫn của NVIDIA 5.6.1.3 (appA-facts A7)') },
+    { id: 'minus-one-zero', expr: '−1 / 0', fmt: F, value: div(F, -1, 0), rule: tr('The same, with a negative sign.', 'Tương tự, với dấu âm.'), source: tr('NVIDIA guide 5.6.1.3 (appA-facts A7)', 'hướng dẫn của NVIDIA 5.6.1.3 (appA-facts A7)') },
+    { id: 'inf-inf', expr: '∞ − ∞', fmt: F, value: add(F, INF, -INF), rule: tr('Undefined: one of the book\'s four NaN-producing operations.', 'Không xác định: một trong bốn phép toán sinh ra NaN mà sách nêu.'), source: tr('book §A.3, p. 591', 'sách §A.3, tr. 591') },
+    { id: 'zero-inf', expr: '0 × ∞', fmt: F, value: mul(F, 0, INF), rule: tr('Undefined: another of the four.', 'Không xác định: một phép khác trong bốn phép đó.'), source: tr('book §A.3, p. 591', 'sách §A.3, tr. 591') },
+    { id: 'one-inf', expr: '1 / ∞', fmt: F, value: div(F, 1, INF), rule: tr('Any representable number divided by ±∞ is 0.', 'Mọi số biểu diễn được chia cho ±∞ đều bằng 0.'), source: tr('book §A.3, p. 590', 'sách §A.3, tr. 590') },
+    { id: 'one-nan', expr: '1 + NaN', fmt: F, value: add(F, 1, NAN), rule: tr('A quiet NaN goes in, a quiet NaN comes out, silently.', 'Một quiet NaN đi vào, một quiet NaN đi ra, một cách lặng lẽ.'), source: tr('book §A.3, p. 591', 'sách §A.3, tr. 591') }, // i18n-ignore: expression in code notation
+    { id: 'nan-eq', expr: 'NaN == NaN', fmt: F, value: NAN === NAN, rule: tr('Every ordered comparison involving a NaN, == included, is false. A NaN does not equal itself.', 'Mọi phép so sánh có thứ tự có mặt NaN, kể cả ==, đều là false. Một NaN không bằng chính nó.'), source: tr('NVIDIA guide 5.6.1.3 (appA-facts A7)', 'hướng dẫn của NVIDIA 5.6.1.3 (appA-facts A7)') },
+    { id: 'nan-ne', expr: 'NaN != NaN', fmt: F, value: NAN !== NAN, rule: tr('The unordered comparison is true, so x != x is true exactly for a NaN, unless fast math lets the compiler assume there are none.', 'Phép so sánh không có thứ tự là true, nên x != x là true khi và chỉ khi x là NaN, trừ khi fast math cho phép trình biên dịch giả định rằng không có NaN nào.'), source: tr('NVIDIA guide 5.6.1.3 (appA-facts A7)', 'hướng dẫn của NVIDIA 5.6.1.3 (appA-facts A7)') },
+    { id: 'max-two', expr: 'FLT_MAX × 2', fmt: F, value: mul(F, MAX, 2), rule: tr('Overflow saturates to infinity; integer arithmetic would wrap or be undefined instead.', 'Tràn số bão hòa thành vô cực; số học số nguyên thì lại quay vòng hoặc không xác định.'), source: tr('book §A.3, p. 590', 'sách §A.3, tr. 590') }, // i18n-ignore: expression in code notation
+    { id: 'fp16-max', expr: tr('65504 + 32 in FP16', '65504 + 32 trong FP16'), fmt: FP16, value: add(FP16, 65504, 32), rule: tr('The exact 65536 lies past 65504 plus half a step (65520), so it rounds to infinity.', 'Giá trị chính xác 65536 nằm quá 65504 cộng nửa bước (65520), nên nó được làm tròn thành vô cực.'), source: tr('FP16 maximum from NVIDIA Table 51 (appA-facts A2); the rounding is ours', 'giá trị lớn nhất của FP16 lấy từ Bảng 51 của NVIDIA (appA-facts A2); phần làm tròn là của khóa học này') },
+    { id: 'fmaxf', expr: 'fmaxf(NaN, 1)', fmt: F, value: fmaxf(NAN, 1), rule: tr('fmaxf treats a NaN as missing data and returns the other argument, so a max reduction drops NaNs.', 'fmaxf coi NaN là dữ liệu thiếu và trả về đối số còn lại, nên một phép rút gọn max bỏ qua các NaN.'), source: 'CUDA Math API fmaxf (ch10-facts A10)' }, // i18n-ignore: citation (API name and fact id)
   ];
   return rows.map((r) => ({ ...r, outcome: outcomeOf(r.value) }));
 }
@@ -590,34 +601,43 @@ export function classifierPresets(f: Format): PatternPreset[] {
   const sub = minSubnormal(f);
   const out: PatternPreset[] = [
     { id: 'pzero', label: '+0', bits: has(0) },
-    { id: 'nzero', label: '−0', bits: f.signed && f.specials !== 'fnuz' ? has(-0) : null, reason: `${f.name} has no −0` },
-    { id: 'min-sub', label: 'smallest denormal', bits: sub === null ? null : has(sub), reason: `${f.name} has no denormals` },
-    { id: 'max-sub', label: 'largest denormal', bits: sub === null ? null : has(minNormal(f) - sub), reason: `${f.name} has no denormals` },
-    { id: 'min-normal', label: 'smallest normal', bits: has(minNormal(f)) },
+    { id: 'nzero', label: '−0', bits: f.signed && f.specials !== 'fnuz' ? has(-0) : null, reason: tr(`${f.name} has no −0`, `${f.name} không có −0`) },
+    { id: 'min-sub', label: tr('smallest denormal', 'số denormal nhỏ nhất'), bits: sub === null ? null : has(sub), reason: tr(`${f.name} has no denormals`, `${f.name} không có số denormal`) },
+    { id: 'max-sub', label: tr('largest denormal', 'số denormal lớn nhất'), bits: sub === null ? null : has(minNormal(f) - sub), reason: tr(`${f.name} has no denormals`, `${f.name} không có số denormal`) },
+    { id: 'min-normal', label: tr('smallest normal', 'số normal nhỏ nhất'), bits: has(minNormal(f)) },
     { id: 'one', label: '1', bits: has(1) },
-    { id: 'max', label: 'largest finite', bits: has(maxFinite(f)) },
+    { id: 'max', label: tr('largest finite', 'số hữu hạn lớn nhất'), bits: has(maxFinite(f)) },
     {
       id: 'inf',
       label: '+∞',
       bits: ieee ? has(Infinity) : null,
-      reason: f.specials === 'fn' ? `${f.name} has no infinity: its top exponent code holds numbers` : `${f.name} has neither infinity nor NaN`,
+      reason:
+        f.specials === 'fn'
+          ? tr(`${f.name} has no infinity: its top exponent code holds numbers`, `${f.name} không có vô cực: mã số mũ cao nhất của nó chứa các số`)
+          : tr(`${f.name} has neither infinity nor NaN`, `${f.name} không có cả vô cực lẫn NaN`),
     },
     {
       id: 'nan',
-      label: split ? 'quiet NaN' : 'NaN',
+      label: split ? tr('quiet NaN', 'quiet NaN') : 'NaN',
       bits: f.specials === 'none' ? null : has(NaN),
-      reason: `${f.name} has neither infinity nor NaN`,
+      reason: tr(`${f.name} has neither infinity nor NaN`, `${f.name} không có cả vô cực lẫn NaN`),
     },
     {
       id: 'snan',
-      label: 'signalling NaN',
+      label: tr('signalling NaN', 'signalling NaN'),
       bits: split ? ones * 2 ** f.m + 1 : null,
       reason:
         f.specials === 'none'
-          ? `${f.name} has no NaN`
+          ? tr(`${f.name} has no NaN`, `${f.name} không có NaN`)
           : f.specials === 'fn'
-            ? `${f.name} has one NaN pattern per sign, so there is nothing to split into quiet and signalling`
-            : `OCP's specification does not say which of ${f.name}'s NaN patterns are quiet`,
+            ? tr(
+                `${f.name} has one NaN pattern per sign, so there is nothing to split into quiet and signalling`,
+                `${f.name} chỉ có một mẫu NaN cho mỗi dấu, nên không có gì để chia thành quiet và signalling`,
+              )
+            : tr(
+                `OCP's specification does not say which of ${f.name}'s NaN patterns are quiet`,
+                `Đặc tả của OCP không nói mẫu NaN nào của ${f.name} là quiet`,
+              ),
     },
   ];
   return out.map((p) => (p.bits !== null && p.bits >= 0 ? { ...p, reason: undefined } : { ...p, bits: null }));

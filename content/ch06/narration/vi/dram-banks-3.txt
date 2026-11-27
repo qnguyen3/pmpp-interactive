@@ -1,0 +1,1 @@
+Giờ thêm một bank thứ hai. Nó bắt đầu yêu cầu của riêng nó trong khi bank thứ nhất vẫn đang chờ. Khi loạt truyền đầu tiên xong, bank thứ hai đã sẵn sàng, nên hai loạt truyền đi liền nhau. Không bank nào nhanh hơn. Vậy mà giờ bus làm được gấp đôi công việc.

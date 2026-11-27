@@ -1,0 +1,1 @@
+Một lớp mixture of experts đã chạy bộ định tuyến của nó. Mỗi token trong 8 token chọn 2 trong 4 expert, tạo thành 16 cặp token và expert. Vẽ với expert là hàng và token là cột, chúng tạo thành một ma trận thưa. Liệt kê theo thứ tự token, chúng là một danh sách tọa độ: định dạng COO của sách.

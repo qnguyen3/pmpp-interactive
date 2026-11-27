@@ -1,0 +1,1 @@
+Đặt cạnh nhau. Đường không gộp mất khoảng 2.1 lần thời gian của float32. Đường gộp nhanh hơn khoảng 7 lần. Cả hai tỉ số đều chỉ đến từ số byte. Thiết bị của bạn còn cộng thêm chi phí giải nén, chi phí của các hệ số tỉ lệ, và chi phí của việc không dùng hết băng thông. Các lab của học phần này đo xem lợi thế đó còn lại bao nhiêu.

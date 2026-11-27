@@ -38,6 +38,8 @@
 // directly in Node.
 
 // ---------------------------------------------------------------- 1. Fig. 15.12(a)
+import { tr } from '../lib/locale.ts';
+
 export type DepKind = 'true' | 'false';
 
 export interface Instr {
@@ -56,16 +58,22 @@ export function baselineStream(n: number): Instr[] {
   const out: Instr[] = [];
   let b = 0;
   for (let i = 0; i < n; i++) {
-    out.push({ kind: 'load', tile: i, label: `Load A${i} and B${i}` });
+    out.push({ kind: 'load', tile: i, label: tr(`Load A${i} and B${i}`, `Nạp A${i} và B${i}`) });
     out.push({
       kind: 'sync', tile: i, label: '__syncthreads()', barrier: b++, dep: 'true',
-      why: `Compute C${i} reads elements of A${i} and B${i} that other threads loaded: the data has to arrive before anyone uses it.`,
+      why: tr(
+        `Compute C${i} reads elements of A${i} and B${i} that other threads loaded: the data has to arrive before anyone uses it.`,
+        `Tính C${i} đọc các phần tử của A${i} và B${i} mà các luồng khác đã nạp: dữ liệu phải đến nơi trước khi ai đó dùng nó.`,
+      ),
     });
-    out.push({ kind: 'compute', tile: i, label: `Compute C${i}` });
+    out.push({ kind: 'compute', tile: i, label: tr(`Compute C${i}`, `Tính C${i}`) });
     if (i < n - 1)
       out.push({
         kind: 'sync', tile: i, label: '__syncthreads()', barrier: b++, dep: 'false',
-        why: `Loading A${i + 1} and B${i + 1} needs nothing from computing C${i}. It waits only because it would overwrite A${i} and B${i}, in the same shared arrays, while other threads still read them.`,
+        why: tr(
+          `Loading A${i + 1} and B${i + 1} needs nothing from computing C${i}. It waits only because it would overwrite A${i} and B${i}, in the same shared arrays, while other threads still read them.`,
+          `Việc nạp A${i + 1} và B${i + 1} không cần gì từ việc tính C${i}. Nó chờ chỉ vì nó sẽ ghi đè A${i} và B${i}, trong cùng các mảng chia sẻ, khi các luồng khác vẫn đang đọc chúng.`,
+        ),
       });
   }
   return out;
@@ -78,9 +86,9 @@ export const baselineBarriers = (n: number) => baselineStream(n).filter((x) => x
 export type Scheme = 'two-barriers' | 'double-buffered' | 'pipelined';
 export const SCHEMES: Scheme[] = ['two-barriers', 'double-buffered', 'pipelined'];
 export const SCHEME_LABEL: Record<Scheme, string> = {
-  'two-barriers': 'One buffer, two barriers (Fig. 15.12a)',
-  'double-buffered': 'Two buffers, not rotated (Fig. 15.12b)',
-  pipelined: 'Two buffers, pipelined (Fig. 15.12c)',
+  get 'two-barriers'() { return tr('One buffer, two barriers (Fig. 15.12a)', 'Một buffer, hai rào chắn (Fig. 15.12a)'); },
+  get 'double-buffered'() { return tr('Two buffers, not rotated (Fig. 15.12b)', 'Hai buffer, không xoay vòng (Fig. 15.12b)'); },
+  get pipelined() { return tr('Two buffers, pipelined (Fig. 15.12c)', 'Hai buffer, chạy đường ống (Fig. 15.12c)'); },
 };
 
 export type Lane = 'mem' | 'comp';
@@ -143,7 +151,7 @@ export function timeline(scheme: Scheme, n: number, L: number, C: number, s = 0)
     boxes.push({ lane: 'mem', tile: 0, start: 0, end: L, buf: 0 });
     t = L;
     bar(true, false);
-    spans.push({ label: 'prologue', start: 0, end: t });
+    spans.push({ label: 'prologue', start: 0, end: t }); // i18n-ignore: span label parsed by PipelineScene (startsWith/split), which shows its own text
     for (let i = 0; i < n - 1; i++) {
       const t0 = t;
       boxes.push({ lane: 'comp', tile: i, start: t, end: t + C, buf: buf(i) });
@@ -151,12 +159,12 @@ export function timeline(scheme: Scheme, n: number, L: number, C: number, s = 0)
       t += Math.max(L, C);
       // A later load (pair i + 2, in iteration i + 1) writes the buffer computed on here.
       bar(true, i + 2 < n);
-      spans.push({ label: `iteration ${i}`, start: t0, end: t });
+      spans.push({ label: `iteration ${i}`, start: t0, end: t }); // i18n-ignore: span label parsed by PipelineScene (startsWith/split), which shows its own text
     }
     const t0 = t;
     boxes.push({ lane: 'comp', tile: n - 1, start: t, end: t + C, buf: buf(n - 1) });
     t += C;
-    spans.push({ label: n > 1 ? 'after the loop' : 'compute', start: t0, end: t });
+    spans.push({ label: n > 1 ? 'after the loop' : 'compute', start: t0, end: t }); // i18n-ignore: span label parsed by PipelineScene (startsWith/split), which shows its own text
   } else {
     for (let i = 0; i < n; i++) {
       const t0 = t;
@@ -168,7 +176,7 @@ export function timeline(scheme: Scheme, n: number, L: number, C: number, s = 0)
       boxes.push({ lane: 'comp', tile: i, start: t, end: t + C, buf: buf(i) });
       t += C;
       if (!dbl && i < n - 1) bar(false, true);
-      spans.push({ label: `iteration ${i}`, start: t0, end: t });
+      spans.push({ label: `iteration ${i}`, start: t0, end: t }); // i18n-ignore: span label parsed by PipelineScene (startsWith/split), which shows its own text
     }
   }
   const memBusy = n * L;
@@ -197,28 +205,28 @@ export type Variant = 'correct' | 'no-loop-barrier' | 'barrier-before-load' | 'n
  * page only, and is kept out of this list on purpose. */
 export const VARIANTS: Variant[] = ['correct', 'no-loop-barrier', 'barrier-before-load', 'no-epilogue', 'wrong-tile', 'single-buffer'];
 export const VARIANT_LABEL: Record<Variant, string> = {
-  correct: 'as in Fig. 15.14',
-  'no-loop-barrier': 'barrier in the loop removed',
-  'barrier-before-load': 'barrier moved before loadTile',
-  'no-epilogue': 'mm after the loop missing',
-  'wrong-tile': 'loads tile instead of tile + 1',
-  'single-buffer': 'one buffer, one barrier',
-  'load-first': 'loads first, then mm',
+  get correct() { return tr('as in Fig. 15.14', 'như Fig. 15.14'); },
+  get 'no-loop-barrier'() { return tr('barrier in the loop removed', 'bỏ rào chắn trong vòng lặp'); },
+  get 'barrier-before-load'() { return tr('barrier moved before loadTile', 'rào chắn dời lên trước loadTile'); },
+  get 'no-epilogue'() { return tr('mm after the loop missing', 'thiếu mm sau vòng lặp'); },
+  get 'wrong-tile'() { return tr('loads tile instead of tile + 1', 'nạp tile thay vì tile + 1'); },
+  get 'single-buffer'() { return tr('one buffer, one barrier', 'một buffer, một rào chắn'); },
+  get 'load-first'() { return tr('loads first, then mm', 'nạp trước, rồi mm'); },
 };
 
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled';
 export const SCHEDULES: Schedule[] = ['lockstep', 'in-order', 'reversed', 'shuffled'];
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
+  get lockstep() { return tr('all threads in lockstep', 'mọi luồng chạy đồng bộ từng bước'); },
+  get 'in-order'() { return tr('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước'); },
+  get reversed() { return tr('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước'); },
+  get shuffled() { return tr('random interleaving', 'đan xen ngẫu nhiên'); },
 };
 
 export type Hazard = 'read-before-write' | 'overwritten-before-read';
 export const HAZARD_LABEL: Record<Hazard, string> = {
-  'read-before-write': 'read before write',
-  'overwritten-before-read': 'overwritten before read',
+  get 'read-before-write'() { return tr('read before write', 'đọc trước khi ghi'); },
+  get 'overwritten-before-read'() { return tr('overwritten before read', 'bị ghi đè trước khi đọc'); },
 };
 
 export type Phase = 'prologue' | 'loop' | 'epilogue';
@@ -238,14 +246,14 @@ export interface Op {
 // The loop as the stepper shows it. For 'correct' these are, line for line, the loop of
 // labs/ch15/snippets/s158_pipeline_toy.cu (gemmpipe.test.ts checks).
 const SRC = {
-  prologueLoad: 'loadTile(buf[0], tiles, 0);',
+  prologueLoad: 'loadTile(buf[0], tiles, 0);', // i18n-ignore: CUDA source shown as code
   prologueSync: '__syncthreads();',
-  head: 'for (unsigned int tile = 0; tile < numTiles - 1; ++tile) {',
-  mm: '    mm(buf[tile & 1], sum);',
-  load: '    loadTile(buf[(tile + 1) & 1], tiles, tile + 1);',
+  head: 'for (unsigned int tile = 0; tile < numTiles - 1; ++tile) {', // i18n-ignore: CUDA source shown as code
+  mm: '    mm(buf[tile & 1], sum);', // i18n-ignore: CUDA source shown as code
+  load: '    loadTile(buf[(tile + 1) & 1], tiles, tile + 1);', // i18n-ignore: CUDA source shown as code
   sync: '    __syncthreads();',
   tail: '}',
-  epilogue: 'mm(buf[(numTiles - 1) & 1], sum);',
+  epilogue: 'mm(buf[(numTiles - 1) & 1], sum);', // i18n-ignore: CUDA source shown as code
 };
 
 type Row = 'prologueLoad' | 'prologueSync' | 'head' | 'mm' | 'load' | 'sync' | 'tail' | 'epilogue';
@@ -253,11 +261,11 @@ type Row = 'prologueLoad' | 'prologueSync' | 'head' | 'mm' | 'load' | 'sync' | '
 function rows(v: Variant): { row: Row; text: string }[] {
   const text = (r: Row): string => {
     if (v === 'single-buffer') {
-      if (r === 'mm') return '    mm(buf[0], sum);';
-      if (r === 'load') return '    loadTile(buf[0], tiles, tile + 1);';
-      if (r === 'epilogue') return 'mm(buf[0], sum);';
+      if (r === 'mm') return '    mm(buf[0], sum);'; // i18n-ignore: CUDA source shown as code
+      if (r === 'load') return '    loadTile(buf[0], tiles, tile + 1);'; // i18n-ignore: CUDA source shown as code
+      if (r === 'epilogue') return 'mm(buf[0], sum);'; // i18n-ignore: CUDA source shown as code
     }
-    if (v === 'wrong-tile' && r === 'load') return '    loadTile(buf[(tile + 1) & 1], tiles, tile);';
+    if (v === 'wrong-tile' && r === 'load') return '    loadTile(buf[(tile + 1) & 1], tiles, tile);'; // i18n-ignore: CUDA source shown as code
     return SRC[r];
   };
   const body: Row[] =
@@ -366,7 +374,8 @@ export interface Trace {
 }
 
 /** Where an operation sits, in words: "the prologue", "iteration 2", "after the loop". */
-export const where = (op: Op) => (op.phase === 'prologue' ? 'the prologue' : op.phase === 'epilogue' ? 'after the loop' : `iteration ${op.iter}`);
+export const where = (op: Op) =>
+  op.phase === 'prologue' ? tr('the prologue', 'phần mở đầu') : op.phase === 'epilogue' ? tr('after the loop', 'sau vòng lặp') : tr(`iteration ${op.iter}`, `vòng lặp ${op.iter}`);
 
 function mulberry(seed: number) {
   let a = seed >>> 0;
@@ -420,11 +429,17 @@ export function run(cfg: Config, schedule: Schedule, seed = 1): Trace {
         const r: Read = { buf: op.buf!, slot: j, tile: sl.tile, meant, ok: sl.pos === want };
         if (!r.ok) {
           r.hazard = sl.pos < want ? 'read-before-write' : 'overwritten-before-read';
-          const found = sl.tile < 0 ? 'it was still empty' : `it still held tile ${sl.tile}`;
+          const found = sl.tile < 0 ? tr('it was still empty', 'ô vẫn còn trống') : tr(`it still held tile ${sl.tile}`, `ô vẫn còn giữ tile ${sl.tile}`);
           const msg =
             r.hazard === 'read-before-write'
-              ? `thread ${t} added up buffer ${op.buf} in ${where(op)} before thread ${j} had loaded tile ${meant} into slot ${j}: ${found}`
-              : `thread ${t} needed tile ${meant} in slot ${j} of buffer ${op.buf} in ${where(op)}, but thread ${j} had already loaded tile ${sl.tile} over it`;
+              ? tr(
+                  `thread ${t} added up buffer ${op.buf} in ${where(op)} before thread ${j} had loaded tile ${meant} into slot ${j}: ${found}`,
+                  `luồng ${t} cộng buffer ${op.buf} trong ${where(op)} trước khi luồng ${j} nạp tile ${meant} vào ô ${j}: ${found}`,
+                )
+              : tr(
+                  `thread ${t} needed tile ${meant} in slot ${j} of buffer ${op.buf} in ${where(op)}, but thread ${j} had already loaded tile ${sl.tile} over it`,
+                  `luồng ${t} cần tile ${meant} ở ô ${j} của buffer ${op.buf} trong ${where(op)}, nhưng luồng ${j} đã nạp tile ${sl.tile} đè lên nó`,
+                );
           const v: Violation = { kind: r.hazard, step: s.index, thread: t, message: msg };
           (s.violations ??= []).push(v);
           violations.push(v);

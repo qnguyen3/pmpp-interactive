@@ -1,0 +1,1 @@
+Bước thứ ba dùng bước nhảy 4. Mỗi cửa sổ lớn lên thành 8 đầu vào, mà ở đây nghĩa là mọi thứ tính đến vị trí đó. Sau 3 bước, mọi vị trí đều xong. Đó là log cơ số 2 của 8. Với 1024 giá trị, cùng phép scan đó sẽ mất 10 bước.

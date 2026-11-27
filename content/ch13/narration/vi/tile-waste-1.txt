@@ -1,0 +1,1 @@
+Một khối sẽ ghi 8 đầu ra tiếp theo của phép trộn. Trước khi tìm kiếm, nó không thể biết bao nhiêu đầu ra sẽ đến từ A và bao nhiêu từ B. Cả 8 có thể đến từ bất kỳ mảng nào. Vậy kernel phân ô của sách nạp 8 phần tử của mỗi mảng vào bộ nhớ chia sẻ, với các luồng liên tiếp chép các phần tử liên tiếp.

@@ -1,0 +1,1 @@
+Giờ là cùng cặp láng giềng đó trên một GPU có L2 được chia theo từng die. Chương trình không chọn nơi một khối chạy. Trong lần chạy này, A và B rơi vào hai die khác nhau, nên các dòng của A nằm trong bộ nhớ đệm của die kia. Các lần đọc của B tới chúng bị trượt và đi xuống DRAM, dù A mới nạp chúng ngay trước đó.

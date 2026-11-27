@@ -28,6 +28,7 @@
 // What it leaves out: time, warps, caches, and any interleaving finer than one source statement.
 //
 // Erasable TypeScript only.
+import { tr } from '../lib/locale.ts';
 import { emuOrders, SCHEDULES, SCHEDULE_LABEL, type Schedule } from './histpriv';
 
 export { SCHEDULES, SCHEDULE_LABEL, type Schedule };
@@ -47,9 +48,15 @@ export const MAX_CAPACITY = 8;
 export type Preset = 'fanout' | 'shared' | 'hub';
 export const PRESETS: Preset[] = ['fanout', 'shared', 'hub'];
 export const PRESET_LABEL: Record<Preset, string> = {
-  fanout: 'fan-out: every vertex finds 2 new ones',
-  shared: 'shared: neighbouring vertices share a new one',
-  hub: `hub: one vertex finds ${HUB_DEGREE}, the others 1`,
+  get fanout() {
+    return tr('fan-out: every vertex finds 2 new ones', 'fan-out: mỗi đỉnh tìm thấy 2 đỉnh mới');
+  },
+  get shared() {
+    return tr('shared: neighbouring vertices share a new one', 'shared: các đỉnh liền kề dùng chung một đỉnh mới');
+  },
+  get hub() {
+    return tr(`hub: one vertex finds ${HUB_DEGREE}, the others 1`, `hub: một đỉnh tìm thấy ${HUB_DEGREE}, các đỉnh khác 1`);
+  },
 };
 export interface Graph {
   preset: Preset;
@@ -90,9 +97,15 @@ export function makeGraph(preset: Preset, blocks: number, threads: number): Grap
 // ---------------------------------------------------------------- shapes and kernels
 export type Reset = 'atomic' | 'clamp' | 'plain';
 export const RESET_LABEL: Record<Reset, string> = {
-  atomic: 'atomic store (corrected)',
-  clamp: 'clamp after barrier 2 (corrected)',
-  plain: "plain store (the book's line 29)",
+  get atomic() {
+    return tr('atomic store (corrected)', 'store nguyên tử (đã sửa)');
+  },
+  get clamp() {
+    return tr('clamp after barrier 2 (corrected)', 'kẹp sau rào chắn 2 (đã sửa)');
+  },
+  get plain() {
+    return tr('plain store (the book\'s line 29)', 'store thường (dòng 29 của sách)');
+  },
 };
 export interface Shape {
   reset: Reset;
@@ -108,14 +121,62 @@ export type Variant =
   | 'correct' | 'clamp' | 'plain-store' | 'no-barrier-1' | 'no-barrier-2' | 'no-barrier-3' | 'if-commit' | 'no-overflow-check';
 export const VARIANTS: Variant[] = ['correct', 'clamp', 'plain-store', 'no-barrier-1', 'no-barrier-2', 'no-barrier-3', 'if-commit', 'no-overflow-check'];
 export const VARIANT: Record<Variant, { kernel: string; label: string; shape: Shape }> = {
-  correct: { kernel: 'bfsPrivatised', label: 'corrected: atomic store', shape: CORRECT },
-  clamp: { kernel: 'bfsPrivatisedClamp', label: 'corrected: clamp after barrier 2', shape: { ...CORRECT, reset: 'clamp' } },
-  'plain-store': { kernel: 'bfsPlainStore', label: "the book's plain store", shape: { ...CORRECT, reset: 'plain' } },
-  'no-barrier-1': { kernel: 'bfsNoBarrier1', label: 'barrier 1 removed', shape: { ...CORRECT, barrier1: false } },
-  'no-barrier-2': { kernel: 'bfsNoBarrier2', label: 'barrier 2 removed', shape: { ...CORRECT, barrier2: false } },
-  'no-barrier-3': { kernel: 'bfsNoBarrier3', label: 'barrier 3 removed', shape: { ...CORRECT, barrier3: false } },
-  'if-commit': { kernel: 'bfsIfCommit', label: 'commit with an if', shape: { ...CORRECT, commit: 'if' } },
-  'no-overflow-check': { kernel: 'bfsNoOverflowCheck', label: 'no overflow check', shape: { ...CORRECT, overflowCheck: false } },
+  correct: {
+    kernel: 'bfsPrivatised',
+    get label() {
+      return tr('corrected: atomic store', 'đã sửa: store nguyên tử');
+    },
+    shape: CORRECT,
+  },
+  clamp: {
+    kernel: 'bfsPrivatisedClamp',
+    get label() {
+      return tr('corrected: clamp after barrier 2', 'đã sửa: kẹp sau rào chắn 2');
+    },
+    shape: { ...CORRECT, reset: 'clamp' },
+  },
+  'plain-store': {
+    kernel: 'bfsPlainStore',
+    get label() {
+      return tr('the book\'s plain store', 'store thường của sách');
+    },
+    shape: { ...CORRECT, reset: 'plain' },
+  },
+  'no-barrier-1': {
+    kernel: 'bfsNoBarrier1',
+    get label() {
+      return tr('barrier 1 removed', 'bỏ rào chắn 1');
+    },
+    shape: { ...CORRECT, barrier1: false },
+  },
+  'no-barrier-2': {
+    kernel: 'bfsNoBarrier2',
+    get label() {
+      return tr('barrier 2 removed', 'bỏ rào chắn 2');
+    },
+    shape: { ...CORRECT, barrier2: false },
+  },
+  'no-barrier-3': {
+    kernel: 'bfsNoBarrier3',
+    get label() {
+      return tr('barrier 3 removed', 'bỏ rào chắn 3');
+    },
+    shape: { ...CORRECT, barrier3: false },
+  },
+  'if-commit': {
+    kernel: 'bfsIfCommit',
+    get label() {
+      return tr('commit with an if', 'commit bằng một lệnh if');
+    },
+    shape: { ...CORRECT, commit: 'if' },
+  },
+  'no-overflow-check': {
+    kernel: 'bfsNoOverflowCheck',
+    get label() {
+      return tr('no overflow check', 'không kiểm tra tràn');
+    },
+    shape: { ...CORRECT, overflowCheck: false },
+  },
 };
 
 type LineKey =
@@ -123,35 +184,35 @@ type LineKey =
   | 'test' | 'store' | 'else' | 'reset' | 'oref' | 'oadd' | 'ostore' | 'c4' | 'c3' | 'c2' | 'c1'
   | 'b2' | 'd3' | 't0' | 'clamp' | 'pref' | 'reserve' | 'c5' | 'b3' | 'cfor' | 'cidx' | 'cwrite' | 'c6';
 const TEXT: Partial<Record<LineKey, string>> = {
-  d1: '__shared__ unsigned int currFrontier_s[PRIVATE_FRONTIER_CAPACITY];',
-  d2: '__shared__ unsigned int numCurrFrontier_s;',
-  zero: 'if (threadIdx.x == 0) numCurrFrontier_s = 0;',
-  b1: '__syncthreads();  // barrier 1',
-  idx: 'unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;',
-  guard: 'if (i < numPrevFrontier) {',
-  load: '    unsigned int vertex = prevFrontier[i];',
-  loop: '    for (unsigned int edge = csrGraph.srcPtrs[vertex];\n            edge < csrGraph.srcPtrs[vertex + 1]; ++edge) {',
-  nbr: '        unsigned int neighbor = csrGraph.dst[edge];',
-  visit: '        if (visitVertexAtomically(neighbor, level, currLevel)) {',
-  ref: '            cuda::atomic_ref<unsigned int, cuda::thread_scope_block>\n                numCurrFrontier_s_ref(numCurrFrontier_s);',
-  count: '            unsigned int currFrontierIdx_s = numCurrFrontier_s_ref\n                .fetch_add(1, cuda::memory_order_relaxed);',
-  test: '            if (currFrontierIdx_s < PRIVATE_FRONTIER_CAPACITY) {',
-  else: '            } else {',
-  oref: '                cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\n                    numCurrFrontier_ref(*numCurrFrontier);',
-  oadd: '                unsigned int currFrontierIdx = numCurrFrontier_ref\n                    .fetch_add(1, cuda::memory_order_relaxed);',
-  ostore: '                currFrontier[currFrontierIdx] = neighbor;',
-  c4: '            }',
-  c3: '        }',
-  c2: '    }',
-  c1: '}',
-  b2: '__syncthreads();  // barrier 2',
-  d3: '__shared__ unsigned int currFrontierStartIdx;',
-  t0: 'if (threadIdx.x == 0) {',
-  clamp: '    if (numCurrFrontier_s > PRIVATE_FRONTIER_CAPACITY)\n        numCurrFrontier_s = PRIVATE_FRONTIER_CAPACITY;',
-  pref: '    cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\n        numCurrFrontier_ref(*numCurrFrontier);',
-  reserve: '    currFrontierStartIdx = numCurrFrontier_ref\n        .fetch_add(numCurrFrontier_s, cuda::memory_order_relaxed);',
-  c5: '}',
-  b3: '__syncthreads();  // barrier 3',
+  d1: '__shared__ unsigned int currFrontier_s[PRIVATE_FRONTIER_CAPACITY];', // i18n-ignore: kernel source
+  d2: '__shared__ unsigned int numCurrFrontier_s;', // i18n-ignore: kernel source
+  zero: 'if (threadIdx.x == 0) numCurrFrontier_s = 0;', // i18n-ignore: kernel source
+  b1: '__syncthreads();  // barrier 1', // i18n-ignore: kernel source
+  idx: 'unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;', // i18n-ignore: kernel source
+  guard: 'if (i < numPrevFrontier) {', // i18n-ignore: kernel source
+  load: '    unsigned int vertex = prevFrontier[i];', // i18n-ignore: kernel source
+  loop: '    for (unsigned int edge = csrGraph.srcPtrs[vertex];\n            edge < csrGraph.srcPtrs[vertex + 1]; ++edge) {', // i18n-ignore: kernel source
+  nbr: '        unsigned int neighbor = csrGraph.dst[edge];', // i18n-ignore: kernel source
+  visit: '        if (visitVertexAtomically(neighbor, level, currLevel)) {', // i18n-ignore: kernel source
+  ref: '            cuda::atomic_ref<unsigned int, cuda::thread_scope_block>\n                numCurrFrontier_s_ref(numCurrFrontier_s);', // i18n-ignore: kernel source
+  count: '            unsigned int currFrontierIdx_s = numCurrFrontier_s_ref\n                .fetch_add(1, cuda::memory_order_relaxed);', // i18n-ignore: kernel source
+  test: '            if (currFrontierIdx_s < PRIVATE_FRONTIER_CAPACITY) {', // i18n-ignore: kernel source
+  else: '            } else {', // i18n-ignore: kernel source
+  oref: '                cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\n                    numCurrFrontier_ref(*numCurrFrontier);', // i18n-ignore: kernel source
+  oadd: '                unsigned int currFrontierIdx = numCurrFrontier_ref\n                    .fetch_add(1, cuda::memory_order_relaxed);', // i18n-ignore: kernel source
+  ostore: '                currFrontier[currFrontierIdx] = neighbor;', // i18n-ignore: kernel source
+  c4: '            }', // i18n-ignore: kernel source
+  c3: '        }', // i18n-ignore: kernel source
+  c2: '    }', // i18n-ignore: kernel source
+  c1: '}', // i18n-ignore: kernel source
+  b2: '__syncthreads();  // barrier 2', // i18n-ignore: kernel source
+  d3: '__shared__ unsigned int currFrontierStartIdx;', // i18n-ignore: kernel source
+  t0: 'if (threadIdx.x == 0) {', // i18n-ignore: kernel source
+  clamp: '    if (numCurrFrontier_s > PRIVATE_FRONTIER_CAPACITY)\n        numCurrFrontier_s = PRIVATE_FRONTIER_CAPACITY;', // i18n-ignore: kernel source
+  pref: '    cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\n        numCurrFrontier_ref(*numCurrFrontier);', // i18n-ignore: kernel source
+  reserve: '    currFrontierStartIdx = numCurrFrontier_ref\n        .fetch_add(numCurrFrontier_s, cuda::memory_order_relaxed);', // i18n-ignore: kernel source
+  c5: '}', // i18n-ignore: kernel source
+  b3: '__syncthreads();  // barrier 3', // i18n-ignore: kernel source
 };
 const RESET_TEXT: Record<'atomic' | 'plain', string> = {
   atomic: '                numCurrFrontier_s_ref.store(PRIVATE_FRONTIER_CAPACITY,\n                    cuda::memory_order_relaxed);',
@@ -220,9 +281,15 @@ export function variantOf(s: Shape): Variant | null {
 // ---------------------------------------------------------------- block orders
 export type BlockOrder = 'in-order' | 'reversed' | 'random';
 export const BLOCK_ORDER_LABEL: Record<BlockOrder, string> = {
-  'in-order': '0, 1, 2, ... (as the emulator)',
-  reversed: 'last block first',
-  random: 'random',
+  get 'in-order'() {
+    return tr('0, 1, 2, ... (as the emulator)', '0, 1, 2, ... (như trình giả lập)');
+  },
+  get reversed() {
+    return tr('last block first', 'khối cuối chạy trước');
+  },
+  get random() {
+    return tr('random', 'ngẫu nhiên');
+  },
 };
 export function blockOrderOf(kind: BlockOrder, blocks: number, seed = 1): number[] {
   const o = Array.from({ length: blocks }, (_, b) => b);
@@ -243,20 +310,48 @@ export type Site =
   | 'reserve-read' | 'reserve-add' | 'reserve-write'
   | 'commit-test' | 'commit-read-start' | 'commit-read-private' | 'commit-write';
 export const SITE_TEXT: Record<Site, string> = {
-  zero: 'the zeroing of numCurrFrontier_s',
-  count: 'the fetch_add on numCurrFrontier_s',
-  store: 'the store into currFrontier_s',
-  reset: 'the store that puts numCurrFrontier_s back to capacity',
-  'overflow-add': 'the overflow fetch_add on the public counter',
-  'overflow-store': 'the overflow store into currFrontier',
-  clamp: 'the clamp of numCurrFrontier_s',
-  'reserve-read': "thread 0's read of numCurrFrontier_s for the reservation",
-  'reserve-add': 'the reservation on the public counter',
-  'reserve-write': "thread 0's write of currFrontierStartIdx",
-  'commit-test': 'the read of numCurrFrontier_s in the commit',
-  'commit-read-start': 'the read of currFrontierStartIdx in the commit',
-  'commit-read-private': 'the read of currFrontier_s in the commit',
-  'commit-write': 'the commit store to currFrontier',
+  get zero() {
+    return tr('the zeroing of numCurrFrontier_s', 'lệnh đặt numCurrFrontier_s về 0');
+  },
+  get count() {
+    return tr('the fetch_add on numCurrFrontier_s', 'fetch_add trên numCurrFrontier_s');
+  },
+  get store() {
+    return tr('the store into currFrontier_s', 'lệnh store vào currFrontier_s');
+  },
+  get reset() {
+    return tr('the store that puts numCurrFrontier_s back to capacity', 'lệnh store đặt numCurrFrontier_s về lại dung lượng');
+  },
+  get 'overflow-add'() {
+    return tr('the overflow fetch_add on the public counter', 'fetch_add tràn trên bộ đếm chung');
+  },
+  get 'overflow-store'() {
+    return tr('the overflow store into currFrontier', 'lệnh store tràn vào currFrontier');
+  },
+  get clamp() {
+    return tr('the clamp of numCurrFrontier_s', 'lệnh kẹp numCurrFrontier_s');
+  },
+  get 'reserve-read'() {
+    return tr('thread 0\'s read of numCurrFrontier_s for the reservation', 'lần đọc numCurrFrontier_s của luồng 0 để đặt chỗ');
+  },
+  get 'reserve-add'() {
+    return tr('the reservation on the public counter', 'lần đặt chỗ trên bộ đếm chung');
+  },
+  get 'reserve-write'() {
+    return tr('thread 0\'s write of currFrontierStartIdx', 'lần ghi currFrontierStartIdx của luồng 0');
+  },
+  get 'commit-test'() {
+    return tr('the read of numCurrFrontier_s in the commit', 'lần đọc numCurrFrontier_s trong bước commit');
+  },
+  get 'commit-read-start'() {
+    return tr('the read of currFrontierStartIdx in the commit', 'lần đọc currFrontierStartIdx trong bước commit');
+  },
+  get 'commit-read-private'() {
+    return tr('the read of currFrontier_s in the commit', 'lần đọc currFrontier_s trong bước commit');
+  },
+  get 'commit-write'() {
+    return tr('the commit store to currFrontier', 'lệnh store của bước commit vào currFrontier');
+  },
 };
 const SITE_ORDER = Object.keys(SITE_TEXT) as Site[];
 
@@ -405,7 +500,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
     counter: leftover,
     start: leftover,
     written: { private_: new Array<boolean>(CAP).fill(false), counter: false, start: false },
-    status: new Array<string>(T).fill('not started'),
+    status: new Array<string>(T).fill(tr('not started', 'chưa bắt đầu')),
   });
   const st: Snapshot = {
     blocks: Array.from({ length: B }, fresh),
@@ -435,10 +530,10 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
     let reservation: Reservation | null = null;
     const push = (t: number, s: Omit<Step, 'after' | 'block' | 'thread'>) => steps.push({ ...s, block: b, thread: t, after: cloneSnap(st) });
     const acc = (t: number, a: Omit<Access, 'block' | 'thread' | 'epoch'>) => accesses.push({ ...a, block: b, thread: t, epoch: epoch[t] });
-    const who = (t: number) => `Block ${b}, thread ${t}`;
+    const who = (t: number) => tr(`Block ${b}, thread ${t}`, `Khối ${b}, luồng ${t}`);
     const crash = (t: number, op: Op, lines: number[], text: string, msg: string) => {
       crashed = msg;
-      push(t, { op, lines, text, violation: { kind: 'crash', message: `${msg}: the emulator stops here with an AddressSanitizer report` } });
+      push(t, { op, lines, text, violation: { kind: 'crash', message: tr(`${msg}: the emulator stops here with an AddressSanitizer report`, `${msg}: trình giả lập dừng ở đây với một báo cáo AddressSanitizer`) } });
     };
 
     function* thread(t: number): Generator<Yield, void, void> {
@@ -447,12 +542,12 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         sh.written.counter = true;
         acc(t, { space: 'shared', addr: 'numCurrFrontier_s', write: true, atomic: false, site: 'zero' });
         push(t, {
-          op: 'zero', lines: L('zero'), text: `${who(t)} sets the private counter numCurrFrontier_s to 0.`,
+          op: 'zero', lines: L('zero'), text: tr(`${who(t)} sets the private counter numCurrFrontier_s to 0.`, `${who(t)} đặt bộ đếm riêng numCurrFrontier_s về 0.`),
           violation: privateStores
-            ? { kind: 'late-zero', message: `${plural(privateStores, 'vertex has', 'vertices have')} already been stored in the private queue from a count that was never zeroed; zeroing now hands those slots out again` }
+            ? { kind: 'late-zero', message: tr(`${plural(privateStores, 'vertex has', 'vertices have')} already been stored in the private queue from a count that was never zeroed; zeroing now hands those slots out again`, `${privateStores} đỉnh đã được lưu vào hàng đợi riêng từ một bộ đếm chưa từng được đặt về 0; đặt về 0 lúc này sẽ cấp lại những ô đó lần nữa`) }
             : undefined,
           note: !privateStores && increments
-            ? `Late: ${plural(increments, 'vertex was', 'vertices were')} already counted from the leftover value. Above capacity, they took the overflow path, so nothing is lost this time.`
+            ? tr(`Late: ${plural(increments, 'vertex was', 'vertices were')} already counted from the leftover value. Above capacity, they took the overflow path, so nothing is lost this time.`, `Muộn: ${increments} đỉnh đã được đếm từ giá trị còn sót lại. Vượt quá dung lượng, chúng đã đi theo nhánh tràn, nên lần này không mất gì.`)
             : undefined,
         });
         yield null;
@@ -464,7 +559,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
       const last = graph.srcPtrs[vertex + 1];
       push(t, {
         op: 'load', lines: L('load'),
-        text: `${who(t)}: i = ${b}·${T} + ${t} = ${i}, so its vertex is prevFrontier[${i}] = ${vertex}, with ${plural(last - first, 'out-edge')}.`,
+        text: tr(`${who(t)}: i = ${b}·${T} + ${t} = ${i}, so its vertex is prevFrontier[${i}] = ${vertex}, with ${plural(last - first, 'out-edge')}.`, `${who(t)}: i = ${b}·${T} + ${t} = ${i}, nên đỉnh của nó là prevFrontier[${i}] = ${vertex}, với ${last - first} cạnh đi ra.`),
       });
       yield null;
       for (let e = first; e < last; e++) {
@@ -478,8 +573,8 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         push(t, {
           op: 'visit', lines: L('visit'),
           text: won
-            ? `${who(t)} looks at neighbour ${nb}: the compare-and-swap finds it unvisited and labels it level ${CURR_LEVEL}. It is new, so it must be appended.`
-            : `${who(t)} looks at neighbour ${nb}: the compare-and-swap fails, another thread labelled it first. Nothing to append.`,
+            ? tr(`${who(t)} looks at neighbour ${nb}: the compare-and-swap finds it unvisited and labels it level ${CURR_LEVEL}. It is new, so it must be appended.`, `${who(t)} xét đỉnh kề ${nb}: compare-and-swap thấy nó chưa được thăm và gán cho nó mức ${CURR_LEVEL}. Đỉnh này mới, nên phải được thêm vào.`)
+            : tr(`${who(t)} looks at neighbour ${nb}: the compare-and-swap fails, another thread labelled it first. Nothing to append.`, `${who(t)} xét đỉnh kề ${nb}: compare-and-swap thất bại, một luồng khác đã gán mức cho nó trước. Không có gì để thêm.`),
         });
         yield null;
         if (!won) continue;
@@ -491,10 +586,16 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         const over = idx >= CAP;
         push(t, {
           op: 'count', lines: L('count'),
-          text: `${who(t)} does fetch_add(1) on numCurrFrontier_s: it gets ${show(idx)}, and the counter becomes ${show(sh.counter)}.` +
-            (shape.overflowCheck ? (over ? ` That is not below the capacity of ${CAP}: overflow.` : ` Below the capacity of ${CAP}: a private slot.`) : ''),
+          text: tr(
+            `${who(t)} does fetch_add(1) on numCurrFrontier_s: it gets ${show(idx)}, and the counter becomes ${show(sh.counter)}.`,
+            `${who(t)} thực hiện fetch_add(1) trên numCurrFrontier_s: nó nhận ${show(idx)}, và bộ đếm trở thành ${show(sh.counter)}.`,
+          ) +
+            (shape.overflowCheck ? (over ? tr(` That is not below the capacity of ${CAP}: overflow.`, ` Giá trị đó không nhỏ hơn dung lượng ${CAP}: tràn.`) : tr(` Below the capacity of ${CAP}: a private slot.`, ` Nhỏ hơn dung lượng ${CAP}: một ô riêng.`)) : ''),
           note: fromLeftover
-            ? `The counter has not been zeroed yet: it still holds the leftover ${show(idx)}.${over && shape.overflowCheck ? ' Far above capacity, so this vertex takes the overflow path and is not lost.' : ''}`
+            ? tr(
+                `The counter has not been zeroed yet: it still holds the leftover ${show(idx)}.${over && shape.overflowCheck ? ' Far above capacity, so this vertex takes the overflow path and is not lost.' : ''}`,
+                `Bộ đếm chưa được đặt về 0: nó vẫn giữ giá trị còn sót lại ${show(idx)}.${over && shape.overflowCheck ? ' Vượt xa dung lượng, nên đỉnh này đi theo nhánh tràn và không bị mất.' : ''}`,
+              )
             : undefined,
         });
         yield null;
@@ -504,9 +605,15 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
             acc(t, { space: 'shared', addr: 'numCurrFrontier_s', write: true, atomic: shape.reset === 'atomic', site: 'reset' });
             push(t, {
               op: 'reset', lines: L('reset'),
-              text: `${who(t)} puts numCurrFrontier_s back to ${CAP}${shape.reset === 'atomic' ? ' with an atomic store through the same atomic_ref' : ' with a plain store'}.`,
+              text: tr(
+                `${who(t)} puts numCurrFrontier_s back to ${CAP}${shape.reset === 'atomic' ? ' with an atomic store through the same atomic_ref' : ' with a plain store'}.`,
+                `${who(t)} đặt numCurrFrontier_s về lại ${CAP}${shape.reset === 'atomic' ? ' bằng một store nguyên tử qua cùng atomic_ref đó' : ' bằng một store thường'}.`,
+              ),
               note: shape.reset === 'plain'
-                ? "A plain store to a counter other threads of the block may be adding to at this moment: a data race. Taking turns, as here, it gives the right number. The race check below reports it."
+                ? tr(
+                    'A plain store to a counter other threads of the block may be adding to at this moment: a data race. Taking turns, as here, it gives the right number. The race check below reports it.',
+                    'Một store thường vào bộ đếm mà các luồng khác của khối có thể đang cộng vào ngay lúc này: một race condition (tranh chấp dữ liệu). Khi các luồng lần lượt chạy, như ở đây, nó cho đúng con số. Phép kiểm tra race bên dưới báo cáo nó.',
+                  )
                 : undefined,
             });
             yield null;
@@ -517,7 +624,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
           st.overflows++;
           accesses.push({ block: b, thread: t, epoch: epoch[t], space: 'global', addr: 'numCurrFrontier', write: true, atomic: true, site: 'overflow-add' });
           if (j >= n) {
-            crash(t, 'append', [...L('oadd'), ...L('ostore')], `${who(t)} appends ${nb} straight to the public frontier at slot ${j}.`, `currFrontier[${j}] is past the end of the ${n}-slot public frontier`);
+            crash(t, 'append', [...L('oadd'), ...L('ostore')], tr(`${who(t)} appends ${nb} straight to the public frontier at slot ${j}.`, `${who(t)} thêm ${nb} thẳng vào frontier chung tại ô ${j}.`), tr(`currFrontier[${j}] is past the end of the ${n}-slot public frontier`, `currFrontier[${j}] nằm quá cuối frontier chung có ${n} ô`));
             return;
           }
           const prevHow = st.how[j];
@@ -526,13 +633,13 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
           accesses.push({ block: b, thread: t, epoch: epoch[t], space: 'global', addr: `currFrontier[${j}]`, write: true, atomic: false, site: 'overflow-store' });
           push(t, {
             op: 'append', lines: [...L('oadd'), ...L('ostore')],
-            text: `${who(t)} appends ${nb} straight to the public frontier: fetch_add(1) on the public counter gives slot ${j}, a global atomic.`,
-            violation: prevHow ? { kind: 'public-overwrite', message: `currFrontier[${j}] already held ${st.pub[j]} from block ${prevHow.block}` } : undefined,
+            text: tr(`${who(t)} appends ${nb} straight to the public frontier: fetch_add(1) on the public counter gives slot ${j}, a global atomic.`, `${who(t)} thêm ${nb} thẳng vào frontier chung: fetch_add(1) trên bộ đếm chung cho ô ${j}, một atomic trên bộ nhớ toàn cục.`),
+            violation: prevHow ? { kind: 'public-overwrite', message: tr(`currFrontier[${j}] already held ${st.pub[j]} from block ${prevHow.block}`, `currFrontier[${j}] đã chứa ${st.pub[j]} từ khối ${prevHow.block}`) } : undefined,
           });
           yield null;
         } else {
           if (idx >= CAP) {
-            crash(t, 'store', L('store'), `${who(t)} stores ${nb} into currFrontier_s[${show(idx)}].`, `currFrontier_s[${show(idx)}] is outside the ${CAP}-entry private queue`);
+            crash(t, 'store', L('store'), tr(`${who(t)} stores ${nb} into currFrontier_s[${show(idx)}].`, `${who(t)} lưu ${nb} vào currFrontier_s[${show(idx)}].`), tr(`currFrontier_s[${show(idx)}] is outside the ${CAP}-entry private queue`, `currFrontier_s[${show(idx)}] nằm ngoài hàng đợi riêng có ${CAP} phần tử`));
             return;
           }
           const had = sh.written.private_[idx] ? sh.private_[idx] : null;
@@ -541,9 +648,9 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
           privateStores++;
           acc(t, { space: 'shared', addr: `currFrontier_s[${idx}]`, write: true, atomic: false, site: 'store' });
           push(t, {
-            op: 'store', lines: L('store'), text: `${who(t)} stores ${nb} into currFrontier_s[${idx}].`,
+            op: 'store', lines: L('store'), text: tr(`${who(t)} stores ${nb} into currFrontier_s[${idx}].`, `${who(t)} lưu ${nb} vào currFrontier_s[${idx}].`),
             violation: had !== null
-              ? { kind: 'private-overwrite', message: `currFrontier_s[${idx}] already held ${had}, which is now lost` }
+              ? { kind: 'private-overwrite', message: tr(`currFrontier_s[${idx}] already held ${had}, which is now lost`, `currFrontier_s[${idx}] đã chứa ${had}, giá trị này giờ bị mất`) }
               : undefined,
           });
           yield null;
@@ -561,8 +668,8 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
           push(t, {
             op: 'reserve', lines: L('clamp'),
             text: before > CAP
-              ? `${who(t)} clamps numCurrFrontier_s from ${show(before)} to the capacity, ${CAP}: the first ${CAP} new vertices are in the private queue, the rest went to the public frontier.`
-              : `${who(t)} checks numCurrFrontier_s = ${show(before)} against the capacity, ${CAP}: nothing to clamp.`,
+              ? tr(`${who(t)} clamps numCurrFrontier_s from ${show(before)} to the capacity, ${CAP}: the first ${CAP} new vertices are in the private queue, the rest went to the public frontier.`, `${who(t)} kẹp numCurrFrontier_s từ ${show(before)} xuống dung lượng, ${CAP}: ${CAP} đỉnh mới đầu tiên nằm trong hàng đợi riêng, phần còn lại đã vào frontier chung.`)
+              : tr(`${who(t)} checks numCurrFrontier_s = ${show(before)} against the capacity, ${CAP}: nothing to clamp.`, `${who(t)} so numCurrFrontier_s = ${show(before)} với dung lượng, ${CAP}: không có gì để kẹp.`),
           });
           yield null;
         }
@@ -579,7 +686,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         reservations.push(reservation);
         push(t, {
           op: 'reserve', lines: L('reserve'),
-          text: `${who(t)} reserves the block's range with one fetch_add(${show(size)}) on the public counter: it goes from ${start} to ${show(st.count)}, so currFrontierStartIdx = ${start}. One global atomic for the whole block.`,
+          text: tr(`${who(t)} reserves the block's range with one fetch_add(${show(size)}) on the public counter: it goes from ${start} to ${show(st.count)}, so currFrontierStartIdx = ${start}. One global atomic for the whole block.`, `${who(t)} đặt chỗ cho dải của khối bằng một fetch_add(${show(size)}) trên bộ đếm chung: bộ đếm đi từ ${start} lên ${show(st.count)}, nên currFrontierStartIdx = ${start}. Một atomic toàn cục cho cả khối.`),
         });
         yield null;
       }
@@ -594,7 +701,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         const startGarbage = !sh.written.start;
         acc(t, { space: 'shared', addr: 'currFrontierStartIdx', write: false, atomic: false, site: 'commit-read-start' });
         if (k >= CAP) {
-          crash(t, 'commit', L('cwrite'), `${who(t)} copies currFrontier_s[${k}].`, `currFrontier_s[${k}] is outside the ${CAP}-entry private queue`);
+          crash(t, 'commit', L('cwrite'), tr(`${who(t)} copies currFrontier_s[${k}].`, `${who(t)} sao chép currFrontier_s[${k}].`), tr(`currFrontier_s[${k}] is outside the ${CAP}-entry private queue`, `currFrontier_s[${k}] nằm ngoài hàng đợi riêng có ${CAP} phần tử`));
           return false;
         }
         const v = sh.private_[k];
@@ -602,8 +709,11 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         acc(t, { space: 'shared', addr: `currFrontier_s[${k}]`, write: false, atomic: false, site: 'commit-read-private' });
         const j = (start + k) >>> 0;
         if (j >= n) {
-          crash(t, 'commit', L('cwrite'), `${who(t)} copies currFrontier_s[${k}] to currFrontier[${show(start)} + ${k}].`,
-            `${startGarbage ? 'currFrontierStartIdx has not been written yet, so ' : ''}currFrontier[${j}] is past the end of the ${n}-slot public frontier`);
+          crash(t, 'commit', L('cwrite'), tr(`${who(t)} copies currFrontier_s[${k}] to currFrontier[${show(start)} + ${k}].`, `${who(t)} sao chép currFrontier_s[${k}] sang currFrontier[${show(start)} + ${k}].`),
+            tr(
+              `${startGarbage ? 'currFrontierStartIdx has not been written yet, so ' : ''}currFrontier[${j}] is past the end of the ${n}-slot public frontier`,
+              `${startGarbage ? 'currFrontierStartIdx chưa được ghi, nên ' : ''}currFrontier[${j}] nằm quá cuối frontier chung có ${n} ô`,
+            ));
           return false;
         }
         const prev = st.how[j];
@@ -615,15 +725,15 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         (commitPasses[b][pass] ??= []).push(j);
         push(t, {
           op: 'commit', lines: L('cwrite'),
-          text: `${who(t)} copies currFrontier_s[${k}] (${show(v)}) to currFrontier[${start} + ${k}] = currFrontier[${j}].`,
+          text: tr(`${who(t)} copies currFrontier_s[${k}] (${show(v)}) to currFrontier[${start} + ${k}] = currFrontier[${j}].`, `${who(t)} sao chép currFrontier_s[${k}] (${show(v)}) sang currFrontier[${start} + ${k}] = currFrontier[${j}].`),
           violation: startGarbage
-            ? { kind: 'garbage-start', message: `currFrontierStartIdx has not been written yet: it holds the leftover ${show(start)}` }
+            ? { kind: 'garbage-start', message: tr(`currFrontierStartIdx has not been written yet: it holds the leftover ${show(start)}`, `currFrontierStartIdx chưa được ghi: nó giữ giá trị còn sót lại ${show(start)}`) }
             : garbage
-              ? { kind: 'garbage-copy', message: `currFrontier_s[${k}] was never written: the leftover ${show(v)} goes into the public frontier` }
+              ? { kind: 'garbage-copy', message: tr(`currFrontier_s[${k}] was never written: the leftover ${show(v)} goes into the public frontier`, `currFrontier_s[${k}] chưa từng được ghi: giá trị còn sót lại ${show(v)} đi vào frontier chung`) }
               : prev && prev.block !== b
-                ? { kind: 'public-overwrite', message: `currFrontier[${j}] already held a vertex from block ${prev.block}, which is now lost` }
+                ? { kind: 'public-overwrite', message: tr(`currFrontier[${j}] already held a vertex from block ${prev.block}, which is now lost`, `currFrontier[${j}] đã chứa một đỉnh từ khối ${prev.block}, đỉnh đó giờ bị mất`) }
                 : prev && prev.via === 'overflow'
-                  ? { kind: 'public-overwrite', message: `currFrontier[${j}] held an overflow vertex, which is now lost` }
+                  ? { kind: 'public-overwrite', message: tr(`currFrontier[${j}] held an overflow vertex, which is now lost`, `currFrontier[${j}] đã chứa một đỉnh tràn, đỉnh đó giờ bị mất`) }
                   : undefined,
         });
         return true;
@@ -631,7 +741,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
       if (shape.commit === 'loop') {
         for (let k = t; ; k += T) {
           if (!cmp(k)) {
-            push(t, { op: 'skip', lines: L('cfor'), text: `${who(t)}: ${k} < numCurrFrontier_s (${show(sh.counter)}) is false, so its commit loop ends.` });
+            push(t, { op: 'skip', lines: L('cfor'), text: tr(`${who(t)}: ${k} < numCurrFrontier_s (${show(sh.counter)}) is false, so its commit loop ends.`, `${who(t)}: ${k} < numCurrFrontier_s (${show(sh.counter)}) sai, nên vòng lặp commit của nó kết thúc.`) });
             yield null;
             break;
           }
@@ -642,7 +752,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         if (!copy(t)) return;
         yield null;
       } else {
-        push(t, { op: 'skip', lines: L('cfor'), text: `${who(t)}: ${t} < numCurrFrontier_s (${show(sh.counter)}) is false, so it copies nothing.` });
+        push(t, { op: 'skip', lines: L('cfor'), text: tr(`${who(t)}: ${t} < numCurrFrontier_s (${show(sh.counter)}) is false, so it copies nothing.`, `${who(t)}: ${t} < numCurrFrontier_s (${show(sh.counter)}) sai, nên nó không sao chép gì.`) });
         yield null;
       }
     }
@@ -653,19 +763,19 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
     while (!crashed) {
       for (const t of orders[pos]) {
         if (done[t] || waiting[t] || crashed) continue;
-        sh.status[t] = 'running';
+        sh.status[t] = tr('running', 'đang chạy');
         for (;;) {
           const r = gens[t].next();
           if (crashed) break;
           if (r.done) {
             done[t] = true;
-            sh.status[t] = 'finished';
+            sh.status[t] = tr('finished', 'đã xong');
             break;
           }
           if (r.value) {
             waiting[t] = r.value.barrier;
-            sh.status[t] = `at barrier ${r.value.barrier}`;
-            push(t, { op: 'arrive', barrier: r.value.barrier, lines: L(`b${r.value.barrier}` as LineKey), text: `${who(t)} reaches barrier ${r.value.barrier} and waits for the rest of its block.` });
+            sh.status[t] = tr(`at barrier ${r.value.barrier}`, `tại rào chắn ${r.value.barrier}`);
+            push(t, { op: 'arrive', barrier: r.value.barrier, lines: L(`b${r.value.barrier}` as LineKey), text: tr(`${who(t)} reaches barrier ${r.value.barrier} and waits for the rest of its block.`, `${who(t)} tới rào chắn ${r.value.barrier} và chờ phần còn lại của khối.`) });
             break;
           }
         }
@@ -676,13 +786,13 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
         if (waiting[t]) {
           waiting[t] = 0;
           epoch[t]++;
-          sh.status[t] = `past barrier ${n0}`;
+          sh.status[t] = tr(`past barrier ${n0}`, `đã qua rào chắn ${n0}`);
         }
       const why =
-        n0 === 1 ? 'the private counter is 0 before anyone counts'
-          : n0 === 2 ? 'every new vertex is in the private queue or the public frontier, so numCurrFrontier_s is final'
-            : 'currFrontierStartIdx is written, so every thread can read it';
-      push(-1, { op: 'release', barrier: n0, lines: L(`b${n0}` as LineKey), text: `Barrier ${n0} opens for block ${b}: ${why}.` });
+        n0 === 1 ? tr('the private counter is 0 before anyone counts', 'bộ đếm riêng bằng 0 trước khi ai bắt đầu đếm')
+          : n0 === 2 ? tr('every new vertex is in the private queue or the public frontier, so numCurrFrontier_s is final', 'mọi đỉnh mới đều đã nằm trong hàng đợi riêng hoặc frontier chung, nên numCurrFrontier_s là giá trị cuối cùng')
+            : tr('currFrontierStartIdx is written, so every thread can read it', 'currFrontierStartIdx đã được ghi, nên mọi luồng đều đọc được');
+      push(-1, { op: 'release', barrier: n0, lines: L(`b${n0}` as LineKey), text: tr(`Barrier ${n0} opens for block ${b}: ${why}.`, `Rào chắn ${n0} mở cho khối ${b}: ${why}.`) });
     }
     if (crashed) break;
     // After the block: was its reservation right, and did the commit copy everything?
@@ -691,7 +801,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
       if (r.count !== sh.counter && !steps[r.step].violation)
         steps[r.step].violation = {
           kind: 'short-reservation',
-          message: `thread 0 reserves ${show(r.count)} public slot${r.count === 1 ? '' : 's'}, but the private queue ends with ${show(sh.counter)}: it read the counter before every thread had counted`,
+          message: tr(`thread 0 reserves ${show(r.count)} public slot${r.count === 1 ? '' : 's'}, but the private queue ends with ${show(sh.counter)}: it read the counter before every thread had counted`, `luồng 0 đặt chỗ ${show(r.count)} ô chung, nhưng hàng đợi riêng kết thúc với ${show(sh.counter)}: nó đã đọc bộ đếm trước khi mọi luồng đếm xong`),
         };
     }
     if (shape.commit === 'if' && sh.counter > T) {
@@ -700,7 +810,7 @@ export function simulate(shape: Shape, schedule: Schedule, o: Options): Trace {
       if (last >= 0 && !steps[last].violation)
         steps[last].violation = {
           kind: 'uncopied',
-          message: `the private queue holds ${sh.counter} entries but the block has ${T} threads: entries ${T} to ${sh.counter - 1} are never copied, and their reserved public slots stay empty`,
+          message: tr(`the private queue holds ${sh.counter} entries but the block has ${T} threads: entries ${T} to ${sh.counter - 1} are never copied, and their reserved public slots stay empty`, `hàng đợi riêng chứa ${sh.counter} phần tử nhưng khối có ${T} luồng: các phần tử ${T} đến ${sh.counter - 1} không bao giờ được sao chép, và các ô chung đã đặt cho chúng vẫn trống`),
         };
     }
   }
@@ -742,14 +852,14 @@ function classify(st: Snapshot, g: Graph, crash: string | undefined, res: Reserv
 
 /** One line for a table cell or a chip. */
 export function summary(o: Outcome): string {
-  if (o.kind === 'crash') return 'stopped: an out-of-range access';
-  if (o.kind === 'correct') return 'correct';
+  if (o.kind === 'crash') return tr('stopped: an out-of-range access', 'đã dừng: một truy cập ngoài phạm vi');
+  if (o.kind === 'correct') return tr('correct', 'đúng');
   const parts: string[] = [];
-  if (o.size !== o.expectedSize) parts.push(`size ${show(o.size)} (not ${o.expectedSize})`);
-  if (o.lost.length) parts.push(`${plural(o.lost.length, 'vertex', 'vertices')} lost`);
-  if (o.duplicated.length) parts.push(`${o.duplicated.length} duplicated`);
-  if (o.foreign) parts.push(`${plural(o.foreign, 'slot')} of garbage`);
-  return parts.join(', ') || 'wrong';
+  if (o.size !== o.expectedSize) parts.push(tr(`size ${show(o.size)} (not ${o.expectedSize})`, `kích thước ${show(o.size)} (không phải ${o.expectedSize})`));
+  if (o.lost.length) parts.push(tr(`${plural(o.lost.length, 'vertex', 'vertices')} lost`, `mất ${o.lost.length} đỉnh`));
+  if (o.duplicated.length) parts.push(tr(`${o.duplicated.length} duplicated`, `${o.duplicated.length} bị trùng`));
+  if (o.foreign) parts.push(tr(`${plural(o.foreign, 'slot')} of garbage`, `${o.foreign} ô chứa rác`));
+  return parts.join(', ') || tr('wrong', 'sai');
 }
 
 // ---------------------------------------------------------------- the race check

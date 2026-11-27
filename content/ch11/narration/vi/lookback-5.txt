@@ -1,0 +1,1 @@
+Lookback tách rời. Mỗi khối công bố tổng của riêng nó ngay khi đoạn của nó được scan xong. Một khối đang chờ đọc ngược qua các khối đứng trước, cộng dồn tổng của chúng, cho đến khi gặp một khối có tổng tiền tố đầy đủ đã sẵn sàng. Ở đây việc chờ giảm từ 5 vòng xuống 1, và cái giá là 4 phép cộng thêm.

@@ -1,0 +1,1 @@
+Một khối 4 luồng sở hữu 16 phần tử, mỗi luồng 4 phần tử. Luồng 0 sở hữu 4 phần tử đầu, luồng 1 sở hữu 4 phần tử tiếp theo, và cứ thế. Lúc bắt đầu, cả 16 giá trị nằm trong bộ nhớ toàn cục, ở hàng trên cùng. Chúng sẽ đi qua bộ nhớ chia sẻ và thanh ghi, rồi quay về đã được scan.

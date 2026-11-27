@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { sceneData } from '../../sim/histpriv';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Privatise, then commit": 24 pixels of our own (already bin numbers), three blocks of
 // eight threads, eight bins. Every number drawn comes from sceneData() in
@@ -56,18 +57,20 @@ function Arrow({ x1, y1, x2, y2, tier, strength = 1 }: { x1: number; y1: number;
 function Stage(f: Frame) {
   const pub = f.publicValues ?? new Array<number | null>(D.bins).fill(null);
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Animation: private histograms per block, then a commit to the public histogram"
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Animation: private histograms per block, then a commit to the public histogram', 'Hoạt ảnh: histogram riêng cho mỗi khối, rồi ghi về histogram công khai')}
       style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <defs>
         {(['global', 'shared'] as const).map((t) => (
-          <marker key={t} id={`pv-head-${t}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto">
+          <marker key={t} id={`pv-head-${t}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto">{/* i18n-ignore: SVG attribute value */}
             <path d="M0,0 L6,3 L0,6 z" fill={`var(--${t})`} />
           </marker>
         ))}
       </defs>
       {/* the image strip, one thread per pixel */}
       <text x={bx(0)} y={16} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>
-        image: {D.pixels.length} pixels as bin numbers, one thread each
+        <Translated vi={<>ảnh: {D.pixels.length} điểm ảnh dưới dạng số hiệu ô, mỗi điểm một luồng</>}>
+          image: {D.pixels.length} pixels as bin numbers, one thread each
+        </Translated>
       </text>
       {D.pixels.map((v, i) => (
         <g key={i} data-pixel={v}>
@@ -80,7 +83,9 @@ function Stage(f: Frame) {
         <g key={k}>
           <line x1={bx(k)} y1={STRIP_Y - 4} x2={bx(k) + D.tpb * PX - 2} y2={STRIP_Y - 4} stroke="var(--ink-2)" />
           <text x={bx(k) + (D.tpb * PX) / 2} y={STRIP_Y - 9} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-            block {k}: {D.tpb} threads
+            <Translated vi={<>khối {k}: {D.tpb} luồng</>}>
+              block {k}: {D.tpb} threads
+            </Translated>
           </text>
         </g>
       ))}
@@ -90,7 +95,7 @@ function Stage(f: Frame) {
         <g opacity={f.copies}>
           {Array.from({ length: D.blocks }, (_, k) => (
             <g key={k} data-copy={k}>
-              <text x={bx(k)} y={COPY_Y + PX + 24} fontSize="11" fontWeight="600" style={{ fill: 'var(--shared)' }}>block {k}'s copy (shared)</text>
+              <text x={bx(k)} y={COPY_Y + PX + 24} fontSize="11" fontWeight="600" style={{ fill: 'var(--shared)' }}><Translated vi={<>bản sao của khối {k} (chia sẻ)</>}>block {k}'s copy (shared)</Translated></text>
               {Array.from({ length: D.bins }, (_, b) => {
                 const val = f.copyValues?.[k]?.[b] ?? null;
                 const hot = f.hotCopy && f.hotCopy.block === k && f.hotCopy.bin === b;
@@ -116,15 +121,15 @@ function Stage(f: Frame) {
       ) : null}
 
       {/* the public histogram in global memory */}
-      <text x={PUB_X - 10} y={PUB_Y + 12} fontSize="11" fontWeight="600" textAnchor="end" style={{ fill: 'var(--global)' }}>public bins</text>
-      <text x={PUB_X - 10} y={PUB_Y + 25} fontSize="10" textAnchor="end" style={{ fill: 'var(--global)' }}>(global memory)</text>
+      <text x={PUB_X - 10} y={PUB_Y + 12} fontSize="11" fontWeight="600" textAnchor="end" style={{ fill: 'var(--global)' }}>{tr('public bins', 'các ô công khai')}</text>
+      <text x={PUB_X - 10} y={PUB_Y + 25} fontSize="10" textAnchor="end" style={{ fill: 'var(--global)' }}>{tr('(global memory)', '(bộ nhớ toàn cục)')}</text>
       {pub.map((v, b) => (
         <g key={b} data-public-bin={b} data-value={v ?? ''}>
           <rect x={PUB_X + b * PUB_W + 1} y={PUB_Y} width={PUB_W - 2} height={28} rx="2"
             fill={f.hotPublic === b ? 'var(--global)' : 'var(--global-wash)'} stroke="var(--global)" />
           <text x={pubX(b)} y={PUB_Y + 18} fontSize="12" textAnchor="middle"
             style={{ fill: f.hotPublic === b ? 'var(--page)' : 'var(--ink)' }}>{v ?? ''}</text>
-          <text x={pubX(b)} y={PUB_Y + 40} fontSize="9" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>bin {b}</text>
+          <text x={pubX(b)} y={PUB_Y + 40} fontSize="9" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}><Translated vi={<>ô {b}</>}>bin {b}</Translated></text>
         </g>
       ))}
 
@@ -144,8 +149,8 @@ function Stage(f: Frame) {
       {f.bill != null ? (
         <g data-bill={`${D.globalBefore}-${D.globalAfter}`}>
           {[
-            { label: 'basic kernel', v: D.globalBefore, y: 292 },
-            { label: 'privatised', v: D.globalAfter, y: 314 },
+            { label: tr('basic kernel', 'kernel cơ bản'), v: D.globalBefore, y: 292 },
+            { label: tr('privatised', 'đã riêng tư hóa'), v: D.globalAfter, y: 314 },
           ].map((r) => (
             <g key={r.y}>
               <text x={PUB_X - 8} y={r.y + 10} fontSize="11" textAnchor="end">{r.label}</text>
@@ -159,7 +164,7 @@ function Stage(f: Frame) {
       ) : null}
       {f.counter ? (
         <text x={W / 2} y={f.bill != null ? 348 : 312} fontSize="12.5" fontWeight="600" textAnchor="middle"
-          {...Object.fromEntries(Object.entries(f.counterData ?? {}).map(([k, v]) => [`data-${k}`, v]))}>{f.counter}</text>
+          {...Object.fromEntries(Object.entries(f.counterData ?? {}).map(([k, v]) => [`data-${k}` /* i18n-ignore: data attribute name */, v]))}>{f.counter}</text>
       ) : null}
       {f.headline ? (
         <text x={W / 2} y={f.bill != null ? 290 : 340} fontSize="11.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{f.headline}</text>
@@ -181,7 +186,9 @@ const blocksOf = (pixels: number[]) => new Set(pixels.map((i) => Math.floor(i / 
 const beats: Beat[] = [
   {
     clip: 'privatise-1',
-    label: 'One public histogram',
+    get label() {
+      return tr('One public histogram', 'Một histogram công khai');
+    },
     draw: (p) => {
       const shown = Math.round(ramp(p, 0.25, 0.8) * hotPixels.length);
       const hot = hotPixels.slice(0, shown);
@@ -194,16 +201,22 @@ const beats: Beat[] = [
           ]}
           publicValues={p >= 0.85 ? D.total : new Array(D.bins).fill(0)}
           hotPublic={shown ? D.busiest : null}
-          counter={<>threads aiming at bin {D.busiest}: {shown}{shown ? <> from {blocksOf(hot)} block{blocksOf(hot) === 1 ? '' : 's'}</> : null}</>}
+          counter={
+            <Translated vi={<>số luồng nhắm vào ô {D.busiest}: {shown}{shown ? <> từ {blocksOf(hot)} khối</> : null}</>}>
+              threads aiming at bin {D.busiest}: {shown}{shown ? <> from {blocksOf(hot)} block{blocksOf(hot) === 1 ? '' : 's'}</> : null}
+            </Translated>
+          }
           counterData={{ contenders: shown }}
-          headline="every update is a device-scope atomic on the one public copy"
+          headline={tr('every update is a device-scope atomic on the one public copy', 'mỗi lần cập nhật là một atomic phạm vi thiết bị trên bản công khai duy nhất')}
         />
       );
     },
   },
   {
     clip: 'privatise-2',
-    label: 'A copy per block',
+    get label() {
+      return tr('A copy per block', 'Mỗi khối một bản sao');
+    },
     draw: (p) => {
       const zeroed = Math.floor(ramp(p, 0.3, 0.7) * D.bins + 1e-9);
       const vals = Array.from({ length: D.blocks }, () =>
@@ -213,16 +226,18 @@ const beats: Beat[] = [
         <Stage
           copies={ramp(p, 0, 0.2)}
           copyValues={vals}
-          barrier={p >= 0.75 ? 'barrier 1: nobody counts until every bin of the copy is zero' : null}
+          barrier={p >= 0.75 ? tr('barrier 1: nobody counts until every bin of the copy is zero', 'rào chắn 1: không ai đếm cho đến khi mọi ô của bản sao đều bằng 0') : null}
           publicValues={new Array(D.bins).fill(0)}
-          headline={p < 0.3 ? 'shared memory starts with leftovers (?)' : 'thread t of each block zeroes bin t'}
+          headline={p < 0.3 ? tr('shared memory starts with leftovers (?)', 'bộ nhớ chia sẻ ban đầu chứa dữ liệu thừa (?)') : tr('thread t of each block zeroes bin t', 'luồng t của mỗi khối đặt ô t về 0')}
         />
       );
     },
   },
   {
     clip: 'privatise-3',
-    label: 'Count locally',
+    get label() {
+      return tr('Count locally', 'Đếm cục bộ');
+    },
     draw: (p) => {
       const t = Math.min(D.tpb, Math.floor(ramp(p, 0.05, 0.75) * D.tpb + 1e-9));
       const c = countedAfter(t);
@@ -235,16 +250,22 @@ const beats: Beat[] = [
           toCopy={arrows}
           hotCopy={best.v ? { block: best.k, bin: best.b } : null}
           publicValues={new Array(D.bins).fill(0)}
-          counter={<>busiest location of any copy: {best.v} contender{best.v === 1 ? '' : 's'}, all in block {best.k} (was {D.publicContenders})</>}
+          counter={
+            <Translated vi={<>vị trí bận nhất trong mọi bản sao: {best.v} luồng tranh chấp, tất cả trong khối {best.k} (trước đây {D.publicContenders})</>}>
+              busiest location of any copy: {best.v} contender{best.v === 1 ? '' : 's'}, all in block {best.k} (was {D.publicContenders})
+            </Translated>
+          }
           counterData={{ contenders: best.v }}
-          headline="block-scope atomics on each block's own copy"
+          headline={tr("block-scope atomics on each block's own copy", 'atomic phạm vi khối trên bản sao riêng của từng khối')}
         />
       );
     },
   },
   {
     clip: 'privatise-4',
-    label: 'Barrier, then commit',
+    get label() {
+      return tr('Barrier, then commit', 'Rào chắn, rồi ghi về');
+    },
     draw: (p) => {
       const n = Math.round(ramp(p, 0.2, 0.9) * COMMITS.length);
       const done = COMMITS.slice(0, n);
@@ -257,29 +278,31 @@ const beats: Beat[] = [
         <Stage
           copies={1}
           copyValues={vals}
-          barrier={p < 0.2 ? 'barrier 2: every update of the block has landed' : null}
+          barrier={p < 0.2 ? tr('barrier 2: every update of the block has landed', 'rào chắn 2: mọi lần cập nhật của khối đã hoàn tất') : null}
           commits={done}
           publicValues={pub}
           hotPublic={last ? last.bin : null}
           counter={last
-            ? <>committers to public bin {last.bin} so far: {sameBin}, one per block (at most {D.commitContention})</>
-            : <>zero bins are skipped: no atomic for them</>}
+            ? <Translated vi={<>số lần ghi về ô công khai {last.bin} đến giờ: {sameBin}, mỗi khối một lần (tối đa {D.commitContention})</>}>committers to public bin {last.bin} so far: {sameBin}, one per block (at most {D.commitContention})</Translated>
+            : <Translated vi={<>các ô bằng 0 được bỏ qua: không có atomic nào cho chúng</>}>zero bins are skipped: no atomic for them</Translated>}
           counterData={{ commits: done.length }}
-          headline="one thread per bin of each block adds its count with a device-scope atomic"
+          headline={tr('one thread per bin of each block adds its count with a device-scope atomic', 'mỗi ô của mỗi khối có một luồng cộng số đếm của nó bằng một atomic phạm vi thiết bị')}
         />
       );
     },
   },
   {
     clip: 'privatise-5',
-    label: 'The bill',
+    get label() {
+      return tr('The bill', 'Cái giá');
+    },
     draw: (p) => (
       <Stage
         copies={0.35}
         copyValues={D.perBlock}
         publicValues={D.total}
         bill={ramp(p, 0.05, 0.45)}
-        counter={p >= 0.5 ? <>{D.globalBefore} global atomics become {D.globalAfter}, plus {D.blocks} zeroing passes and {D.blocks} commits</> : null}
+        counter={p >= 0.5 ? <Translated vi={<>{D.globalBefore} atomic toàn cục còn {D.globalAfter}, cộng thêm {D.blocks} lượt đặt về 0 và {D.blocks} lần ghi về</>}>{D.globalBefore} global atomics become {D.globalAfter}, plus {D.blocks} zeroing passes and {D.blocks} commits</Translated> : null}
         counterData={{ before: D.globalBefore, after: D.globalAfter }}
       />
     ),
@@ -287,5 +310,5 @@ const beats: Beat[] = [
 ];
 
 export function PrivatiseScene() {
-  return <Scene chapter="ch09" title="Privatise, then commit" beats={beats} />;
+  return <Scene chapter="ch09" title={tr('Privatise, then commit', 'Riêng tư hóa, rồi ghi về')} beats={beats} />;
 }

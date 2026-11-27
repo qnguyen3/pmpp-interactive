@@ -1,0 +1,1 @@
+Các đầu ra của luồng 1 bắt đầu ở vị trí 3. Lần đoán đầu tiên của nó lấy nhiều nhất có thể từ A: i là 3 và j là 0, nên i cộng j là 3. Phép kiểm tra thứ nhất so sánh A ở chỉ số 2, giữ giá trị 8, với B ở chỉ số 0, giữ giá trị 7. 8 lớn hơn, nên i quá cao.

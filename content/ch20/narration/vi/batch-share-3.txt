@@ -1,0 +1,1 @@
+Attention thì khác. Mỗi yêu cầu chú ý tới ngữ cảnh của riêng nó, nên mỗi yêu cầu đọc cache của riêng nó. Bốn yêu cầu nghĩa là bốn cache: gấp bốn lần số byte, và gấp bốn lần số phép toán. Tỉ lệ không hề dịch chuyển. Cường độ tính toán của attention vẫn ở gần một với số 16 bit.

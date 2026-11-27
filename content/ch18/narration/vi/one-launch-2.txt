@@ -1,0 +1,1 @@
+Giờ là một đồ thị có các mức tăng nhanh, như một mạng xã hội, nơi chỉ vài bước nhảy là tới gần như tất cả mọi người. Chỉ có một vài mức, và mỗi kernel có rất nhiều việc. Các khoảng trống vẫn được vẽ như trước, nhưng cạnh những thanh rộng thế này thì chúng gần như không thấy. Chi phí khởi chạy là không đáng kể với frontier lớn, và có thể chiếm phần lớn thời gian với frontier nhỏ.

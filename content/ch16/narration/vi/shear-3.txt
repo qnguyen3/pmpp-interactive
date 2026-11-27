@@ -1,0 +1,1 @@
+Chạy lại lần nữa. Giờ mỗi bước là 1 cột của ô, và cả 3 luồng đều làm việc ở mọi bước. Bên trong ô, ô con phía bắc và phía tây của một ô con đã xong sớm hơn 1 bước, còn ô con phía tây bắc xong sớm hơn 2 bước, nên mọi đầu vào đều sẵn sàng kịp lúc. Cùng 9 ô con đó mất 3 bước, không có luồng nào ngồi không.

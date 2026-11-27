@@ -1,0 +1,1 @@
+Một điều cuối cùng. Các GPU NVIDIA đời cũ chạy xong một đường rồi mới bắt đầu đường kia. Các GPU hiện nay có thể xen kẽ hai đường, như vẽ ở đây. AMD ghi rõ là chạy cùng nhịp. Apple thì không nói. Vì vậy, khi bước tiếp theo cần mọi lane đã xong, hãy gọi rào chắn cấp warp trước.

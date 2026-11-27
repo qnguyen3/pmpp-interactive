@@ -1,0 +1,1 @@
+Giờ đến down-sweep, một cây đảo ngược, trao các tổng một phần cho những vị trí còn cần chúng. Vị trí 11 giữ các đầu vào từ 8 đến 11. Thứ nó còn thiếu là tổng các đầu vào từ 0 đến 7, và tổng đó nằm ở vị trí 7, cách nó 4 vị trí về bên trái. Một phép cộng, và vị trí 11 đã xong.

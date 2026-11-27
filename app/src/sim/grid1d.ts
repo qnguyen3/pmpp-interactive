@@ -32,6 +32,8 @@
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
 /** The book's upper limit on threads per block "on current systems" (p. 33). The explorer's slider stops here. */
+import { tr } from '../lib/locale.ts';
+
 export const BOOK_MAX_BLOCK = 1024;
 /** The book's advice: a block size that is a multiple of 32 "for hardware efficiency reasons" (p. 34). */
 export const BOOK_BLOCK_MULTIPLE = 32;
@@ -73,10 +75,12 @@ const ceilDiv = (a: number, b: number) => Math.floor((a + b - 1) / b);
 const MAPPINGS: Record<MappingKind, Mapping> = {
   one: {
     kind: 'one',
-    label: 'one element per thread',
+    get label() {
+      return tr('one element per thread', 'mỗi luồng một phần tử');
+    },
     exercise: 1,
     perThread: 1,
-    firstExpr: 'blockIdx.x * blockDim.x + threadIdx.x',
+    firstExpr: 'blockIdx.x * blockDim.x + threadIdx.x', // i18n-ignore: C index expression
     secondExpr: null,
     guards: ['i < n'],
     first: (b, t, B) => b * B + t,
@@ -86,10 +90,12 @@ const MAPPINGS: Record<MappingKind, Mapping> = {
   },
   'two-adjacent': {
     kind: 'two-adjacent',
-    label: 'two adjacent elements per thread',
+    get label() {
+      return tr('two adjacent elements per thread', 'mỗi luồng hai phần tử liền kề');
+    },
     exercise: 2,
     perThread: 2,
-    firstExpr: '(blockIdx.x * blockDim.x + threadIdx.x) * 2',
+    firstExpr: '(blockIdx.x * blockDim.x + threadIdx.x) * 2', // i18n-ignore: C index expression
     secondExpr: 'i + 1',
     guards: ['i < n', 'i + 1 < n'],
     first: (b, t, B) => (b * B + t) * 2,
@@ -102,11 +108,13 @@ const MAPPINGS: Record<MappingKind, Mapping> = {
   },
   'two-sections': {
     kind: 'two-sections',
-    label: 'two sections per block',
+    get label() {
+      return tr('two sections per block', 'mỗi khối hai đoạn');
+    },
     exercise: 3,
     perThread: 2,
-    firstExpr: 'blockIdx.x * blockDim.x * 2 + threadIdx.x',
-    secondExpr: 'i + blockDim.x',
+    firstExpr: 'blockIdx.x * blockDim.x * 2 + threadIdx.x', // i18n-ignore: C index expression
+    secondExpr: 'i + blockDim.x', // i18n-ignore: C index expression
     guards: ['i < n', 'i + blockDim.x < n'],
     first: (b, t, B) => b * B * 2 + t,
     elements: (b, t, B) => [b * B * 2 + t, b * B * 2 + t + B],
@@ -371,5 +379,5 @@ export function span(indices: number[]): string {
   if (!indices.length) return 'none';
   const lo = indices[0];
   const hi = indices[indices.length - 1];
-  return lo === hi ? String(lo) : `${lo} to ${hi}`;
+  return lo === hi ? String(lo) : tr(`${lo} to ${hi}`, `${lo} đến ${hi}`);
 }

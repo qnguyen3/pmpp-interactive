@@ -1,0 +1,1 @@
+Giai đoạn 2 và 3 gom từ bản đồ đầu vào thứ hai, và giai đoạn 4 và 5 từ bản đồ thứ ba. Sau mỗi cặp giai đoạn, các tổng đang chạy tăng thêm phần đóng góp của một bản đồ. Sau giai đoạn 5, chúng là 14, 20, 12 và 24, và mỗi luồng ghi tổng của mình vào Y.

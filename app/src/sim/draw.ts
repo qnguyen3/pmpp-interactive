@@ -44,13 +44,14 @@
 // hook that adds the .ts extension (see app/e2e/x1-sx18.mjs).
 import { inclusiveIn } from './scan';
 import { m5Uniform, philox } from './philox';
+import { tr } from '../lib/locale.ts';
 
 const f32 = Math.fround;
 
 export type DrawRule = 'gt' | 'ge';
 export const RULE_LABEL: Record<DrawRule, string> = {
-  gt: 'first inclusive sum > target',
-  ge: 'first inclusive sum ≥ target',
+  get gt() { return tr('first inclusive sum > target', 'tổng bao gồm đầu tiên > target'); },
+  get ge() { return tr('first inclusive sum ≥ target', 'tổng bao gồm đầu tiên ≥ target'); },
 };
 
 /** The last index whose weight is positive, or -1. */
@@ -294,15 +295,15 @@ export function drawKernel(weights: number[], u: number, cfg: KernelCfg = STEPPE
 // ---------------------------------------------------------------- the barrier hunt
 export type Missing = 'none' | 'written' | 'read';
 export const MISSING_LABEL: Record<Missing, string> = {
-  none: 'both barriers in place',
-  written: 'barrier A removed (after the total is written)',
-  read: 'barrier B removed (after the total is read)',
+  get none() { return tr('both barriers in place', 'cả hai rào chắn còn nguyên'); },
+  get written() { return tr('barrier A removed (after the total is written)', 'bỏ rào chắn A (sau khi ghi tổng)'); },
+  get read() { return tr('barrier B removed (after the total is read)', 'bỏ rào chắn B (sau khi đọc tổng)'); },
 };
 export type HuntOrder = 'in-order' | 'reversed' | 'warp-ahead';
 export const HUNT_ORDER_LABEL: Record<HuntOrder, string> = {
-  'in-order': 'emulator, in order',
-  reversed: 'emulator, reversed',
-  'warp-ahead': 'warp 0 runs ahead (a GPU may)',
+  get 'in-order'() { return tr('emulator, in order', 'trình giả lập, theo thứ tự'); },
+  get reversed() { return tr('emulator, reversed', 'trình giả lập, đảo ngược'); },
+  get 'warp-ahead'() { return tr('warp 0 runs ahead (a GPU may)', 'warp 0 chạy trước (GPU có thể làm vậy)'); },
 };
 type Sync = { kind: 'warp' | 'block' | 'end'; id: string };
 type Cell = { v: number; what: string } | null;
@@ -365,25 +366,25 @@ export function barrierHunt(weights: number[], u: number, cfg: KernelCfg, missin
     };
     // 1. the total: a strided sum, a shuffle-down tree, lane 0 writes the warp's sum
     for (let i = 0; i < levels; i++) stop('warp', 'reduce' + i);
-    act((s) => { if (l === 0) s[w] = { v: warpSums[w], what: `warp ${w}'s partial sum` }; });
-    stop('block', 'after the warp sums');
+    act((s) => { if (l === 0) s[w] = { v: warpSums[w], what: tr(`warp ${w}'s partial sum`, `tổng riêng phần của warp ${w}`) }; });
+    stop('block', 'after the warp sums'); // i18n-ignore: barrier id, compared; translated where the log prints it
     // warp 0 adds the warp sums with one more tree; thread 0 writes the total
     if (w === 0) {
       for (let i = 0; i < levels; i++) stop('warp', 'final' + i);
-      act((s) => { if (t === 0) s[0] = { v: total, what: 'the total' }; });
+      act((s) => { if (t === 0) s[0] = { v: total, what: tr('the total', 'tổng') }; });
     }
     if (missing !== 'written') stop('block', 'A');
     act((s) => {
       const c = s[0];
-      reads.push({ thread: t, warp: w, value: c ? c.v : NaN, ok: !!c && c.v === total, what: c ? c.what : 'nothing yet' });
+      reads.push({ thread: t, warp: w, value: c ? c.v : NaN, ok: !!c && c.v === total, what: c ? c.what : tr('nothing yet', 'chưa có gì') });
     });
     if (missing !== 'read') stop('block', 'B');
     // 2. the first chunk: a Kogge-Stone scan by shuffle up, one more shuffle for the exclusive
     // value, then the last lane writes the warp's chunk total into the same array
     for (let i = 0; i < levels; i++) stop('warp', 'scan' + i);
     stop('warp', 'exclusive');
-    act((s) => { if (l === warp - 1) s[w] = { v: chunk0.warpTotals[w], what: `warp ${w}'s chunk-0 total` }; });
-    stop('block', 'after the chunk totals');
+    act((s) => { if (l === warp - 1) s[w] = { v: chunk0.warpTotals[w], what: tr(`warp ${w}'s chunk-0 total`, `tổng chunk 0 của warp ${w}`) }; });
+    stop('block', 'after the chunk totals'); // i18n-ignore: barrier id, compared; translated where the log prints it
     stop('end', 'end');
     return segs;
   };
@@ -410,7 +411,7 @@ export function barrierHunt(weights: number[], u: number, cfg: KernelCfg, missin
   const releaseBlock = () => {
     const s0 = waiting[0];
     if (s0 && s0.kind === 'block' && waiting.every((s) => s?.kind === 'block' && s.id === s0.id)) {
-      log.push(`barrier "${s0.id}" releases the block`);
+      log.push(tr(`barrier "${s0.id}" releases the block`, `rào chắn "${({ 'after the warp sums': 'sau các tổng warp', 'after the chunk totals': 'sau các tổng chunk' } as Record<string, string>)[s0.id] ?? s0.id}" giải phóng khối`));
       waiting.fill(null);
       return true;
     }
@@ -427,19 +428,19 @@ export function barrierHunt(weights: number[], u: number, cfg: KernelCfg, missin
           ts.forEach((t) => { if (waiting[t] === null) step(t); });
         } while (releaseWarp(k));
         const r = readsSoFar() - r0;
-        log.push(`warp ${k} runs until it waits at "${waiting[ts[0]]?.id}"${r ? `; ${r} of its threads read scratch_s[0]` : ''}`);
+        log.push(tr(`warp ${k} runs until it waits at "${waiting[ts[0]]?.id}"${r ? `; ${r} of its threads read scratch_s[0]` : ''}`, `warp ${k} chạy cho tới khi chờ ở "${({ 'after the warp sums': 'sau các tổng warp', 'after the chunk totals': 'sau các tổng chunk' } as Record<string, string>)[waiting[ts[0]]?.id ?? ''] ?? waiting[ts[0]]?.id}"${r ? `; ${r} luồng của nó đọc scratch_s[0]` : ''}`));
       }
-      if (!releaseBlock() && !done()) { log.push('stuck'); break; }
+      if (!releaseBlock() && !done()) { log.push(tr('stuck', 'kẹt')); break; }
     } else {
       const seq = Array.from({ length: threads }, (_, i) => (order === 'in-order' ? i : threads - 1 - i));
       const r0 = readsSoFar();
       const ran = seq.filter((t) => waiting[t] === null);
       ran.forEach(step);
       const r = readsSoFar() - r0;
-      if (r) log.push(`one pass: threads ${ran[0]} to ${ran[ran.length - 1]} each run to their next stop; ${r} of them read scratch_s[0]`);
+      if (r) log.push(tr(`one pass: threads ${ran[0]} to ${ran[ran.length - 1]} each run to their next stop; ${r} of them read scratch_s[0]`, `một lượt: các luồng ${ran[0]} đến ${ran[ran.length - 1]} mỗi luồng chạy tới điểm dừng kế tiếp; ${r} luồng trong số đó đọc scratch_s[0]`));
       let any = releaseBlock();
       for (let k = 0; k < nW; k++) any = releaseWarp(k) || any;
-      if (!any && !done()) { log.push('stuck'); break; }
+      if (!any && !done()) { log.push(tr('stuck', 'kẹt')); break; }
     }
   }
   reads.sort((a, b) => a.thread - b.thread);
@@ -474,17 +475,17 @@ export function huntDraw(weights: number[], u: number, cfg: KernelCfg, missing: 
  * at the stepper's display width (pinned in draw.test.ts).
  */
 export const STEP_ROWS: { id: string; label: string; n: number; T: number; u: number }[] = [
-  { id: 'short', label: '40 survivors', n: 40, T: 1, u: 0.6 },
-  { id: 'long', label: '200 survivors, T = 2.5', n: 200, T: 2.5, u: 0.85 },
-  { id: 'hunt', label: '120 survivors, T = 2', n: 120, T: 2, u: 0.7 },
+  { id: 'short', get label() { return tr('40 survivors', '40 phần tử còn lại'); }, n: 40, T: 1, u: 0.6 },
+  { id: 'long', get label() { return tr('200 survivors, T = 2.5', '200 phần tử còn lại, T = 2.5'); }, n: 200, T: 2.5, u: 0.85 },
+  { id: 'hunt', get label() { return tr('120 survivors, T = 2', '120 phần tử còn lại, T = 2'); }, n: 120, T: 2, u: 0.7 },
 ];
 
 // ---------------------------------------------------------------- near a boundary
 export type CdfOrder = 'double' | 'f32-loop' | 'f32-kernel';
 export const CDF_LABEL: Record<CdfOrder, string> = {
-  double: 'double, left to right (the CPU reference)',
-  'f32-loop': 'float32, left to right',
-  'f32-kernel': "float32, the kernel's order (thread, warp, block)",
+  get double() { return tr('double, left to right (the CPU reference)', 'double, từ trái sang phải (bản tham chiếu trên CPU)'); },
+  get 'f32-loop'() { return tr('float32, left to right', 'float32, từ trái sang phải'); },
+  get 'f32-kernel'() { return tr("float32, the kernel's order (thread, warp, block)", 'float32, thứ tự của kernel (luồng, warp, khối)'); },
 };
 /** Cumulative sums and the total in one order. The kernel's total comes from its own reduction. */
 export function cdfIn(weights: number[], order: CdfOrder, cfg: KernelCfg = STEPPER_CFG): { cum: number[]; total: number } {
@@ -574,9 +575,9 @@ export function weightsFrom(logits: number[], T: number): number[] {
 // ---------------------------------------------------------------- three samplers
 export type Sampler = 'inverse-cdf' | 'race' | 'gumbel';
 export const SAMPLER_LABEL: Record<Sampler, string> = {
-  'inverse-cdf': 'inverse CDF (llama.cpp, FlashInfer, M5; MLX at batch 1)',
-  race: 'exponential race argmax(p / q) (torch.multinomial, one sample)',
-  gumbel: 'Gumbel-max argmax(l + g) (MLX at batch 2 or more)',
+  get 'inverse-cdf'() { return tr('inverse CDF (llama.cpp, FlashInfer, M5; MLX at batch 1)', 'CDF nghịch đảo (llama.cpp, FlashInfer, M5; MLX ở batch 1)'); },
+  get race() { return tr('exponential race argmax(p / q) (torch.multinomial, one sample)', 'cuộc đua hàm mũ (exponential race) argmax(p / q) (torch.multinomial, một mẫu)'); },
+  get gumbel() { return tr('Gumbel-max argmax(l + g) (MLX at batch 2 or more)', 'Gumbel-max argmax(l + g) (MLX ở batch 2 trở lên)'); },
 };
 export type RaceQ = 'one-minus' | 'log-u';
 /**

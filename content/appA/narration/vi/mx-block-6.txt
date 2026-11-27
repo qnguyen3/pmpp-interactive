@@ -1,0 +1,1 @@
+Giải mã nhân mỗi mã với hệ số tỉ lệ. Các thanh cho thấy sai số. 30 trong 31 trọng số nhỏ quay về thành 0, tất cả chỉ vì một giá trị ngoại lai. [short pause] Giờ chia cũng những trọng số đó thành 2 khối 16 phần tử, mỗi khối có hệ số tỉ lệ riêng. Nửa không chứa giá trị ngoại lai không mất gì cả.

@@ -1,0 +1,1 @@
+Đây là một hàng gồm 6 điểm lưới với 4 nguyên tử phía trên. Mỗi nguyên tử đóng góp vào mọi điểm, nên có 24 cặp cần cộng lại. Kernel phân tán của hình 21.5 chia các cặp theo nguyên tử. Kernel thu gom của hình 21.6 chia chúng theo điểm. Hãy xem mỗi kernel ghi vào đâu.

@@ -1,0 +1,1 @@
+Đây là 16 vị trí, mỗi vị trí giữ một giá trị đầu vào. Brent-Kung làm việc theo hai pha. Pha đầu, up-sweep, chính là cây rút gọn từ chương 10. Ở bước đầu tiên, mỗi vị trí trong 8 vị trí lẻ cộng giá trị mà vị trí bên trái nó đang giữ, nên giờ nó giữ một cặp. Các vị trí chẵn thì chờ.

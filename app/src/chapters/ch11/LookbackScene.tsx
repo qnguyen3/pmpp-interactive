@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   SCENE_G,
   SCENE_R,
@@ -57,11 +58,11 @@ function Defs() {
 
 function Legend({ y }: { y: number }) {
   const items: [string, ReactNode][] = [
-    ['scanning its segment', <rect key="a" width="14" height="10" fill="var(--ink-3)" opacity="0.6" />],
-    ['spinning on a flag', <rect key="b" width="14" height="10" fill="url(#lb-spin)" />],
-    ['looking back, adding', <rect key="c" width="14" height="10" fill="var(--ink)" />],
-    ['adding and storing', <rect key="d" width="14" height="10" fill="var(--ink-2)" />],
-    ['resident, not run', <rect key="e" width="14" height="10" fill="none" stroke="var(--fail)" strokeDasharray="3 2" />],
+    [tr('scanning its segment', 'đang scan đoạn của mình'), <rect key="a" width="14" height="10" fill="var(--ink-3)" opacity="0.6" />],
+    [tr('spinning on a flag', 'quay chờ trên một cờ'), <rect key="b" width="14" height="10" fill="url(#lb-spin)" />],
+    [tr('looking back, adding', 'nhìn lại, cộng dồn'), <rect key="c" width="14" height="10" fill="var(--ink)" />],
+    [tr('adding and storing', 'cộng và ghi'), <rect key="d" width="14" height="10" fill="var(--ink-2)" />],
+    [tr('resident, not run', 'thường trú, không được chạy'), <rect key="e" width="14" height="10" fill="none" stroke="var(--fail)" strokeDasharray="3 2" />],
   ];
   // Five items in one row from the left edge: about 5.3 px a character at this size.
   let x = LX;
@@ -102,15 +103,25 @@ function Stage({ run, t, headline, lines = [], chain, message = 0, banner }: Sta
   const rowY = (hw: number) => TOP + rs.findIndex((b) => b.hw === hw) * RH;
   const rowOfIdx = (idx: number) => rs.find((b) => b.idx === idx);
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Blocks of a single-pass scan waiting for each other" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Blocks of a single-pass scan waiting for each other', 'Các khối của một scan một lượt chờ lẫn nhau')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <Defs />
       <text x={LX} y={16} fontSize="12" fontWeight="600">
-        {run.config.G} blocks, {run.config.R} slots; index {counter ? 'claimed from a counter' : 'from blockIdx.x'}; {run.config.scheme === 'decoupled' ? 'decoupled' : 'single'} lookback
+        <Translated
+          vi={
+            <>
+              {run.config.G} khối, {run.config.R} chỗ; chỉ số {counter ? 'giành từ một bộ đếm' : 'lấy từ blockIdx.x'}; lookback {run.config.scheme === 'decoupled' ? 'tách rời (decoupled)' : 'đơn'}
+            </>
+          }
+        >
+          {run.config.G} blocks, {run.config.R} slots; index {counter ? 'claimed from a counter' : 'from blockIdx.x'}; {run.config.scheme === 'decoupled' ? 'decoupled' : 'single'} lookback
+        </Translated>
       </text>
       <text x={TX} y={34} fontSize="10.5" style={{ fill: 'var(--ink-2)' }} data-resident={resident}>
-        round {Math.floor(t)} · resident {resident} of {run.config.R}
+        <Translated vi={<>vòng {Math.floor(t)} · thường trú {resident} trên {run.config.R}</>}>
+          round {Math.floor(t)} · resident {resident} of {run.config.R}
+        </Translated>
       </text>
-      <text x={FX} y={34} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--global)' }}>flags (global memory)</text>
+      <text x={FX} y={34} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="cờ (bộ nhớ toàn cục)">flags (global memory)</Translated></text>
       {[0, 6, 12, 18, 24].map((r) => (
         <g key={r}>
           <line x1={X(r)} x2={X(r)} y1={TOP - 4} y2={TOP + rs.length * RH - 4} stroke="var(--rule-soft)" />
@@ -123,7 +134,7 @@ function Stage({ run, t, headline, lines = [], chain, message = 0, banner }: Sta
         return (
           <g key={b.hw} data-row={b.hw} data-idx={b.idx ?? ''} data-phase={now}>
             <text x={LX} y={y + 15} fontSize="11">
-              {!counter ? `block ${b.hw}${b.start == null || b.start > t ? ' (queued)' : ''}` : b.start != null && b.start <= t ? `index ${b.idx} · blockIdx ${b.hw}` : `blockIdx ${b.hw} (queued)`}
+              {!counter ? tr(`block ${b.hw}${b.start == null || b.start > t ? ' (queued)' : ''}`, `khối ${b.hw}${b.start == null || b.start > t ? ' (đang chờ)' : ''}`) : b.start != null && b.start <= t ? tr(`index ${b.idx} · blockIdx ${b.hw}`, `chỉ số ${b.idx} · blockIdx ${b.hw}`) : tr(`blockIdx ${b.hw} (queued)`, `blockIdx ${b.hw} (đang chờ)`)}
             </text>
             {b.start == null || b.start > t ? (
               <rect x={TX} y={y + 4} width={TW} height={RH - 10} rx="2" fill="none" stroke="var(--rule)" strokeDasharray="3 3" />
@@ -139,7 +150,7 @@ function Stage({ run, t, headline, lines = [], chain, message = 0, banner }: Sta
               );
             })}
             {b.end != null && b.end <= t ? (
-              <text x={X(b.end) + 4} y={y + 15} fontSize="10.5" style={{ fill: 'var(--ok)' }}>done</text>
+              <text x={X(b.end) + 4} y={y + 15} fontSize="10.5" style={{ fill: 'var(--ok)' }}><Translated vi="xong">done</Translated></text>
             ) : null}
           </g>
         );
@@ -151,7 +162,7 @@ function Stage({ run, t, headline, lines = [], chain, message = 0, banner }: Sta
           <g key={i} data-flag={i} data-state={f}>
             <rect x={FX} y={y + 4} width={18} height={RH - 10} rx="2" fill={f === 'inclusive' ? 'var(--global)' : f === 'own' ? 'var(--global-wash)' : 'var(--cell)'} stroke="var(--global)" />
             <text x={FX + 24} y={y + 15} fontSize="10" style={{ fill: 'var(--ink-2)' }}>
-              {i}: {f === 'inclusive' ? 'prefix ready' : f === 'own' ? 'own total' : '—'}
+              {i}: {f === 'inclusive' ? tr('prefix ready', 'tiền tố sẵn sàng') : f === 'own' ? tr('own total', 'tổng riêng') : '—'}
             </text>
           </g>
         );
@@ -180,8 +191,8 @@ function Stage({ run, t, headline, lines = [], chain, message = 0, banner }: Sta
               <g data-message="0-1">
                 <line x1={X(pub.t)} y1={rowY(b0.hw) + RH / 2} x2={FX - 4} y2={TOP + RH / 2} stroke="var(--global)" strokeDasharray="3 2" />
                 <line x1={FX - 4} y1={TOP + RH / 2} x2={X(pub.t + 0.5)} y2={rowY(b1.hw) + RH / 2} stroke="var(--global)" strokeWidth="1.8" />
-                <text x={X(pub.t) + 6} y={rowY(b0.hw) - 1} fontSize="10">store sum, then release the flag</text>
-                <text x={X(pub.t + 1) + 6} y={rowY(b1.hw) + RH + 6} fontSize="10">acquire the flag, then read the sum</text>
+                <text x={X(pub.t) + 6} y={rowY(b0.hw) - 1} fontSize="10"><Translated vi="ghi tổng, rồi giải phóng cờ (release)">store sum, then release the flag</Translated></text>
+                <text x={X(pub.t + 1) + 6} y={rowY(b1.hw) + RH + 6} fontSize="10"><Translated vi="nhận cờ (acquire), rồi đọc tổng">acquire the flag, then read the sum</Translated></text>
               </g>
             );
           })()}
@@ -211,77 +222,89 @@ const b1Read = b1.spans.find((s) => s.phase === 'look')!.from;
 const beats: Beat[] = [
   {
     clip: 'lookback-1',
-    label: 'Six blocks, three slots',
+    get label() {
+      return tr('Six blocks, three slots', 'Sáu khối, ba chỗ');
+    },
     draw: (p) => (
       <Stage run={S} t={ramp(p, 0.05, 0.95) * (firstPublish - 2)}
-        headline={`${SCENE_G} blocks, ${SCENE_R} slots: the first ${SCENE_R} start, the rest queue`}
-        lines={['Each block scans its segment; then it needs the total of every segment before it.']} />
+        headline={tr(`${SCENE_G} blocks, ${SCENE_R} slots: the first ${SCENE_R} start, the rest queue`, `${SCENE_G} khối, ${SCENE_R} chỗ: ${SCENE_R} khối đầu bắt đầu, số còn lại xếp hàng chờ`)}
+        lines={[tr('Each block scans its segment; then it needs the total of every segment before it.', 'Mỗi khối scan đoạn của mình; sau đó nó cần tổng của mọi đoạn đứng trước nó.')]} />
     ),
   },
   {
     clip: 'lookback-2',
-    label: 'One flag',
+    get label() {
+      return tr('One flag', 'Một cờ');
+    },
     draw: (p) => {
       const t = firstPublish - 2 + ramp(p, 0.05, 0.85) * (b1Read + 2 - (firstPublish - 2));
       return (
         <Stage run={S} t={t} message={t >= firstPublish ? 1 : 0}
-          headline="indices 0, 1, 2 claimed in start order; index 1 spins on index 0's flag"
-          lines={[`index 1 spins ${b1.wait} round${b1.wait === 1 ? '' : 's'}; it reads the sum only after the flag is set`]} />
+          headline={tr("indices 0, 1, 2 claimed in start order; index 1 spins on index 0's flag", 'các chỉ số 0, 1, 2 được giành theo thứ tự bắt đầu; chỉ số 1 quay chờ trên cờ của chỉ số 0')}
+          lines={[tr(`index 1 spins ${b1.wait} round${b1.wait === 1 ? '' : 's'}; it reads the sum only after the flag is set`, `chỉ số 1 quay chờ ${b1.wait} vòng; nó chỉ đọc tổng sau khi cờ được đặt`)]} />
       );
     },
   },
   {
     clip: 'lookback-3',
-    label: 'The chain',
+    get label() {
+      return tr('The chain', 'Chuỗi');
+    },
     draw: (p) => {
       const t = b1Read + 2 + ramp(p, 0.02, 0.7) * (S.time - b1Read - 2);
       return (
         <Stage run={S} t={t} chain
-          headline={`a chain of ${S.criticalPath} links for ${SCENE_G} blocks`}
-          lines={[p > 0.72 ? `with ${SCENE_WIDE.config.G} blocks all resident: ${SCENE_WIDE.criticalPath} links, finished after ${SCENE_WIDE.time} rounds` : `finished after ${S.time} rounds; ${S.waitTotal} rounds spent spinning in all`]} />
+          headline={tr(`a chain of ${S.criticalPath} links for ${SCENE_G} blocks`, `một chuỗi ${S.criticalPath} mắt xích cho ${SCENE_G} khối`)}
+          lines={[p > 0.72 ? tr(`with ${SCENE_WIDE.config.G} blocks all resident: ${SCENE_WIDE.criticalPath} links, finished after ${SCENE_WIDE.time} rounds`, `với ${SCENE_WIDE.config.G} khối đều thường trú: ${SCENE_WIDE.criticalPath} mắt xích, xong sau ${SCENE_WIDE.time} vòng`) : tr(`finished after ${S.time} rounds; ${S.waitTotal} rounds spent spinning in all`, `xong sau ${S.time} vòng; tổng cộng ${S.waitTotal} vòng quay chờ`)]} />
       );
     },
   },
   {
     clip: 'lookback-4',
-    label: 'Without the counter',
+    get label() {
+      return tr('Without the counter', 'Không có bộ đếm');
+    },
     draw: (p) => {
       const D = SCENE.deadlock;
       return (
         <Stage run={D} t={ramp(p, 0.05, 0.75) * (D.time + 1)}
-          banner={p > 0.78 ? { text: 'deadlock: every resident block spins, no slot can free', tone: 'fail' } : null}
-          headline={`the scheduler starts blocks ${D.dispatch.slice(0, SCENE_R).join(', ')} first`}
-          lines={[D.stuck.map((s) => `${s.idx} waits on ${s.on}${s.onStarted ? '' : ' (not started)'}`).join(' · ')]} />
+          banner={p > 0.78 ? { text: tr('deadlock: every resident block spins, no slot can free', 'deadlock: mọi khối thường trú đều quay chờ, không chỗ nào được giải phóng'), tone: 'fail' } : null}
+          headline={tr(`the scheduler starts blocks ${D.dispatch.slice(0, SCENE_R).join(', ')} first`, `bộ lập lịch khởi động các khối ${D.dispatch.slice(0, SCENE_R).join(', ')} trước`)}
+          lines={[D.stuck.map((s) => tr(`${s.idx} waits on ${s.on}${s.onStarted ? '' : ' (not started)'}`, `${s.idx} chờ ${s.on}${s.onStarted ? '' : ' (chưa bắt đầu)'}`)).join(' · ')]} />
       );
     },
   },
   {
     clip: 'lookback-5',
-    label: 'Decoupled',
+    get label() {
+      return tr('Decoupled', 'Decoupled');
+    },
     draw: (p) => {
       const D = SCENE.decoupled;
       return (
         <Stage run={D} t={ramp(p, 0.03, 0.75) * D.time} chain
-          headline={`spinning: ${S.waitTotal} rounds single, ${D.waitTotal} decoupled; ${D.repeated} extra additions`}
-          lines={[`chain ${S.criticalPath} links single, ${D.criticalPath} decoupled; finished after ${S.time} rounds single, ${D.time} decoupled`]} />
+          headline={tr(`spinning: ${S.waitTotal} rounds single, ${D.waitTotal} decoupled; ${D.repeated} extra additions`, `quay chờ: ${S.waitTotal} vòng với lookback đơn, ${D.waitTotal} với decoupled; thêm ${D.repeated} phép cộng`)}
+          lines={[tr(`chain ${S.criticalPath} links single, ${D.criticalPath} decoupled; finished after ${S.time} rounds single, ${D.time} decoupled`, `chuỗi ${S.criticalPath} mắt xích với lookback đơn, ${D.criticalPath} với decoupled; xong sau ${S.time} vòng với lookback đơn, ${D.time} với decoupled`)]} />
       );
     },
   },
   {
     clip: 'lookback-6',
-    label: 'Who promises progress',
+    get label() {
+      return tr('Who promises progress', 'Ai bảo đảm tiến triển');
+    },
     draw: (p) => {
       const M = SCENE.metal;
       return (
         <Stage run={M} t={ramp(p, 0.05, 0.6) * (M.time + 1)}
-          banner={p > 0.62 ? { text: 'no progress guarantee: the waiter runs, the block it waits for does not', tone: 'fail' } : null}
-          headline="CUDA documents progress for a started block; AMD and Metal do not"
-          lines={['CUDA: claimed index is safe · HIP: unverified · Metal: unsafe, use separate dispatches']} />
+          banner={p > 0.62 ? { text: tr('no progress guarantee: the waiter runs, the block it waits for does not', 'không bảo đảm tiến triển: khối chờ thì chạy, khối nó chờ thì không'), tone: 'fail' } : null}
+          headline={tr('CUDA documents progress for a started block; AMD and Metal do not', 'CUDA có tài liệu bảo đảm tiến triển cho khối đã bắt đầu; AMD và Metal thì không')}
+          lines={[tr('CUDA: claimed index is safe · HIP: unverified · Metal: unsafe, use separate dispatches', 'CUDA: chỉ số giành từ bộ đếm là an toàn · HIP: unverified · Metal: không an toàn, hãy dùng các dispatch riêng')]} />
       );
     },
   },
 ];
 
 export function LookbackScene() {
-  return <Scene chapter="ch11" title="Waiting for the block before you" beats={beats} />;
+  return <Scene chapter="ch11" title={tr('Waiting for the block before you', 'Chờ khối đứng trước bạn')} beats={beats} />;
 }

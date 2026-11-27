@@ -25,6 +25,8 @@
 //
 // Erasable TypeScript and no imports: the browser check imports this file directly.
 
+import { tr } from '../lib/locale.ts';
+
 export type Partitioning = 'contiguous' | 'interleaved';
 
 /** Line 12 of the two listings, as the book prints them. */
@@ -272,8 +274,36 @@ export interface SegmentChoice {
 }
 
 export const SEGMENT_CHOICES: SegmentChoice[] = [
-  { id: 'nvidia', label: '32 bytes: NVIDIA’s transaction', bytes: 32, facts: 'notes/today/ch09-facts.md, A7' },
-  { id: 'amd64', label: '64 bytes: an AMD cache line', bytes: 64, facts: 'notes/today/ch09-facts.md, B3' },
-  { id: 'amd128', label: '128 bytes: an AMD cache line', bytes: 128, facts: 'notes/today/ch09-facts.md, B3' },
-  { id: 'apple', label: 'Apple: not documented', bytes: null, facts: 'notes/today/ch09-facts.md, C4' },
+  {
+    id: 'nvidia',
+    get label() {
+      return tr('32 bytes: NVIDIA’s transaction', '32 byte: một giao dịch (transaction) của NVIDIA');
+    },
+    bytes: 32,
+    facts: 'notes/today/ch09-facts.md, A7', // i18n-ignore: facts-file citation
+  },
+  {
+    id: 'amd64',
+    get label() {
+      return tr('64 bytes: an AMD cache line', '64 byte: một dòng bộ nhớ đệm (cache line) của AMD');
+    },
+    bytes: 64,
+    facts: 'notes/today/ch09-facts.md, B3', // i18n-ignore: facts-file citation
+  },
+  {
+    id: 'amd128',
+    get label() {
+      return tr('128 bytes: an AMD cache line', '128 byte: một dòng bộ nhớ đệm (cache line) của AMD');
+    },
+    bytes: 128,
+    facts: 'notes/today/ch09-facts.md, B3', // i18n-ignore: facts-file citation
+  },
+  {
+    id: 'apple',
+    get label() {
+      return tr('Apple: not documented', 'Apple: không có tài liệu');
+    },
+    bytes: null,
+    facts: 'notes/today/ch09-facts.md, C4', // i18n-ignore: facts-file citation
+  },
 ];

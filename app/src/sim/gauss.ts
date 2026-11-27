@@ -13,6 +13,7 @@
 // rounded once to nearest even by minifloat.ts. Not modelled: timing, warps, shared-memory
 // layout, fused multiply-add (a multiply and a subtract round twice here).
 
+import { tr } from '../lib/locale.ts';
 import { FP16, FP32, add, div, mul, round, sub, type Format } from './minifloat';
 
 // ---------------------------------------------------------------- numbers
@@ -83,7 +84,13 @@ function fmtFloat(v: number, digits: number): string {
 }
 
 export type ArithId = 'exact' | 'fp32' | 'fp16';
-export const ARITH_LABEL: Record<ArithId, string> = { exact: 'exact fractions', fp32: 'FP32', fp16: 'FP16' };
+export const ARITH_LABEL: Record<ArithId, string> = {
+  get exact() {
+    return tr('exact fractions', 'phân số chính xác');
+  },
+  fp32: 'FP32',
+  fp16: 'FP16',
+};
 
 interface Arith<T> {
   of(n: bigint, d: bigint): T;
@@ -153,7 +160,9 @@ const I = (n: number): [bigint, bigint] => [BigInt(n), 1n];
 /** The book's first system (p. 594, Figs. A.9 and A.10). */
 const BOOK1: SystemDef = {
   id: 'book1',
-  label: "The book's first system (Figs. A.9, A.10)",
+  get label() {
+    return tr("The book's first system (Figs. A.9, A.10)", 'Hệ thứ nhất của sách (Hình A.9, A.10)');
+  },
   vars: ['X', 'Y', 'Z'],
   rows: [
     [I(3), I(5), I(2), I(19)],
@@ -165,7 +174,9 @@ const BOOK1: SystemDef = {
 /** The book's second system: equation 1 replaced by 5Y + 2Z = 16 (p. 597, Fig. A.11). */
 const BOOK2: SystemDef = {
   id: 'book2',
-  label: "The book's second system (Fig. A.11)",
+  get label() {
+    return tr("The book's second system (Fig. A.11)", 'Hệ thứ hai của sách (Hình A.11)');
+  },
   vars: ['X', 'Y', 'Z'],
   rows: [
     [I(0), I(5), I(2), I(16)],
@@ -185,7 +196,7 @@ export function tinySystem(k: number): SystemDef {
   const x2 = q(d - 2n, d - 1n);
   return {
     id: 'tiny',
-    label: '2 × 2 with a tiny pivot ε (ours)',
+    label: tr('2 × 2 with a tiny pivot ε (ours)', '2 × 2 với pivot ε rất nhỏ (của khóa học này)'),
     vars: ['x1', 'x2'],
     rows: [
       [[1n, d], I(1), I(1)],
@@ -241,8 +252,8 @@ export interface Trace {
   finite: boolean;
 }
 
-const rowName = (i: number) => `row ${i + 1}`;
-const list = (xs: string[]) => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]);
+const rowName = (i: number) => tr(`row ${i + 1}`, `hàng ${i + 1}`);
+const list = (xs: string[]) => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + tr(' and ', ' và ') + xs[xs.length - 1]);
 const uni = (s: string) => s.replace(/-/g, '−');
 
 export function trace(sys: SystemDef, opts: TraceOpts): Trace {
@@ -259,10 +270,10 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
   const cap = (s: string) => s.replace(/(^|\. )([a-z])/g, (_, a: string, b: string) => a + b.toUpperCase());
   const push = (p: Omit<Phase, 'm'>) => phases.push({ ...p, note: cap(p.note), m: cells() });
   const barrier = (why: string) =>
-    push({ kind: 'barrier', col: -1, threads: Array(n).fill('waiting'), note: `Barrier: all ${n} threads wait here ${why}.` });
+    push({ kind: 'barrier', col: -1, threads: Array(n).fill('waiting'), note: tr(`Barrier: all ${n} threads wait here ${why}.`, `Rào chắn: cả ${n} luồng chờ ở đây ${why}.`) });
   const base = (i: number): ThreadState => (solved.has(i) ? 'finished' : 'idle');
 
-  push({ kind: 'start', col: 0, threads: Array(n).fill('ready'), note: `Thread t owns row t + 1 and does all the work on it. Nothing has run yet.` });
+  push({ kind: 'start', col: 0, threads: Array(n).fill('ready'), note: tr(`Thread t owns row t + 1 and does all the work on it. Nothing has run yet.`, `Luồng t sở hữu hàng t + 1 và làm mọi việc trên hàng đó. Chưa có gì chạy.`) });
 
   for (let k = 0; k < n; k++) {
     if (opts.pivot) {
@@ -286,9 +297,11 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
         threads: Array.from({ length: n }, (_, i) => (i >= k ? 'searching' : base(i))),
         pivot: { rows, abs, levels, winner },
         note:
-          `Pivot search for ${V[k]}: a max reduction over |coefficient of ${V[k]}| in ${list(rows.map(rowName))}: ` +
+          tr(`Pivot search for ${V[k]}: a max reduction over |coefficient of ${V[k]}| in ${list(rows.map(rowName))}: `, `Tìm pivot cho ${V[k]}: một phép rút gọn max trên |hệ số của ${V[k]}| trong ${list(rows.map(rowName))}: `) +
           `${list(abs.map((c) => c.text))}. ` +
-          (winner === k ? `${rowName(k)} already holds the largest, so no swap is needed.` : `${rowName(winner)} wins.`),
+          (winner === k
+            ? tr(`${rowName(k)} already holds the largest, so no swap is needed.`, `${rowName(k)} đã giữ giá trị lớn nhất, nên không cần hoán đổi.`)
+            : tr(`${rowName(winner)} wins.`, `${rowName(winner)} thắng.`)),
       });
       if (winner !== k) {
         [m[k], m[winner]] = [m[winner], m[k]];
@@ -297,11 +310,14 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
           col: k,
           threads: Array.from({ length: n }, (_, i) => (i === k || i === winner ? 'working' : base(i))),
           swap: [k, winner],
-          step: 'Pivoting',
-          note: `Threads ${k} and ${winner} exchange their rows: ${rowName(winner)} moves to the top of what is left.`,
+          step: 'Pivoting', // i18n-ignore: identifier also shown to the reader
+          note: tr(
+            `Threads ${k} and ${winner} exchange their rows: ${rowName(winner)} moves to the top of what is left.`,
+            `Luồng ${k} và ${winner} đổi hàng cho nhau: ${rowName(winner)} chuyển lên đầu phần còn lại.`,
+          ),
         });
       }
-      barrier(winner !== k ? 'so that every thread sees the swapped rows' : 'until the search is over');
+      barrier(winner !== k ? tr('so that every thread sees the swapped rows', 'để mọi luồng đều thấy các hàng đã hoán đổi') : tr('until the search is over', 'cho đến khi việc tìm kiếm kết thúc'));
     }
 
     // Divide: each remaining row by its own coefficient in column k.
@@ -320,7 +336,7 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
       if (A.isZero(lead)) zeroPivot = true;
       threads[i] = 'working';
       divisors[i] = cell(lead);
-      divided.push(`${rowName(i)} by ${uni(A.text(lead))}`);
+      divided.push(tr(`${rowName(i)} by ${uni(A.text(lead))}`, `${rowName(i)} cho ${uni(A.text(lead))}`));
       m[i] = m[i].map((x, c) => (c < k ? x : A.div(x, lead)));
     }
     stepNo += 1;
@@ -330,14 +346,19 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
       col: k,
       threads,
       divisors,
-      step: `Step ${stepNo}`,
+      step: `Step ${stepNo}`, // i18n-ignore: identifier also shown to the reader
       note:
-        `Each thread divides its own row by that row's coefficient of ${V[k]}: ${list(divided)}.` +
-        (skipped.length ? ` ${list(skipped.map(rowName))} ${skipped.length > 1 ? 'have' : 'has'} no ${V[k]}, so ${skipped.length > 1 ? 'their threads skip' : 'its thread skips'} the division.` : '') +
-        (zeroPivot ? ` ${rowName(k)}'s coefficient is 0: x / 0 gives infinity and 0 / 0 gives NaN.` : '') +
-        (k === n - 1 ? ` ${rowName(k)} now reads ${V[k]} = ${uni(A.text(m[k][n]))}.` : ''),
+        tr(`Each thread divides its own row by that row's coefficient of ${V[k]}: ${list(divided)}.`, `Mỗi luồng chia hàng của mình cho hệ số của ${V[k]} trong hàng đó: ${list(divided)}.`) +
+        (skipped.length
+          ? tr(
+              ` ${list(skipped.map(rowName))} ${skipped.length > 1 ? 'have' : 'has'} no ${V[k]}, so ${skipped.length > 1 ? 'their threads skip' : 'its thread skips'} the division.`,
+              ` ${list(skipped.map(rowName))} không có ${V[k]}, nên luồng của ${skipped.length > 1 ? 'chúng' : 'nó'} bỏ qua phép chia.`,
+            )
+          : '') +
+        (zeroPivot ? tr(` ${rowName(k)}'s coefficient is 0: x / 0 gives infinity and 0 / 0 gives NaN.`, ` Hệ số của ${rowName(k)} bằng 0: x / 0 cho ra vô cực và 0 / 0 cho ra NaN.`) : '') +
+        (k === n - 1 ? tr(` ${rowName(k)} now reads ${V[k]} = ${uni(A.text(m[k][n]))}.`, ` ${rowName(k)} giờ là ${V[k]} = ${uni(A.text(m[k][n]))}.`) : ''),
     });
-    barrier('until every division is written');
+    barrier(tr('until every division is written', 'cho đến khi mọi phép chia đã được ghi'));
 
     if (k < n - 1) {
       const sThreads: ThreadState[] = Array.from({ length: n }, (_, i) => base(i));
@@ -358,13 +379,23 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
         kind: 'subtract',
         col: k,
         threads: sThreads,
-        step: `Step ${stepNo}`,
+        step: `Step ${stepNo}`, // i18n-ignore: identifier also shown to the reader
         note:
-          (subtracted.length ? `${list(subtracted.map(rowName))} subtract${subtracted.length > 1 ? '' : 's'} ${rowName(k)}, so ${V[k]} leaves ${subtracted.length > 1 ? 'them' : 'it'}.` : `No row below has ${V[k]}.`) +
-          (sSkipped.length ? ` ${list(sSkipped.map(rowName))} already ${sSkipped.length > 1 ? 'lack' : 'lacks'} ${V[k]} and ${sSkipped.length > 1 ? 'skip' : 'skips'}.` : '') +
-          ` Thread ${k} is done until back substitution: one more idle thread.`,
+          (subtracted.length
+            ? tr(
+                `${list(subtracted.map(rowName))} subtract${subtracted.length > 1 ? '' : 's'} ${rowName(k)}, so ${V[k]} leaves ${subtracted.length > 1 ? 'them' : 'it'}.`,
+                `${list(subtracted.map(rowName))} trừ đi ${rowName(k)}, nên ${V[k]} biến mất khỏi ${subtracted.length > 1 ? 'chúng' : 'nó'}.`,
+              )
+            : tr(`No row below has ${V[k]}.`, `Không hàng nào bên dưới có ${V[k]}.`)) +
+          (sSkipped.length
+            ? tr(
+                ` ${list(sSkipped.map(rowName))} already ${sSkipped.length > 1 ? 'lack' : 'lacks'} ${V[k]} and ${sSkipped.length > 1 ? 'skip' : 'skips'}.`,
+                ` ${list(sSkipped.map(rowName))} vốn đã không có ${V[k]} và bỏ qua.`,
+              )
+            : '') +
+          tr(` Thread ${k} is done until back substitution: one more idle thread.`, ` Luồng ${k} xong việc cho đến bước thế ngược: thêm một luồng rảnh.`),
       });
-      barrier('until every subtraction is written');
+      barrier(tr('until every subtraction is written', 'cho đến khi mọi phép trừ đã được ghi'));
     }
   }
 
@@ -385,19 +416,22 @@ export function trace(sys: SystemDef, opts: TraceOpts): Trace {
       col: j,
       threads: Array.from({ length: n }, (_, i) => (i === j ? 'working' : i > j ? 'finished' : 'idle')),
       subst,
-      step: `Step ${stepNo}`,
+      step: `Step ${stepNo}`, // i18n-ignore: identifier also shown to the reader
       note:
-        `Thread ${j} substitutes ${list(subst.map((c) => `${V[c]} = ${uni(A.text(m[c][n]))}`)) || 'nothing'} into ${rowName(j)}: ` +
+        tr(
+          `Thread ${j} substitutes ${list(subst.map((c) => `${V[c]} = ${uni(A.text(m[c][n]))}`)) || 'nothing'} into ${rowName(j)}: `,
+          `Luồng ${j} thế ${list(subst.map((c) => `${V[c]} = ${uni(A.text(m[c][n]))}`)) || 'không gì'} vào ${rowName(j)}: `,
+        ) +
         `${V[j]} = ${uni(A.text(m[j][n]))}.`,
     });
-    if (j > 0) barrier('before the next row up reads this one');
+    if (j > 0) barrier(tr('before the next row up reads this one', 'trước khi hàng kế tiếp phía trên đọc hàng này'));
   }
   const solution = m.map((r) => cell(r[n]));
   push({
     kind: 'done',
     col: -1,
     threads: Array(n).fill('finished'),
-    note: `Solution: ${list(V.map((v, i) => `${v} = ${uni(solution[i].text)}`))}.`,
+    note: tr(`Solution: ${list(V.map((v, i) => `${v} = ${uni(solution[i].text)}`))}.`, `Nghiệm: ${list(V.map((v, i) => `${v} = ${uni(solution[i].text)}`))}.`),
   });
   const last = phases[phases.length - 1].m;
   return { sys, opts, n, phases, solution, finite: last.every((r) => r.every((c) => Number.isFinite(c.v))) };
@@ -433,7 +467,7 @@ export interface Panel {
 /** Panels as the book's figures lay them out, computed from a trace (rows numbered from 1). */
 export function panelsOf(t: Trace): Panel[] {
   const V = t.sys.vars;
-  const out: Panel[] = [{ label: 'Original', caption: { op: 'none' }, rows: t.phases[0].m.map((r) => r.map((c) => c.text)) }];
+  const out: Panel[] = [{ label: 'Original', caption: { op: 'none' }, rows: t.phases[0].m.map((r) => r.map((c) => c.text)) }]; // i18n-ignore: identifier also shown to the reader
   for (const p of t.phases) {
     if (!p.step) continue;
     let caption: Caption = { op: 'none' };
@@ -472,15 +506,15 @@ export function bookPanels(fig: 'A.10' | 'A.11'): Panel[] {
 const R = (s: string) => s.split(' ');
 /** Fig. A.11 as printed (p. 598), transcribed from notes/appA.md; captions shortened to their content. */
 export const printedA11: Panel[] = [
-  { label: 'Original', caption: { op: 'none' }, rows: [R('0 5 2 16'), R('2 3 1 11'), R('1 2 2 11')] },
-  { label: 'Pivoting', caption: { op: 'swap', rows: [1, 2] }, rows: [R('2 3 1 11'), R('0 5 2 16'), R('1 2 2 11')] },
-  { label: 'Step 1', caption: { op: 'divide', by: [[1, '3']] }, rows: [R('1 3/2 1/2 11/2'), R('0 5 2 16'), R('1 2 2 11')] },
-  { label: 'Step 2', caption: { op: 'subtract', minus: 1, from: [3], skipped: [2] }, rows: [R('1 3/2 1/2 11/2'), R('0 5 2 16'), R('0 1/2 3/2 11/2')] },
-  { label: 'Step 3', caption: { op: 'divide', by: [[2, '5'], [3, '1/2']] }, rows: [R('1 3/2 1/2 11/2'), R('0 1 2/5 16/5'), R('0 1 3 11')] },
-  { label: 'Step 4', caption: { op: 'subtract', minus: 2, from: [3], skipped: [] }, rows: [R('1 3/2 1/2 11/2'), R('0 1 2/5 16/5'), R('0 0 13/5 39/5')] },
-  { label: 'Step 5', caption: { op: 'divide', by: [[3, '13/5']] }, rows: [R('1 5/3 2/3 19/3'), R('0 1 2/5 16/5'), R('0 0 1 3')], solved: 'Z' },
-  { label: 'Step 6', caption: { op: 'substitute', row: 2, vars: ['Z'] }, rows: [R('1 5/3 2/3 19/3'), R('0 1 0 2'), R('0 0 1 3')], solved: 'Y' },
-  { label: 'Step 7', caption: { op: 'substitute', row: 1, vars: ['Y', 'Z'] }, rows: [R('1 0 0 1'), R('0 1 0 2'), R('0 0 1 3')], solved: 'X' },
+  { label: 'Original', caption: { op: 'none' }, rows: [R('0 5 2 16'), R('2 3 1 11'), R('1 2 2 11')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Pivoting', caption: { op: 'swap', rows: [1, 2] }, rows: [R('2 3 1 11'), R('0 5 2 16'), R('1 2 2 11')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 1', caption: { op: 'divide', by: [[1, '3']] }, rows: [R('1 3/2 1/2 11/2'), R('0 5 2 16'), R('1 2 2 11')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 2', caption: { op: 'subtract', minus: 1, from: [3], skipped: [2] }, rows: [R('1 3/2 1/2 11/2'), R('0 5 2 16'), R('0 1/2 3/2 11/2')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 3', caption: { op: 'divide', by: [[2, '5'], [3, '1/2']] }, rows: [R('1 3/2 1/2 11/2'), R('0 1 2/5 16/5'), R('0 1 3 11')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 4', caption: { op: 'subtract', minus: 2, from: [3], skipped: [] }, rows: [R('1 3/2 1/2 11/2'), R('0 1 2/5 16/5'), R('0 0 13/5 39/5')] }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 5', caption: { op: 'divide', by: [[3, '13/5']] }, rows: [R('1 5/3 2/3 19/3'), R('0 1 2/5 16/5'), R('0 0 1 3')], solved: 'Z' }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 6', caption: { op: 'substitute', row: 2, vars: ['Z'] }, rows: [R('1 5/3 2/3 19/3'), R('0 1 0 2'), R('0 0 1 3')], solved: 'Y' }, // i18n-ignore: identifier also shown to the reader
+  { label: 'Step 7', caption: { op: 'substitute', row: 1, vars: ['Y', 'Z'] }, rows: [R('1 0 0 1'), R('0 1 0 2'), R('0 0 1 3')], solved: 'X' }, // i18n-ignore: identifier also shown to the reader
 ];
 
 export interface PanelDiff {
@@ -498,16 +532,23 @@ export function captionText(c: Caption, vars: string[] = ['X', 'Y', 'Z']): strin
     case 'none':
       return '';
     case 'swap':
-      return `swap row ${c.rows[0]} with row ${c.rows[1]}`;
+      return tr(`swap row ${c.rows[0]} with row ${c.rows[1]}`, `hoán đổi hàng ${c.rows[0]} với hàng ${c.rows[1]}`);
     case 'divide':
-      return c.by.length ? 'divide ' + list(c.by.map(([r, d]) => `row ${r} by ${uni(d)}`)) : 'no division needed';
+      return c.by.length
+        ? tr('divide ', 'chia ') + list(c.by.map(([r, d]) => tr(`row ${r} by ${uni(d)}`, `hàng ${r} cho ${uni(d)}`)))
+        : tr('no division needed', 'không cần chia');
     case 'subtract':
       return (
-        `subtract row ${c.minus} from ${list(c.from.map((r) => `row ${r}`))}` +
-        (c.skipped.length ? `; ${list(c.skipped.map((r) => `row ${r}`))} already ${c.skipped.length > 1 ? 'lack' : 'lacks'} ${vars[c.minus - 1]}` : '')
+        tr(`subtract row ${c.minus} from ${list(c.from.map((r) => `row ${r}`))}`, `lấy ${list(c.from.map((r) => `hàng ${r}`))} trừ hàng ${c.minus}`) +
+        (c.skipped.length
+          ? tr(
+              `; ${list(c.skipped.map((r) => `row ${r}`))} already ${c.skipped.length > 1 ? 'lack' : 'lacks'} ${vars[c.minus - 1]}`,
+              `; ${list(c.skipped.map((r) => `hàng ${r}`))} vốn đã không có ${vars[c.minus - 1]}`,
+            )
+          : '')
       );
     case 'substitute':
-      return `substitute ${list(c.vars)} into row ${c.row}`;
+      return tr(`substitute ${list(c.vars)} into row ${c.row}`, `thế ${list(c.vars)} vào hàng ${c.row}`);
   }
 }
 
@@ -517,10 +558,10 @@ export function diffPanels(printed: Panel[], computed: Panel[]): PanelDiff[] {
   printed.forEach((p, i) => {
     const c = computed[i];
     if (JSON.stringify(p.caption) !== JSON.stringify(c.caption))
-      out.push({ panel: p.label, what: 'caption', printed: captionText(p.caption), computed: captionText(c.caption) });
+      out.push({ panel: p.label, what: 'caption', printed: captionText(p.caption), computed: captionText(c.caption) }); // i18n-ignore: union member
     p.rows.forEach((row, r) =>
       row.forEach((v, k) => {
-        if (v !== c.rows[r][k]) out.push({ panel: p.label, what: 'cell', row: r, col: k, printed: v, computed: c.rows[r][k] });
+        if (v !== c.rows[r][k]) out.push({ panel: p.label, what: 'cell', row: r, col: k, printed: v, computed: c.rows[r][k] }); // i18n-ignore: union member
       }),
     );
   });

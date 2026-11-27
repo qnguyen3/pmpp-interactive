@@ -16,25 +16,36 @@
 // What it leaves out: steel and cuBLAS tile selection, data types other than the weight's
 // class, strides and batching of 3-D operands, and every per-GPU exception (it names them).
 
+import { tr } from '../lib/locale.ts';
 import { gpuBackends, stepSeries, type ReportsLike } from './batching';
 
 export type Project = 'llama-cuda' | 'llama-metal' | 'mlx-cuda' | 'mlx-metal' | 'torch-cuda' | 'torch-mps';
 export const PROJECTS: Project[] = ['llama-cuda', 'llama-metal', 'mlx-cuda', 'mlx-metal', 'torch-cuda', 'torch-mps'];
 export const PROJECT_LABEL: Record<Project, string> = {
-  'llama-cuda': 'llama.cpp, CUDA and HIP',
-  'llama-metal': 'llama.cpp, Metal',
-  'mlx-cuda': 'MLX, CUDA',
-  'mlx-metal': 'MLX, Metal',
-  'torch-cuda': 'PyTorch, CUDA (and ROCm)',
-  'torch-mps': 'PyTorch, MPS (addmm and mm)',
+  get 'llama-cuda'() {
+    return tr('llama.cpp, CUDA and HIP', 'llama.cpp, CUDA và HIP');
+  },
+  'llama-metal': 'llama.cpp, Metal', // i18n-ignore: project and backend names
+  'mlx-cuda': 'MLX, CUDA', // i18n-ignore: project and backend names
+  'mlx-metal': 'MLX, Metal', // i18n-ignore: project and backend names
+  get 'torch-cuda'() {
+    return tr('PyTorch, CUDA (and ROCm)', 'PyTorch, CUDA (và ROCm)');
+  },
+  get 'torch-mps'() {
+    return tr('PyTorch, MPS (addmm and mm)', 'PyTorch, MPS (addmm và mm)');
+  },
 };
 
 export type WeightType = 'f32' | 'f16' | 'quant' | 'kquant';
 export const WEIGHT_LABEL: Record<WeightType, string> = {
   f32: 'F32',
   f16: 'F16',
-  quant: 'quantised (not a k-quant)',
-  kquant: 'quantised (k-quant)',
+  get quant() {
+    return tr('quantised (not a k-quant)', 'lượng tử hóa (không phải k-quant)');
+  },
+  get kquant() {
+    return tr('quantised (k-quant)', 'lượng tử hóa (k-quant)');
+  },
 };
 const isQuant = (w: WeightType) => w === 'quant' || w === 'kquant';
 
@@ -68,24 +79,114 @@ export type RouteId =
 export type Kind = 'gemv' | 'gemm' | 'library' | 'unknown';
 
 export const ROUTES: Record<RouteId, { name: string; kind: Kind; where: string }> = {
-  cublas: { name: 'cuBLAS (ggml_cuda_mul_mat_cublas)', kind: 'library', where: 'ggml/src/ggml-cuda/ggml-cuda.cu (the HIP build goes through the renames in vendors/hip.h)' },
-  mmvf: { name: 'mmvf: float GEMV (ggml_cuda_mul_mat_vec_f)', kind: 'gemv', where: 'ggml/src/ggml-cuda/mmvf.cu' },
-  mmf: { name: 'mmf (ggml_cuda_mul_mat_f)', kind: 'gemm', where: 'ggml/src/ggml-cuda/mmf.cu' },
-  mmvq: { name: 'mmvq: quantised GEMV (ggml_cuda_mul_mat_vec_q)', kind: 'gemv', where: 'ggml/src/ggml-cuda/mmvq.cu' },
-  mmq: { name: 'mmq: quantised GEMM (ggml_cuda_mul_mat_q)', kind: 'gemm', where: 'ggml/src/ggml-cuda/mmq.cu' },
-  fp8: { name: 'the FP8 path', kind: 'unknown', where: 'ggml/src/ggml-cuda/ggml-cuda.cu' },
-  mul_mv: { name: 'mul_mv (matrix-vector)', kind: 'gemv', where: 'ggml/src/ggml-metal/kernels/mul_mv.metal' },
-  mul_mv_ext: { name: 'mul_mv_ext (small-batch matrix-vector)', kind: 'gemv', where: 'ggml/src/ggml-metal/ggml-metal-ops.cpp' },
-  mul_mm: { name: 'mul_mm (SIMD-group matrices)', kind: 'gemm', where: 'ggml/src/ggml-metal/kernels/mul_mm.metal' },
-  'metal-unread': { name: 'a path the facts did not read', kind: 'unknown', where: 'ggml/src/ggml-metal/ggml-metal-ops.cpp' },
-  'mlx-gemv': { name: 'gemv: a warp per row (gemv_impl)', kind: 'gemv', where: 'mlx/backend/cuda/gemms/gemv.cu' },
-  cublaslt: { name: 'cuBLASLt (CublasGemm)', kind: 'library', where: 'mlx/backend/cuda/gemms/cublas_gemm.cpp' },
-  wide: { name: 'the wide GEMV', kind: 'gemv', where: 'mlx/backend/metal/matmul.cpp' },
-  gemv: { name: 'gemv (GEMVKernel)', kind: 'gemv', where: 'mlx/backend/metal/kernels/gemv.h' },
-  steel: { name: 'steel GEMM, tiles chosen per device', kind: 'gemm', where: 'mlx/backend/metal/kernels/steel/gemm/' },
-  'torch-blas': { name: 'cuBLAS or cuBLASLt (CK on ROCm), by the preferred BLAS backend', kind: 'library', where: 'aten/src/ATen/cuda/CUDABlas.cpp' },
-  'mps-gemv': { name: 'gemv_t / gemv_nt kernels', kind: 'gemv', where: 'aten/src/ATen/native/mps/kernels/Gemv.h' },
-  'mps-matmul': { name: "PyTorch's Metal matmul kernels or MPSGraph (which one was not read)", kind: 'gemm', where: 'aten/src/ATen/native/mps/operations/Matmul.mm' },
+  cublas: {
+    name: 'cuBLAS (ggml_cuda_mul_mat_cublas)', // i18n-ignore: kernel and API names
+    kind: 'library',
+    get where() {
+      return tr('ggml/src/ggml-cuda/ggml-cuda.cu (the HIP build goes through the renames in vendors/hip.h)', 'ggml/src/ggml-cuda/ggml-cuda.cu (bản build HIP đi qua các phép đổi tên trong vendors/hip.h)');
+    },
+  },
+  mmvf: {
+    get name() {
+      return tr('mmvf: float GEMV (ggml_cuda_mul_mat_vec_f)', 'mmvf: GEMV số thực (ggml_cuda_mul_mat_vec_f)');
+    },
+    kind: 'gemv',
+    where: 'ggml/src/ggml-cuda/mmvf.cu',
+  },
+  mmf: { name: 'mmf (ggml_cuda_mul_mat_f)', kind: 'gemm', where: 'ggml/src/ggml-cuda/mmf.cu' }, // i18n-ignore: kernel and API names, file path
+  mmvq: {
+    get name() {
+      return tr('mmvq: quantised GEMV (ggml_cuda_mul_mat_vec_q)', 'mmvq: GEMV lượng tử hóa (ggml_cuda_mul_mat_vec_q)');
+    },
+    kind: 'gemv',
+    where: 'ggml/src/ggml-cuda/mmvq.cu',
+  },
+  mmq: {
+    get name() {
+      return tr('mmq: quantised GEMM (ggml_cuda_mul_mat_q)', 'mmq: GEMM lượng tử hóa (ggml_cuda_mul_mat_q)');
+    },
+    kind: 'gemm',
+    where: 'ggml/src/ggml-cuda/mmq.cu',
+  },
+  fp8: {
+    get name() {
+      return tr('the FP8 path', 'nhánh FP8');
+    },
+    kind: 'unknown',
+    where: 'ggml/src/ggml-cuda/ggml-cuda.cu',
+  },
+  mul_mv: {
+    get name() {
+      return tr('mul_mv (matrix-vector)', 'mul_mv (ma trận với vector)');
+    },
+    kind: 'gemv',
+    where: 'ggml/src/ggml-metal/kernels/mul_mv.metal',
+  },
+  mul_mv_ext: {
+    get name() {
+      return tr('mul_mv_ext (small-batch matrix-vector)', 'mul_mv_ext (ma trận với vector, batch nhỏ)');
+    },
+    kind: 'gemv',
+    where: 'ggml/src/ggml-metal/ggml-metal-ops.cpp',
+  },
+  mul_mm: {
+    get name() {
+      return tr('mul_mm (SIMD-group matrices)', 'mul_mm (ma trận SIMD group)');
+    },
+    kind: 'gemm',
+    where: 'ggml/src/ggml-metal/kernels/mul_mm.metal',
+  },
+  'metal-unread': {
+    get name() {
+      return tr('a path the facts did not read', 'một nhánh mà facts chưa đọc');
+    },
+    kind: 'unknown',
+    where: 'ggml/src/ggml-metal/ggml-metal-ops.cpp',
+  },
+  'mlx-gemv': {
+    get name() {
+      return tr('gemv: a warp per row (gemv_impl)', 'gemv: một warp cho mỗi hàng (gemv_impl)');
+    },
+    kind: 'gemv',
+    where: 'mlx/backend/cuda/gemms/gemv.cu',
+  },
+  cublaslt: { name: 'cuBLASLt (CublasGemm)', kind: 'library', where: 'mlx/backend/cuda/gemms/cublas_gemm.cpp' }, // i18n-ignore: kernel and API names, file path
+  wide: {
+    get name() {
+      return tr('the wide GEMV', 'GEMV rộng');
+    },
+    kind: 'gemv',
+    where: 'mlx/backend/metal/matmul.cpp',
+  },
+  gemv: { name: 'gemv (GEMVKernel)', kind: 'gemv', where: 'mlx/backend/metal/kernels/gemv.h' }, // i18n-ignore: kernel and API names, file path
+  steel: {
+    get name() {
+      return tr('steel GEMM, tiles chosen per device', 'steel GEMM, ô được chọn theo từng device');
+    },
+    kind: 'gemm',
+    where: 'mlx/backend/metal/kernels/steel/gemm/',
+  },
+  'torch-blas': {
+    get name() {
+      return tr('cuBLAS or cuBLASLt (CK on ROCm), by the preferred BLAS backend', 'cuBLAS hoặc cuBLASLt (CK trên ROCm), theo backend BLAS được ưu tiên');
+    },
+    kind: 'library',
+    where: 'aten/src/ATen/cuda/CUDABlas.cpp',
+  },
+  'mps-gemv': {
+    get name() {
+      return tr('gemv_t / gemv_nt kernels', 'các kernel gemv_t / gemv_nt');
+    },
+    kind: 'gemv',
+    where: 'aten/src/ATen/native/mps/kernels/Gemv.h',
+  },
+  'mps-matmul': {
+    get name() {
+      return tr('PyTorch\'s Metal matmul kernels or MPSGraph (which one was not read)', 'các kernel matmul Metal của PyTorch hoặc MPSGraph (chưa đọc là cái nào)');
+    },
+    kind: 'gemm',
+    where: 'aten/src/ATen/native/mps/operations/Matmul.mm',
+  },
 };
 
 export type Verdict = 'true' | 'false' | 'not-modelled';
@@ -133,47 +234,47 @@ function checksFor(p: Project, s: Shape): { checks: Check[]; notes: string[] } {
       const overVec = s.M > MMVF_MAX_BATCH_SIZE;
       return {
         checks: [
-          { label: 'the activations (src1) or the output are not F32', verdict: T(!s.inputF32), route: 'cublas', detail: s.inputF32 ? 'F32: go on' : 'not F32: straight to cuBLAS', source: 'x3 B4, ggml-cuda.cu 2547 to 2548 (src1->type, dst->type)' },
+          { label: tr('the activations (src1) or the output are not F32', 'activation (src1) hoặc đầu ra không phải F32'), verdict: T(!s.inputF32), route: 'cublas', detail: s.inputF32 ? tr('F32: go on', 'F32: đi tiếp') : tr('not F32: straight to cuBLAS', 'không phải F32: thẳng tới cuBLAS'), source: tr('x3 B4, ggml-cuda.cu 2547 to 2548 (src1->type, dst->type)', 'x3 B4, ggml-cuda.cu 2547 đến 2548 (src1->type, dst->type)') },
           {
-            label: 'ggml_cuda_should_use_mmvf',
+            label: 'ggml_cuda_should_use_mmvf', // i18n-ignore: function name
             verdict: overVec ? 'false' : isQuant(s.weight) ? 'false' : 'not-modelled',
             route: 'mmvf',
             detail: overVec
-              ? `${s.M} tokens > MMVF_MAX_BATCH_SIZE ${MMVF_MAX_BATCH_SIZE}: ruled out`
+              ? tr(`${s.M} tokens > MMVF_MAX_BATCH_SIZE ${MMVF_MAX_BATCH_SIZE}: ruled out`, `${s.M} token > MMVF_MAX_BATCH_SIZE ${MMVF_MAX_BATCH_SIZE}: bị loại`)
               : isQuant(s.weight)
-                ? 'a quantised weight: mmvf is the float GEMV (our reading of the names in the facts)'
-                : `${s.M} ≤ ${MMVF_MAX_BATCH_SIZE}; the rest, including AMD branches, is decided inside should_use_mmvf (not modelled)`,
-            source: 'x3 B4, ch22 D6',
+                ? tr('a quantised weight: mmvf is the float GEMV (our reading of the names in the facts)', 'trọng số lượng tử hóa: mmvf là GEMV số thực (cách chúng tôi đọc các tên trong facts)')
+                : tr(`${s.M} ≤ ${MMVF_MAX_BATCH_SIZE}; the rest, including AMD branches, is decided inside should_use_mmvf (not modelled)`, `${s.M} ≤ ${MMVF_MAX_BATCH_SIZE}; phần còn lại, kể cả các nhánh AMD, được quyết định bên trong should_use_mmvf (không mô hình hóa)`),
+            source: 'x3 B4, ch22 D6', // i18n-ignore: citation
           },
           {
-            label: 'ggml_cuda_should_use_mmf',
+            label: 'ggml_cuda_should_use_mmf', // i18n-ignore: function name
             verdict: isQuant(s.weight) ? 'false' : 'not-modelled',
             route: 'mmf',
-            detail: isQuant(s.weight) ? 'a quantised weight: mmf is the float matmul, beside mmq (our reading of the names)' : 'decided inside should_use_mmf (not modelled)',
-            source: 'x3 B4, ggml-cuda.cu 2575 to 2576',
+            detail: isQuant(s.weight) ? tr('a quantised weight: mmf is the float matmul, beside mmq (our reading of the names)', 'trọng số lượng tử hóa: mmf là phép nhân ma trận số thực, bên cạnh mmq (cách chúng tôi đọc các tên)') : tr('decided inside should_use_mmf (not modelled)', 'được quyết định bên trong should_use_mmf (không mô hình hóa)'),
+            source: tr('x3 B4, ggml-cuda.cu 2575 to 2576', 'x3 B4, ggml-cuda.cu 2575 đến 2576'),
           },
           {
-            label: 'ggml_cuda_should_use_mmvq',
+            label: 'ggml_cuda_should_use_mmvq', // i18n-ignore: function name
             verdict: s.M > MMVQ_MAX_BATCH_SIZE ? 'false' : !isQuant(s.weight) ? 'false' : 'not-modelled',
             route: 'mmvq',
             detail: s.M > MMVQ_MAX_BATCH_SIZE
-              ? `${s.M} tokens > MMVQ_MAX_BATCH_SIZE ${MMVQ_MAX_BATCH_SIZE}: ruled out`
+              ? tr(`${s.M} tokens > MMVQ_MAX_BATCH_SIZE ${MMVQ_MAX_BATCH_SIZE}: ruled out`, `${s.M} token > MMVQ_MAX_BATCH_SIZE ${MMVQ_MAX_BATCH_SIZE}: bị loại`)
               : !isQuant(s.weight)
-                ? 'a float weight: mmvq is the quantised GEMV (our reading of the names in the facts)'
-                : `${s.M} ≤ ${MMVQ_MAX_BATCH_SIZE}, but the limit is lower for some types on some GPUs ("tuned on RTX 4090"): not modelled`,
-            source: 'x3 B4, ch22 D6',
+                ? tr('a float weight: mmvq is the quantised GEMV (our reading of the names in the facts)', 'trọng số số thực: mmvq là GEMV lượng tử hóa (cách chúng tôi đọc các tên trong facts)')
+                : tr(`${s.M} ≤ ${MMVQ_MAX_BATCH_SIZE}, but the limit is lower for some types on some GPUs ("tuned on RTX 4090"): not modelled`, `${s.M} ≤ ${MMVQ_MAX_BATCH_SIZE}, nhưng giới hạn thấp hơn với một số kiểu trên một số GPU ("tuned on RTX 4090"): không mô hình hóa`),
+            source: 'x3 B4, ch22 D6', // i18n-ignore: citation
           },
           {
-            label: 'ggml_cuda_should_use_mmq',
+            label: 'ggml_cuda_should_use_mmq', // i18n-ignore: function name
             verdict: isQuant(s.weight) ? 'not-modelled' : 'false',
             route: 'mmq',
-            detail: isQuant(s.weight) ? 'decided inside should_use_mmq (not modelled)' : 'a float weight: mmq is the quantised matmul (our reading of the names)',
-            source: 'x3 B4, ggml-cuda.cu 2589 to 2590',
+            detail: isQuant(s.weight) ? tr('decided inside should_use_mmq (not modelled)', 'được quyết định bên trong should_use_mmq (không mô hình hóa)') : tr('a float weight: mmq is the quantised matmul (our reading of the names)', 'trọng số số thực: mmq là phép nhân ma trận lượng tử hóa (cách chúng tôi đọc các tên)'),
+            source: tr('x3 B4, ggml-cuda.cu 2589 to 2590', 'x3 B4, ggml-cuda.cu 2589 đến 2590'),
           },
-          { label: 'an FP8 path', verdict: 'not-modelled', route: 'fp8', detail: 'its condition was not read', source: 'x3 B4' },
-          { label: 'otherwise', verdict: 'true', route: 'cublas', detail: 'ggml_cuda_mul_mat_cublas', source: 'x3 B4, ggml-cuda.cu 2596' },
+          { label: tr('an FP8 path', 'một nhánh FP8'), verdict: 'not-modelled', route: 'fp8', detail: tr('its condition was not read', 'điều kiện của nó chưa được đọc'), source: 'x3 B4' }, // i18n-ignore: verdict identifier
+          { label: tr('otherwise', 'ngược lại'), verdict: 'true', route: 'cublas', detail: 'ggml_cuda_mul_mat_cublas', source: 'x3 B4, ggml-cuda.cu 2596' }, // i18n-ignore: verdict identifier, function name, citation
         ],
-        notes: ['HIP compiles the same file: the chain is the same, with AMD branches inside should_use_mmvf (ch22 D6, x3 B9).'],
+        notes: [tr('HIP compiles the same file: the chain is the same, with AMD branches inside should_use_mmvf (ch22 D6, x3 B9).', 'HIP biên dịch cùng tệp này: chuỗi kiểm tra giống hệt, với các nhánh AMD bên trong should_use_mmvf (ch22 D6, x3 B9).')],
       };
     }
     case 'llama-metal': {
@@ -181,18 +282,18 @@ function checksFor(p: Project, s: Shape): { checks: Check[]; notes: string[] } {
       const inExt = s.M >= lo && s.M <= METAL_EXT.hi;
       return {
         checks: [
-          { label: 'one token', verdict: T(s.M === 1), route: 'mul_mv', detail: s.M === 1 ? 'mul_mv.metal' : `${s.M} tokens`, source: 'x3 B4 ("mul_mv.metal for one"; where this test sits in the code was not read)' },
+          { label: tr('one token', 'một token'), verdict: T(s.M === 1), route: 'mul_mv', detail: s.M === 1 ? 'mul_mv.metal' : tr(`${s.M} tokens`, `${s.M} token`), source: tr('x3 B4 ("mul_mv.metal for one"; where this test sits in the code was not read)', 'x3 B4 ("mul_mv.metal for one"; chưa đọc phép kiểm tra này nằm ở đâu trong mã)') },
           {
-            label: `${lo} ≤ tokens ≤ ${METAL_EXT.hi}${s.weight === 'kquant' ? ' (k-quants)' : ''}`,
+            label: tr(`${lo} ≤ tokens ≤ ${METAL_EXT.hi}${s.weight === 'kquant' ? ' (k-quants)' : ''}`, `${lo} ≤ token ≤ ${METAL_EXT.hi}${s.weight === 'kquant' ? ' (k-quant)' : ''}`),
             verdict: inExt ? 'not-modelled' : 'false',
             route: 'mul_mv_ext',
             detail: inExt
-              ? 'in the range; the condition is "for most types" and the full type list was not read'
-              : `${s.M} tokens: outside ${lo} to ${METAL_EXT.hi}`,
-            source: 'ch22 D6, ggml-metal-ops.cpp',
+              ? tr('in the range; the condition is "for most types" and the full type list was not read', 'trong khoảng; điều kiện là "for most types" và danh sách kiểu đầy đủ chưa được đọc')
+              : tr(`${s.M} tokens: outside ${lo} to ${METAL_EXT.hi}`, `${s.M} token: ngoài khoảng ${lo} đến ${METAL_EXT.hi}`),
+            source: 'ch22 D6, ggml-metal-ops.cpp', // i18n-ignore: citation and file name
           },
-          { label: 'ggml_metal_op_mul_mat_use_mm', verdict: 'not-modelled', route: 'mul_mm', detail: 'decided inside use_mm (not modelled)', source: 'ch22 D6, ch15 D2' },
-          { label: 'otherwise', verdict: 'true', route: 'metal-unread', detail: 'what runs when use_mm declines was not read', source: 'ch22 D6' },
+          { label: 'ggml_metal_op_mul_mat_use_mm', verdict: 'not-modelled', route: 'mul_mm', detail: tr('decided inside use_mm (not modelled)', 'được quyết định bên trong use_mm (không mô hình hóa)'), source: 'ch22 D6, ch15 D2' }, // i18n-ignore: function name, verdict identifier, citation
+          { label: tr('otherwise', 'ngược lại'), verdict: 'true', route: 'metal-unread', detail: tr('what runs when use_mm declines was not read', 'chưa đọc cái gì chạy khi use_mm từ chối'), source: 'ch22 D6' }, // i18n-ignore: verdict identifier, citation
         ],
         notes: [],
       };
@@ -206,52 +307,55 @@ function checksFor(p: Project, s: Shape): { checks: Check[]; notes: string[] } {
             verdict: T(g),
             route: 'mlx-gemv',
             detail: s.bias
-              ? 'a bias: the GEMV branch needs none'
-              : `M == 1: ${s.M === 1}, b transposed: ${s.bTransposed}, N == 1: ${s.N === 1}, a transposed: ${s.aTransposed}`,
-            source: 'x3 B4, matmul.cpp line 99, gemv.cu line 188',
+              ? tr('a bias: the GEMV branch needs none', 'có bias: nhánh GEMV yêu cầu không có bias')
+              : tr(`M == 1: ${s.M === 1}, b transposed: ${s.bTransposed}, N == 1: ${s.N === 1}, a transposed: ${s.aTransposed}`, `M == 1: ${s.M === 1}, b chuyển vị: ${s.bTransposed}, N == 1: ${s.N === 1}, a chuyển vị: ${s.aTransposed}`),
+            source: tr('x3 B4, matmul.cpp line 99, gemv.cu line 188', 'x3 B4, matmul.cpp dòng 99, gemv.cu dòng 188'),
           },
-          { label: 'otherwise', verdict: 'true', route: 'cublaslt', detail: '"Invoke cublasLt"', source: 'x3 B4, matmul.cpp line 115' },
+          { label: tr('otherwise', 'ngược lại'), verdict: 'true', route: 'cublaslt', detail: '"Invoke cublasLt"', source: tr('x3 B4, matmul.cpp line 115', 'x3 B4, matmul.cpp dòng 115') }, // i18n-ignore: verdict identifier; the detail quotes a source comment
         ],
-        notes: ['No AMD backend: MLX has no HIP build (x3 B9).'],
+        notes: [tr('No AMD backend: MLX has no HIP build (x3 B9).', 'Không có backend AMD: MLX không có bản build HIP (x3 B9).')],
       };
     }
     case 'mlx-metal': {
       return {
         checks: [
           {
-            label: `the wide GEMV: at most ${MLX_WIDE_MAX} input vectors`,
+            label: tr(`the wide GEMV: at most ${MLX_WIDE_MAX} input vectors`, `GEMV rộng: tối đa ${MLX_WIDE_MAX} vector đầu vào`),
             verdict: s.M <= MLX_WIDE_MAX ? 'not-modelled' : 'false',
             route: 'wide',
-            detail: s.M <= MLX_WIDE_MAX ? `${s.M} ≤ ${MLX_WIDE_MAX}; the route's other conditions were not read` : `${s.M} vectors > ${MLX_WIDE_MAX}`,
-            source: 'x3 B4, matmul.cpp line 1620',
+            detail: s.M <= MLX_WIDE_MAX ? tr(`${s.M} ≤ ${MLX_WIDE_MAX}; the route's other conditions were not read`, `${s.M} ≤ ${MLX_WIDE_MAX}; các điều kiện khác của nhánh này chưa được đọc`) : tr(`${s.M} vectors > ${MLX_WIDE_MAX}`, `${s.M} vector > ${MLX_WIDE_MAX}`),
+            source: tr('x3 B4, matmul.cpp line 1620', 'x3 B4, matmul.cpp dòng 1620'),
           },
-          { label: 'std::min(M, N) == 1', verdict: T(Math.min(s.M, s.N) === 1), route: 'gemv', detail: `min(${s.M}, ${s.N}) = ${Math.min(s.M, s.N)}`, source: 'x3 B4, matmul.cpp line 1647' },
-          { label: 'otherwise', verdict: 'true', route: 'steel', detail: 'tile shape picked per device class (not evaluated)', source: 'ch15 D3' },
+          { label: 'std::min(M, N) == 1', verdict: T(Math.min(s.M, s.N) === 1), route: 'gemv', detail: `min(${s.M}, ${s.N}) = ${Math.min(s.M, s.N)}`, source: tr('x3 B4, matmul.cpp line 1647', 'x3 B4, matmul.cpp dòng 1647') },
+          { label: tr('otherwise', 'ngược lại'), verdict: 'true', route: 'steel', detail: tr('tile shape picked per device class (not evaluated)', 'hình dạng ô được chọn theo lớp device (không đánh giá)'), source: 'ch15 D3' }, // i18n-ignore: verdict identifier, citation
         ],
-        notes: ['GEMVKernel asserts SM * SN == 32: a SIMD width of 32 written into the code (x3 B4, ch04 D3).'],
+        notes: [tr('GEMVKernel asserts SM * SN == 32: a SIMD width of 32 written into the code (x3 B4, ch04 D3).', 'GEMVKernel khẳng định SM * SN == 32: độ rộng SIMD 32 được viết cứng vào mã (x3 B4, ch04 D3).')],
       };
     }
     case 'torch-cuda':
       return {
         checks: [
           {
-            label: 'gemm_internal: the preferred BLAS backend',
-            verdict: 'true',
+            label: tr('gemm_internal: the preferred BLAS backend', 'gemm_internal: backend BLAS được ưu tiên'),
+            verdict: 'true', // i18n-ignore: verdict identifier
             route: 'torch-blas',
-            detail: "the library picks its own kernel; a gemv entry point exists, with TF32 turned off, but which shapes reach it was not read",
-            source: 'ch15 D4, CUDABlas.cpp',
+            detail: tr('the library picks its own kernel; a gemv entry point exists, with TF32 turned off, but which shapes reach it was not read', 'thư viện tự chọn kernel của nó; có một điểm vào gemv, với TF32 bị tắt, nhưng chưa đọc những hình dạng nào đi tới đó'),
+            source: 'ch15 D4, CUDABlas.cpp', // i18n-ignore: citation and file name
           },
         ],
-        notes: ['On ROCm the same sources are hipified; gemm_internal may prefer Composable Kernel (ch15 D4, x3 B9).'],
+        notes: [tr('On ROCm the same sources are hipified; gemm_internal may prefer Composable Kernel (ch15 D4, x3 B9).', 'Trên ROCm, cùng mã nguồn đó được hipify; gemm_internal có thể ưu tiên Composable Kernel (ch15 D4, x3 B9).')],
       };
     case 'torch-mps':
       return {
         checks: [
-          { label: 'a rank-1 shape: min(M, N) == 1', verdict: T(Math.min(s.M, s.N) === 1), route: 'mps-gemv', detail: `min(${s.M}, ${s.N}) = ${Math.min(s.M, s.N)}`, source: 'x3 B4, Matmul.mm lines 116 to 141, Linear.mm line 161' },
-          { label: 'otherwise', verdict: 'true', route: 'mps-matmul', detail: 'not read in detail (infra D4)', source: 'x3 B4' },
+          { label: tr('a rank-1 shape: min(M, N) == 1', 'hình dạng hạng 1: min(M, N) == 1'), verdict: T(Math.min(s.M, s.N) === 1), route: 'mps-gemv', detail: `min(${s.M}, ${s.N}) = ${Math.min(s.M, s.N)}`, source: tr('x3 B4, Matmul.mm lines 116 to 141, Linear.mm line 161', 'x3 B4, Matmul.mm dòng 116 đến 141, Linear.mm dòng 161') },
+          { label: tr('otherwise', 'ngược lại'), verdict: 'true', route: 'mps-matmul', detail: tr('not read in detail (infra D4)', 'chưa đọc chi tiết (infra D4)'), source: 'x3 B4' }, // i18n-ignore: verdict identifier, citation
         ],
         notes: [
-          "nn.Linear's own path (Linear.mm) uses MPSNDArrayMatrixMultiplication (lines 68 to 82); its comment says addmm routes rank-1 shapes to the GEMV kernels. Which shapes Linear.mm hands to addmm was not read.",
+          tr(
+            "nn.Linear's own path (Linear.mm) uses MPSNDArrayMatrixMultiplication (lines 68 to 82); its comment says addmm routes rank-1 shapes to the GEMV kernels. Which shapes Linear.mm hands to addmm was not read.",
+            'Nhánh riêng của nn.Linear (Linear.mm) dùng MPSNDArrayMatrixMultiplication (dòng 68 đến 82); chú thích của nó nói addmm chuyển các hình dạng hạng 1 tới các kernel GEMV. Chưa đọc Linear.mm giao những hình dạng nào cho addmm.',
+          ),
         ],
       };
   }
@@ -279,8 +383,20 @@ export const SHAPE_RULE_READ: Project[] = ['llama-cuda', 'llama-metal', 'mlx-cud
 
 /** Switch points written in code, for the strip beside the reader's knee. */
 export const CODE_SWITCHES = [
-  { label: "llama.cpp's MMVF_MAX_BATCH_SIZE", tokens: MMVF_MAX_BATCH_SIZE, source: 'ch22 D6' },
-  { label: "MLX Metal's wide GEMV limit", tokens: MLX_WIDE_MAX, source: 'x3 B4' },
+  {
+    get label() {
+      return tr('llama.cpp\'s MMVF_MAX_BATCH_SIZE', 'MMVF_MAX_BATCH_SIZE của llama.cpp');
+    },
+    tokens: MMVF_MAX_BATCH_SIZE,
+    source: 'ch22 D6', // i18n-ignore: citation
+  },
+  {
+    get label() {
+      return tr('MLX Metal\'s wide GEMV limit', 'giới hạn GEMV rộng của MLX Metal');
+    },
+    tokens: MLX_WIDE_MAX,
+    source: 'x3 B4',
+  },
 ];
 
 // ---------------------------------------------------------------- the reader's knee (ch22's definition)

@@ -1,0 +1,1 @@
+Bộ nhớ chia sẻ lưu ô dưới dạng hình vuông, với cột d chứa bước d. Vậy đầu vào phía bắc nằm cao hơn 1 hàng và lệch trái 1 cột. Đầu vào phía tây lệch trái 1 cột. Đầu vào phía tây bắc nằm cao hơn 1 hàng và lệch trái 2 cột. Đó là nguồn gốc của các độ lệch trong các hàm nạp.

@@ -41,6 +41,8 @@
 // Everything is relative time; nothing here is a device figure.
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Order = 'depth' | 'breadth';
 export type HostMem = 'pinned' | 'pageable';
 export type View = 'cuda' | 'metal';
@@ -192,12 +194,24 @@ const r9 = (x: number) => Math.round(x * 1e9) / 1e9;
 const fmtT = (x: number) => String(Number(x.toFixed(3)));
 
 export const LANE_NAME: Record<Lane, string> = {
-  host: 'Host thread',
-  h2d: 'Copy-in engine',
-  compute: 'Compute',
-  d2h: 'Copy-out engine',
-  copy: 'Copy engine (both ways)',
-  cpu: 'CPU: drain, then fill',
+  get host() {
+    return tr('Host thread', 'Luồng host');
+  },
+  get h2d() {
+    return tr('Copy-in engine', 'Copy engine chiều vào');
+  },
+  get compute() {
+    return tr('Compute', 'Tính toán');
+  },
+  get d2h() {
+    return tr('Copy-out engine', 'Copy engine chiều ra');
+  },
+  get copy() {
+    return tr('Copy engine (both ways)', 'Copy engine (cả hai chiều)');
+  },
+  get cpu() {
+    return tr('CPU: drain, then fill', 'CPU: rút, rồi nạp');
+  },
   gpu: 'GPU',
 };
 
@@ -221,14 +235,22 @@ const present = (cfg: PipeConfig) => STAGES.filter((k) => total(cfg, k) > 0);
 /** "chunk 2's copy-in", "chunk 0's kernel". */
 export function opLabel(op: Pick<Op, 'kind' | 'chunk'>, view: View = 'cuda'): string {
   const what = view === 'metal'
-    ? { in: 'fill', kernel: 'command buffer', out: 'drain' }[op.kind]
-    : { in: 'copy-in', kernel: 'kernel', out: 'copy-out' }[op.kind];
-  return `chunk ${op.chunk}'s ${what}`;
+    ? { in: tr('fill', 'lần nạp'), kernel: tr('command buffer', 'command buffer'), out: tr('drain', 'lần rút') }[op.kind]
+    : { in: tr('copy-in', 'lần sao chép vào'), kernel: 'kernel', out: tr('copy-out', 'lần sao chép ra') }[op.kind];
+  return tr(`chunk ${op.chunk}'s ${what}`, `${what} của chunk ${op.chunk}`);
 }
 const doing = (op: Op, view: View) =>
   view === 'metal'
-    ? { in: `filling chunk ${op.chunk}`, kernel: `running chunk ${op.chunk}'s command buffer`, out: `draining chunk ${op.chunk}` }[op.kind]
-    : { in: `copying in chunk ${op.chunk}`, kernel: `running chunk ${op.chunk}'s kernel`, out: `copying out chunk ${op.chunk}` }[op.kind];
+    ? {
+        in: tr(`filling chunk ${op.chunk}`, `đang nạp chunk ${op.chunk}`),
+        kernel: tr(`running chunk ${op.chunk}'s command buffer`, `đang chạy command buffer của chunk ${op.chunk}`),
+        out: tr(`draining chunk ${op.chunk}`, `đang rút chunk ${op.chunk}`),
+      }[op.kind]
+    : {
+        in: tr(`copying in chunk ${op.chunk}`, `đang sao chép chunk ${op.chunk} vào`),
+        kernel: tr(`running chunk ${op.chunk}'s kernel`, `đang chạy kernel của chunk ${op.chunk}`),
+        out: tr(`copying out chunk ${op.chunk}`, `đang sao chép chunk ${op.chunk} ra`),
+      }[op.kind];
 
 function laneFor(cfg: PipeConfig, kind: Kind): Lane {
   if (cfg.view === 'metal') return kind === 'kernel' ? 'gpu' : 'cpu';
@@ -348,15 +370,21 @@ function cudaSchedule(cfg: PipeConfig, shares: number[], dur: (k: Kind, j: numbe
     if (isFinite(cfg.queues)) queueLast.set(qKey, id);
     laneLast.set(lane, id);
     if (cfg.host === 'pageable' && kind !== 'kernel') {
-      const api = kind === 'in' ? 'cudaMemcpyAsync (host to device)' : 'cudaMemcpyAsync (device to host)';
+      const api = kind === 'in' ? tr('cudaMemcpyAsync (host to device)', 'cudaMemcpyAsync (host sang device)') : tr('cudaMemcpyAsync (device to host)', 'cudaMemcpyAsync (device sang host)');
       if (op.start > op.issue + EPS)
         host.push({
           from: op.issue, to: op.start, kind: 'blocked', op: id, lane: 'host', lines: op.lines,
-          text: `The host thread is stuck in ${api} for ${opLabel(op)}: the buffer is pageable, so the call first waits for ${binding.cause === 'stream' ? `stream ${stream} to finish ${opLabel(ops[binding.on])}` : binding.cause === 'queue' ? `queue ${queue} to finish ${opLabel(ops[binding.on])}` : `the ${LANE_NAME[lane].toLowerCase()} to finish ${opLabel(ops[binding.on])}`}.`,
+          text: tr(
+            `The host thread is stuck in ${api} for ${opLabel(op)}: the buffer is pageable, so the call first waits for ${binding.cause === 'stream' ? `stream ${stream} to finish ${opLabel(ops[binding.on])}` : binding.cause === 'queue' ? `queue ${queue} to finish ${opLabel(ops[binding.on])}` : `the ${LANE_NAME[lane].toLowerCase()} to finish ${opLabel(ops[binding.on])}`}.`,
+            `Luồng host bị kẹt trong ${api} cho ${opLabel(op)}: buffer là bộ nhớ phân trang (pageable), nên lời gọi trước hết chờ ${binding.cause === 'stream' ? `stream ${stream} làm xong ${opLabel(ops[binding.on])}` : binding.cause === 'queue' ? `hàng đợi ${queue} làm xong ${opLabel(ops[binding.on])}` : `${LANE_NAME[lane].toLowerCase()} làm xong ${opLabel(ops[binding.on])}`}.`,
+          ),
         });
       host.push({
         from: op.start, to: op.end, kind: 'staging', op: id, lane: 'host', lines: op.lines,
-        text: `The host thread takes part in ${opLabel(op)}, staging it through pinned memory; the call returns only when the copy has finished.`,
+        text: tr(
+          `The host thread takes part in ${opLabel(op)}, staging it through pinned memory; the call returns only when the copy has finished.`,
+          `Luồng host tham gia vào ${opLabel(op)}, trung chuyển dữ liệu qua bộ nhớ ghim (pinned memory); lời gọi chỉ trả về khi lần sao chép đã xong.`,
+        ),
       });
       hostT = op.end;
     }
@@ -367,23 +395,37 @@ function waitText(op: Op, ops: Op[], cfg: PipeConfig): string {
   const w = op.wait!;
   const on = ops[w.on];
   const running = on.start <= w.at + EPS && on.end > w.at + EPS;
-  const state = running ? `is still ${doing(on, cfg.view)}` : on.start > w.at + EPS ? `has not yet started ${opLabel(on, cfg.view)}` : `has not finished ${opLabel(on, cfg.view)}`;
+  const state = running
+    ? tr(`is still ${doing(on, cfg.view)}`, `vẫn ${doing(on, cfg.view)}`)
+    : on.start > w.at + EPS
+      ? tr(`has not yet started ${opLabel(on, cfg.view)}`, `chưa bắt đầu ${opLabel(on, cfg.view)}`)
+      : tr(`has not finished ${opLabel(on, cfg.view)}`, `chưa làm xong ${opLabel(on, cfg.view)}`);
   const who = opLabel(op, cfg.view);
-  const head = who.charAt(0).toUpperCase() + who.slice(1) + ' waits: ';
+  const head = who.charAt(0).toUpperCase() + who.slice(1) + tr(' waits: ', ' chờ: ');
   switch (w.cause) {
     case 'stream':
-      return head + `stream ${op.stream} ${state}.`;
+      return head + tr(`stream ${op.stream} ${state}.`, `stream ${op.stream} ${state}.`);
     case 'queue':
-      return head + `hardware queue ${op.queue} also holds stream ${on.stream}, which ${state} (a false dependency between unrelated streams).`;
+      return head + tr(
+        `hardware queue ${op.queue} also holds stream ${on.stream}, which ${state} (a false dependency between unrelated streams).`,
+        `hàng đợi phần cứng ${op.queue} cũng chứa stream ${on.stream}, mà stream này ${state} (một phụ thuộc giả giữa các stream không liên quan đến nhau).`,
+      );
     case 'engine': {
-      if (cfg.view === 'metal') return head + `the GPU runs command buffers one at a time, in commit order, and it ${state}.`;
+      if (cfg.view === 'metal')
+        return head + tr(
+          `the GPU runs command buffers one at a time, in commit order, and it ${state}.`,
+          `GPU chạy lần lượt từng command buffer một, theo thứ tự commit, và nó ${state}.`,
+        );
       const gpu = op.lane === 'compute';
-      const eng = gpu ? 'the GPU' : `the ${LANE_NAME[op.lane].toLowerCase()}`;
-      if (running) return head + (gpu ? `the GPU runs one kernel at a time, and it ${state}.` : `${eng} ${state}.`);
-      return head + `${eng} ${gpu ? 'runs kernels' : 'serves operations'} in the order they were issued, and ${opLabel(on)}, queued ahead of it, ${on.start > w.at + EPS ? 'has not started' : 'has not finished'}${on.wait ? ` (it waits for ${opLabel(ops[on.wait.on])})` : ''}.`;
+      const eng = gpu ? tr('the GPU', 'GPU') : tr(`the ${LANE_NAME[op.lane].toLowerCase()}`, `bộ ${LANE_NAME[op.lane].toLowerCase()}`);
+      if (running) return head + (gpu ? tr(`the GPU runs one kernel at a time, and it ${state}.`, `GPU chạy mỗi lần một kernel, và nó ${state}.`) : `${eng} ${state}.`);
+      return head + tr(
+        `${eng} ${gpu ? 'runs kernels' : 'serves operations'} in the order they were issued, and ${opLabel(on)}, queued ahead of it, ${on.start > w.at + EPS ? 'has not started' : 'has not finished'}${on.wait ? ` (it waits for ${opLabel(ops[on.wait.on])})` : ''}.`,
+        `${eng} ${gpu ? 'chạy các kernel' : 'phục vụ các thao tác'} theo thứ tự chúng được phát lệnh, và ${opLabel(on)}, được xếp hàng trước nó, ${on.start > w.at + EPS ? 'chưa bắt đầu' : 'chưa làm xong'}${on.wait ? ` (nó đang chờ ${opLabel(ops[on.wait.on])})` : ''}.`,
+      );
     }
     case 'slot':
-      return head + `buffer ${op.stream} ${state}.`;
+      return head + tr(`buffer ${op.stream} ${state}.`, `buffer ${op.stream} ${state}.`);
   }
 }
 
@@ -401,7 +443,10 @@ function metalSchedule(cfg: PipeConfig, shares: number[], dur: (k: Kind, j: numb
     if (g >= 0 && ops[g].end > cpu + EPS) {
       host.push({
         from: r9(cpu), to: ops[g].end, kind: 'waiting', op: g, lane: 'cpu', lines: [site, LINES.metal.wait],
-        text: `The CPU waits in waitUntilCompleted: buffer ${k} is still in use by ${opLabel(ops[g], 'metal')}, and it must not be touched until that has completed.`,
+        text: tr(
+          `The CPU waits in waitUntilCompleted: buffer ${k} is still in use by ${opLabel(ops[g], 'metal')}, and it must not be touched until that has completed.`,
+          `CPU chờ trong waitUntilCompleted: buffer ${k} vẫn đang được ${opLabel(ops[g], 'metal')} dùng, và không được đụng vào nó cho tới khi việc đó hoàn tất.`,
+        ),
       });
       cpu = ops[g].end;
     }
@@ -444,13 +489,20 @@ function metalSchedule(cfg: PipeConfig, shares: number[], dur: (k: Kind, j: numb
 // ---------------------------------------------------------------- stepping
 function startText(op: Op, cfg: PipeConfig): string {
   if (cfg.view === 'metal') {
-    if (op.kind === 'in') return `The CPU fills buffer ${op.stream} with chunk ${op.chunk}.`;
-    if (op.kind === 'out') return `The CPU reads chunk ${op.chunk}'s result out of buffer ${op.stream}${op.tail ? ' (after the loop)' : ''}.`;
-    return `The GPU starts chunk ${op.chunk}'s command buffer (buffer ${op.stream}).`;
+    if (op.kind === 'in') return tr(`The CPU fills buffer ${op.stream} with chunk ${op.chunk}.`, `CPU nạp chunk ${op.chunk} vào buffer ${op.stream}.`);
+    if (op.kind === 'out')
+      return tr(
+        `The CPU reads chunk ${op.chunk}'s result out of buffer ${op.stream}${op.tail ? ' (after the loop)' : ''}.`,
+        `CPU đọc kết quả của chunk ${op.chunk} ra khỏi buffer ${op.stream}${op.tail ? ' (sau vòng lặp)' : ''}.`,
+      );
+    return tr(`The GPU starts chunk ${op.chunk}'s command buffer (buffer ${op.stream}).`, `GPU bắt đầu command buffer của chunk ${op.chunk} (buffer ${op.stream}).`);
   }
-  const where = op.kind === 'kernel' ? '' : ` on the ${LANE_NAME[op.lane].toLowerCase()}`;
+  const where = op.kind === 'kernel' ? '' : tr(` on the ${LANE_NAME[op.lane].toLowerCase()}`, ` trên ${LANE_NAME[op.lane].toLowerCase()}`);
   const who = opLabel(op);
-  return `${who.charAt(0).toUpperCase() + who.slice(1)} starts${where} (stream ${op.stream}).`;
+  return tr(
+    `${who.charAt(0).toUpperCase() + who.slice(1)} starts${where} (stream ${op.stream}).`,
+    `${who.charAt(0).toUpperCase() + who.slice(1)} bắt đầu${where} (stream ${op.stream}).`,
+  );
 }
 
 function buildSteps(s: Schedule): Step[] {
@@ -462,22 +514,28 @@ function buildSteps(s: Schedule): Step[] {
     push({
       t: 0, kind: 'issue', op: null, lines: [],
       text: cfg.host === 'pinned'
-        ? `The host thread queues all ${ops.length} operations at time 0; every call returns at once.`
-        : `The host thread starts queuing. With pageable buffers each copy holds it until the copy is done, so it gets only ${first.length} operation${first.length === 1 ? '' : 's'} queued before it is stuck.`,
+        ? tr(
+            `The host thread queues all ${ops.length} operations at time 0; every call returns at once.`,
+            `Luồng host xếp hàng cả ${ops.length} thao tác tại thời điểm 0; mọi lời gọi trả về ngay.`,
+          )
+        : tr(
+            `The host thread starts queuing. With pageable buffers each copy holds it until the copy is done, so it gets only ${first.length} operation${first.length === 1 ? '' : 's'} queued before it is stuck.`,
+            `Luồng host bắt đầu xếp hàng. Với buffer phân trang (pageable), mỗi lần sao chép giữ luồng lại cho tới khi lần sao chép xong, nên nó chỉ kịp xếp hàng ${first.length} thao tác trước khi bị kẹt.`,
+          ),
     }, 0);
   }
   for (const o of ops) {
     const who = opLabel(o, cfg.view);
-    push({ t: o.end, kind: 'end', op: o.id, lines: o.lines, text: `${who.charAt(0).toUpperCase() + who.slice(1)} finishes.` }, 1);
+    push({ t: o.end, kind: 'end', op: o.id, lines: o.lines, text: tr(`${who.charAt(0).toUpperCase() + who.slice(1)} finishes.`, `${who.charAt(0).toUpperCase() + who.slice(1)} xong.`) }, 1);
     push({ t: o.start, kind: 'start', op: o.id, lines: o.lines, text: startText(o, cfg) }, 3);
     if (o.wait) push({ t: o.wait.at, kind: 'wait', op: o.id, lines: o.lines, text: o.wait.text }, 5);
     if (cfg.host === 'pageable' && cfg.view === 'cuda' && o.kind === 'kernel' && o.issue > EPS)
-      push({ t: o.issue, kind: 'issue', op: o.id, lines: o.lines, text: `Only now can the host thread queue ${opLabel(o)}.` }, 4);
+      push({ t: o.issue, kind: 'issue', op: o.id, lines: o.lines, text: tr(`Only now can the host thread queue ${opLabel(o)}.`, `Đến lúc này luồng host mới xếp hàng được ${opLabel(o)}.`) }, 4);
   }
   for (const h of host) {
     if (h.kind === 'staging') {
       push({ t: h.from, kind: 'stage', op: h.op, lines: h.lines, text: h.text }, 4);
-      push({ t: h.to, kind: 'return', op: h.op, lines: h.lines, text: `The call for ${opLabel(ops[h.op])} returns.` }, 2);
+      push({ t: h.to, kind: 'return', op: h.op, lines: h.lines, text: tr(`The call for ${opLabel(ops[h.op])} returns.`, `Lời gọi cho ${opLabel(ops[h.op])} trả về.`) }, 2);
     } else push({ t: h.from, kind: h.kind === 'blocked' ? 'block' : 'wait', op: h.op, lines: h.lines, text: h.text }, 4);
   }
   ev.sort((x, y) => x.t - y.t || x.rank - y.rank || (x.op ?? -1) - (y.op ?? -1));
@@ -539,18 +597,29 @@ function e1Conditions(s: Schedule): Condition[] {
   const enough = cfg.order === 'depth' ? d * M >= sum - EPS : d === Infinity;
   const fmt = (x: number) => fmtT(x);
   return [
-    { id: 'engines', text: cfg.engines === 2 ? 'a copy engine for each direction' : cfg.a === 0 || cfg.c === 0 ? 'only one direction is copied' : 'one copy engine for both directions', holds: cfg.engines === 2 || cfg.a === 0 || cfg.c === 0 },
-    { id: 'pinned', text: cfg.host === 'pinned' ? 'pinned host memory' : 'pageable host memory', holds: cfg.host === 'pinned' },
-    { id: 'equal', text: equal ? 'equal chunks' : 'unequal chunks', holds: equal },
+    {
+      id: 'engines',
+      text: cfg.engines === 2
+        ? tr('a copy engine for each direction', 'mỗi chiều có một copy engine')
+        : cfg.a === 0 || cfg.c === 0
+          ? tr('only one direction is copied', 'chỉ sao chép một chiều')
+          : tr('one copy engine for both directions', 'một copy engine cho cả hai chiều'),
+      holds: cfg.engines === 2 || cfg.a === 0 || cfg.c === 0,
+    },
+    { id: 'pinned', text: cfg.host === 'pinned' ? tr('pinned host memory', 'bộ nhớ host ghim (pinned)') : tr('pageable host memory', 'bộ nhớ host phân trang (pageable)'), holds: cfg.host === 'pinned' },
+    { id: 'equal', text: equal ? tr('equal chunks', 'các chunk bằng nhau') : tr('unequal chunks', 'các chunk không bằng nhau'), holds: equal },
     {
       id: 'streams',
       text: cfg.order === 'depth'
         ? d === Infinity
-          ? 'no two chunks share a stream or queue'
-          : `chunks sharing a stream or queue are ${d} apart, and ${d} × ${fmt(M)} ${enough ? '≥' : '<'} ${fmt(sum)}`
+          ? tr('no two chunks share a stream or queue', 'không có hai chunk nào chung một stream hay hàng đợi')
+          : tr(
+              `chunks sharing a stream or queue are ${d} apart, and ${d} × ${fmt(M)} ${enough ? '≥' : '<'} ${fmt(sum)}`,
+              `các chunk chung một stream hay hàng đợi cách nhau ${d}, và ${d} × ${fmt(M)} ${enough ? '≥' : '<'} ${fmt(sum)}`,
+            )
         : d === Infinity
-          ? 'each stream and queue holds one chunk'
-          : 'issued breadth first with chunks sharing a stream or queue',
+          ? tr('each stream and queue holds one chunk', 'mỗi stream và hàng đợi chứa một chunk')
+          : tr('issued breadth first with chunks sharing a stream or queue', 'phát lệnh theo chiều rộng trước, với các chunk chung một stream hay hàng đợi'),
       holds: enough,
     },
   ];
@@ -565,7 +634,7 @@ function e1Form(s: Schedule): ClosedForm | null {
   const value = r9(sum + (m - 1) * M);
   const conditions = e1Conditions(s);
   return {
-    name: 'Pipeline with enough streams (E1)',
+    name: tr('Pipeline with enough streams (E1)', 'Pipeline với đủ stream (E1)'),
     formula: `a + b + c + (n − 1)·max(a, b, c) = ${fmtT(sum)} + ${m - 1} × ${fmtT(M)}`,
     value, conditions, holds: conditions.every((c) => c.holds), matches: Math.abs(value - s.total) < 1e-6,
   };
@@ -580,11 +649,15 @@ function nvidiaForm(s: Schedule): ClosedForm | null {
   const value = r9(tE >= tT ? tE + tT / m : tT + tE / m);
   const conditions = [
     ...e1Conditions(s),
-    { id: 'oneway', text: cfg.c === 0 ? 'nothing is copied back, as in NVIDIA\'s example' : 'the result is copied back too', holds: cfg.c === 0 },
-    { id: 'overhead', text: cfg.overhead === 0 ? 'no per-operation cost' : 'a per-operation cost', holds: cfg.overhead === 0 },
+    {
+      id: 'oneway',
+      text: cfg.c === 0 ? tr('nothing is copied back, as in NVIDIA\'s example', 'không sao chép gì ngược về, như trong ví dụ của NVIDIA') : tr('the result is copied back too', 'kết quả cũng được sao chép ngược về'),
+      holds: cfg.c === 0,
+    },
+    { id: 'overhead', text: cfg.overhead === 0 ? tr('no per-operation cost', 'không có chi phí cho mỗi thao tác') : tr('a per-operation cost', 'có chi phí cho mỗi thao tác'), holds: cfg.overhead === 0 },
   ];
   return {
-    name: "NVIDIA's rough estimate (A7)",
+    name: tr("NVIDIA's rough estimate (A7)", 'Ước lượng thô của NVIDIA (A7)'),
     formula: tE >= tT ? `tE + tT/nStreams = ${fmtT(tE)} + ${fmtT(tT)}/${m}` : `tT + tE/nStreams = ${fmtT(tT)} + ${fmtT(tE)}/${m}`,
     value, conditions, holds: conditions.every((c) => c.holds), matches: Math.abs(value - s.total) < 1e-6,
   };
@@ -614,11 +687,11 @@ export interface Preset {
 }
 const P = (o: Partial<PipeConfig>): PipeConfig => ({ ...DEFAULTS, ...o });
 export const PRESETS: Preset[] = [
-  { id: 'best-practices', label: 'Best Practices example', cfg: P({ a: 8, b: 16, c: 0, n: 4, streams: 4 }) },
-  { id: 'equal', label: 'equal stages', cfg: P({ a: 12, b: 12, c: 12, n: 6, streams: 6 }) },
-  { id: 'copy-bound', label: 'copy-bound', cfg: P({ a: 16, b: 4, c: 8, n: 8, streams: 8 }) },
-  { id: 'compute-bound', label: 'compute-bound', cfg: P({ a: 4, b: 24, c: 4, n: 8, streams: 8 }) },
-  { id: 'p-pipeline', label: "the prediction's case", cfg: P({ a: 8, b: 16, c: 8, n: 8, streams: 8 }) },
+  { id: 'best-practices', get label() { return tr('Best Practices example', 'Ví dụ trong Best Practices'); }, cfg: P({ a: 8, b: 16, c: 0, n: 4, streams: 4 }) },
+  { id: 'equal', get label() { return tr('equal stages', 'các giai đoạn bằng nhau'); }, cfg: P({ a: 12, b: 12, c: 12, n: 6, streams: 6 }) },
+  { id: 'copy-bound', get label() { return tr('copy-bound', 'bị giới hạn bởi sao chép'); }, cfg: P({ a: 16, b: 4, c: 8, n: 8, streams: 8 }) },
+  { id: 'compute-bound', get label() { return tr('compute-bound', 'bị giới hạn bởi tính toán'); }, cfg: P({ a: 4, b: 24, c: 4, n: 8, streams: 8 }) },
+  { id: 'p-pipeline', get label() { return tr("the prediction's case", 'trường hợp của phần dự đoán'); }, cfg: P({ a: 8, b: 16, c: 8, n: 8, streams: 8 }) },
 ];
 /** Where the stepper starts: not the prediction's case, so the read-outs do not give it away. */
 export const START: PipeConfig = P({ a: 12, b: 16, c: 8, n: 4, streams: 4 });
@@ -766,18 +839,18 @@ export interface HaloBar {
 export function haloLanes(t: { internal: number; boundary: number; exchange: number; reduce: number }, overlap: boolean) {
   const bars: HaloBar[] = [];
   if (!overlap) {
-    bars.push({ lane: 'gpu', label: 'compute all points', from: 0, to: t.internal });
-    bars.push({ lane: 'net', label: 'halo exchange (top)', from: t.internal, to: t.internal + t.exchange });
-    bars.push({ lane: 'net', label: 'halo exchange (bottom)', from: t.internal + t.exchange, to: t.internal + 2 * t.exchange });
+    bars.push({ lane: 'gpu', label: 'compute all points', from: 0, to: t.internal }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'net', label: 'halo exchange (top)', from: t.internal, to: t.internal + t.exchange }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'net', label: 'halo exchange (bottom)', from: t.internal + t.exchange, to: t.internal + 2 * t.exchange }); // i18n-ignore: identifier also shown to the reader
   } else {
-    bars.push({ lane: 'gpu', label: 'compute internal', from: 0, to: t.internal });
-    bars.push({ lane: 'gpu', label: 'compute top', from: 0, to: t.boundary });
-    bars.push({ lane: 'gpu', label: 'compute bottom', from: 0, to: t.boundary });
-    bars.push({ lane: 'net', label: 'halo exchange (top)', from: t.boundary, to: t.boundary + t.exchange });
-    bars.push({ lane: 'net', label: 'halo exchange (bottom)', from: t.boundary + t.exchange, to: t.boundary + 2 * t.exchange });
+    bars.push({ lane: 'gpu', label: 'compute internal', from: 0, to: t.internal }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'gpu', label: 'compute top', from: 0, to: t.boundary }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'gpu', label: 'compute bottom', from: 0, to: t.boundary }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'net', label: 'halo exchange (top)', from: t.boundary, to: t.boundary + t.exchange }); // i18n-ignore: identifier also shown to the reader
+    bars.push({ lane: 'net', label: 'halo exchange (bottom)', from: t.boundary + t.exchange, to: t.boundary + 2 * t.exchange }); // i18n-ignore: identifier also shown to the reader
   }
   const ready = Math.max(...bars.map((b) => b.to));
-  bars.push({ lane: 'net', label: 'reduce L2 norm', from: ready, to: ready + t.reduce });
+  bars.push({ lane: 'net', label: 'reduce L2 norm', from: ready, to: ready + t.reduce }); // i18n-ignore: identifier also shown to the reader
   const total = ready + t.reduce;
   const exchangeEnd = overlap ? t.boundary + 2 * t.exchange : t.internal + 2 * t.exchange;
   return {

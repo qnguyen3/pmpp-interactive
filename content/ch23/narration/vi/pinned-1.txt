@@ -1,0 +1,1 @@
+Hãy bắt đầu với bộ nhớ từ malloc. Chương trình của bạn thấy một dải địa chỉ dài liên tục, chia thành các trang. Mỗi trang nằm trong một khung nào đó của bộ nhớ vật lý, nhưng chỉ là tạm thời. Hệ điều hành có thể chuyển một trang sang khung khác, hoặc ghi nó ra đĩa, bất cứ lúc nào. Bộ nhớ kiểu này gọi là bộ nhớ phân trang, hay pageable.

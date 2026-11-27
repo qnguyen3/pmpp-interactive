@@ -1,0 +1,1 @@
+Giờ hãy để nó chạy. Mỗi khối chờ khối ngay trước nó, nên các tổng đã scan đi dọc một chuỗi, từng khối một. Với 6 khối, chuỗi có 5 mắt xích. Với 32 khối cùng nằm trên thiết bị một lúc, chuỗi có 31 mắt xích, và khối cuối cùng phải chờ tất cả.

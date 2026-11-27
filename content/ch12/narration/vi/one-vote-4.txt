@@ -1,0 +1,1 @@
+Hình 12.3 làm việc này chỉ với một phép toán nguyên tử. Trước tiên, các lane đạt bỏ phiếu. Mặt nạ chúng nhận lại có một bit 1 cho mỗi lane đã đạt: các bit 1, 2, 4 và 5. Bit được bật thấp nhất chọn lane 1 làm lane dẫn đầu, và đếm số bit 1 trong mặt nạ cho ra 4.

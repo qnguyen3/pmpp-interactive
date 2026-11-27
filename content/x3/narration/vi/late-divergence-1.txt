@@ -1,0 +1,1 @@
+Hai lần chạy của cùng một mô hình, đặt cạnh nhau. Bên trái là bản tham chiếu. Bên phải là GPU. Mỗi bước biến token trước đó thành mười sáu logits, và giải mã greedy chọn giá trị lớn nhất. Hai bộ cột trông giống hệt nhau, vì chúng chỉ khác nhau ở phần làm tròn, quá nhỏ để nhìn thấy.

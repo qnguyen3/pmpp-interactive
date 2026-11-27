@@ -33,6 +33,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export interface Dims {
   x: number;
   y: number;
@@ -273,10 +275,10 @@ export function regions(p: Picture, width: number): Region[] {
     };
   };
   return [
-    make('1', 'wholly inside', fx * fy, p.blockX, p.blockY),
-    make('2', 'cut by the right edge', (gridX - fx) * fy, remX, p.blockY),
-    make('3', 'cut by the bottom edge', fx * (gridY - fy), p.blockX, remY),
-    make('4', 'the corner', (gridX - fx) * (gridY - fy), remX, remY),
+    make('1', tr('wholly inside', 'nằm trọn bên trong'), fx * fy, p.blockX, p.blockY),
+    make('2', tr('cut by the right edge', 'bị cạnh phải cắt'), (gridX - fx) * fy, remX, p.blockY),
+    make('3', tr('cut by the bottom edge', 'bị cạnh dưới cắt'), fx * (gridY - fy), p.blockX, remY),
+    make('4', tr('the corner', 'góc'), (gridX - fx) * (gridY - fy), remX, remY),
   ];
 }
 
@@ -346,14 +348,78 @@ export interface BookCase {
 }
 const vector = (n: number, block: number): Picture => ({ width: n, height: 1, blockX: block, blockY: 1 });
 export const BOOK_CASES: readonly BookCase[] = [
-  { id: 'v1003', label: 'vector of 1003, 64-thread blocks', page: '81–82', printed: '1 of 32', picture: vector(1003, 64) },
-  { id: 'v100', label: 'vector of 100, 64-thread blocks', page: '82', printed: '1 of 4', picture: vector(100, 64) },
-  { id: 'v1000', label: 'vector of 1000, 64-thread blocks', page: '82', printed: '1 of 32', picture: vector(1000, 64) },
-  { id: 'v10000', label: 'vector of 10,000, 64-thread blocks', page: '82', printed: '1 of 313', picture: vector(10000, 64) },
-  { id: 'ex3', label: 'exercise 3: vector of 2000, 512-thread blocks', page: '91', printed: null, picture: vector(2000, 512) },
-  { id: 'p76x62', label: 'picture 76 wide, 62 high, 16 × 16 blocks', page: '82', printed: '31 of 160', picture: { width: 76, height: 62, blockX: 16, blockY: 16 } },
-  { id: 'p200x150', label: '“200 × 150” read as 200 wide, 150 high', page: '82', printed: '80 of 1040', picture: { width: 200, height: 150, blockX: 16, blockY: 16 } },
-  { id: 'p150x200', label: '“200 × 150” read as 150 wide, 200 high', page: '82', printed: '80 of 1040', picture: { width: 150, height: 200, blockX: 16, blockY: 16 } },
+  {
+    id: 'v1003',
+    get label() {
+      return tr('vector of 1003, 64-thread blocks', 'vector 1003 phần tử, khối 64 luồng');
+    },
+    page: '81–82',
+    printed: '1 of 32', // i18n-ignore: identifier also shown to the reader
+    picture: vector(1003, 64),
+  },
+  {
+    id: 'v100',
+    get label() {
+      return tr('vector of 100, 64-thread blocks', 'vector 100 phần tử, khối 64 luồng');
+    },
+    page: '82',
+    printed: '1 of 4', // i18n-ignore: identifier also shown to the reader
+    picture: vector(100, 64),
+  },
+  {
+    id: 'v1000',
+    get label() {
+      return tr('vector of 1000, 64-thread blocks', 'vector 1000 phần tử, khối 64 luồng');
+    },
+    page: '82',
+    printed: '1 of 32', // i18n-ignore: identifier also shown to the reader
+    picture: vector(1000, 64),
+  },
+  {
+    id: 'v10000',
+    get label() {
+      return tr('vector of 10,000, 64-thread blocks', 'vector 10,000 phần tử, khối 64 luồng');
+    },
+    page: '82',
+    printed: '1 of 313', // i18n-ignore: identifier also shown to the reader
+    picture: vector(10000, 64),
+  },
+  {
+    id: 'ex3',
+    get label() {
+      return tr('exercise 3: vector of 2000, 512-thread blocks', 'bài tập 3: vector 2000 phần tử, khối 512 luồng');
+    },
+    page: '91',
+    printed: null,
+    picture: vector(2000, 512),
+  },
+  {
+    id: 'p76x62',
+    get label() {
+      return tr('picture 76 wide, 62 high, 16 × 16 blocks', 'ảnh rộng 76, cao 62, khối 16 × 16');
+    },
+    page: '82',
+    printed: '31 of 160', // i18n-ignore: identifier also shown to the reader
+    picture: { width: 76, height: 62, blockX: 16, blockY: 16 },
+  },
+  {
+    id: 'p200x150',
+    get label() {
+      return tr('“200 × 150” read as 200 wide, 150 high', '“200 × 150” hiểu là rộng 200, cao 150');
+    },
+    page: '82',
+    printed: '80 of 1040', // i18n-ignore: identifier also shown to the reader
+    picture: { width: 200, height: 150, blockX: 16, blockY: 16 },
+  },
+  {
+    id: 'p150x200',
+    get label() {
+      return tr('“200 × 150” read as 150 wide, 200 high', '“200 × 150” hiểu là rộng 150, cao 200');
+    },
+    page: '82',
+    printed: '80 of 1040', // i18n-ignore: identifier also shown to the reader
+    picture: { width: 150, height: 200, blockX: 16, blockY: 16 },
+  },
 ];
 
 // ---------------------------------------------------------------- widths to choose from
@@ -378,19 +444,33 @@ export function widthChoices(reports: Record<string, { device: Record<string, un
   const out: WidthChoice[] = [
     {
       key: 'book',
-      label: "the book's 32",
+      get label() {
+        return tr("the book's 32", '32 của sách');
+      },
       width: BOOK_WIDTH,
       maxThreads: BOOK_MAX_THREADS,
       source: 'book',
-      note: "The width the book reports for CUDA devices to date (pp. 74, 77), with its example device's cap of 1024 threads in a block (p. 85).",
+      get note() {
+        return tr(
+          "The width the book reports for CUDA devices to date (pp. 74, 77), with its example device's cap of 1024 threads in a block (p. 85).",
+          'Độ rộng mà sách ghi cho các device CUDA tính đến nay (pp. 74, 77), cùng giới hạn 1024 luồng trong một khối của device ví dụ trong sách (p. 85).',
+        );
+      },
     },
     {
       key: 'w64',
-      label: '64, as HIP documents for gfx9',
+      get label() {
+        return tr('64, as HIP documents for gfx9', '64, theo tài liệu HIP cho gfx9');
+      },
       width: 64,
       maxThreads: BOOK_MAX_THREADS,
       source: 'doc',
-      note: "The width AMD's HIP documentation gives for gfx9 devices (AMD Instinct). The cap of 1024 threads in a block is the book's example, not an AMD figure.",
+      get note() {
+        return tr(
+          "The width AMD's HIP documentation gives for gfx9 devices (AMD Instinct). The cap of 1024 threads in a block is the book's example, not an AMD figure.",
+          'Độ rộng mà tài liệu HIP của AMD đưa ra cho các device gfx9 (AMD Instinct). Giới hạn 1024 luồng trong một khối là ví dụ của sách, không phải con số của AMD.',
+        );
+      },
     },
   ];
   for (const backend of Object.keys(reports).sort()) {
@@ -401,13 +481,20 @@ export function widthChoices(reports: Record<string, { device: Record<string, un
     const name = typeof device['name'] === 'string' && device['name'] ? String(device['name']) : backend;
     out.push({
       key: backend,
-      label: `yours: ${name} (${backend}), ${width}`,
+      get label() {
+        return tr(`yours: ${name} (${backend}), ${width}`, `của bạn: ${name} (${backend}), ${width}`);
+      },
       width,
       maxThreads: cap ?? BOOK_MAX_THREADS,
       source: 'report',
-      note:
-        `What this device reported as warpSize` +
-        (cap != null ? ` and maxThreadsPerBlock (${cap}).` : `. It reported no maxThreadsPerBlock, so blocks are capped at the book's 1024.`),
+      get note() {
+        return tr(
+          `What this device reported as warpSize` +
+            (cap != null ? ` and maxThreadsPerBlock (${cap}).` : `. It reported no maxThreadsPerBlock, so blocks are capped at the book's 1024.`),
+          `Giá trị device này báo cáo cho warpSize` +
+            (cap != null ? ` và maxThreadsPerBlock (${cap}).` : `. Nó không báo cáo maxThreadsPerBlock, nên khối bị giới hạn ở 1024 như trong sách.`),
+        );
+      },
     });
   }
   return out;

@@ -1,0 +1,1 @@
+Qua cả vòng lặp, hai bộ đếm lệch nhau 8 lần. Một lưu ý. Những byte chưa dùng trong mỗi sector là các giá trị mà chính lane đó cần ở vài bước tiếp theo. Một bộ nhớ đệm giữ lại các sector đó sẽ cứu được một phần lãng phí. Nó cứu được bao nhiêu trên GPU của bạn là chuyện phải đo, và lab 6.1 đo điều đó.

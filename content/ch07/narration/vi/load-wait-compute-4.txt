@@ -1,0 +1,1 @@
+Giờ là pha tính toán. Vòng ngoài gồm 28 luồng không có gì để tính và tắt đi. Mỗi luồng trong 36 luồng bên trong đọc một mảng 3 nhân 3 từ bộ nhớ chia sẻ, không cần kiểm tra biên. Luồng ở hàng 1, cột 1 ghi đầu ra hàng 0, cột 0. Luồng ở hàng 6, cột 6 ghi hàng 5, cột 5.

@@ -198,7 +198,7 @@ export function simulate(input: PagedConfig): PagedRun {
           pFree.unshift(...victim.blocks!);
           pWait.unshift({ id: victim.id, len: victim.len });
           evictions++;
-          pEv.push(`r${victim.id} swapped out`);
+          pEv.push(`r${victim.id} swapped out`); // i18n-ignore: identifier also shown to the reader
           if (victim === r) continue;
         }
         r.blocks!.push(pFree.shift()!);
@@ -213,14 +213,14 @@ export function simulate(input: PagedConfig): PagedRun {
         cFree.push(r.slot!);
         cFree.sort((a, b) => a - b);
         cDone++;
-        cEv.push(`r${r.id} finished`);
+        cEv.push(`r${r.id} finished`); // i18n-ignore: identifier also shown to the reader
       }
     for (let i = pLive.length - 1; i >= 0; i--)
       if (pLive[i].len >= pLive[i].final) {
         const [r] = pLive.splice(i, 1);
         pFree.unshift(...r.blocks!);
         pDone++;
-        pEv.push(`r${r.id} finished`);
+        pEv.push(`r${r.id} finished`); // i18n-ignore: identifier also shown to the reader
       }
 
     // 4. Admissions, strict first come, first served.
@@ -229,13 +229,13 @@ export function simulate(input: PagedConfig): PagedRun {
       const q = reqs[id];
       cLive.push({ id, len: q.prompt, final: q.final, slot: cFree.shift()! });
       cAdmitted.add(id);
-      cEv.push(`r${id} admitted`);
+      cEv.push(`r${id} admitted`); // i18n-ignore: identifier also shown to the reader
     }
     while (pWait.length && pFree.length >= blocksFor(pWait[0].len, B)) {
       const w = pWait.shift()!;
       const n = blocksFor(w.len, B);
       pLive.push({ id: w.id, len: w.len, final: reqs[w.id].final, blocks: pFree.splice(0, n) });
-      pEv.push(pAdmitted.has(w.id) ? `r${w.id} swapped back in` : `r${w.id} admitted`);
+      pEv.push(pAdmitted.has(w.id) ? `r${w.id} swapped back in` : `r${w.id} admitted`); // i18n-ignore: identifier also shown to the reader
       pAdmitted.add(w.id);
     }
 

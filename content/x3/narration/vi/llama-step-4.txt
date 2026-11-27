@@ -1,0 +1,1 @@
+Kernel attention cho decode đọc mọi hàng đã được cache cho đến lúc này, kể cả hàng vừa thêm, cho từng head của key, chấm điểm chúng so với query, và gộp kết quả từng phần của các warp thành một đầu ra. Rồi phép chiếu đầu ra chạy, và một phép cộng residual từ mốc M0 đưa kết quả trở lại trạng thái ẩn.

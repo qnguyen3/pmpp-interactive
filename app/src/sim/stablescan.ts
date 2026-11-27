@@ -22,6 +22,8 @@
 //
 // Erasable TypeScript only.
 
+import { tr } from '../lib/locale.ts';
+
 /** Fig. 12.7's keep row (p. 297): k1, k3, k4, k6, k8, k10, k11 and k14 are kept. */
 export const BOOK_KEEP: readonly number[] = [0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0];
 export const BOOK_KEYS: readonly string[] = Array.from({ length: 16 }, (_, i) => `k${i}`);
@@ -189,9 +191,15 @@ export const maskBits = (mask: number, width: number) => (mask >>> 0).toString(2
 export type TrafficDesign = 'three-kernels' | 'staged' | 'single-pass';
 export const TRAFFIC_DESIGNS: TrafficDesign[] = ['three-kernels', 'staged', 'single-pass'];
 export const TRAFFIC_LABEL: Record<TrafficDesign, string> = {
-  'three-kernels': 'exercise 1: keep flags, scan, scatter (three kernels)',
-  staged: 'count per block, scan the block counts, staged scatter (three kernels)',
-  'single-pass': 'exercise 2: one kernel with a single-pass scan',
+  get 'three-kernels'() {
+    return tr('exercise 1: keep flags, scan, scatter (three kernels)', 'bài tập 1: cờ giữ lại, scan, rải (ba kernel)');
+  },
+  get staged() {
+    return tr('count per block, scan the block counts, staged scatter (three kernels)', 'đếm theo khối, scan các số đếm của khối, rải có gom tạm (ba kernel)');
+  },
+  get 'single-pass'() {
+    return tr('exercise 2: one kernel with a single-pass scan', 'bài tập 2: một kernel với scan một lượt');
+  },
 };
 
 export interface Traffic {
@@ -216,17 +224,17 @@ export function traffic(design: TrafficDesign, f: number, keysPerBlock = 256): T
   const parts =
     design === 'three-kernels'
       ? [
-          { kernel: 'keep flags: read each key, write its flag', reads: 4, writes: 4 },
-          { kernel: 'exclusive scan: read the flags, write the offsets', reads: 4, writes: 4 },
-          { kernel: 'scatter: read key, flag and offset, write the kept keys', reads: 12, writes: 4 * f },
+          { kernel: tr('keep flags: read each key, write its flag', 'cờ giữ lại: đọc từng khóa, ghi cờ của nó'), reads: 4, writes: 4 },
+          { kernel: tr('exclusive scan: read the flags, write the offsets', 'scan loại trừ: đọc các cờ, ghi các độ lệch'), reads: 4, writes: 4 },
+          { kernel: tr('scatter: read key, flag and offset, write the kept keys', 'rải: đọc khóa, cờ và độ lệch, ghi các khóa được giữ'), reads: 12, writes: 4 * f },
         ]
       : design === 'staged'
         ? [
-            { kernel: 'count: read each key, write one count per block', reads: 4, writes: 4 / B },
-            { kernel: 'scan the block counts', reads: 4 / B, writes: 4 / B },
-            { kernel: 'staged scatter: read each key and its block offset, write the kept keys', reads: 4 + 4 / B, writes: 4 * f },
+            { kernel: tr('count: read each key, write one count per block', 'đếm: đọc từng khóa, ghi một số đếm cho mỗi khối'), reads: 4, writes: 4 / B },
+            { kernel: tr('scan the block counts', 'scan các số đếm của khối'), reads: 4 / B, writes: 4 / B },
+            { kernel: tr('staged scatter: read each key and its block offset, write the kept keys', 'rải có gom tạm: đọc từng khóa và độ lệch khối của nó, ghi các khóa được giữ'), reads: 4 + 4 / B, writes: 4 * f },
           ]
-        : [{ kernel: 'one kernel: read each key once, write each kept key once', reads: 4, writes: 4 * f }];
+        : [{ kernel: tr('one kernel: read each key once, write each kept key once', 'một kernel: đọc mỗi khóa một lần, ghi mỗi khóa được giữ một lần'), reads: 4, writes: 4 * f }];
   const reads = parts.reduce((s, p) => s + p.reads, 0);
   const writes = parts.reduce((s, p) => s + p.writes, 0);
   return { design, parts, reads, writes, total: reads + writes };

@@ -25,6 +25,8 @@
 // Left out: padding, dilation and groups; data types other than FP32 for byte
 // counts; caches (load counts are what the kernel requests, not DRAM traffic).
 
+import { tr as trText } from '../lib/locale.ts';
+
 export interface ConvShape {
   C: number;
   H: number;
@@ -270,8 +272,8 @@ export function sizes(s: ConvShape): Sizes {
   const bSample = ckk(s) * pixels(s);
   const flags: Flag[] = [];
   const one = limitFlags(bSample);
-  for (const id of one) flags.push({ id, what: 'sample' });
-  for (const id of limitFlags(bSample * s.N)) if (!one.includes(id)) flags.push({ id, what: 'batch' });
+  for (const id of one) flags.push({ id, what: 'sample' }); // i18n-ignore: identifier compared by the chapter, which shows its own text
+  for (const id of limitFlags(bSample * s.N)) if (!one.includes(id)) flags.push({ id, what: 'batch' }); // i18n-ignore: identifier compared by the chapter, which shows its own text
   return {
     xSample,
     xBatch: xSample * s.N,
@@ -353,14 +355,14 @@ export interface Preset {
  * and a late one (more channels, smaller maps), and a 1 × 1 layer.
  */
 export const PRESETS: Preset[] = [
-  { id: 'book', label: "the book's example", from: 'Fig. 19.2, p. 456', shape: BOOK_SHAPE },
-  { id: 'c1', label: 'LeNet C1', from: 'p. 458', shape: { C: 1, H: 32, W: 32, K: 5, M: 6, N: 1 } },
-  { id: 'c3', label: 'LeNet C3', from: 'p. 458', shape: { C: 6, H: 14, W: 14, K: 5, M: 16, N: 1 } },
-  { id: 'c5', label: 'LeNet C5', from: 'p. 458', shape: { C: 16, H: 5, W: 5, K: 5, M: 120, N: 1 } },
-  { id: 'early', label: "lab's early layer", from: 'lab 19.1', shape: { C: 3, H: 224, W: 224, K: 3, M: 64, N: 8 } },
-  { id: 'middle', label: "lab's middle layer", from: 'lab 19.1', shape: { C: 64, H: 56, W: 56, K: 3, M: 64, N: 8 } },
-  { id: 'late', label: "lab's late layer", from: 'lab 19.1', shape: { C: 256, H: 14, W: 14, K: 3, M: 256, N: 8 } },
-  { id: 'pointwise', label: "lab's 1 × 1 layer", from: 'lab 19.1', shape: { C: 256, H: 14, W: 14, K: 1, M: 256, N: 8 } },
+  { id: 'book', get label() { return trText("the book's example", 'ví dụ của sách'); }, from: 'Fig. 19.2, p. 456', shape: BOOK_SHAPE },
+  { id: 'c1', get label() { return trText('LeNet C1', 'LeNet C1'); }, from: 'p. 458', shape: { C: 1, H: 32, W: 32, K: 5, M: 6, N: 1 } },
+  { id: 'c3', get label() { return trText('LeNet C3', 'LeNet C3'); }, from: 'p. 458', shape: { C: 6, H: 14, W: 14, K: 5, M: 16, N: 1 } },
+  { id: 'c5', get label() { return trText('LeNet C5', 'LeNet C5'); }, from: 'p. 458', shape: { C: 16, H: 5, W: 5, K: 5, M: 120, N: 1 } },
+  { id: 'early', get label() { return trText("lab's early layer", 'lớp đầu của lab'); }, get from() { return trText('lab 19.1', 'bài thực hành 19.1'); }, shape: { C: 3, H: 224, W: 224, K: 3, M: 64, N: 8 } },
+  { id: 'middle', get label() { return trText("lab's middle layer", 'lớp giữa của lab'); }, get from() { return trText('lab 19.1', 'bài thực hành 19.1'); }, shape: { C: 64, H: 56, W: 56, K: 3, M: 64, N: 8 } },
+  { id: 'late', get label() { return trText("lab's late layer", 'lớp cuối của lab'); }, get from() { return trText('lab 19.1', 'bài thực hành 19.1'); }, shape: { C: 256, H: 14, W: 14, K: 3, M: 256, N: 8 } },
+  { id: 'pointwise', get label() { return trText("lab's 1 × 1 layer", 'lớp 1 × 1 của lab'); }, get from() { return trText('lab 19.1', 'bài thực hành 19.1'); }, shape: { C: 256, H: 14, W: 14, K: 1, M: 256, N: 8 } },
 ];
 export const preset = (id: PresetId) => PRESETS.find((p) => p.id === id)!;
 

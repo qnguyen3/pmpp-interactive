@@ -1,4 +1,5 @@
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   coRankTrace,
   knownRange,
@@ -106,8 +107,8 @@ function Stage(f: Frame) {
   const lab = f.labels ?? pos;
   const cRow = f.tagged ?? C_BOOK;
   return (
-    <svg viewBox={`0 0 ${W} 340`} role="img" aria-label="Co-rank search on the running example" style={{ width: '100%', maxWidth: W, display: 'block' }}>
-      <g data-beat={f.beat} {...Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}`, String(v)]))}>
+    <svg viewBox={`0 0 ${W} 340`} role="img" aria-label={tr('Co-rank search on the running example', 'Tìm co-rank trên ví dụ xuyên suốt')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
+      <g data-beat={f.beat} {...Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}` /* i18n-ignore: data attribute name */, String(v)]))}>
         {f.slices ? (
           <g data-slices={f.slices.map((s) => `${s.iCurr},${s.jCurr}`).join(' ') + ` | ${f.slices[f.slices.length - 1].iNext},${f.slices[f.slices.length - 1].jNext}`}>
             {f.slices.map((s) => (
@@ -128,8 +129,8 @@ function Stage(f: Frame) {
           shade={f.slices ? (p) => f.slices!.some((s) => s.t % 2 === 0 && p >= s.jCurr && p < s.jNext) : undefined} />
         {f.unknown ? (
           <g opacity={f.unknown}>
-            <text x={(ax(0) + ax(A.length)) / 2} y={RY - 16} fontSize="13" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>where does thread 1 start in A?</text>
-            <text x={(bx(0) + bx(B.length)) / 2} y={RY - 16} fontSize="13" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>and in B?</text>
+            <text x={(ax(0) + ax(A.length)) / 2} y={RY - 16} fontSize="13" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi="luồng 1 bắt đầu ở đâu trong A?">where does thread 1 start in A?</Translated></text>
+            <text x={(bx(0) + bx(B.length)) / 2} y={RY - 16} fontSize="13" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi="còn trong B?">and in B?</Translated></text>
           </g>
         ) : null}
         {pos && lab ? (
@@ -151,7 +152,7 @@ function Stage(f: Frame) {
                 at.set(b, [...(at.get(b) ?? []), `t${s.t}`]);
               }
               const end = arr === 'A' ? last.iNext : last.jNext;
-              at.set(end, [...(at.get(end) ?? []), 'end']);
+              at.set(end, [...(at.get(end) ?? []), tr('end', 'cuối')]);
               const x = arr === 'A' ? ax : bx;
               return [...at].map(([b, names]) => (
                 <g key={arr + b}>
@@ -169,7 +170,9 @@ function Stage(f: Frame) {
               <circle key={q} cx={ax(f.window![0] + q) - 1.5} cy={RY + CW + 32} r="4" fill="var(--ink)" />
             ))}
             <text x={AX - 30} y={RY + CW + 50} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-              {f.window[1] - f.window[0] + 1} candidate{f.window[0] === f.window[1] ? '' : 's'} for i
+              <Translated vi={<>{f.window[1] - f.window[0] + 1} ứng viên cho i</>}>
+                {f.window[1] - f.window[0] + 1} candidate{f.window[0] === f.window[1] ? '' : 's'} for i
+              </Translated>
             </text>
           </g>
         ) : null}
@@ -206,7 +209,7 @@ function Stage(f: Frame) {
           {f.outline ? (
             <g>
               <rect x={cx(K) - 4} y={CY - 4} width={3 * CW + 5} height={CW + 5} rx="4" fill="none" stroke="var(--ink)" strokeWidth="2" />
-              <text x={cx(K) + 1.5 * CW} y={CY + CW + 18} fontSize="11.5" textAnchor="middle">thread 1: k = 3, 4, 5</text>
+              <text x={cx(K) + 1.5 * CW} y={CY + CW + 18} fontSize="11.5" textAnchor="middle"><Translated vi="luồng 1: k = 3, 4, 5">thread 1: k = 3, 4, 5</Translated></text>
             </g>
           ) : null}
         </g>
@@ -217,7 +220,9 @@ function Stage(f: Frame) {
             ))}
             {[0, 1, 2].map((t) => (
               <text key={t} x={cx(3 * t) + 1.5 * CW} y={CY + CW + (f.tagged || f.slices ? 28 : 16)} fontSize="11.5" textAnchor="middle">
-                thread {t}: k = {3 * t}
+                <Translated vi={<>luồng {t}: k = {3 * t}</>}>
+                  thread {t}: k = {3 * t}
+                </Translated>
               </text>
             ))}
           </g>
@@ -234,15 +239,15 @@ function testLines(st: CoRankStep): { text: string; mark: Mark }[] {
   if (st.t1.inBounds)
     out.push({
       text: st.t1.holds
-        ? `A[${st.i - 1}] = ${st.t1.left} > B[${st.j}] = ${st.t1.right}: i is too high`
-        : `A[${st.i - 1}] = ${st.t1.left} ≤ B[${st.j}] = ${st.t1.right}: first test passes`,
+        ? tr(`A[${st.i - 1}] = ${st.t1.left} > B[${st.j}] = ${st.t1.right}: i is too high`, `A[${st.i - 1}] = ${st.t1.left} > B[${st.j}] = ${st.t1.right}: i quá cao`)
+        : tr(`A[${st.i - 1}] = ${st.t1.left} ≤ B[${st.j}] = ${st.t1.right}: first test passes`, `A[${st.i - 1}] = ${st.t1.left} ≤ B[${st.j}] = ${st.t1.right}: phép thử thứ nhất qua`),
       mark: st.t1.holds ? 'fail' : 'ok',
     });
   if (st.t2?.inBounds)
     out.push({
       text: st.t2.holds
-        ? `B[${st.j - 1}] = ${st.t2.left} ≥ A[${st.i}] = ${st.t2.right}: j is too high`
-        : `B[${st.j - 1}] = ${st.t2.left} < A[${st.i}] = ${st.t2.right}: second test passes`,
+        ? tr(`B[${st.j - 1}] = ${st.t2.left} ≥ A[${st.i}] = ${st.t2.right}: j is too high`, `B[${st.j - 1}] = ${st.t2.left} ≥ A[${st.i}] = ${st.t2.right}: j quá cao`)
+        : tr(`B[${st.j - 1}] = ${st.t2.left} < A[${st.i}] = ${st.t2.right}: second test passes`, `B[${st.j - 1}] = ${st.t2.left} < A[${st.i}] = ${st.t2.right}: phép thử thứ hai qua`),
       mark: st.t2.holds ? 'fail' : 'ok',
     });
   return out;
@@ -301,48 +306,60 @@ const say = (s: CoRankStep) => (s.delta ? `delta = ${s.delta}` : '');
 const beats: Beat[] = [
   {
     clip: 'corank-search-1',
-    label: 'Three threads',
+    get label() {
+      return tr('Three threads', 'Ba luồng');
+    },
     draw: (p) => (
       <Stage beat={1} cuts={ramp(p, 0.3, 0.45)} unknown={ramp(p, 0.62, 0.75)}
-        headline={p < 0.55 ? 'nine outputs, three threads, three outputs each' : 'each thread knows where its outputs start, not where its inputs start'} />
+        headline={p < 0.55 ? tr('nine outputs, three threads, three outputs each', 'chín đầu ra, ba luồng, mỗi luồng ba đầu ra') : tr('each thread knows where its outputs start, not where its inputs start', 'mỗi luồng biết đầu ra của nó bắt đầu ở đâu, nhưng không biết đầu vào của nó bắt đầu ở đâu')} />
     ),
   },
   {
     clip: 'corank-search-2',
-    label: 'A first guess',
-    draw: (p) => <Stage {...iteration(0, p, (shown) => (shown ? `${say(S[0])}: move i down and j up` : 'start with as much of A as possible: i = min(k, m)'))} />,
+    get label() {
+      return tr('A first guess', 'Lần đoán đầu tiên');
+    },
+    draw: (p) => <Stage {...iteration(0, p, (shown) => (shown ? tr(`${say(S[0])}: move i down and j up`, `${say(S[0])}: dời i xuống và j lên`) : tr('start with as much of A as possible: i = min(k, m)', 'bắt đầu với nhiều phần của A nhất có thể: i = min(k, m)')))} />,
   },
   {
     clip: 'corank-search-3',
-    label: 'Halve the gap',
-    draw: (p) => <Stage {...iteration(1, p, (shown) => (shown ? `${say(S[1])}: now move j down and i up` : `i and j move by ${S[0].delta} together; their sum stays 3`))} />,
+    get label() {
+      return tr('Halve the gap', 'Chia đôi khoảng cách');
+    },
+    draw: (p) => <Stage {...iteration(1, p, (shown) => (shown ? tr(`${say(S[1])}: now move j down and i up`, `${say(S[1])}: giờ dời j xuống và i lên`) : tr(`i and j move by ${S[0].delta} together; their sum stays 3`, `i và j cùng dời ${S[0].delta}; tổng của chúng vẫn là 3`)))} />,
   },
   {
     clip: 'corank-search-4',
-    label: 'The answer',
+    get label() {
+      return tr('The answer', 'Đáp án');
+    },
     draw: (p) => (
       <Stage {...iteration(2, p, (shown) =>
         shown
-          ? `co-rank of 3: i = ${TRACE.result}, j = ${K - TRACE.result}; ${TRACE.candidates} candidates to 1 in ${S.length} iterations`
-          : `i and j move by ${S[1].delta}`)} />
+          ? tr(`co-rank of 3: i = ${TRACE.result}, j = ${K - TRACE.result}; ${TRACE.candidates} candidates to 1 in ${S.length} iterations`, `co-rank của 3: i = ${TRACE.result}, j = ${K - TRACE.result}; từ ${TRACE.candidates} ứng viên còn 1 sau ${S.length} lần lặp`)
+          : tr(`i and j move by ${S[1].delta}`, `i và j dời ${S[1].delta}`))} />
     ),
   },
   {
     clip: 'corank-search-5',
-    label: 'Every thread at once',
+    get label() {
+      return tr('Every thread at once', 'Mọi luồng cùng lúc');
+    },
     draw: (p) => {
       const t1 = BOOK[1];
       const t2 = BOOK[2];
       return (
         <Stage beat={5} slices={BOOK} cuts={1}
-          sliceText={p > 0.45 ? `thread 1: A[${t1.iCurr}..${t1.iNext}) and ${t1.jNext - t1.jCurr} of B;  thread 2: ${t2.iNext - t2.iCurr} of A and B[${t2.jCurr}..${t2.jNext})` : undefined}
-          headline={p < 0.7 ? 'every thread searches for its own start, at the same time' : 'then each merges its own slices: no thread waits for another'} />
+          sliceText={p > 0.45 ? tr(`thread 1: A[${t1.iCurr}..${t1.iNext}) and ${t1.jNext - t1.jCurr} of B;  thread 2: ${t2.iNext - t2.iCurr} of A and B[${t2.jCurr}..${t2.jNext})`, `luồng 1: A[${t1.iCurr}..${t1.iNext}) và ${t1.jNext - t1.jCurr} phần tử của B;  luồng 2: ${t2.iNext - t2.iCurr} phần tử của A và B[${t2.jCurr}..${t2.jNext})`) : undefined}
+          headline={p < 0.7 ? tr('every thread searches for its own start, at the same time', 'mọi luồng cùng lúc tìm điểm bắt đầu của riêng nó') : tr('then each merges its own slices: no thread waits for another', 'rồi mỗi luồng trộn các lát của riêng nó: không luồng nào phải chờ luồng khác')} />
       );
     },
   },
   {
     clip: 'corank-search-6',
-    label: 'Why the tests are lopsided',
+    get label() {
+      return tr('Why the tests are lopsided', 'Vì sao hai phép thử lệch nhau');
+    },
     draw: (p) => {
       const swapped = p >= 0.42;
       return (
@@ -351,10 +368,10 @@ const beats: Beat[] = [
           data={{ rule: swapped ? 'swapped' : 'book' }}
           headline={
             !swapped
-              ? 'the book\'s tests: equal keys keep their order, A first'
+              ? tr('the book\'s tests: equal keys keep their order, A first', 'các phép thử của sách: khóa bằng nhau giữ nguyên thứ tự, A trước')
               : p < 0.6
-                ? 'swap > and >= in the two tests: the slices move'
-                : `keys still sorted, but ${tag(C_SWAP[MOVED[0]])} now comes before ${tag(C_SWAP[MOVED[1]])}: not stable`
+                ? tr('swap > and >= in the two tests: the slices move', 'đổi > và >= trong hai phép thử: các lát dịch chuyển')
+                : tr(`keys still sorted, but ${tag(C_SWAP[MOVED[0]])} now comes before ${tag(C_SWAP[MOVED[1]])}: not stable`, `khóa vẫn đã sắp xếp, nhưng ${tag(C_SWAP[MOVED[0]])} giờ đứng trước ${tag(C_SWAP[MOVED[1]])}: không ổn định`)
           } />
       );
     },
@@ -362,5 +379,5 @@ const beats: Beat[] = [
 ];
 
 export function CoRankScene() {
-  return <Scene chapter="ch13" title="Searching for the split" beats={beats} />;
+  return <Scene chapter="ch13" title={tr('Searching for the split', 'Tìm điểm chia')} beats={beats} />;
 }

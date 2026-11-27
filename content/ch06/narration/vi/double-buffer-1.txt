@@ -1,0 +1,1 @@
+Bốn luồng dùng chung một buffer trong bộ nhớ chia sẻ. Ở mỗi vòng lặp, mỗi luồng đọc vị trí của luồng bên cạnh, chờ ở một rào chắn, ghi vị trí của mình, rồi lại chờ. Hãy xem các giá trị đi vòng quanh. Hàng chục đếm số bước, còn chữ số cuối cho biết giá trị xuất phát từ luồng nào.

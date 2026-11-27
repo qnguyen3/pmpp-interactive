@@ -1,0 +1,1 @@
+Mỗi vòng lặp có hai rào chắn. Rào chắn sau các lần nạp bảo vệ một phụ thuộc thật. Không luồng nào được tính toán cho đến khi mọi phần tử của các ô đã đến. Rào chắn sau phần tính toán bảo vệ một phụ thuộc giả. Lần nạp tiếp theo không cần gì từ phần tính toán này. Nó chờ chỉ vì nó sẽ ghi đè lên các ô mà những luồng khác vẫn đang đọc.

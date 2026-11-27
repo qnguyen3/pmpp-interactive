@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { LANE_NAME, pinnedScene, type Lane, type Op, type Schedule } from '../../sim/chunkpipe';
+import { Translated, tr } from '../../lib/i18n';
 
 // ---------------------------------------------------------------- lanes, shared with the stepper
 // Draws a schedule from sim/chunkpipe.ts as horizontal lanes, up to time t. Operations are
@@ -40,7 +41,18 @@ export function PipeLanes({
     out.push(
       <g key={'lane-' + l} data-lane={l}>
         <text x={x + labelW - 10} y={yy + laneH / 2 + 4} fontSize="11.5" fontWeight={l === s.bottleneck ? 700 : 500} textAnchor="end">
-          {LANE_NAME[l]}
+          {tr(
+            LANE_NAME[l],
+            {
+              host: 'Luồng host',
+              h2d: 'Copy engine vào',
+              compute: 'Tính toán',
+              d2h: 'Copy engine ra',
+              copy: 'Copy engine (cả hai chiều)',
+              cpu: 'CPU: rút ra, rồi nạp vào',
+              gpu: 'GPU',
+            }[l],
+          )}
         </text>
         <rect x={X(0)} y={yy} width={X(span) - X(0)} height={laneH} fill="none" stroke="var(--rule-soft)" />
       </g>,
@@ -70,7 +82,7 @@ export function PipeLanes({
         {X(to) - X(h.from) > 54 ? (
           <text x={(X(h.from) + X(to)) / 2} y={yy + laneH / 2 + 4} fontSize="10" textAnchor="middle" fontWeight="600"
             style={{ fill: hatched ? 'var(--ink)' : 'var(--page)' }}>
-            {h.kind === 'blocked' ? 'blocked' : h.kind === 'staging' ? 'staging' : 'waiting'}
+            {h.kind === 'blocked' ? tr('blocked', 'bị chặn') : h.kind === 'staging' ? tr('staging', 'trung chuyển') : tr('waiting', 'đang chờ')}
           </text>
         ) : null}
       </g>,
@@ -83,7 +95,9 @@ export function PipeLanes({
       <g key="issued" data-issued={s.ops.length}>
         <rect x={X(0)} y={yy + 4} width={4} height={laneH - 8} fill="var(--ink)" />
         <text x={X(0) + 9} y={yy + laneH / 2 + 4} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-          queued all {s.ops.length} operations at 0, then free
+          <Translated vi={<>đã đưa cả {s.ops.length} thao tác vào hàng đợi lúc 0, rồi rảnh</>}>
+            queued all {s.ops.length} operations at 0, then free
+          </Translated>
         </text>
       </g>,
     );
@@ -129,7 +143,7 @@ export function PipeLanes({
     out.push(
       <g key="serial" data-serial={s.serial}>
         <line x1={X(s.serial)} y1={y - 6} x2={X(s.serial)} y2={bottom + 8} stroke="var(--ink-3)" strokeDasharray="5 4" />
-        <text x={X(s.serial) - 4} y={y - 9} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>in one piece: {fmtN(s.serial)}</text>
+        <text x={X(s.serial) - 4} y={y - 9} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>không chia nhỏ: {fmtN(s.serial)}</>}>in one piece: {fmtN(s.serial)}</Translated></text>
       </g>,
     );
   if (t > 1e-9 || s.ops.length === 0)
@@ -164,15 +178,15 @@ function Pages({ moving, dma }: { moving: number; dma?: { k: number; broken: boo
   const used = new Set(M.frames);
   return (
     <g>
-      <text x={PX} y={26} fontSize="12" fontWeight="600">A buffer from malloc: {M.pages} virtual pages, one after another</text>
+      <text x={PX} y={26} fontSize="12" fontWeight="600"><Translated vi={<>Một buffer từ malloc: {M.pages} trang ảo, nối tiếp nhau</>}>A buffer from malloc: {M.pages} virtual pages, one after another</Translated></text>
       {Array.from({ length: M.pages }, (_, i) => (
         <g key={'p' + i} data-page={i}>
           <rect x={pageX(i)} y={36} width={PW} height={34} rx="3" fill="var(--cell)" stroke="var(--ink)"
             strokeWidth={dma && dma.k === i ? 2.4 : 1} />
-          <text x={pageX(i) + PW / 2} y={57} fontSize="11.5" textAnchor="middle">page {i}</text>
+          <text x={pageX(i) + PW / 2} y={57} fontSize="11.5" textAnchor="middle"><Translated vi={<>trang {i}</>}>page {i}</Translated></text>
         </g>
       ))}
-      <text x={FX} y={172} fontSize="12" fontWeight="600">Physical memory: frames</text>
+      <text x={FX} y={172} fontSize="12" fontWeight="600"><Translated vi="Bộ nhớ vật lý: các khung (frame)">Physical memory: frames</Translated></text>
       {Array.from({ length: M.frameCount }, (_, f) => {
         // mine: holds one of the buffer's pages; free: holds nothing; otherwise another process's
         const left = f === M.frames[M.moved.page] && moving >= 1;
@@ -187,7 +201,7 @@ function Pages({ moving, dma }: { moving: number; dma?: { k: number; broken: boo
               stroke={broken ? 'var(--fail)' : free ? 'var(--ink-3)' : 'var(--rule)'} strokeWidth={broken ? 2 : 1}
               strokeDasharray={free && !broken ? '3 2' : undefined} />
             <text x={frameX(f) + FW / 2} y={201} fontSize="10.5" textAnchor="middle" style={{ fill: mine ? 'var(--ink)' : 'var(--ink-3)' }}>
-              {broken ? 'not yours' : free ? 'free' : `frame ${f}`}
+              {broken ? tr('not yours', 'không phải của bạn') : free ? tr('free', 'trống') : tr(`frame ${f}`, `khung ${f}`)}
             </text>
           </g>
         );
@@ -203,7 +217,7 @@ function Pages({ moving, dma }: { moving: number; dma?: { k: number; broken: boo
         }
         return f == null ? null : <line key={'l' + i} x1={sx} y1={70} x2={frameX(f) + FW / 2} y2={180} stroke="var(--ink-3)" strokeWidth="1" />;
       })}
-      <text x={W - 20} y={236} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>hatched: frames other processes hold; dashed: free</text>
+      <text x={W - 20} y={236} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}><Translated vi="gạch chéo: khung do tiến trình khác giữ; nét đứt: trống">hatched: frames other processes hold; dashed: free</Translated></text>
     </g>
   );
 }
@@ -236,7 +250,15 @@ function StagingBeat({ p }: { p: number }) {
   return (
     <g data-staging={plan.pieces.length} data-returns={plan.returnsAt}>
       <text x={20} y={26} fontSize="12" fontWeight="600">
-        Copying {M.pages} pageable pages: {plan.pieces.length} pieces through {2} pinned staging buffers of {M.staging} pages
+        <Translated
+          vi={
+            <>
+              Sao chép {M.pages} trang pageable: {plan.pieces.length} phần qua {2} buffer trung chuyển được ghim, mỗi vùng {M.staging} trang
+            </>
+          }
+        >
+          Copying {M.pages} pageable pages: {plan.pieces.length} pieces through {2} pinned staging buffers of {M.staging} pages
+        </Translated>
       </text>
       {[0, 1].map((b) => {
         const holding = plan.pieces.filter((x) => x.buffer === b && x.hostFrom <= t && x.dmaTo > t).pop();
@@ -244,23 +266,25 @@ function StagingBeat({ p }: { p: number }) {
           <g key={b} data-buffer={b}>
             <rect x={L + b * 190} y={52} width={170} height={36} rx="3" fill={holding ? 'var(--ink)' : 'var(--cell)'} fillOpacity={holding ? 0.18 : 1} stroke="var(--ink)" />
             <text x={L + b * 190 + 85} y={74} fontSize="11" textAnchor="middle">
-              staging buffer {b} (pinned){holding ? `: piece ${holding.k}` : ''}
+              <Translated vi={<>buffer trung chuyển {b} (được ghim){holding ? `: phần ${holding.k}` : ''}</>}>
+                staging buffer {b} (pinned){holding ? `: piece ${holding.k}` : ''}
+              </Translated>
             </text>
           </g>
         );
       })}
-      <text x={L - 10} y={laneY.host + 19} fontSize="11.5" textAnchor="end">Host thread</text>
-      <text x={L - 10} y={laneY.dma + 19} fontSize="11.5" textAnchor="end">Copy engine</text>
+      <text x={L - 10} y={laneY.host + 19} fontSize="11.5" textAnchor="end"><Translated vi="Luồng host">Host thread</Translated></text>
+      <text x={L - 10} y={laneY.dma + 19} fontSize="11.5" textAnchor="end"><Translated vi="Copy engine">Copy engine</Translated></text>
       {/* the host is held for the whole call */}
       <rect x={X(0)} y={laneY.host + 2} width={Math.max(0, X(Math.min(t, span)) - X(0))} height={26} fill="url(#pin-hatch)" stroke="var(--ink-3)" strokeDasharray="3 2" />
       {cur.map((x) => (
         <g key={x.k} data-piece={x.k}>
           <rect x={X(x.hostFrom)} y={laneY.host + 2} width={X(Math.min(x.hostTo, t)) - X(x.hostFrom)} height={26} fill="var(--ink-2)" />
-          {x.hostTo <= t ? <text x={(X(x.hostFrom) + X(x.hostTo)) / 2} y={laneY.host + 19} fontSize="10" textAnchor="middle" style={{ fill: 'var(--page)' }}>copy {x.k}</text> : null}
+          {x.hostTo <= t ? <text x={(X(x.hostFrom) + X(x.hostTo)) / 2} y={laneY.host + 19} fontSize="10" textAnchor="middle" style={{ fill: 'var(--page)' }}><Translated vi={<>chép {x.k}</>}>copy {x.k}</Translated></text> : null}
           {x.dmaFrom <= t ? (
             <>
               <rect x={X(x.dmaFrom)} y={laneY.dma + 2} width={X(Math.min(x.dmaTo, t)) - X(x.dmaFrom)} height={26} fill="var(--ink)" fillOpacity={0.8} />
-              {x.dmaTo <= t ? <text x={(X(x.dmaFrom) + X(x.dmaTo)) / 2} y={laneY.dma + 19} fontSize="10" textAnchor="middle" style={{ fill: 'var(--page)' }}>move {x.k}</text> : null}
+              {x.dmaTo <= t ? <text x={(X(x.dmaFrom) + X(x.dmaTo)) / 2} y={laneY.dma + 19} fontSize="10" textAnchor="middle" style={{ fill: 'var(--page)' }}><Translated vi={<>chuyển {x.k}</>}>move {x.k}</Translated></text> : null}
             </>
           ) : null}
         </g>
@@ -272,11 +296,13 @@ function StagingBeat({ p }: { p: number }) {
       {t >= span - 1e-9 ? (
         <g data-returned>
           <line x1={X(span)} y1={laneY.host - 8} x2={X(span)} y2={laneY.dma + 30} stroke="var(--ink)" strokeWidth="1.6" />
-          <text x={X(span) - 4} y={laneY.host - 12} fontSize="11" fontWeight="700" textAnchor="end">the call returns at {span}</text>
+          <text x={X(span) - 4} y={laneY.host - 12} fontSize="11" fontWeight="700" textAnchor="end"><Translated vi={<>lời gọi trả về lúc {span}</>}>the call returns at {span}</Translated></text>
         </g>
       ) : null}
       <text x={20} y={268} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-        From pinned memory the engine would read the pages directly: {plan.pinnedTime} for the same bytes, and the host free at once.
+        <Translated vi={<>Từ bộ nhớ ghim, engine sẽ đọc thẳng các trang: {plan.pinnedTime} cho cùng lượng byte, và host rảnh ngay lập tức.</>}>
+          From pinned memory the engine would read the pages directly: {plan.pinnedTime} for the same bytes, and the host free at once.
+        </Translated>
       </text>
     </g>
   );
@@ -289,13 +315,23 @@ function TimelineBeat({ p, which }: { p: number; which: 'pageable' | 'pinned' })
   return (
     <g data-timeline={which} data-total={s.total}>
       <text x={20} y={22} fontSize="12" fontWeight="600">
-        Four chunks of copy-in 1, kernel 2, copy-out 1, a stream each, {which} host buffers
+        <Translated
+          vi={
+            <>
+              Bốn chunk gồm copy-in 1, kernel 2, copy-out 1, mỗi chunk một stream, buffer host {which === 'pageable' ? 'pageable' : 'được ghim'}
+            </>
+          }
+        >
+          Four chunks of copy-in 1, kernel 2, copy-out 1, a stream each, {which} host buffers
+        </Translated>
       </text>
       <PipeLanes s={s} t={t} x={10} y={44} w={W - 20} span={span} laneH={28} gap={9} id={'pin-' + which} bubbles={false} />
       {which === 'pinned' && p > 0.86 ? (
         <g data-compare>
           <text x={W - 20} y={250} fontSize="12" fontWeight="700" textAnchor="end">
-            pageable {M.pageable.total}, pinned {M.pinned.total}
+            <Translated vi={<>pageable {M.pageable.total}, ghim {M.pinned.total}</>}>
+              pageable {M.pageable.total}, pinned {M.pinned.total}
+            </Translated>
           </text>
         </g>
       ) : null}
@@ -305,13 +341,37 @@ function TimelineBeat({ p, which }: { p: number; which: 'pageable' | 'pinned' })
 
 function TodayBeat({ p }: { p: number }) {
   const cols = [
-    { head: 'CUDA', lines: ['pinned: cudaMallocHost', 'from malloc: legal, but', '"will revert to a synchronous', 'behavior" (A6)'] },
-    { head: 'HIP', lines: ['pinned: hipHostMalloc', 'not pinned: "the memory', 'copy will be performed', 'synchronously" (B4)'] },
-    { head: 'Apple silicon', lines: ['a shared buffer is the', "GPU's memory: nothing to", 'copy, nothing to pin;', 'only the order matters (C4)'] },
+    {
+      head: 'CUDA',
+      lines: [
+        tr('pinned: cudaMallocHost', 'ghim: cudaMallocHost'),
+        tr('from malloc: legal, but', 'từ malloc: hợp lệ, nhưng'),
+        tr('"will revert to a synchronous', '"sẽ quay về hành vi'),
+        tr('behavior" (A6)', 'đồng bộ" (A6)'),
+      ],
+    },
+    {
+      head: 'HIP',
+      lines: [
+        tr('pinned: hipHostMalloc', 'ghim: hipHostMalloc'),
+        tr('not pinned: "the memory', 'không ghim: "phép sao chép'),
+        tr('copy will be performed', 'bộ nhớ sẽ được thực hiện'),
+        tr('synchronously" (B4)', 'một cách đồng bộ" (B4)'),
+      ],
+    },
+    {
+      head: 'Apple silicon', // i18n-ignore: product name, also the column key
+      lines: [
+        tr('a shared buffer is the', 'một buffer shared chính là'),
+        tr("GPU's memory: nothing to", 'bộ nhớ của GPU: không có gì'),
+        tr('copy, nothing to pin;', 'để sao chép, không có gì để ghim;'),
+        tr('only the order matters (C4)', 'chỉ thứ tự là quan trọng (C4)'),
+      ],
+    },
   ];
   return (
     <g>
-      <text x={20} y={30} fontSize="12" fontWeight="600">Today: the same rule, or no copy at all</text>
+      <text x={20} y={30} fontSize="12" fontWeight="600"><Translated vi="Ngày nay: cùng quy tắc, hoặc không cần sao chép gì cả">Today: the same rule, or no copy at all</Translated></text>
       {cols.map((c, i) => (
         <g key={c.head} opacity={ramp(p, 0.08 + i * 0.27, 0.2 + i * 0.27)} data-col={c.head}>
           <rect x={20 + i * 230} y={50} width={214} height={150} rx="4" fill="var(--cell)" stroke="var(--rule)" />
@@ -328,72 +388,96 @@ function TodayBeat({ p }: { p: number }) {
 const beats: Beat[] = [
   {
     clip: 'pinned-1',
-    label: 'Pages',
+    get label() {
+      return tr('Pages', 'Trang');
+    },
     draw: (p) => (
-      <Stage label="Virtual pages mapped to physical frames, and the operating system moving one">
+      <Stage label={tr('Virtual pages mapped to physical frames, and the operating system moving one', 'Các trang ảo được ánh xạ vào khung vật lý, và hệ điều hành di chuyển một trang')}>
         <Pages moving={ramp(p, 0.5, 0.8)} />
-        <Headline>{p < 0.5 ? 'pageable: each page sits in some frame, for now' : `the OS moves page ${M.moved.page} to frame ${M.moved.to}, at any time`}</Headline>
+        <Headline>{p < 0.5
+            ? tr('pageable: each page sits in some frame, for now', 'pageable: mỗi trang nằm trong một khung nào đó, tạm thời thôi')
+            : tr(`the OS moves page ${M.moved.page} to frame ${M.moved.to}, at any time`, `hệ điều hành chuyển trang ${M.moved.page} sang khung ${M.moved.to}, vào bất cứ lúc nào`)}</Headline>
       </Stage>
     ),
   },
   {
     clip: 'pinned-2',
-    label: 'DMA',
+    get label() {
+      return tr('DMA', 'DMA');
+    },
     draw: (p) => {
       const k = Math.min(M.pages - 1, Math.floor(ramp(p, 0.05, 0.55) * M.pages));
       const broken = p > 0.6;
       return (
-        <Stage label="The copy engine reads physical frames directly">
+        <Stage label={tr('The copy engine reads physical frames directly', 'Copy engine đọc trực tiếp các khung vật lý')}>
           <Pages moving={0} dma={{ k: broken ? 5 : k, broken }} />
           <rect x={560} y={100} width={140} height={40} rx="4" fill="var(--ink)" />
-          <text x={630} y={124} fontSize="12" textAnchor="middle" style={{ fill: 'var(--page)' }}>copy engine (DMA)</text>
-          <Headline>{broken ? 'a frame reassigned mid-copy: the engine would read data that is not yours' : `the engine reads frame ${M.frames[k]} (page ${k}) by its physical address`}</Headline>
+          <text x={630} y={124} fontSize="12" textAnchor="middle" style={{ fill: 'var(--page)' }}><Translated vi="copy engine (DMA)">copy engine (DMA)</Translated></text>
+          <Headline>{broken
+              ? tr('a frame reassigned mid-copy: the engine would read data that is not yours', 'một khung bị gán lại giữa lúc sao chép: engine sẽ đọc dữ liệu không phải của bạn')
+              : tr(`the engine reads frame ${M.frames[k]} (page ${k}) by its physical address`, `engine đọc khung ${M.frames[k]} (trang ${k}) theo địa chỉ vật lý của nó`)}</Headline>
         </Stage>
       );
     },
   },
   {
     clip: 'pinned-3',
-    label: 'Staging',
+    get label() {
+      return tr('Staging', 'Trung chuyển');
+    },
     draw: (p) => (
-      <Stage label="A pageable copy staged through pinned buffers">
+      <Stage label={tr('A pageable copy staged through pinned buffers', 'Một phép sao chép từ bộ nhớ phân trang (pageable) đi qua các buffer được ghim')}>
         <StagingBeat p={p} />
-        <Headline>{`the host takes part in every piece and is held until ${M.plan.returnsAt}`}</Headline>
+        <Headline>{tr(`the host takes part in every piece and is held until ${M.plan.returnsAt}`, `host tham gia vào mọi phần và bị giữ đến ${M.plan.returnsAt}`)}</Headline>
       </Stage>
     ),
   },
   {
     clip: 'pinned-4',
-    label: 'Pageable',
+    get label() {
+      return tr('Pageable', 'Pageable');
+    },
     draw: (p) => (
-      <Stage label="The four-chunk pipeline with pageable buffers">
-        <TimelineBeat p={p} which="pageable" />
-        <Headline>{p > 0.86 ? `${M.pageable.total}: the same as doing it in one piece (${M.pageable.serial})` : 'each copy holds the host, so the next operation is queued late'}</Headline>
+      <Stage label={tr('The four-chunk pipeline with pageable buffers', 'Pipeline bốn chunk với buffer pageable')}>
+        <TimelineBeat p={p} which="pageable" />{/* i18n-ignore: schedule key */}
+        <Headline>
+          {p > 0.86
+            ? tr(`${M.pageable.total}: the same as doing it in one piece (${M.pageable.serial})`, `${M.pageable.total}: bằng với làm không chia nhỏ (${M.pageable.serial})`)
+            : tr('each copy holds the host, so the next operation is queued late', 'mỗi phép sao chép giữ host, nên thao tác kế tiếp vào hàng đợi muộn')}</Headline>
       </Stage>
     ),
   },
   {
     clip: 'pinned-5',
-    label: 'Pinned',
+    get label() {
+      return tr('Pinned', 'Ghim');
+    },
     draw: (p) => (
-      <Stage label="The four-chunk pipeline with pinned buffers">
-        <TimelineBeat p={p} which="pinned" />
-        <Headline>{p > 0.86 ? `${M.pinned.total} instead of ${M.pageable.total}` : "every call returns at once; chunk 1's copy runs under kernel 0"}</Headline>
+      <Stage label={tr('The four-chunk pipeline with pinned buffers', 'Pipeline bốn chunk với buffer được ghim')}>
+        <TimelineBeat p={p} which="pinned" />{/* i18n-ignore: schedule key */}
+        <Headline>
+          {p > 0.86
+            ? tr(`${M.pinned.total} instead of ${M.pageable.total}`, `${M.pinned.total} thay vì ${M.pageable.total}`)
+            : tr("every call returns at once; chunk 1's copy runs under kernel 0", 'mọi lời gọi trả về ngay; phép sao chép của chunk 1 chạy chồng lấp bên dưới kernel 0')}</Headline>
       </Stage>
     ),
   },
   {
     clip: 'pinned-6',
-    label: 'Today',
+    get label() {
+      return tr('Today', 'Ngày nay');
+    },
     draw: (p) => (
-      <Stage label="Pinned memory on CUDA, HIP and Apple silicon">
+      <Stage label={tr('Pinned memory on CUDA, HIP and Apple silicon', 'Bộ nhớ ghim (pinned memory) trên CUDA, HIP và Apple silicon')}>
         <TodayBeat p={p} />
-        <Headline>a pageable async copy is legal and silently synchronous</Headline>
+        <Headline>
+          <Translated vi="một phép sao chép async từ bộ nhớ phân trang là hợp lệ nhưng âm thầm chạy đồng bộ">a pageable async copy is legal and silently synchronous</Translated>
+        </Headline>
       </Stage>
     ),
   },
 ];
 
 export function PinnedScene() {
-  return <Scene chapter="ch23" title="Why an asynchronous copy needs pinned memory" beats={beats} />;
+  return <Scene chapter="ch23" title={tr('Why an asynchronous copy needs pinned memory', 'Vì sao phép sao chép bất đồng bộ cần bộ nhớ ghim (pinned memory)')} beats={beats} />;
 }

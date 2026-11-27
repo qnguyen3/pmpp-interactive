@@ -1,0 +1,1 @@
+6 yêu cầu đến theo thời gian, mỗi yêu cầu cần một số token khác nhau. Mỗi hàng ở đây là một chỗ trong batch, và mỗi cột là một bước decode. Một bước thêm một token cho mọi yêu cầu trong batch. Một yêu cầu giữ chỗ của mình cho đến khi có đủ mọi token.

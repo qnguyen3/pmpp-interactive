@@ -1,0 +1,1 @@
+Giờ đến mẹo. Lấy t trừ tổng cũ: đó là lượng mà phép cộng thực sự đã thêm vào, và ở đây nó bằng không. Rồi trừ đi y, lượng mà ta định cộng. Kết quả là âm 2 mũ âm 25: đúng phần mà phép làm tròn đã bỏ đi, với dấu bị đảo ngược. Nó được đưa vào c.

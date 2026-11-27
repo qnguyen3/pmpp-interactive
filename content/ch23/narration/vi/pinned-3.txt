@@ -1,0 +1,1 @@
+Thay vào đó, một lần sao chép từ bộ nhớ phân trang đi qua hai bước. CPU chép một mẩu vào một buffer trung chuyển được ghim, thứ mà hệ thống sẽ không di chuyển. Rồi copy engine chuyển tiếp mẩu đó, trong khi CPU nạp buffer kế tiếp. CPU tham gia cho đến khi mẩu cuối cùng đi qua, nên lời gọi không thể trả về sớm hơn.

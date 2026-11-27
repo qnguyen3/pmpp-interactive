@@ -29,6 +29,7 @@
 //
 // Erasable TypeScript only.
 import { emuOrders, SCHEDULES, SCHEDULE_LABEL, type Schedule } from './histpriv';
+import { tr } from '../lib/locale.ts';
 
 export { SCHEDULES, SCHEDULE_LABEL, type Schedule };
 
@@ -71,42 +72,72 @@ export const CORRECT: Shape = { barrier1: true, barrier2: true, barrier3: true, 
 export type Variant = 'correct' | 'no-barrier-1' | 'no-barrier-2' | 'no-barrier-3' | 'plain-counter';
 export const VARIANTS: Variant[] = ['correct', 'no-barrier-1', 'no-barrier-2', 'no-barrier-3', 'plain-counter'];
 export const VARIANT: Record<Variant, { kernel: string; label: string; shape: Shape }> = {
-  correct: { kernel: 'filterPrivatised', label: 'all three barriers', shape: CORRECT },
-  'no-barrier-1': { kernel: 'filterNoBarrier1', label: 'barrier 1 removed', shape: { ...CORRECT, barrier1: false } },
-  'no-barrier-2': { kernel: 'filterNoBarrier2', label: 'barrier 2 removed', shape: { ...CORRECT, barrier2: false } },
-  'no-barrier-3': { kernel: 'filterNoBarrier3', label: 'barrier 3 removed', shape: { ...CORRECT, barrier3: false } },
-  'plain-counter': { kernel: 'filterPlainCounter', label: 'private counter not atomic', shape: { ...CORRECT, atomicCounter: false } },
+  correct: {
+    kernel: 'filterPrivatised',
+    get label() {
+      return tr('all three barriers', 'cả ba rào chắn');
+    },
+    shape: CORRECT,
+  },
+  'no-barrier-1': {
+    kernel: 'filterNoBarrier1',
+    get label() {
+      return tr('barrier 1 removed', 'bỏ rào chắn 1');
+    },
+    shape: { ...CORRECT, barrier1: false },
+  },
+  'no-barrier-2': {
+    kernel: 'filterNoBarrier2',
+    get label() {
+      return tr('barrier 2 removed', 'bỏ rào chắn 2');
+    },
+    shape: { ...CORRECT, barrier2: false },
+  },
+  'no-barrier-3': {
+    kernel: 'filterNoBarrier3',
+    get label() {
+      return tr('barrier 3 removed', 'bỏ rào chắn 3');
+    },
+    shape: { ...CORRECT, barrier3: false },
+  },
+  'plain-counter': {
+    kernel: 'filterPlainCounter',
+    get label() {
+      return tr('private counter not atomic', 'bộ đếm riêng không nguyên tử (atomic)');
+    },
+    shape: { ...CORRECT, atomicCounter: false },
+  },
 };
 
 type LineKey =
   | 'd1' | 'd2' | 'd3' | 'zero' | 'b1' | 'idx' | 'guard' | 'load' | 'cond' | 'ref' | 'count' | 'store'
   | 'c2' | 'c1' | 'b2' | 't0' | 'pref' | 'reserve' | 'c3' | 'b3' | 'test' | 'commit';
 const TEXT: Record<LineKey, string> = {
-  d1: '__shared__ unsigned int output_s[BLOCK_DIM];',
-  d2: '__shared__ unsigned int outputSize_s;',
-  d3: '__shared__ unsigned int blockStart;',
+  d1: '__shared__ unsigned int output_s[BLOCK_DIM];', // i18n-ignore: kernel source
+  d2: '__shared__ unsigned int outputSize_s;', // i18n-ignore: kernel source
+  d3: '__shared__ unsigned int blockStart;', // i18n-ignore: kernel source
   zero: 'if (threadIdx.x == 0) outputSize_s = 0;',
-  b1: '__syncthreads();  // barrier 1',
+  b1: '__syncthreads();  // barrier 1', // i18n-ignore: kernel source
   idx: 'unsigned int i = blockIdx.x * blockDim.x + threadIdx.x;',
   guard: 'if (i < N) {',
-  load: '    unsigned int val = input[i];',
-  cond: '    if (cond(val)) {',
+  load: '    unsigned int val = input[i];', // i18n-ignore: kernel source
+  cond: '    if (cond(val)) {', // i18n-ignore: kernel source
   // Four statements take two lines each, so that the stepper's listing fits its column.
   ref: '        cuda::atomic_ref<unsigned int, cuda::thread_scope_block>\n            outputSize_s_ref(outputSize_s);',
   count: '        unsigned int slot = outputSize_s_ref.fetch_add(1,\n            cuda::memory_order_relaxed);',
   store: '        output_s[slot] = val;',
   c2: '    }',
   c1: '}',
-  b2: '__syncthreads();  // barrier 2',
+  b2: '__syncthreads();  // barrier 2', // i18n-ignore: kernel source
   t0: 'if (threadIdx.x == 0) {',
   pref: '    cuda::atomic_ref<unsigned int, cuda::thread_scope_device>\n        outputSize_ref(*outputSize);',
   reserve: '    blockStart = outputSize_ref.fetch_add(outputSize_s,\n        cuda::memory_order_relaxed);',
   c3: '}',
-  b3: '__syncthreads();  // barrier 3',
+  b3: '__syncthreads();  // barrier 3', // i18n-ignore: kernel source
   test: 'if (threadIdx.x < outputSize_s)',
   commit: '    output[blockStart + threadIdx.x] = output_s[threadIdx.x];',
 };
-const PLAIN_COUNT = '        unsigned int slot = outputSize_s++;';
+const PLAIN_COUNT = '        unsigned int slot = outputSize_s++;'; // i18n-ignore: kernel source
 
 function bodyLines(shape: Shape, placeholders: boolean): { key: LineKey | null; text: string }[] {
   const out: { key: LineKey | null; text: string }[] = [];
@@ -158,9 +189,13 @@ export function statementLines(shape: Shape, placeholders: boolean, line: number
 // ---------------------------------------------------------------- block orders
 export type BlockOrder = 'in-order' | 'book' | 'random';
 export const BLOCK_ORDER_LABEL: Record<BlockOrder, string> = {
-  'in-order': '0, 1, 2, 3 (as the emulator)',
+  get 'in-order'() {
+    return tr('0, 1, 2, 3 (as the emulator)', '0, 1, 2, 3 (như trình giả lập)');
+  },
   book: '1, 3, 2, 0 (Fig. 12.5)',
-  random: 'random',
+  get random() {
+    return tr('random', 'ngẫu nhiên');
+  },
 };
 export function blockOrderOf(kind: BlockOrder, seed = 1): number[] {
   if (kind === 'in-order') return [0, 1, 2, 3];
@@ -180,16 +215,36 @@ export type Site =
   | 'zero' | 'count' | 'store' | 'reserve-read' | 'reserve-write' | 'public-add'
   | 'commit-test' | 'commit-read-start' | 'commit-read-private' | 'commit-write';
 export const SITE_TEXT: Record<Site, string> = {
-  zero: 'the zeroing of outputSize_s',
-  count: 'the increment of outputSize_s',
-  store: 'the store into output_s',
-  'reserve-read': 'thread 0\'s read of outputSize_s for the reservation',
-  'reserve-write': 'thread 0\'s write of blockStart',
-  'public-add': 'the add to the public counter',
-  'commit-test': 'the read of outputSize_s in the commit test',
-  'commit-read-start': 'the read of blockStart in the commit',
-  'commit-read-private': 'the read of output_s in the commit',
-  'commit-write': 'the store to the public output',
+  get zero() {
+    return tr('the zeroing of outputSize_s', 'việc đặt outputSize_s về 0');
+  },
+  get count() {
+    return tr('the increment of outputSize_s', 'việc tăng outputSize_s');
+  },
+  get store() {
+    return tr('the store into output_s', 'việc ghi vào output_s');
+  },
+  get 'reserve-read'() {
+    return tr('thread 0\'s read of outputSize_s for the reservation', 'lần đọc outputSize_s của luồng 0 để giữ chỗ');
+  },
+  get 'reserve-write'() {
+    return tr('thread 0\'s write of blockStart', 'lần ghi blockStart của luồng 0');
+  },
+  get 'public-add'() {
+    return tr('the add to the public counter', 'phép cộng vào bộ đếm công khai');
+  },
+  get 'commit-test'() {
+    return tr('the read of outputSize_s in the commit test', 'lần đọc outputSize_s trong phép kiểm tra của bước commit');
+  },
+  get 'commit-read-start'() {
+    return tr('the read of blockStart in the commit', 'lần đọc blockStart trong bước commit');
+  },
+  get 'commit-read-private'() {
+    return tr('the read of output_s in the commit', 'lần đọc output_s trong bước commit');
+  },
+  get 'commit-write'() {
+    return tr('the store to the public output', 'việc ghi vào output công khai');
+  },
 };
 
 export interface Access {
@@ -283,7 +338,7 @@ function fresh(): BlockState {
     outputSize_s: GARBAGE,
     blockStart: GARBAGE,
     written: { output_s: new Array<boolean>(BLOCK_DIM).fill(false), outputSize_s: false, blockStart: false },
-    status: new Array<string>(THREADS).fill('not started'),
+    status: new Array<string>(THREADS).fill(tr('not started', 'chưa bắt đầu')),
   };
 }
 function clone(s: Snapshot): Snapshot {
@@ -350,35 +405,56 @@ export function simulate(
     const done = (t: number) => pc[t] >= progs[t].length;
     const push = (s: Omit<Step, 'after' | 'block'>) => steps.push({ ...s, block: b, after: clone(st) });
     const acc = (t: number, a: Omit<Access, 'block' | 'thread' | 'epoch'>) => accesses.push({ ...a, block: b, thread: t, epoch: epoch[t] });
-    const who = (t: number) => `Block ${b}, thread ${t}`;
+    const who = (t: number) => tr(`Block ${b}, thread ${t}`, `Khối ${b}, luồng ${t}`);
 
     while (!crashed) {
       for (const t of orders[pos]) {
         if (done(t) || waiting[t] || crashed) continue;
         while (!done(t) && !crashed) {
           const op = progs[t][pc[t]];
-          sh.status[t] = 'running';
+          sh.status[t] = tr('running', 'đang chạy');
           const i = b * THREADS + t;
           if (op.k === 'barrier') {
             waiting[t] = true;
-            sh.status[t] = `at barrier ${op.n}`;
-            push({ thread: t, op: 'arrive', barrier: op.n, line: line(`b${op.n}` as LineKey), text: `${who(t)} reaches barrier ${op.n} and waits for the other three threads of its block.` });
+            sh.status[t] = tr(`at barrier ${op.n}`, `tại rào chắn ${op.n}`);
+            push({
+              thread: t,
+              op: 'arrive',
+              barrier: op.n,
+              line: line(`b${op.n}` as LineKey),
+              text: tr(
+                `${who(t)} reaches barrier ${op.n} and waits for the other three threads of its block.`,
+                `${who(t)} tới rào chắn ${op.n} và chờ ba luồng còn lại của khối.`,
+              ),
+            });
             break;
           }
           pc[t]++;
           const last = done(t);
           const fin = () => {
-            if (done(t)) sh.status[t] = 'finished';
+            if (done(t)) sh.status[t] = tr('finished', 'đã xong');
           };
           if (op.k === 'zero') {
             const v: Violation | undefined = increments
-              ? { kind: 'late-zero', message: `thread 0 zeroes the counter after ${increments} key${increments === 1 ? ' was' : 's were'} already counted, so those slots will be handed out again` }
+              ? {
+                  kind: 'late-zero',
+                  message: tr(
+                    `thread 0 zeroes the counter after ${increments} key${increments === 1 ? ' was' : 's were'} already counted, so those slots will be handed out again`,
+                    `luồng 0 đặt bộ đếm về 0 sau khi ${increments} khóa đã được đếm, nên các ô đó sẽ bị phát ra lần nữa`,
+                  ),
+                }
               : undefined;
             sh.outputSize_s = 0;
             sh.written.outputSize_s = true;
             acc(t, { space: 'shared', addr: 'outputSize_s', write: true, atomic: false, site: 'zero' });
             fin();
-            push({ thread: t, op: 'zero', line: line('zero'), text: `${who(t)} sets the private counter outputSize_s to 0.`, violation: v });
+            push({
+              thread: t,
+              op: 'zero',
+              line: line('zero'),
+              text: tr(`${who(t)} sets the private counter outputSize_s to 0.`, `${who(t)} đặt bộ đếm riêng outputSize_s về 0.`),
+              violation: v,
+            });
           } else if (op.k === 'load') {
             val[t] = input[i];
             fin();
@@ -388,8 +464,14 @@ export function simulate(
             push({
               thread: t, op: 'load', line: line(kept ? 'cond' : 'load'),
               text: kept
-                ? `${who(t)}: i = ${b}·4 + ${t} = ${i}. It reads k${i}, which passes cond(), so it will take a slot in the private list.`
-                : `${who(t)}: i = ${b}·4 + ${t} = ${i}. It reads k${i}, which fails cond(): nothing to count or store.`,
+                ? tr(
+                    `${who(t)}: i = ${b}·4 + ${t} = ${i}. It reads k${i}, which passes cond(), so it will take a slot in the private list.`,
+                    `${who(t)}: i = ${b}·4 + ${t} = ${i}. Nó đọc k${i}, khóa này qua được cond(), nên nó sẽ lấy một ô trong danh sách riêng.`,
+                  )
+                : tr(
+                    `${who(t)}: i = ${b}·4 + ${t} = ${i}. It reads k${i}, which fails cond(): nothing to count or store.`,
+                    `${who(t)}: i = ${b}·4 + ${t} = ${i}. Nó đọc k${i}, khóa này không qua cond(): không có gì để đếm hay ghi.`,
+                  ),
             });
           } else if (op.k === 'count') {
             const old = sh.outputSize_s;
@@ -404,22 +486,53 @@ export function simulate(
             }
             push({
               thread: t, op: 'count', line: line('count'),
-              text: `${who(t)} ${shape.atomicCounter ? 'atomically adds 1 to' : 'reads and increments'} outputSize_s: it gets the old value, ${show(old)}, as its slot, and the counter becomes ${show(sh.outputSize_s)}.`,
-              violation: garbage ? { kind: 'garbage-count', message: `outputSize_s has not been zeroed yet: it still holds the 0xCD bytes shared memory started with, so the slot is ${show(old)}` } : undefined,
-              note: shape.atomicCounter ? undefined : 'Not atomic. Here threads take turns, so it gives the right slot; threads running at the same time can both read the same value. The race check below reports it.',
+              text: tr(
+                `${who(t)} ${shape.atomicCounter ? 'atomically adds 1 to' : 'reads and increments'} outputSize_s: it gets the old value, ${show(old)}, as its slot, and the counter becomes ${show(sh.outputSize_s)}.`,
+                `${who(t)} ${shape.atomicCounter ? 'cộng 1 một cách nguyên tử vào' : 'đọc rồi tăng'} outputSize_s: nó nhận giá trị cũ, ${show(old)}, làm ô của mình, và bộ đếm thành ${show(sh.outputSize_s)}.`,
+              ),
+              violation: garbage
+                ? {
+                    kind: 'garbage-count',
+                    message: tr(
+                      `outputSize_s has not been zeroed yet: it still holds the 0xCD bytes shared memory started with, so the slot is ${show(old)}`,
+                      `outputSize_s chưa được đặt về 0: nó vẫn giữ các byte 0xCD mà bộ nhớ chia sẻ có từ đầu, nên ô là ${show(old)}`,
+                    ),
+                  }
+                : undefined,
+              note: shape.atomicCounter
+                ? undefined
+                : tr(
+                    'Not atomic. Here threads take turns, so it gives the right slot; threads running at the same time can both read the same value. The race check below reports it.',
+                    'Không nguyên tử. Ở đây các luồng lần lượt chạy, nên nó cho đúng ô; các luồng chạy cùng lúc có thể cùng đọc một giá trị. Phép kiểm tra race bên dưới báo điều đó.',
+                  ),
             });
           } else if (op.k === 'store') {
             const s = slot[t];
             if (s >= BLOCK_DIM) {
-              crashed = `block ${b}, thread ${t} writes output_s[${s}], outside the ${BLOCK_DIM}-entry list`;
-              push({ thread: t, op: 'store', line: line('store'), text: `${who(t)} stores k${i} into output_s[${show(s)}].`, violation: { kind: 'crash', message: `output_s[${show(s)}] is outside the ${BLOCK_DIM}-entry list: the emulator stops here with an AddressSanitizer report` } });
+              crashed = tr(
+                `block ${b}, thread ${t} writes output_s[${s}], outside the ${BLOCK_DIM}-entry list`,
+                `khối ${b}, luồng ${t} ghi output_s[${s}], ngoài danh sách ${BLOCK_DIM} phần tử`,
+              );
+              push({
+                thread: t,
+                op: 'store',
+                line: line('store'),
+                text: tr(`${who(t)} stores k${i} into output_s[${show(s)}].`, `${who(t)} ghi k${i} vào output_s[${show(s)}].`),
+                violation: {
+                  kind: 'crash',
+                  message: tr(
+                    `output_s[${show(s)}] is outside the ${BLOCK_DIM}-entry list: the emulator stops here with an AddressSanitizer report`,
+                    `output_s[${show(s)}] nằm ngoài danh sách ${BLOCK_DIM} phần tử: trình giả lập dừng ở đây với một báo cáo AddressSanitizer`,
+                  ),
+                },
+              });
               break;
             }
             sh.output_s[s] = val[t];
             sh.written.output_s[s] = true;
             acc(t, { space: 'shared', addr: `output_s[${s}]`, write: true, atomic: false, site: 'store' });
             fin();
-            push({ thread: t, op: 'store', line: line('store'), text: `${who(t)} stores k${i} into output_s[${s}].` });
+            push({ thread: t, op: 'store', line: line('store'), text: tr(`${who(t)} stores k${i} into output_s[${s}].`, `${who(t)} ghi k${i} vào output_s[${s}].`) });
           } else if (op.k === 'reserve') {
             const size = sh.outputSize_s;
             const start = st.outputSize;
@@ -431,13 +544,25 @@ export function simulate(
             acc(t, { space: 'shared', addr: 'blockStart', write: true, atomic: false, site: 'reserve-write' });
             fin();
             const v: Violation | undefined = !sh.written.outputSize_s
-              ? { kind: 'garbage-reservation', message: `outputSize_s was never zeroed: thread 0 reserves ${show(size)} slots` }
+              ? {
+                  kind: 'garbage-reservation',
+                  message: tr(`outputSize_s was never zeroed: thread 0 reserves ${show(size)} slots`, `outputSize_s chưa từng được đặt về 0: luồng 0 giữ chỗ ${show(size)} ô`),
+                }
               : size !== keptHere
-                ? { kind: 'short-reservation', message: `thread 0 reserves ${size} public slot${size === 1 ? '' : 's'}, but block ${b} keeps ${keptHere}: it read the counter before every thread had counted` }
+                ? {
+                    kind: 'short-reservation',
+                    message: tr(
+                      `thread 0 reserves ${size} public slot${size === 1 ? '' : 's'}, but block ${b} keeps ${keptHere}: it read the counter before every thread had counted`,
+                      `luồng 0 giữ chỗ ${size} ô công khai, nhưng khối ${b} giữ lại ${keptHere}: nó đọc bộ đếm trước khi mọi luồng đếm xong`,
+                    ),
+                  }
                 : undefined;
             push({
               thread: t, op: 'reserve', line: line('reserve'),
-              text: `${who(t)} reserves outputSize_s = ${show(size)} public slots: the public counter goes from ${start} to ${st.outputSize}, so blockStart = ${start}.`,
+              text: tr(
+                `${who(t)} reserves outputSize_s = ${show(size)} public slots: the public counter goes from ${start} to ${st.outputSize}, so blockStart = ${start}.`,
+                `${who(t)} giữ chỗ outputSize_s = ${show(size)} ô công khai: bộ đếm công khai đi từ ${start} lên ${st.outputSize}, nên blockStart = ${start}.`,
+              ),
               violation: v,
             });
           } else {
@@ -445,7 +570,15 @@ export function simulate(
             acc(t, { space: 'shared', addr: 'outputSize_s', write: false, atomic: false, site: 'commit-test' });
             if (!(t < size)) {
               fin();
-              push({ thread: t, op: 'skip', line: line('test'), text: `${who(t)}: ${t} < outputSize_s (${show(size)}) is false, so it has nothing to copy${last ? ' and finishes' : ''}.` });
+              push({
+                thread: t,
+                op: 'skip',
+                line: line('test'),
+                text: tr(
+                  `${who(t)}: ${t} < outputSize_s (${show(size)}) is false, so it has nothing to copy${last ? ' and finishes' : ''}.`,
+                  `${who(t)}: ${t} < outputSize_s (${show(size)}) là sai, nên nó không có gì để chép${last ? ' và kết thúc' : ''}.`,
+                ),
+              });
               continue;
             }
             const start = sh.blockStart;
@@ -456,11 +589,23 @@ export function simulate(
             acc(t, { space: 'shared', addr: `output_s[${t}]`, write: false, atomic: false, site: 'commit-read-private' });
             const j = (start + t) >>> 0;
             if (j >= N) {
-              crashed = `block ${b}, thread ${t} writes output[${j}], outside the ${N}-slot output`;
+              crashed = tr(
+                `block ${b}, thread ${t} writes output[${j}], outside the ${N}-slot output`,
+                `khối ${b}, luồng ${t} ghi output[${j}], ngoài output ${N} ô`,
+              );
               push({
                 thread: t, op: 'commit', line: line('commit'),
-                text: `${who(t)} copies output_s[${t}] to output[blockStart + ${t}] = output[${show(start)} + ${t}].`,
-                violation: { kind: 'crash', message: `${startGarbage ? 'blockStart has not been written yet (0xCD bytes), so ' : ''}output[${j}] is outside the ${N}-slot output: the emulator stops here with an AddressSanitizer report` },
+                text: tr(
+                  `${who(t)} copies output_s[${t}] to output[blockStart + ${t}] = output[${show(start)} + ${t}].`,
+                  `${who(t)} chép output_s[${t}] sang output[blockStart + ${t}] = output[${show(start)} + ${t}].`,
+                ),
+                violation: {
+                  kind: 'crash',
+                  message: tr(
+                    `${startGarbage ? 'blockStart has not been written yet (0xCD bytes), so ' : ''}output[${j}] is outside the ${N}-slot output: the emulator stops here with an AddressSanitizer report`,
+                    `${startGarbage ? 'blockStart chưa được ghi (các byte 0xCD), nên ' : ''}output[${j}] nằm ngoài output ${N} ô: trình giả lập dừng ở đây với một báo cáo AddressSanitizer`,
+                  ),
+                },
               });
               break;
             }
@@ -470,15 +615,30 @@ export function simulate(
             accesses.push({ block: b, thread: t, epoch: epoch[t], space: 'global', addr: `output[${j}]`, write: true, atomic: false, site: 'commit-write' });
             fin();
             const viol: Violation | undefined = startGarbage
-              ? { kind: 'garbage-start', message: `blockStart has not been written yet; it holds ${hex(start)}` }
+              ? { kind: 'garbage-start', message: tr(`blockStart has not been written yet; it holds ${hex(start)}`, `blockStart chưa được ghi; nó đang giữ ${hex(start)}`) }
               : copyGarbage
-                ? { kind: 'garbage-copy', message: `output_s[${t}] was never written: thread ${t} copies the 0xCD bytes into the public output` }
+                ? {
+                    kind: 'garbage-copy',
+                    message: tr(
+                      `output_s[${t}] was never written: thread ${t} copies the 0xCD bytes into the public output`,
+                      `output_s[${t}] chưa từng được ghi: luồng ${t} chép các byte 0xCD vào output công khai`,
+                    ),
+                  }
                 : prev >= 0 && prev !== b
-                  ? { kind: 'overwrite', message: `output[${j}] was already written by block ${prev}: this overwrites one of its keys` }
+                  ? {
+                      kind: 'overwrite',
+                      message: tr(
+                        `output[${j}] was already written by block ${prev}: this overwrites one of its keys`,
+                        `output[${j}] đã được khối ${prev} ghi: lần ghi này đè lên một khóa của khối đó`,
+                      ),
+                    }
                   : undefined;
             push({
               thread: t, op: 'commit', line: line('commit'),
-              text: `${who(t)} copies output_s[${t}] (${keyName(v) || show(v)}) to output[blockStart + ${t}] = output[${j}]${last ? ' and finishes' : ''}.`,
+              text: tr(
+                `${who(t)} copies output_s[${t}] (${keyName(v) || show(v)}) to output[blockStart + ${t}] = output[${j}]${last ? ' and finishes' : ''}.`,
+                `${who(t)} chép output_s[${t}] (${keyName(v) || show(v)}) sang output[blockStart + ${t}] = output[${j}]${last ? ' và kết thúc' : ''}.`,
+              ),
               violation: viol,
             });
           }
@@ -493,14 +653,14 @@ export function simulate(
           waiting[t] = false;
           epoch[t]++;
           pc[t]++;
-          sh.status[t] = `past barrier ${(progs[t][pc[t] - 1] as { n: number }).n}`;
+          sh.status[t] = tr(`past barrier ${(progs[t][pc[t] - 1] as { n: number }).n}`, `đã qua rào chắn ${(progs[t][pc[t] - 1] as { n: number }).n}`);
         }
-      for (let t = 0; t < THREADS; t++) if (done(t)) sh.status[t] = 'finished';
+      for (let t = 0; t < THREADS; t++) if (done(t)) sh.status[t] = tr('finished', 'đã xong');
       const what =
-        n === 1 ? 'the counter is zero before anyone counts'
-          : n === 2 ? 'every kept key is in the private list, so outputSize_s is the block\'s full count'
-            : 'blockStart is written, so every thread can read it';
-      push({ thread: -1, op: 'release', barrier: n, line: line(`b${n}` as LineKey), text: `Barrier ${n} opens: ${what}.` });
+        n === 1 ? tr('the counter is zero before anyone counts', 'bộ đếm bằng 0 trước khi có luồng nào đếm')
+          : n === 2 ? tr('every kept key is in the private list, so outputSize_s is the block\'s full count', 'mọi khóa được giữ lại đều đã ở trong danh sách riêng, nên outputSize_s là số đếm đầy đủ của khối')
+            : tr('blockStart is written, so every thread can read it', 'blockStart đã được ghi, nên mọi luồng đều đọc được nó');
+      push({ thread: -1, op: 'release', barrier: n, line: line(`b${n}` as LineKey), text: tr(`Barrier ${n} opens: ${what}.`, `Rào chắn ${n} mở: ${what}.`) });
     }
   }
 
@@ -534,14 +694,14 @@ function classify(st: Snapshot, keep: readonly boolean[], crash?: string): Outco
 
 /** One line for a table cell. */
 export function summary(o: Outcome): string {
-  if (o.kind === 'crash') return 'an out-of-range write';
-  if (o.kind === 'correct') return 'correct';
+  if (o.kind === 'crash') return tr('an out-of-range write', 'một lần ghi ngoài phạm vi');
+  if (o.kind === 'correct') return tr('correct', 'đúng');
   const parts: string[] = [];
-  if (o.size !== o.expectedSize) parts.push(`size ${o.size > N ? show(o.size) : o.size} (not ${o.expectedSize})`);
-  if (o.lost.length) parts.push(`${o.lost.length} key${o.lost.length === 1 ? '' : 's'} lost`);
-  if (o.duplicated.length) parts.push(`${o.duplicated.length} duplicated`);
-  if (o.foreign) parts.push(`${o.foreign} slot${o.foreign === 1 ? '' : 's'} of garbage`);
-  return parts.join(', ') || 'wrong';
+  if (o.size !== o.expectedSize) parts.push(tr(`size ${o.size > N ? show(o.size) : o.size} (not ${o.expectedSize})`, `kích thước ${o.size > N ? show(o.size) : o.size} (không phải ${o.expectedSize})`));
+  if (o.lost.length) parts.push(tr(`${o.lost.length} key${o.lost.length === 1 ? '' : 's'} lost`, `mất ${o.lost.length} khóa`));
+  if (o.duplicated.length) parts.push(tr(`${o.duplicated.length} duplicated`, `${o.duplicated.length} bị trùng`));
+  if (o.foreign) parts.push(tr(`${o.foreign} slot${o.foreign === 1 ? '' : 's'} of garbage`, `${o.foreign} ô chứa rác`));
+  return parts.join(', ') || tr('wrong', 'sai');
 }
 
 // ---------------------------------------------------------------- the race check

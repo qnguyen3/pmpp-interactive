@@ -1,0 +1,1 @@
+Kết quả tổng, với cùng 4 chỗ. Batching tĩnh cần 12 bước để tạo ra 26 token này. Continuous batching cần 8. Các yêu cầu ngắn được trả về sớm hơn. Và mỗi người dùng vẫn nhận một token mỗi bước, nên thời gian cho mỗi token là thời gian của một bước, ở bất kỳ kích thước batch nào máy chủ đang chạy.

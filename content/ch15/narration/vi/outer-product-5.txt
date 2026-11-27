@@ -1,0 +1,1 @@
+Các bước từ 1 đến 7 làm tương tự với cột tiếp theo của A và hàng tiếp theo của B. Mỗi bước tốn 16 lần đọc và làm 64 phép nhân cộng. Cuối cùng con số là 128 lần đọc, so với 1024 ở thứ tự đầu tiên: ít hơn 8 lần. Và mảng giữ đúng những giá trị mà thứ tự đầu tiên đã tạo ra.

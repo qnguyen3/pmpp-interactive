@@ -23,7 +23,9 @@
 //    delivers. A cache may serve repeated reads (the lesson says so where counts appear).
 //  - Integers, as the book uses for readability (footnote, p. 457).
 //
-// Erasable TypeScript only, and no imports: the browser checks import this file directly.
+// Erasable TypeScript only, importing only lib/locale.ts: the browser checks import this file directly.
+
+import { tr } from '../lib/locale.ts';
 
 export interface LayerShape {
   /** Input feature maps (channels). */
@@ -245,13 +247,13 @@ export interface Loop {
 
 /** p. 460: n, m, h and w write different Y elements; c, p and q all add into one. */
 export const FIG_19_4_LOOPS: readonly Loop[] = [
-  { v: 'n', line: 4, over: 'samples in the batch', role: 'independent' },
-  { v: 'm', line: 5, over: 'output feature maps', role: 'independent' },
-  { v: 'h', line: 6, over: 'output rows', role: 'independent' },
-  { v: 'w', line: 7, over: 'output columns', role: 'independent' },
-  { v: 'c', line: 9, over: 'input feature maps', role: 'accumulates' },
-  { v: 'p', line: 10, over: 'filter rows', role: 'accumulates' },
-  { v: 'q', line: 11, over: 'filter columns', role: 'accumulates' },
+  { v: 'n', line: 4, get over() { return tr('samples in the batch', 'các mẫu trong batch'); }, role: 'independent' },
+  { v: 'm', line: 5, get over() { return tr('output feature maps', 'các bản đồ đặc trưng đầu ra'); }, role: 'independent' },
+  { v: 'h', line: 6, get over() { return tr('output rows', 'các hàng đầu ra'); }, role: 'independent' },
+  { v: 'w', line: 7, get over() { return tr('output columns', 'các cột đầu ra'); }, role: 'independent' },
+  { v: 'c', line: 9, get over() { return tr('input feature maps', 'các bản đồ đặc trưng đầu vào'); }, role: 'accumulates' },
+  { v: 'p', line: 10, get over() { return tr('filter rows', 'các hàng của bộ lọc'); }, role: 'accumulates' },
+  { v: 'q', line: 11, get over() { return tr('filter columns', 'các cột của bộ lọc'); }, role: 'accumulates' },
 ];
 
 /** Total independent iterations (p. 460): N * M * H_out * W_out. */
@@ -408,7 +410,7 @@ export const directRatioMaps = (s: LayerShape, maps: number): number =>
  */
 export function lessonRegion(text: string, name: string): { code: string; found: boolean } {
   const lines = text.replace(/\r\n/g, '\n').split('\n');
-  const open = `[lesson:${name}]`;
+  const open = `[lesson:${name}]`; // i18n-ignore: marker searched for in lab source, not reader text
   const close = `[/lesson:${name}]`;
   const parts: string[][] = [];
   let at = -1;

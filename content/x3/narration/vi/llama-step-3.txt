@@ -1,0 +1,1 @@
+RoPE xoay query và key tại vị trí này. Value được để nguyên. Rồi key và value được nối vào cache của lớp này, ở hàng của vị trí này, bằng kernel append của lab 20.4. Cache lớn thêm đúng một hàng cho mỗi lớp, ở mọi bước.

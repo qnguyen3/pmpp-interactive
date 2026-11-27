@@ -1,0 +1,1 @@
+Giờ hãy dựng B. Điểm ảnh đầu ra 0 cần mảng vùng góc trên bên trái của mọi bản đồ đầu vào. Mảng vùng của nó từ bản đồ 0 trượt xuống cột 0 trước, rồi mảng vùng từ bản đồ 1, rồi bản đồ 2. Đó cũng là thứ tự kênh như một hàng của F, nên hàng và cột khớp với nhau từng số hạng.

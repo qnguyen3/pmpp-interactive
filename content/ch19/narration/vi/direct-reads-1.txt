@@ -1,0 +1,1 @@
+Đây là ví dụ nhỏ của sách, được khởi chạy theo cách kernel trực tiếp khởi chạy nó. Trục x của lưới là bản đồ đầu ra, y là ô, và z là mẫu. Hai bản đồ đầu ra 2 nhân 2 điểm ảnh, với ô 2 nhân 2, tạo thành 2 khối, mỗi khối 4 luồng. Mỗi khối sở hữu trọn một bản đồ đầu ra.

@@ -224,9 +224,9 @@ export interface BookCase {
 
 /** The three cases the book works on p. 9. */
 export const BOOK_CASES: BookCase[] = [
-  { label: '30%, 100×', p: 0.3, s: 100, book: 'about 1.42' },
-  { label: '30%, unbounded', p: 0.3, s: Infinity, book: 'no more than 1.43' },
-  { label: '99%, 100×', p: 0.99, s: 100, book: 'about 50' },
+  { label: '30%, 100×', p: 0.3, s: 100, book: 'about 1.42' }, // i18n-ignore: no-import file loaded by e2e; Wrap.tsx translates
+  { label: '30%, unbounded', p: 0.3, s: Infinity, book: 'no more than 1.43' }, // i18n-ignore: no-import file loaded by e2e; S13/Wrap translate
+  { label: '99%, 100×', p: 0.99, s: 100, book: 'about 50' }, // i18n-ignore: no-import file loaded by e2e; Wrap.tsx translates
 ];
 
 // ---------------------------------------------------------------- curves for the plots
@@ -426,10 +426,10 @@ export function rebalance(modules: AppModule[], i: number, share: number): AppMo
  * neighbour list, and the update needs both kinds of force before the next step.
  */
 export const MD_STEP: AppModule[] = [
-  { name: 'Neighbour list', share: 0.02, place: 'host', s: 4, chained: true },
-  { name: 'Non-bonded forces', share: 0.95, place: 'device', s: 100 },
-  { name: 'Vibrational and rotational forces', share: 0.02, place: 'host', s: 4 },
-  { name: 'Update positions and velocities', share: 0.01, place: 'host', s: 4, chained: true },
+  { name: 'Neighbour list', share: 0.02, place: 'host', s: 4, chained: true }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Non-bonded forces', share: 0.95, place: 'device', s: 100 }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Vibrational and rotational forces', share: 0.02, place: 'host', s: 4 }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Update positions and velocities', share: 0.01, place: 'host', s: 4, chained: true }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
 ];
 
 /**
@@ -439,9 +439,9 @@ export const MD_STEP: AppModule[] = [
  * next step's kernels need the sampled token, so a host sampler is chained.
  */
 export const DECODE_STEP: AppModule[] = [
-  { name: 'Projections and attention', share: 0.78, place: 'device', s: 1, fixed: 'device' },
-  { name: 'Elementwise kernels', share: 0.08, place: 'device', s: 1, fixed: 'device' },
-  { name: 'Sampling', share: 0.06, place: 'host', s: 10, chained: true },
-  { name: 'Kernel launches', share: 0.05, place: 'host', s: 1, fixed: 'host' },
-  { name: 'Detokenise and stream out', share: 0.03, place: 'host', s: 1, fixed: 'host' },
+  { name: 'Projections and attention', share: 0.78, place: 'device', s: 1, fixed: 'device' }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Elementwise kernels', share: 0.08, place: 'device', s: 1, fixed: 'device' }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Sampling', share: 0.06, place: 'host', s: 10, chained: true }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Kernel launches', share: 0.05, place: 'host', s: 1, fixed: 'host' }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
+  { name: 'Detokenise and stream out', share: 0.03, place: 'host', s: 1, fixed: 'host' }, // i18n-ignore: identifier also shown to the reader; S223 translates by name
 ];

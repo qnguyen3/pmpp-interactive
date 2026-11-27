@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
  * Chapter 10's own helper; a shared version would belong in src/lib.
  */
 export function useNarrow(px = 600): boolean {
-  const query = `(max-width: ${px}px)`;
+  const query = `(max-width: ${px}px)`; // i18n-ignore: CSS media query
   const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && window.matchMedia(query).matches);
   useEffect(() => {
     const m = window.matchMedia(query);

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   CONV_CORRECT,
   constMemIntensity,
@@ -72,9 +73,9 @@ function Stage(f: Frame) {
   const hotN = cur?.op === 'load' && cur.global?.inside ? cur.global.index : -1;
   const pinT = f.pin != null ? info[f.pin] : undefined;
   return (
-    <svg viewBox="0 0 732 404" role="img" aria-label="Animation of one block of the tiled convolution kernel" style={{ width: '100%', maxWidth: 732, display: 'block' }}>
+    <svg viewBox="0 0 732 404" role="img" aria-label={tr('Animation of one block of the tiled convolution kernel', 'Hoạt ảnh một khối của kernel tích chập phân ô')} style={{ width: '100%', maxWidth: 732, display: 'block' }}>
       {/* N with a ring of ghost cells around it */}
-      <text x={NX} y={NY - 12} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>N (global memory), 10 × 10</text>
+      <text x={NX} y={NY - 12} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="N (bộ nhớ toàn cục), 10 × 10">N (global memory), 10 × 10</Translated></text>
       {Array.from({ length: (W + 2) * (W + 2) }, (_, i) => {
         const y = Math.floor(i / (W + 2)) - 1;
         const x = (i % (W + 2)) - 1;
@@ -108,8 +109,8 @@ function Stage(f: Frame) {
       ) : null}
 
       {/* the shared tile, one slot per thread */}
-      <text x={SX} y={SY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--shared)' }}>N_s (shared memory)</text>
-      <text x={SX} y={SY - 20} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>one slot per thread (8 × 8)</text>
+      <text x={SX} y={SY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--shared)' }}><Translated vi="N_s (bộ nhớ chia sẻ)">N_s (shared memory)</Translated></text>
+      <text x={SX} y={SY - 20} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="mỗi luồng một ô nhớ (8 × 8)">one slot per thread (8 × 8)</Translated></text>
       {st.slots.map((s, t) => {
         const ti = info[t];
         const { x, y } = sCell(ti.ty, ti.tx);
@@ -148,7 +149,9 @@ function Stage(f: Frame) {
           <circle cx={nCell(pinT.row, pinT.col).x + C / 2 - 1} cy={nCell(pinT.row, pinT.col).y + C / 2 - 1} r="7" fill="none" stroke="var(--ink)" strokeWidth="1.6" />
           <rect x={sCell(pinT.ty, pinT.tx).x - 1} y={sCell(pinT.ty, pinT.tx).y - 1} width={C} height={C} fill="none" stroke="var(--ink)" strokeWidth="2" />
           <text x={SX} y={SY + IN * C + 18} fontSize="11" style={{ fill: 'var(--ink)' }}>
-            thread ({pinT.tx}, {pinT.ty}) → {pinT.inImage ? `N[${pinT.row}][${pinT.col}]` : `ghost (${pinT.row}, ${pinT.col})`}
+            <Translated vi={<>luồng ({pinT.tx}, {pinT.ty}) → {pinT.inImage ? `N[${pinT.row}][${pinT.col}]` : `ô ma (${pinT.row}, ${pinT.col})`}</>}>
+              thread ({pinT.tx}, {pinT.ty}) → {pinT.inImage ? `N[${pinT.row}][${pinT.col}]` : `ghost (${pinT.row}, ${pinT.col})`}
+            </Translated>
           </text>
         </g>
       ) : null}
@@ -156,14 +159,14 @@ function Stage(f: Frame) {
         <g>
           <rect x={SX} y={SY + IN * C + 6} width={IN * C} height={24} rx="3" fill={f.barrier === 'down' ? 'var(--ink)' : 'none'} stroke="var(--ink)" strokeDasharray={f.barrier === 'open' ? '4 3' : undefined} />
           <text x={SX + (IN * C) / 2} y={SY + IN * C + 22} fontSize="11" textAnchor="middle" style={{ fill: f.barrier === 'down' ? 'var(--page)' : 'var(--ink)' }}>
-            {f.barrier === 'down' ? '__syncthreads(): waiting' : 'barrier open'}
+            {f.barrier === 'down' ? tr('__syncthreads(): waiting', '__syncthreads(): đang chờ') : tr('barrier open', 'rào chắn mở')}
           </text>
         </g>
       ) : null}
 
       {/* the output */}
-      <text x={PX} y={PY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>P (global memory)</text>
-      <text x={PX} y={PY - 20} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>this block's output tile: 6 × 6</text>
+      <text x={PX} y={PY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="P (bộ nhớ toàn cục)">P (global memory)</Translated></text>
+      <text x={PX} y={PY - 20} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="ô đầu ra của khối này: 6 × 6">this block's output tile: 6 × 6</Translated></text>
       {prob.ref.map((ref, i) => {
         const y = Math.floor(i / W);
         const x = i % W;
@@ -187,7 +190,9 @@ function Stage(f: Frame) {
       })}
       {(cur?.op === 'tap' || cur?.op === 'store') && curT ? (
         <text x={PX} y={PY + W * C + 16} fontSize="11" style={{ fill: 'var(--ink)' }}>
-          thread ({curT.tx}, {curT.ty}): patch at N_s[{curT.tileRow}][{curT.tileCol}] → P[{curT.row}][{curT.col}]
+          <Translated vi={<>luồng ({curT.tx}, {curT.ty}): vùng tại N_s[{curT.tileRow}][{curT.tileCol}] → P[{curT.row}][{curT.col}]</>}>
+            thread ({curT.tx}, {curT.ty}): patch at N_s[{curT.tileRow}][{curT.tileCol}] → P[{curT.row}][{curT.col}]
+          </Translated>
         </text>
       ) : null}
 
@@ -211,15 +216,17 @@ function Tally({ p }: { p: number }) {
   return (
     <g>
       <rect x={NX - 6} y={312} width={724} height={88} fill="var(--page)" />
-      <text x={NX} y={348} fontSize="11.5">tiled: 64 loads + 36 stores</text>
+      <text x={NX} y={348} fontSize="11.5"><Translated vi="phân ô: 64 lần nạp + 36 lần ghi">tiled: 64 loads + 36 stores</Translated></text>
       <rect x={210} y={337} width={tiled * scale * g} height={14} fill="var(--shared)" />
       <text x={210 + tiled * scale * g + 6} y={348} fontSize="11.5">{Math.round(tiled * g)} B</text>
-      <text x={NX} y={372} fontSize="11.5">constant memory: 324 loads</text>
+      <text x={NX} y={372} fontSize="11.5"><Translated vi="bộ nhớ hằng: 324 lần nạp">constant memory: 324 loads</Translated></text>
       <rect x={210} y={361} width={perTap * scale * g} height={14} fill="var(--global)" />
       <text x={210 + perTap * scale * g + 6} y={372} fontSize="11.5">{Math.round(perTap * g)} B</text>
       <text x={NX} y={396} fontSize="11.5" opacity={ramp(p, 0.45, 0.55)}>
-        648 FLOP: {f2(aiToy)} FLOP/B tiled against {f2(aiConst)}
-        <tspan opacity={ramp(p, 0.68, 0.78)} dx="14" fontWeight="600">a 32 × 32 block with a 5 × 5 filter: {f2(aiBook)} FLOP/B</tspan>
+        <Translated vi={<>648 FLOP: {f2(aiToy)} FLOP/B khi phân ô so với {f2(aiConst)}</>}>
+          648 FLOP: {f2(aiToy)} FLOP/B tiled against {f2(aiConst)}
+        </Translated>
+        <tspan opacity={ramp(p, 0.68, 0.78)} dx="14" fontWeight="600"><Translated vi={<>một khối 32 × 32 với bộ lọc 5 × 5: {f2(aiBook)} FLOP/B</>}>a 32 × 32 block with a 5 × 5 filter: {f2(aiBook)} FLOP/B</Translated></tspan>
       </text>
     </g>
   );
@@ -232,63 +239,75 @@ const PINS = [9, 0, 7, 63, 54];
 const beats: Beat[] = [
   {
     clip: 'load-wait-compute-1',
-    label: 'The block',
+    get label() {
+      return tr('The block', 'Khối');
+    },
     draw: (p) => (
       <Stage n={0} tile={ramp(p, 0.05, 0.3)} pin={p > 0.3 ? PINS[Math.min(PINS.length - 1, Math.floor(ramp(p, 0.3, 0.98) * PINS.length))] : undefined}
-        headline="block (0, 0): 64 threads, one per input-tile element"
-        sub="row = 0·6 + ty − 1, col = 0·6 + tx − 1: the tile starts one row and one column outside the image" />
+        headline={tr('block (0, 0): 64 threads, one per input-tile element', 'khối (0, 0): 64 luồng, mỗi luồng một phần tử của ô đầu vào')}
+        sub={tr('row = 0·6 + ty − 1, col = 0·6 + tx − 1: the tile starts one row and one column outside the image', 'row = 0·6 + ty − 1, col = 0·6 + tx − 1: ô bắt đầu ở một hàng và một cột bên ngoài ảnh')} />
     ),
   },
   {
     clip: 'load-wait-compute-2',
-    label: 'Load',
+    get label() {
+      return tr('Load', 'Nạp');
+    },
     draw: (p) => {
       const k = Math.round(ramp(p, 0.04, 0.9) * loadIdx.length);
       const n = afterLoads(k);
       const ghosts = steps.slice(0, n).filter((s) => s.op === 'load' && s.write?.ghost).length;
-      return <Stage n={n} tile={1} headline={`load phase: ${k} of 64 slots filled`} sub={`${ghosts} of them ghost cells, stored as 0 (dashed)`} />;
+      return <Stage n={n} tile={1} headline={tr(`load phase: ${k} of 64 slots filled`, `pha nạp: đã điền ${k} trên 64 ô nhớ`)} sub={tr(`${ghosts} of them ghost cells, stored as 0 (dashed)`, `${ghosts} trong số đó là ô ma (ghost cell), lưu là 0 (nét đứt)`)} />;
     },
   },
   {
     clip: 'load-wait-compute-3',
-    label: 'Wait',
+    get label() {
+      return tr('Wait', 'Chờ');
+    },
     draw: (p) => (
       <Stage n={p < 0.72 ? releaseIdx : releaseIdx + 1} tile={1} barrier={p < 0.12 ? null : p < 0.72 ? 'down' : 'open'}
-        headline={p < 0.72 ? 'every thread waits at the one barrier' : 'all 64 slots are filled: the barrier opens'}
-        sub="the tile is loaded once and never overwritten, so no second barrier" />
+        headline={p < 0.72 ? tr('every thread waits at the one barrier', 'mọi luồng chờ ở rào chắn duy nhất') : tr('all 64 slots are filled: the barrier opens', 'cả 64 ô nhớ đã được điền: rào chắn mở')}
+        sub={tr('the tile is loaded once and never overwritten, so no second barrier', 'ô được nạp một lần và không bao giờ bị ghi đè, nên không cần rào chắn thứ hai')} />
     ),
   },
   {
     clip: 'load-wait-compute-4',
-    label: 'Compute',
+    get label() {
+      return tr('Compute', 'Tính');
+    },
     draw: (p) => {
       const span = steps.length - (releaseIdx + 1);
       const n = releaseIdx + 1 + Math.round(ramp(p, 0.04, 0.95) * span);
       const done = stateAt(cfg, trace, n).stores.length;
       return (
-        <Stage n={n} tile={1} ring headline={`compute phase: the ring of ${idleCount} threads is idle`}
-          sub={`${done} of 36 outputs stored; ${taps} multiply-adds in all, every operand from N_s`} />
+        <Stage n={n} tile={1} ring headline={tr(`compute phase: the ring of ${idleCount} threads is idle`, `pha tính: vòng ngoài gồm ${idleCount} luồng ngồi không`)}
+          sub={tr(`${done} of 36 outputs stored; ${taps} multiply-adds in all, every operand from N_s`, `đã ghi ${done} trên 36 đầu ra; tổng cộng ${taps} phép nhân-cộng, mọi toán hạng đều lấy từ N_s`)} />
       );
     },
   },
   {
     clip: 'load-wait-compute-5',
-    label: 'Store',
+    get label() {
+      return tr('Store', 'Ghi');
+    },
     draw: (p) => (
       <Stage n={steps.length} tile={1} ring next={ramp(p, 0.3, 0.55)}
-        headline={`${stores} outputs: one 6 × 6 tile of P`}
-        sub={p < 0.3 ? 'each active thread stored one result' : 'the next block re-loads 2 columns of this block’s inputs: the halo'} />
+        headline={tr(`${stores} outputs: one 6 × 6 tile of P`, `${stores} đầu ra: một ô 6 × 6 của P`)}
+        sub={p < 0.3 ? tr('each active thread stored one result', 'mỗi luồng hoạt động đã ghi một kết quả') : tr('the next block re-loads 2 columns of this block’s inputs: the halo', 'khối kế tiếp nạp lại 2 cột đầu vào của khối này: vùng biên (halo)')} />
     ),
   },
   {
     clip: 'load-wait-compute-6',
-    label: 'Count',
-    draw: (p) => <Stage n={steps.length} tile={1} ring tally={p} headline="global traffic for one block away from the edges" />,
+    get label() {
+      return tr('Count', 'Đếm');
+    },
+    draw: (p) => <Stage n={steps.length} tile={1} ring tally={p} headline={tr('global traffic for one block away from the edges', 'lưu lượng bộ nhớ toàn cục của một khối nằm xa các cạnh')} />,
   },
 ];
 
 export function LoadWaitComputeScene() {
-  return <Scene chapter="ch07" title="Load, wait, compute" beats={beats} />;
+  return <Scene chapter="ch07" title={tr('Load, wait, compute', 'Nạp, chờ, tính')} beats={beats} />;
 }
 
 // For the browser check and the lesson text: the counts the scene shows.

@@ -1,0 +1,1 @@
+Một số GPU AMD chạy 64 lane cho mỗi wavefront. Khi đó cùng khối ấy là 4 wavefront, xếp thành 2 nhân 2 ô, mỗi ô 64 nhân 64. Các lane tạo thành 8 hàng, mỗi hàng 8 lane, và một hàng lane ghi 128 byte liên tục. Cùng một ý tưởng. Các con số đến từ độ rộng của thiết bị.

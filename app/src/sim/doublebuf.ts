@@ -32,6 +32,8 @@
 // Erasable TypeScript only, and no imports: the browser checks import this file
 // directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Variant =
   | 'single-both'
   | 'single-no-read-barrier'
@@ -50,21 +52,21 @@ export const VARIANTS: Variant[] = [
 ];
 
 export const VARIANT_LABEL: Record<Variant, string> = {
-  'single-both': 'one buffer, both barriers',
-  'single-no-read-barrier': 'one buffer, no barrier after the read',
-  'single-no-write-barrier': 'one buffer, no barrier after the write',
-  double: 'two buffers, one barrier',
-  'double-no-swap': 'two buffers, swap forgotten',
-  'double-no-barrier': 'two buffers, no barrier',
+  get 'single-both'() { return tr('one buffer, both barriers', 'một buffer, cả hai rào chắn'); },
+  get 'single-no-read-barrier'() { return tr('one buffer, no barrier after the read', 'một buffer, không có rào chắn sau lần đọc'); },
+  get 'single-no-write-barrier'() { return tr('one buffer, no barrier after the write', 'một buffer, không có rào chắn sau lần ghi'); },
+  get double() { return tr('two buffers, one barrier', 'hai buffer, một rào chắn'); },
+  get 'double-no-swap'() { return tr('two buffers, swap forgotten', 'hai buffer, quên hoán đổi'); },
+  get 'double-no-barrier'() { return tr('two buffers, no barrier', 'hai buffer, không có rào chắn'); },
 };
 
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled';
 export const SCHEDULES: Schedule[] = ['lockstep', 'in-order', 'reversed', 'shuffled'];
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
+  get lockstep() { return tr('all threads in lockstep', 'mọi luồng chạy đồng bộ từng bước (lockstep)'); },
+  get 'in-order'() { return tr('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước'); },
+  get reversed() { return tr('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước'); },
+  get shuffled() { return tr('random interleaving', 'xen kẽ ngẫu nhiên'); },
 };
 
 export interface Config {
@@ -81,7 +83,7 @@ export type ViolationKind = 'read-after-write' | 'write-after-read' | 'wrong-buf
 export const KIND_LABEL: Record<ViolationKind, string> = {
   'read-after-write': 'read-after-write',
   'write-after-read': 'write-after-read',
-  'wrong-buffer': 'wrong buffer (no race)',
+  get 'wrong-buffer'() { return tr('wrong buffer (no race)', 'sai buffer (không có race)'); },
 };
 
 export const isDouble = (v: Variant) => v.startsWith('double');
@@ -110,10 +112,10 @@ export function plan(v: Variant): Op[] {
 const LINES: Record<Op | 'head' | 'tail', { single: string; double: string }> = {
   head: { single: 'for (unsigned int i = 0; i < n; ++i) {', double: 'for (unsigned int i = 0; i < n; ++i) {' },
   read: { single: '    float v = buffer[other];', double: '    float v = inBuffer[other];' },
-  barrierRead: { single: '    __syncthreads();            // after the read', double: '    __syncthreads();            // after the read' },
+  barrierRead: { single: '    __syncthreads();            // after the read', double: '    __syncthreads();            // after the read' }, // i18n-ignore: kernel source shown as code
   write: { single: '    buffer[me] = v + 10.0f;', double: '    outBuffer[me] = v + 10.0f;' },
-  barrierWrite: { single: '    __syncthreads();            // after the write', double: '    __syncthreads();            // after the write' },
-  swap: { single: '    swapPointers(inBuffer, outBuffer);', double: '    swapPointers(inBuffer, outBuffer);' },
+  barrierWrite: { single: '    __syncthreads();            // after the write', double: '    __syncthreads();            // after the write' }, // i18n-ignore: kernel source shown as code
+  swap: { single: '    swapPointers(inBuffer, outBuffer);', double: '    swapPointers(inBuffer, outBuffer);' }, // i18n-ignore: kernel source shown as code
   tail: { single: '}', double: '}' },
 };
 
@@ -219,7 +221,7 @@ export function run(cfg: Config, schedule: Schedule, seed = 1): Trace {
   const steps: Step[] = [];
   const violations: Violation[] = [];
   const rand = mulberry(seed);
-  const name = (t: number) => `thread ${t}`;
+  const name = (t: number) => tr(`thread ${t}`, `luồng ${t}`);
   const bufName = (b: number) => (isDouble(cfg.variant) ? (b === 0 ? 'A' : 'B') : '');
 
   const exec = (t: number) => {
@@ -239,22 +241,22 @@ export function run(cfg: Config, schedule: Schedule, seed = 1): Trace {
       // (or is the initial value), into that thread's out buffer at the time.
       const producerBuf = iter === 0 ? 0 : pointersAt(cfg.variant, iter - 1).outBuf;
       const r: Read = { buf, slot: other, value: slot.value, version: slot.version, expected: iter, ok: true };
-      const at = `${bufName(buf) ? 'buffer ' + bufName(buf) + ', ' : ''}slot ${other}`;
+      const at = tr(`${bufName(buf) ? 'buffer ' + bufName(buf) + ', ' : ''}slot ${other}`, `${bufName(buf) ? 'buffer ' + bufName(buf) + ', ' : ''}vị trí ${other}`);
       let v: Violation | undefined;
       if (buf !== producerBuf) {
         v = {
           kind: 'wrong-buffer', step: s.index, thread: t, iter,
-          message: `${name(t)} read ${at} in iteration ${iter}, but iteration ${iter - 1} wrote its results to buffer ${bufName(producerBuf)}: this value will never arrive here`,
+          message: tr(`${name(t)} read ${at} in iteration ${iter}, but iteration ${iter - 1} wrote its results to buffer ${bufName(producerBuf)}: this value will never arrive here`, `${name(t)} đọc ${at} ở vòng lặp ${iter}, nhưng vòng lặp ${iter - 1} đã ghi kết quả vào buffer ${bufName(producerBuf)}: giá trị này sẽ không bao giờ tới đây`),
         };
       } else if (slot.version < iter) {
         v = {
           kind: 'read-after-write', step: s.index, thread: t, iter,
-          message: `${name(t)} read ${at} in iteration ${iter} before ${name(other)} had written that iteration's value into it`,
+          message: tr(`${name(t)} read ${at} in iteration ${iter} before ${name(other)} had written that iteration's value into it`, `${name(t)} đọc ${at} ở vòng lặp ${iter} trước khi ${name(other)} ghi giá trị của vòng lặp đó vào`),
         };
       } else if (slot.version > iter) {
         v = {
           kind: 'write-after-read', step: s.index, thread: t, iter,
-          message: `${name(t)} still needed ${iter === 0 ? 'the initial value' : `iteration ${iter - 1}'s value`} in ${at}, but ${name(other)} had already overwritten it in iteration ${slot.version - 1}`,
+          message: tr(`${name(t)} still needed ${iter === 0 ? 'the initial value' : `iteration ${iter - 1}'s value`} in ${at}, but ${name(other)} had already overwritten it in iteration ${slot.version - 1}`, `${name(t)} vẫn cần ${iter === 0 ? 'giá trị ban đầu' : `giá trị của vòng lặp ${iter - 1}`} trong ${at}, nhưng ${name(other)} đã ghi đè nó ở vòng lặp ${slot.version - 1}`),
         };
       }
       if (v) {

@@ -1,0 +1,1 @@
+Lượt quét thứ hai ghi từng hàm mũ nhân với một chia cho tổng. Đó là hai lần đọc hàng và một lần ghi, ít hơn một phần tư số byte so với ba lần đọc và một lần ghi. Các đầu ra khớp với cách thứ nhất trong phạm vi 2 đơn vị ở vị trí cuối của một float: cùng một đáp án, chỉ làm tròn hơi khác.

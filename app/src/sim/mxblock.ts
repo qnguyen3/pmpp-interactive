@@ -28,6 +28,7 @@ import {
   type Format,
   type Overflow,
 } from './minifloat';
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- element formats
 export type ElemId = 'E2M1' | 'E2M3' | 'E3M2' | 'E4M3' | 'E5M2';
@@ -73,9 +74,15 @@ export const UE8M0_RANGE = { bias: 127, min: -127, max: 127 };
 export type ScaleRule = 'ocp-floor' | 'cublas-ceil' | 'e4m3';
 
 export const SCALE_RULES: Record<ScaleRule, string> = {
-  'ocp-floor': 'OCP: round down, then clamp (UE8M0)',
-  'cublas-ceil': 'cuBLAS: round the exponent up (UE8M0)',
-  e4m3: 'E4M3 scale (NVIDIA 16-element FP4)',
+  get 'ocp-floor'() {
+    return tr('OCP: round down, then clamp (UE8M0)', 'OCP: làm tròn xuống, rồi kẹp (UE8M0)');
+  },
+  get 'cublas-ceil'() {
+    return tr('cuBLAS: round the exponent up (UE8M0)', 'cuBLAS: làm tròn số mũ lên (UE8M0)');
+  },
+  get e4m3() {
+    return tr('E4M3 scale (NVIDIA 16-element FP4)', 'hệ số tỉ lệ E4M3 (FP4 16 phần tử của NVIDIA)');
+  },
 };
 
 export interface QuantOpts {
@@ -241,7 +248,7 @@ export function namedFormat(o: QuantOpts): string | null {
     if (o.elem === 'E2M3' || o.elem === 'E3M2') return 'MXFP6';
     if (o.elem === 'E4M3' || o.elem === 'E5M2') return 'MXFP8';
   }
-  if (o.k === 16 && o.scale === 'e4m3' && o.elem === 'E2M1') return "NVIDIA's 16-element FP4 (NVFP4 in MLX and llama.cpp)";
+  if (o.k === 16 && o.scale === 'e4m3' && o.elem === 'E2M1') return tr("NVIDIA's 16-element FP4 (NVFP4 in MLX and llama.cpp)", 'FP4 16 phần tử của NVIDIA (NVFP4 trong MLX và llama.cpp)');
   return null;
 }
 
@@ -250,11 +257,42 @@ export type WeightFormat = 'fp32' | 'bf16' | 'fp8' | 'mxfp8' | 'mxfp4' | 'nvfp4'
 
 export const WEIGHT_FORMATS: Record<WeightFormat, { label: string; elemBits: number; block: number | null; scaleBits: number; extra: string }> = {
   fp32: { label: 'FP32', elemBits: 32, block: null, scaleBits: 0, extra: '' },
-  bf16: { label: 'BF16 or FP16', elemBits: 16, block: null, scaleBits: 0, extra: '' },
-  fp8: { label: 'FP8 with one scale per tensor', elemBits: 8, block: null, scaleBits: 0, extra: 'plus one scale per tensor' },
-  mxfp8: { label: 'MXFP8 (32 per UE8M0 scale)', elemBits: 8, block: 32, scaleBits: 8, extra: '' },
-  mxfp4: { label: 'MXFP4 (32 per UE8M0 scale)', elemBits: 4, block: 32, scaleBits: 8, extra: '' },
-  nvfp4: { label: "NVIDIA's FP4 (16 per E4M3 scale)", elemBits: 4, block: 16, scaleBits: 8, extra: 'plus one scale per tensor' },
+  bf16: {
+    get label() {
+      return tr('BF16 or FP16', 'BF16 hoặc FP16');
+    },
+    elemBits: 16, block: null, scaleBits: 0, extra: '',
+  },
+  fp8: {
+    get label() {
+      return tr('FP8 with one scale per tensor', 'FP8 với một hệ số tỉ lệ cho mỗi tensor');
+    },
+    elemBits: 8, block: null, scaleBits: 0,
+    get extra() {
+      return tr('plus one scale per tensor', 'cộng một hệ số tỉ lệ cho mỗi tensor');
+    },
+  },
+  mxfp8: {
+    get label() {
+      return tr('MXFP8 (32 per UE8M0 scale)', 'MXFP8 (32 phần tử mỗi hệ số tỉ lệ UE8M0)');
+    },
+    elemBits: 8, block: 32, scaleBits: 8, extra: '',
+  },
+  mxfp4: {
+    get label() {
+      return tr('MXFP4 (32 per UE8M0 scale)', 'MXFP4 (32 phần tử mỗi hệ số tỉ lệ UE8M0)');
+    },
+    elemBits: 4, block: 32, scaleBits: 8, extra: '',
+  },
+  nvfp4: {
+    get label() {
+      return tr("NVIDIA's FP4 (16 per E4M3 scale)", 'FP4 của NVIDIA (16 phần tử mỗi hệ số tỉ lệ E4M3)');
+    },
+    elemBits: 4, block: 16, scaleBits: 8,
+    get extra() {
+      return tr('plus one scale per tensor', 'cộng một hệ số tỉ lệ cho mỗi tensor');
+    },
+  },
 };
 export const WEIGHT_FORMAT_IDS = Object.keys(WEIGHT_FORMATS) as WeightFormat[];
 

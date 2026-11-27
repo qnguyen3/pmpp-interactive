@@ -39,6 +39,7 @@
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 import { bitsOf, fromBits, hex, keyAsc } from './floatkey';
 import { keyBytes, pairBytes, passes as radixPasses } from './radixcost';
+import { tr } from '../lib/locale.ts';
 
 export { hex };
 export const DIGIT_BITS = 8;
@@ -452,9 +453,9 @@ export function costs(V: number, kIn: number, batch: number): Cost[] {
     return { id, label, passes, perKey, outBytes, perRow, total: perRow * batch, blocks: batch };
   };
   return [
-    mk('sort', 'LSD radix sort (lab 14.3), then cut at k', SORT_PASSES, SORT_PER_KEY, 0),
-    mk('select', 'radix select (lab X1.1)', MAX_PASSES + 1, SELECT_PER_KEY, k * OUT_PAIR_BYTES),
-    mk('bisect', 'threshold bisection', BISECT_PASSES + 1, BISECT_PER_KEY, k * OUT_PAIR_BYTES),
+    mk('sort', tr('LSD radix sort (lab 14.3), then cut at k', 'LSD radix sort (bài thực hành 14.3), rồi cắt tại k'), SORT_PASSES, SORT_PER_KEY, 0),
+    mk('select', tr('radix select (lab X1.1)', 'radix select (bài thực hành X1.1)'), MAX_PASSES + 1, SELECT_PER_KEY, k * OUT_PAIR_BYTES),
+    mk('bisect', tr('threshold bisection', 'tìm ngưỡng bằng cách chia đôi'), BISECT_PASSES + 1, BISECT_PER_KEY, k * OUT_PAIR_BYTES),
   ];
 }
 /** Sort bytes over select bytes for one row. */
@@ -565,11 +566,25 @@ const randomRow = (seed: number, f: (r: () => number) => number) => {
   return Array.from({ length: 64 }, () => f32(Math.round(f(rand) * 100) / 100));
 };
 export const STEP_PRESETS: StepPreset[] = [
-  { id: 'scene', label: 'the animation\'s row', logits: SCENE_ROW, k: SCENE_K },
-  { id: 'random', label: 'random', logits: randomRow(11, (r) => -4 + r() * 12), k: 10 },
+  {
+    id: 'scene',
+    get label() {
+      return tr('the animation\'s row', 'hàng của hoạt cảnh');
+    },
+    logits: SCENE_ROW, k: SCENE_K,
+  },
+  {
+    id: 'random',
+    get label() {
+      return tr('random', 'ngẫu nhiên');
+    },
+    logits: randomRow(11, (r) => -4 + r() * 12), k: 10,
+  },
   {
     id: 'peaked',
-    label: 'peaked',
+    get label() {
+      return tr('peaked', 'có đỉnh nhọn');
+    },
     logits: (() => {
       const rand = mulberry(23);
       const xs = Array.from({ length: 64 }, () => f32(Math.round((-6 + rand() * 4) * 100) / 100));
@@ -580,7 +595,9 @@ export const STEP_PRESETS: StepPreset[] = [
   },
   {
     id: 'ties',
-    label: 'ties straddling the k-th',
+    get label() {
+      return tr('ties straddling the k-th', 'các giá trị bằng nhau vắt qua vị trí thứ k');
+    },
     logits: (() => {
       const rand = mulberry(31);
       const xs = Array.from({ length: 64 }, () => f32(Math.round((-3 + rand() * 4) * 100) / 100));
@@ -590,10 +607,18 @@ export const STEP_PRESETS: StepPreset[] = [
     })(),
     k: 10,
   },
-  { id: 'top8', label: 'top 8 bits shared', logits: randomRow(41, (r) => 2 + r() * 5.99), k: 10 },
+  {
+    id: 'top8',
+    get label() {
+      return tr('top 8 bits shared', 'chung 8 bit cao nhất');
+    },
+    logits: randomRow(41, (r) => 2 + r() * 5.99), k: 10,
+  },
   {
     id: 'top16',
-    label: 'top 16 bits shared',
+    get label() {
+      return tr('top 16 bits shared', 'chung 16 bit cao nhất');
+    },
     logits: (() => {
       const rand = mulberry(43);
       return Array.from({ length: 64 }, () => f32(3 + Math.floor(rand() * 2 ** 15) * 2 ** -22)); // [3, 3.0078): 0xC040....
@@ -602,14 +627,22 @@ export const STEP_PRESETS: StepPreset[] = [
   },
   {
     id: 'top24',
-    label: 'top 24 bits shared',
+    get label() {
+      return tr('top 24 bits shared', 'chung 24 bit cao nhất');
+    },
     logits: (() => {
       const rand = mulberry(47);
       return Array.from({ length: 64 }, () => near3(Math.floor(rand() * 256)));
     })(),
     k: 10,
   },
-  { id: 'negative', label: 'negatives only', logits: randomRow(53, (r) => -8 + r() * 7.5), k: 10 },
+  {
+    id: 'negative',
+    get label() {
+      return tr('negatives only', 'chỉ số âm');
+    },
+    logits: randomRow(53, (r) => -8 + r() * 7.5), k: 10,
+  },
 ];
 
 // ---------------------------------------------------------------- the questions' rows

@@ -1,0 +1,1 @@
+Phần định trị của số nhỏ hơn trượt sang phải, mỗi nhịp một vị trí, và số mũ của nó tăng dần từ âm 2 lên 9. Tức là 11 vị trí, đúng bằng số bit cửa sổ chứa được. Mọi bit đều rời khỏi cửa sổ. Bit đầu tiên ra ngoài thành bit guard, bit kế tiếp thành bit round, và mọi bit sau đó được gộp vào một bit sticky.

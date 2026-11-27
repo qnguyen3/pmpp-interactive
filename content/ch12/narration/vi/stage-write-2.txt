@@ -1,0 +1,1 @@
+Trước tiên là cách ghi rải trực tiếp của hình 12.8. Mỗi warp phát một lệnh ghi cho các lane được giữ của nó. Trong một warp, các lane được giữ ghi vào các vị trí liền kề, nên mỗi lệnh ghi là một đoạn ngắn. Nhưng warp nào cũng phát lệnh ghi riêng, và mỗi lệnh chỉ lấp được một phần của một đoạn bộ nhớ.

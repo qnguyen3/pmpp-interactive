@@ -1,0 +1,1 @@
+Tiếp tục tăng batch. Các byte trọng số được chia sẻ bởi ngày càng nhiều hàng, nên chi phí của chúng trên mỗi token tiếp tục giảm. Số byte cache trên mỗi token vẫn giữ nguyên như cũ. Và mỗi yêu cầu mới mang theo cả một cache, nên bộ nhớ dần đầy.

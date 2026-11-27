@@ -1,0 +1,1 @@
+Vậy trước khi viết một kernel mới, hãy hỏi 4 câu. Ai ghi mỗi đầu ra? Ai đọc mỗi đầu vào? Cách chia này phơi ra bao nhiêu luồng? Và mỗi luồng nhận bao nhiêu việc? Tránh phép toán nguyên tử là một câu trả lời. Tính song song, việc tìm ra các đầu vào, và cân bằng tải là những câu trả lời khác mà sách liệt kê.

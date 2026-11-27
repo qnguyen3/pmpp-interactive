@@ -30,6 +30,8 @@
 // Erasable TypeScript only, and no imports: the browser checks import this file directly.
 
 // ---------------------------------------------------------------- constants (A4)
+import { tr } from '../lib/locale.ts';
+
 export const M0 = 0xd2511f53;
 export const M1 = 0xcd9e8d57;
 export const W0 = 0x9e3779b9;
@@ -125,17 +127,17 @@ export interface Kat {
 /** The three 10-round philox4x32 lines of Random123's tests/kat_vectors (x1-facts A4). */
 export const KATS: Kat[] = [
   {
-    id: 'zero', label: 'all zero', rounds: 10,
+    id: 'zero', get label() { return tr('all zero', 'toàn số 0'); }, rounds: 10,
     ctr: [0, 0, 0, 0], key: [0, 0],
     expected: [0x6627e8d5, 0xe169c58d, 0xbc57ac4c, 0x9b00dbd8],
   },
   {
-    id: 'ones', label: 'all ones', rounds: 10,
+    id: 'ones', get label() { return tr('all ones', 'toàn bit 1'); }, rounds: 10,
     ctr: [0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff], key: [0xffffffff, 0xffffffff],
     expected: [0x408f276d, 0x41c83b0e, 0xa20bc7c6, 0x6d5451fd],
   },
   {
-    id: 'pi', label: 'digits of pi', rounds: 10,
+    id: 'pi', get label() { return tr('digits of pi', 'các chữ số của pi'); }, rounds: 10,
     ctr: [0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344], key: [0xa4093822, 0x299f31d0],
     expected: [0xd16cfe09, 0x94fdcceb, 0x5001e420, 0x24126ea1],
   },
@@ -296,8 +298,12 @@ export function m5Uniform(x: number): number {
 export type Conversion = 'curand' | 'hip' | 'm5';
 export const CONVERT: Record<Conversion, (x: number) => number> = { curand: curandUniform, hip: hipUniformAMD, m5: m5Uniform };
 export const CONVERSION_LABEL: Record<Conversion, string> = {
-  curand: 'curand_uniform (NVIDIA)',
-  hip: 'hiprand_uniform on AMD (rocRAND)',
+  get curand() {
+    return tr('curand_uniform (NVIDIA)', 'curand_uniform (NVIDIA)');
+  },
+  get hip() {
+    return tr('hiprand_uniform on AMD (rocRAND)', 'hiprand_uniform trên AMD (rocRAND)');
+  },
   m5: 'M5: (x >> 8) × 2⁻²⁴',
 };
 
@@ -401,9 +407,9 @@ export function onesCount(kind: 'curand' | 'hip'): number {
 
 /** The regions of the strip, as the analysis finds them (each is checked in the tests). */
 export const DIFFER_REGIONS = [
-  { from: 0, to: 2 ** 23, which: 'every x', count: 2 ** 23 },
-  { from: 2 ** 23, to: 2 ** 24, which: 'even x', count: 2 ** 22 },
-  { from: 2 ** 24, to: 2 ** 25, which: 'x whose float32 value is 2 more than a multiple of 4', count: 2 ** 22 },
+  { from: 0, to: 2 ** 23, get which() { return tr('every x', 'mọi x'); }, count: 2 ** 23 },
+  { from: 2 ** 23, to: 2 ** 24, get which() { return tr('even x', 'x chẵn'); }, count: 2 ** 22 },
+  { from: 2 ** 24, to: 2 ** 25, get which() { return tr('x whose float32 value is 2 more than a multiple of 4', 'x có giá trị float32 bằng một bội của 4 cộng thêm 2'); }, count: 2 ** 22 },
 ];
 /** The smallest input both vendor conversions turn into 1.0 (A2). */
 export const FIRST_ONE = 0xffffff80;

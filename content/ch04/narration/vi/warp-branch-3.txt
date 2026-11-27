@@ -1,0 +1,1 @@
+Vì vậy nó đi từng đường một. Trước tiên là đường A. 24 lane đã chọn đường này thực thi 3 lệnh của nó. 8 lane còn lại bị che, nên mọi việc chúng làm đều không có hiệu lực. Trong hình này, chúng chờ đến lượt, vẫn giữ chỗ của mình trong warp.

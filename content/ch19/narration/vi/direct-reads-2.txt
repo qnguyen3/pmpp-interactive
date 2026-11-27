@@ -1,0 +1,1 @@
+Luồng 0, 0 của khối 0 tính điểm ảnh đầu tiên của bản đồ 0. Vòng lặp của nó chạy qua 3 bản đồ đầu vào và 4 vị trí bộ lọc: 12 bước. Mỗi bước nạp một giá trị đầu vào và một trọng số bộ lọc từ bộ nhớ toàn cục, rồi cộng tích của chúng vào một thanh ghi. Thanh ghi tăng dần lên 14.

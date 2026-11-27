@@ -1,0 +1,1 @@
+Giai đoạn hai sao chép mỗi bucket cục bộ ra thành một dải liền mạch. Hãy nhìn khối 2. Luồng 0 ghi số không duy nhất của khối vào vị trí 4. Các luồng 1, 2 và 3 ghi ba số một của nó cạnh nhau, ở 12, 13 và 14. Trong một bucket, các luồng kề nhau giờ ghi vào các địa chỉ kề nhau.

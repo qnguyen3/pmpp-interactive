@@ -1,0 +1,1 @@
+Các điểm ảnh 1, 2 và 3 theo sau, mỗi điểm vào cột riêng của nó. Hãy xem các bộ đếm trên đầu vào. Các mảng vùng cạnh nhau chồng lên nhau, nên các điểm ảnh bị chép nhiều hơn một lần. Điểm ảnh ở giữa bị chép 4 lần, mỗi điểm ở cạnh hai lần, mỗi góc một lần. B kết thúc với 48 phần tử được tạo từ 27 giá trị.

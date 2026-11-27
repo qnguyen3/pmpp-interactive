@@ -22,6 +22,7 @@ import {
   type WarpSchedule,
 } from '../../sim/flashkernel';
 import { FlashBlockView } from './FlashBlockView';
+import { Translated, tr, useLocale } from '../../lib/i18n';
 
 // "Step one block": the flash kernel of Figs. 20.8–20.16 as lab 20.2 corrects it, at a toy
 // size, with its barriers and the book's slips switchable. Every value comes from
@@ -47,7 +48,7 @@ function Outline({ cur, cfg }: { cur: KStep | undefined; cfg: KConfig }) {
       {OUTLINE.map((o, k) => {
         const removed = (o.op === 'syncwarp' && !cfg.syncwarp) || (k === 8 && !cfg.barrierAfter);
         const header =
-          k === 1 ? <li className="muted" style={{ paddingLeft: '1.2em' }}>for (j : tiles{cfg.order === 'rtl' ? ', right to left' : ''})</li> :
+          k === 1 ? <li className="muted" style={{ paddingLeft: '1.2em' }}>for (j : tiles{/* i18n-ignore: pseudocode */}{cfg.order === 'rtl' ? tr(', right to left', ', từ phải sang trái') : ''})</li> :
           k === 3 ? <li className="muted" style={{ paddingLeft: '2.4em' }}>for (ii = 0; ii &lt; B_r_warp; ii++)</li> : null;
         return (
           <FragmentLine key={k} header={header}>
@@ -63,8 +64,8 @@ function Outline({ cur, cfg }: { cur: KStep | undefined; cfg: KConfig }) {
               }}
             >
               {o.text}
-              {removed ? ' (removed)' : ''}
-              {k === 4 && cfg.returnsNewMax ? <span style={{ color: hl === k ? undefined : 'var(--fail)' }}> returns the new max</span> : null}
+              {removed ? tr(' (removed)', ' (đã bỏ)') : ''}
+              {k === 4 && cfg.returnsNewMax ? <span style={{ color: hl === k ? undefined : 'var(--fail)' }}> <Translated vi="trả về giá trị lớn nhất mới">returns the new max</Translated></span> : null}
             </li>
           </FragmentLine>
         );
@@ -96,7 +97,8 @@ export function FlashStepper() {
   const prob = useMemo(() => makeProblem(n, TOY.d), [n]);
   const nPanels = panels(cfg);
   const p = Math.min(panel, nPanels - 1);
-  const trace = useMemo(() => runBlock(cfg, prob, p, lanes, warps), [cfg, prob, p, lanes, warps]);
+  const locale = useLocale();
+  const trace = useMemo(() => runBlock(cfg, prob, p, lanes, warps), [cfg, prob, p, lanes, warps, locale]);
   const total = trace.steps.length;
   const k = Math.min(at, total);
   const cur = k > 0 ? trace.steps[k - 1] : undefined;
@@ -134,25 +136,38 @@ export function FlashStepper() {
 
   return (
     <Bench
-      title="Step one block"
-      task="Find where each barrier matters: switch on one defect at a time and try both schedules."
+      title={tr('Step one block', 'Chạy từng bước một khối')}
+      task={
+        <Translated vi="Tìm nơi mỗi rào chắn có tác dụng: bật từng lỗi một và thử cả hai cách lập lịch.">
+          Find where each barrier matters: switch on one defect at a time and try both schedules.
+        </Translated>
+      }
       foot={
-        <>
-          A toy configuration: d = {cfg.d}, warps of {cfg.lanes} lanes (not 32, so a warp fits on screen), {cfg.warps} warps,
-          B_r = {BR}, B_c = {cfg.bc}. Hover a cell for its value. <TierLegend />
-        </>
+        <Translated
+          vi={
+            <>
+              Một cấu hình đồ chơi: d = {cfg.d}, warp gồm {cfg.lanes} lane (không phải 32, để một warp vừa màn hình), {cfg.warps} warp,
+              B_r = {BR}, B_c = {cfg.bc}. Di chuột lên một ô để xem giá trị của nó. <TierLegend />
+            </>
+          }
+        >
+          <>
+            A toy configuration: d = {cfg.d}, warps of {cfg.lanes} lanes (not 32, so a warp fits on screen), {cfg.warps} warps,
+            B_r = {BR}, B_c = {cfg.bc}. Hover a cell for its value. <TierLegend />
+          </>
+        </Translated>
       }
     >
       <div className="row" style={{ marginBottom: '0.6rem' }}>
         <label className="field">
-          Rows N
-          <select value={n} onChange={(e) => { setN(+e.target.value); setPanel(1); }} aria-label="Rows N">
+          <Translated vi="Số hàng N">Rows N</Translated>
+          <select value={n} onChange={(e) => { setN(+e.target.value); setPanel(1); }} aria-label={tr('Rows N', 'Số hàng N')}>
             {[8, 10, 12].map((v) => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>
-        <label className="field">
+        <label className="field">{/* i18n-ignore: variable name */}
           B_r_warp
-          <select value={brWarp} onChange={(e) => { setBrWarp(+e.target.value); setPanel(0); }} aria-label="B_r_warp">
+          <select value={brWarp} onChange={(e) => { setBrWarp(+e.target.value); setPanel(0); }} aria-label="B_r_warp">{/* i18n-ignore: variable name */}
             {[1, 2].map((v) => <option key={v} value={v}>{v}</option>)}
           </select>
         </label>
@@ -163,22 +178,22 @@ export function FlashStepper() {
           </select>
         </label>
         <label className="field">
-          Block (Q panel)
-          <select value={p} onChange={(e) => setPanel(+e.target.value)} aria-label="Block">
+          <Translated vi="Khối (panel Q)">Block (Q panel)</Translated>
+          <select value={p} onChange={(e) => setPanel(+e.target.value)} aria-label={tr('Block', 'Khối')}>
             {Array.from({ length: nPanels }, (_, i) => (
-              <option key={i} value={i}>i = {i}: rows {i * BR} to {Math.min(n, (i + 1) * BR) - 1}</option>
+              <option key={i} value={i}>i = {i}: {tr('rows', 'hàng')} {i * BR} {tr('to', 'đến')} {Math.min(n, (i + 1) * BR) - 1}</option>
             ))}
           </select>
         </label>
         <label className="field">
-          Lanes
-          <select value={lanes} onChange={(e) => setLanes(e.target.value as LaneSchedule)} aria-label="Lanes">
+          <Translated vi="Lane">Lanes</Translated>
+          <select value={lanes} onChange={(e) => setLanes(e.target.value as LaneSchedule)} aria-label={tr('Lanes', 'Lane')}>
             {LANES.map((l) => <option key={l} value={l}>{LANE_LABEL[l]}</option>)}
           </select>
         </label>
         <label className="field">
-          Warps
-          <select value={warps} onChange={(e) => setWarps(e.target.value as WarpSchedule)} aria-label="Warps">
+          <Translated vi="Warp">Warps</Translated>
+          <select value={warps} onChange={(e) => setWarps(e.target.value as WarpSchedule)} aria-label={tr('Warps', 'Warp')}>
             {WARPS.map((w) => <option key={w} value={w}>{WARP_LABEL[w]}</option>)}
           </select>
         </label>
@@ -191,27 +206,37 @@ export function FlashStepper() {
         ))}
       </div>
       <div className="row" style={{ marginBottom: '0.8rem' }}>
-        <button onClick={() => { setPlaying(false); setAt(0); }} disabled={k === 0}>Restart</button>
-        <button onClick={() => { setPlaying(false); setAt(k - 1); }} disabled={k === 0}>Back</button>
-        <button className="primary" onClick={() => { setPlaying(false); setAt(k + 1); }} disabled={finished}>Step</button>
-        <button onClick={() => { setPlaying(false); jump((s) => s.op === 'release_syncthreads' || s.op === 'release_syncwarp'); }} disabled={finished}>Run to next barrier</button>
-        <button onClick={() => { setPlaying(false); nextTile(); }} disabled={finished}>Next tile</button>
-        <button onClick={() => setPlaying(!playing)} disabled={finished}>{playing ? 'Pause' : 'Play'}</button>
-        {firstBad ? <button onClick={() => { setPlaying(false); setAt(firstBad); }}>Go to the first failure</button> : null}
-        <span className="muted" aria-live="polite" data-progress>step {k} of {total}</span>
+        <button onClick={() => { setPlaying(false); setAt(0); }} disabled={k === 0}><Translated vi="Bắt đầu lại">Restart</Translated></button>
+        <button onClick={() => { setPlaying(false); setAt(k - 1); }} disabled={k === 0}><Translated vi="Lùi">Back</Translated></button>
+        <button className="primary" onClick={() => { setPlaying(false); setAt(k + 1); }} disabled={finished}><Translated vi="Bước">Step</Translated></button>
+        <button onClick={() => { setPlaying(false); jump((s) => s.op === 'release_syncthreads' || s.op === 'release_syncwarp'); }} disabled={finished}><Translated vi="Chạy tới rào chắn kế tiếp">Run to next barrier</Translated></button>
+        <button onClick={() => { setPlaying(false); nextTile(); }} disabled={finished}><Translated vi="Ô kế tiếp">Next tile</Translated></button>
+        <button onClick={() => setPlaying(!playing)} disabled={finished}>{playing ? tr('Pause', 'Tạm dừng') : tr('Play', 'Chạy')}</button>
+        {firstBad ? <button onClick={() => { setPlaying(false); setAt(firstBad); }}><Translated vi="Tới lỗi đầu tiên">Go to the first failure</Translated></button> : null}
+        <span className="muted" aria-live="polite" data-progress><Translated vi={<>bước {k} / {total}</>}>step {k} of {total}</Translated></span>
       </div>
 
       <div className={'narrate' + (cur?.violation ? ' bad' : '')} role="status" style={{ marginBottom: '0.9rem' }} data-narrate>
         {cur ? (
           <>
             {cur.text}
-            {cur.violation ? <><br /><b className="t-fail">Failure: {cur.violation.message}.</b></> : null}
+            {cur.violation ? <><br /><b className="t-fail"><Translated vi="Lỗi: ">Failure: </Translated>{cur.violation.message}.</b></> : null}
           </>
         ) : (
           <>
-            Nothing has run yet. Block {p} owns rows {p * BR} to {(p + 1) * BR - 1} of Q and O
-            {(p + 1) * BR > n ? ` (rows from ${n} on are past N)` : ''}:{' '}
-            {Array.from({ length: cfg.warps }, (_, w) => `warp ${w} rows ${p * BR + w * cfg.brWarp}${cfg.brWarp > 1 ? `–${p * BR + w * cfg.brWarp + cfg.brWarp - 1}` : ''}`).join(', ')}. Press Step.
+            <Translated
+              vi={
+                <>
+                  Chưa có gì chạy. Khối {p} sở hữu các hàng {p * BR} đến {(p + 1) * BR - 1} của Q và O
+                  {(p + 1) * BR > n ? ` (các hàng từ ${n} trở đi vượt quá N)` : ''}:{' '}
+                  {Array.from({ length: cfg.warps }, (_, w) => `warp ${w} hàng ${p * BR + w * cfg.brWarp}${cfg.brWarp > 1 ? `–${p * BR + w * cfg.brWarp + cfg.brWarp - 1}` : ''}`).join(', ')}. Bấm Bước.
+                </>
+              }
+            >
+              Nothing has run yet. Block {p} owns rows {p * BR} to {(p + 1) * BR - 1} of Q and O
+              {(p + 1) * BR > n ? ` (rows from ${n} on are past N)` : ''}:{' '}
+              {Array.from({ length: cfg.warps }, (_, w) => `warp ${w} rows ${p * BR + w * cfg.brWarp}${cfg.brWarp > 1 ? `–${p * BR + w * cfg.brWarp + cfg.brWarp - 1}` : ''}`).join(', ')}. Press Step.
+            </Translated>
           </>
         )}
       </div>
@@ -225,14 +250,29 @@ export function FlashStepper() {
       <div className="cols" style={{ gridTemplateColumns: 'minmax(0, 4fr) minmax(0, 8fr)' }}>
         <div style={{ minWidth: 0 }}>
           <Outline cur={cur} cfg={cfg} />
-          <p className="muted" style={{ fontSize: '0.74rem', margin: '0.5rem 0 0' }}>
-            The structure of lab 20.2's kernel. With a defect on, a removed barrier is struck through.
-          </p>
+          <Translated
+            vi={
+              <p className="muted" style={{ fontSize: '0.74rem', margin: '0.5rem 0 0' }}>
+                Cấu trúc kernel của lab 20.2. Khi bật một lỗi, rào chắn bị bỏ sẽ bị gạch ngang.
+              </p>
+            }
+          >
+            <p className="muted" style={{ fontSize: '0.74rem', margin: '0.5rem 0 0' }}>
+              The structure of lab 20.2's kernel. With a defect on, a removed barrier is struck through.
+            </p>
+          </Translated>
         </div>
         <div style={{ minWidth: 0, overflowX: 'auto' }}>
           <table className="data" data-rows style={{ margin: 0, background: 'var(--page)' }}>
             <thead>
-              <tr><th>row</th><th>m</th><th>D</th><th>tiles merged</th><th>Õ/D vs exact over those tiles</th><th>stored</th></tr>
+              <tr>
+                <th><Translated vi="hàng">row</Translated></th>
+                <th>m</th>
+                <th>D</th>
+                <th><Translated vi="các ô đã trộn">tiles merged</Translated></th>
+                <th><Translated vi="Õ/D so với giá trị chính xác trên các ô đó">Õ/D vs exact over those tiles</Translated></th>
+                <th><Translated vi="đã ghi">stored</Translated></th>
+              </tr>
             </thead>
             <tbody>
               {Array.from({ length: BR }, (_, lr) => {
@@ -252,19 +292,19 @@ export function FlashStepper() {
                 const st = snap.stored[row];
                 return (
                   <tr key={lr} data-row={row}>
-                    <td>{row}{row >= n ? ' (past N)' : ''}</td>
+                    <td>{row}{row >= n ? tr(' (past N)', ' (quá N)') : ''}</td>
                     <td className="t-reg">{fmtv(reg0.m[ii])}</td>
                     <td className="t-reg">{fmtv(reg0.D[ii])}</td>
-                    <td>{same ? (per[0].length ? per[0].join(', ') : 'none') : per.map((t, L) => `lane ${L}: ${t.join(',') || '–'}`).join('; ')}</td>
+                    <td>{same ? (per[0].length ? per[0].join(', ') : tr('none', 'không có')) : per.map((t, L) => `lane ${L}: ${t.join(',') || '–'}`).join('; ')}</td>
                     <td>
-                      {row >= n ? <span className="muted">not stored</span>
-                        : !same ? <span className="muted">lanes not level yet</span>
-                        : ex == null ? <span className="muted">nothing visible yet</span>
+                      {row >= n ? <span className="muted"><Translated vi="không ghi">not stored</Translated></span>
+                        : !same ? <span className="muted"><Translated vi="các lane chưa đồng mức">lanes not level yet</Translated></span>
+                        : ex == null ? <span className="muted"><Translated vi="chưa thấy gì">nothing visible yet</Translated></span>
                         : Number.isNaN(err!) ? <span className="chip fail" data-live="nan">NaN</span>
-                        : <span className={'chip ' + (err! < 1e-9 ? 'ok' : 'fail')} data-live={err! < 1e-9 ? 'ok' : 'off'}>{err! < 1e-9 ? 'equal' : `off by ${fmtv(err!)}`}</span>}
+                        : <span className={'chip ' + (err! < 1e-9 ? 'ok' : 'fail')} data-live={err! < 1e-9 ? 'ok' : 'off'}>{err! < 1e-9 ? tr('equal', 'bằng nhau') : tr(`off by ${fmtv(err!)}`, `lệch ${fmtv(err!)}`)}</span>}
                     </td>
                     <td data-stored={st ? (rowOk(prob, row, st) ? 'ok' : 'wrong') : 'no'}>
-                      {st ? (rowOk(prob, row, st) ? <span className="chip ok">O and L correct</span> : <span className="chip fail">wrong</span>) : <span className="muted">not yet</span>}
+                      {st ? (rowOk(prob, row, st) ? <span className="chip ok"><Translated vi="O và L đúng">O and L correct</Translated></span> : <span className="chip fail"><Translated vi="sai">wrong</Translated></span>) : <span className="muted"><Translated vi="chưa">not yet</Translated></span>}
                     </td>
                   </tr>
                 );
@@ -275,8 +315,8 @@ export function FlashStepper() {
       </div>
       {finished ? (
         <p style={{ margin: '0.8rem 0 0' }} data-block-result={allOk ? 'ok' : 'wrong'}>
-          {allOk ? <span className="chip ok">This block's rows match exact attention.</span> : <span className="chip fail">This block's results are wrong.</span>}{' '}
-          {trace.violations.length ? `${trace.violations.length} bad reads of shared memory.` : 'No bad read of shared memory.'}
+          {allOk ? <span className="chip ok"><Translated vi="Các hàng của khối này khớp với attention chính xác.">This block's rows match exact attention.</Translated></span> : <span className="chip fail"><Translated vi="Kết quả của khối này sai.">This block's results are wrong.</Translated></span>}{' '}
+          {trace.violations.length ? tr(`${trace.violations.length} bad reads of shared memory.`, `${trace.violations.length} lần đọc sai bộ nhớ chia sẻ.`) : tr('No bad read of shared memory.', 'Không có lần đọc sai nào từ bộ nhớ chia sẻ.')}
         </p>
       ) : null}
     </Bench>
@@ -286,18 +326,26 @@ export function FlashStepper() {
 /** Every defect against every schedule, for the whole 12-row kernel. */
 export function FlashOutcomes() {
   const prob = useMemo(() => makeProblem(12, TOY.d), []);
-  const rows: { label: string; on: DefectId[] }[] = [{ label: 'corrected kernel (lab 20.2)', on: [] }, ...DEFECTS.map((d) => ({ label: d.label, on: [d.id] }))];
+  const rows: { label: string; on: DefectId[] }[] = [{ label: tr('corrected kernel (lab 20.2)', 'kernel đã sửa (lab 20.2)'), on: [] }, ...DEFECTS.map((d) => ({ label: d.label, on: [d.id] }))];
   return (
     <Bench
-      title="Every schedule at once"
-      task="Before reading the table: which defect is wrong under every schedule, and which only under one?"
-      foot="Each cell runs all three blocks of the toy kernel (N = 12) in the model above and compares O and L with exact attention."
+      title={tr('Every schedule at once', 'Mọi cách lập lịch cùng lúc')}
+      task={
+        <Translated vi="Trước khi đọc bảng: lỗi nào sai dưới mọi cách lập lịch, và lỗi nào chỉ sai dưới một cách?">
+          Before reading the table: which defect is wrong under every schedule, and which only under one?
+        </Translated>
+      }
+      foot={
+        <Translated vi="Mỗi ô chạy cả ba khối của kernel đồ chơi (N = 12) trong mô hình ở trên và so O và L với attention chính xác.">
+          Each cell runs all three blocks of the toy kernel (N = 12) in the model above and compares O and L with exact attention.
+        </Translated>
+      }
     >
       <div style={{ overflowX: 'auto' }}>
         <table className="data" style={{ background: 'var(--page)', margin: 0 }} data-outcomes>
           <thead>
             <tr>
-              <th style={{ paddingLeft: '0.6rem' }}>Kernel</th>
+              <th style={{ paddingLeft: '0.6rem' }}>Kernel{/* i18n-ignore: glossary keeps kernel */}</th>
               {SCHEDULES.map(([l, w]) => <th key={l + w}>{LANE_LABEL[l]}, {WARP_LABEL[w]}</th>)}
             </tr>
           </thead>
@@ -309,8 +357,8 @@ export function FlashOutcomes() {
                   const res = runKernel(withDefects(TOY, r.on), prob, l, w);
                   return (
                     <td key={l + w} data-outcome={res.correct ? 'correct' : 'wrong'}>
-                      {res.correct ? <span className="chip ok">correct</span> : <span className="chip fail">{res.wrongRows.length} of 12 rows wrong</span>}
-                      {res.violations.length ? <div className="muted">{res.violations.length} bad reads</div> : null}
+                      {res.correct ? <span className="chip ok"><Translated vi="đúng">correct</Translated></span> : <span className="chip fail"><Translated vi={<>{res.wrongRows.length} trên 12 hàng sai</>}>{res.wrongRows.length} of 12 rows wrong</Translated></span>}
+                      {res.violations.length ? <div className="muted"><Translated vi={<>{res.violations.length} lần đọc sai</>}>{res.violations.length} bad reads</Translated></div> : null}
                     </td>
                   );
                 })}

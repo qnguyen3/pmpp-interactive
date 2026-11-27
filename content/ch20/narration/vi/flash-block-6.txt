@@ -1,0 +1,1 @@
+Sau ô cuối cùng, mỗi warp chia đầu ra của nó cho D, một lần, rồi ghi các hàng của O. Bên cạnh mỗi hàng, nó ghi giá trị lớn nhất cộng với log của D, thứ mà quá trình huấn luyện cần. Các điểm số và các xác suất chỉ sống trong bộ nhớ chia sẻ. Không cái nào từng chạm tới bộ nhớ toàn cục.

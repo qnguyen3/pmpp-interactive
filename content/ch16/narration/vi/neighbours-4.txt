@@ -1,0 +1,1 @@
+Cho cùng lưới đó 4 lane. Giờ mọi mặt sóng đều vừa cùng một lúc, nên cả hai cách đều mất 7 bước, và không ô nào bắt đầu sớm. Khi máy rộng bằng mặt sóng rộng nhất, không còn khoảng trống nào để lấp. Điều quyết định là chuỗi từ ô đầu tiên đến ô cuối cùng: 2 T trừ 1 ô, nối tiếp nhau.

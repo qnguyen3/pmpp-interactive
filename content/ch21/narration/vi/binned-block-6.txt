@@ -1,0 +1,1 @@
+Trong lúc chia ngăn, 3 nguyên tử không vừa ngăn của chúng, nên chúng được đưa vào một danh sách tràn. Sau kernel, lưới quay về host, nơi cộng phần đóng góp của chúng vào các điểm nằm trong bán kính cắt. Khi thể tích được cắt thành nhiều mảnh, host có thể làm việc này trong khi thiết bị chạy mảnh tiếp theo.

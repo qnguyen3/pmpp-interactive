@@ -1,0 +1,1 @@
+Giờ hãy chạy lại lượt 4, nhưng lấp bucket số một theo chiều ngược. Bit cao nhất vẫn chia danh sách đúng. Nhưng 9 khóa có bit cao nhất là 1 ra theo thứ tự ngược của 3 bit thấp hơn, nên danh sách không còn được sắp xếp. Một lượt không ổn định xóa bỏ công việc của mọi lượt trước nó.

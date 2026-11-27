@@ -1,0 +1,1 @@
+Phép chọn phần tử trụ thêm một bước trước mỗi phép chia. Các luồng chạy một phép rút gọn lấy max dọc theo cột, tìm hệ số đầu tiên lớn nhất. Hàng của luồng 1 thắng với số 2, và được đổi lên trên cùng. Phép khử sau đó tìm ra 1, 2, 3. [short pause] Trên nhiều khối, việc tìm kiếm này sẽ cần cả lưới thống nhất với nhau, một lần cho mỗi cột.

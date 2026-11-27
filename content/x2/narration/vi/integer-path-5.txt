@@ -1,0 +1,1 @@
+Dọc theo hàng, mỗi lane cộng kết quả các khối của mình bằng số thực. Rồi warp cộng các lane lại với nhau. Hãy so kết quả với đường số thực, nơi các activation chưa bao giờ bị làm tròn. Khoảng chênh nhỏ bạn thấy đến từ việc làm tròn chúng thành byte. Ở đây nó chỉ là một phần nhỏ của một phần trăm. Đó là cái giá của đường số nguyên.

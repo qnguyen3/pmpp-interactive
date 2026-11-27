@@ -1,0 +1,1 @@
+Đây là một warp đồ chơi gồm 8 lane. Mỗi lane giữ một khóa và kiểm tra nó với cùng một quy tắc: giữ khóa nếu nó nhỏ hơn 5. Các lane 1, 2, 4 và 5 đạt. Mỗi lane trong bốn lane đó giờ cần một vị trí riêng trong mảng đầu ra, và không hai lane nào được dùng chung một vị trí.

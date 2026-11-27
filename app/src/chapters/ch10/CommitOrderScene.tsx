@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { f32, f32hex, f32short, f64short, halvingLevels, sceneData, segments, type CommitTrace } from '../../sim/multiblock';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Blocks finish in any order" (section 10.9): the same eight block sums committed in
 // two seeded orders, then reduced by a fixed second pass. Five beats, one narration
@@ -31,7 +32,9 @@ function Input({ gap, labels, startLabels }: { gap: number; labels: number; star
   return (
     <g>
       <text x={X0} y={16} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>
-        input: {D.seg.N} logits in global memory, blocks of {D.seg.block} threads, segments of {PER}
+        <Translated vi={<>đầu vào: {D.seg.N} logits trong bộ nhớ toàn cục, khối {D.seg.block} luồng, đoạn {PER} phần tử</>}>
+          input: {D.seg.N} logits in global memory, blocks of {D.seg.block} threads, segments of {PER}
+        </Translated>
       </text>
       {Array.from({ length: B * PER }, (_, i) => {
         const real = i < D.seg.N;
@@ -42,9 +45,9 @@ function Input({ gap, labels, startLabels }: { gap: number; labels: number; star
       })}
       {Array.from({ length: B }, (_, b) => (
         <g key={b} opacity={labels}>
-          <text x={segMid(b)} y={60} fontSize="11" textAnchor="middle">block {b}</text>
+          <text x={segMid(b)} y={60} fontSize="11" textAnchor="middle"><Translated vi={<>khối {b}</>}>block {b}</Translated></text>
           <text x={segMid(b)} y={73} fontSize="10" textAnchor="middle" opacity={startLabels} style={{ fill: 'var(--ink-2)' }}>
-            starts at {b * PER}
+            <Translated vi={<>bắt đầu tại {b * PER}</>}>starts at {b * PER}</Translated>
           </text>
         </g>
       ))}
@@ -83,14 +86,14 @@ function Commits({ run, n, label, y0 = 128 }: { run: CommitTrace; n: number; lab
     <g>
       <text x={X0} y={y0 + 14} fontSize="12" fontWeight="600">{label}</text>
       <rect x={X0} y={y0 + 22} width={200} height={44} rx="3" fill="var(--global-wash)" stroke="var(--global)" />
-      <text x={X0 + 10} y={y0 + 38} fontSize="10.5" style={{ fill: 'var(--global)' }}>*output (global memory)</text>
+      <text x={X0 + 10} y={y0 + 38} fontSize="10.5" style={{ fill: 'var(--global)' }}><Translated vi="*output (bộ nhớ toàn cục)">*output (global memory)</Translated></text>
       <text x={X0 + 10} y={y0 + 58} fontSize="15" fontWeight="600" data-total={f32hex(total)}>{f32short(total)}</text>
       {cur >= 0 ? (
-        <text x={X0 + 192} y={y0 + 38} fontSize="10.5" textAnchor="end" fontWeight="600">+ block {cur}</text>
+        <text x={X0 + 192} y={y0 + 38} fontSize="10.5" textAnchor="end" fontWeight="600"><Translated vi={<>+ khối {cur}</>}>+ block {cur}</Translated></text>
       ) : null}
       {run.order.slice(0, n).map((b, k) => (
         <text key={k} x={270} y={y0 + 38 + k * 17} fontSize="11" data-commit={k}>
-          {`commit ${k + 1}: block ${b} adds ${f32short(D.sums[b])}, total ${f32short(run.running[k])}`}
+          {tr(`commit ${k + 1}: block ${b} adds ${f32short(D.sums[b])}, total ${f32short(run.running[k])}`, `lần ghi ${k + 1}: khối ${b} cộng ${f32short(D.sums[b])}, tổng ${f32short(run.running[k])}`)}
         </text>
       ))}
     </g>
@@ -112,7 +115,7 @@ function Hex({ x, y, value, other }: { x: number; y: number; value: number; othe
 
 function Stage({ children, note = true }: { children: ReactNode; note?: boolean }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Blocks committing their sums" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Blocks committing their sums', 'Các khối ghi tổng của mình')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <defs>
         <pattern id="co-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <line x1="0" y1="0" x2="0" y2="5" stroke="var(--ink-3)" strokeWidth="1.4" />
@@ -121,7 +124,9 @@ function Stage({ children, note = true }: { children: ReactNode; note?: boolean 
       {children}
       {note ? (
         <text x={W - 10} y={H - 6} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>
-          commit orders are seeded shuffles from the model, not a timing model
+          <Translated vi="thứ tự ghi là các hoán vị có seed lấy từ mô hình, không phải một mô hình thời gian">
+            commit orders are seeded shuffles from the model, not a timing model
+          </Translated>
         </text>
       ) : null}
     </svg>
@@ -133,7 +138,9 @@ const committedMap = (run: CommitTrace, n: number) => new Map(run.order.slice(0,
 const beats: Beat[] = [
   {
     clip: 'commit-order-1',
-    label: 'Segments',
+    get label() {
+      return tr('Segments', 'Các đoạn');
+    },
     draw: (p) => {
       const gap = GAP * ramp(p, 0.08, 0.35);
       const last = ramp(p, 0.62, 0.8);
@@ -143,18 +150,20 @@ const beats: Beat[] = [
           <g opacity={last}>
             <rect x={cellX((B - 1) * PER, GAP) - 3} y={22} width={PER * CW + 5} height={28} fill="none" stroke="var(--ink)" strokeWidth="2" />
             <text x={segMid(B - 1)} y={98} fontSize="11.5" textAnchor="middle">
-              {D.seg.lastReal} real,
+              <Translated vi={<>{D.seg.lastReal} thật,</>}>{D.seg.lastReal} real,</Translated>
             </text>
             <text x={segMid(B - 1)} y={112} fontSize="11.5" textAnchor="middle">
-              {D.seg.pastEnd} past the end
+              <Translated vi={<>{D.seg.pastEnd} vượt quá cuối</>}>{D.seg.pastEnd} past the end</Translated>
             </text>
           </g>
           <g opacity={ramp(p, 0.8, 0.92)}>
             <text x={X0} y={160} fontSize="13">
-              {`block b starts at 2 × ${D.seg.block} × b = ${PER}b; ${D.seg.N} logits need ceil(${D.seg.N} / ${PER}) = ${B} blocks.`}
+              {tr(`block b starts at 2 × ${D.seg.block} × b = ${PER}b; ${D.seg.N} logits need ceil(${D.seg.N} / ${PER}) = ${B} blocks.`, `khối b bắt đầu tại 2 × ${D.seg.block} × b = ${PER}b; ${D.seg.N} logits cần ceil(${D.seg.N} / ${PER}) = ${B} khối.`)}
             </text>
             <text x={X0} y={182} fontSize="13">
-              The hatched slots load nothing: those threads add 0 and still join the block's reduction.
+              <Translated vi="Các ô gạch chéo không nạp gì: những luồng đó cộng 0 và vẫn tham gia phép rút gọn của khối.">
+                The hatched slots load nothing: those threads add 0 and still join the block's reduction.
+              </Translated>
             </text>
           </g>
         </Stage>
@@ -163,21 +172,25 @@ const beats: Beat[] = [
   },
   {
     clip: 'commit-order-2',
-    label: 'Commit',
+    get label() {
+      return tr('Commit', 'Ghi kết quả');
+    },
     draw: (p) => {
       const n = done(p, 0.22, 0.95);
       return (
         <Stage>
           <Input gap={GAP} labels={1} startLabels={0} />
           <Sums show={ramp(p, 0, 0.15)} committed={committedMap(D.runA, n)} current={n > 0 ? D.runA.order[n - 1] : undefined} />
-          <Commits run={D.runA} n={n} label="run 1: leaders add with an atomic, in the order they finish" />
+          <Commits run={D.runA} n={n} label={tr('run 1: leaders add with an atomic, in the order they finish', 'lần chạy 1: các luồng dẫn đầu cộng bằng một atomic, theo thứ tự chúng xong')} />
         </Stage>
       );
     },
   },
   {
     clip: 'commit-order-3',
-    label: 'Run it again',
+    get label() {
+      return tr('Run it again', 'Chạy lại lần nữa');
+    },
     draw: (p) => {
       const n = done(p, 0.08, 0.55);
       const compare = ramp(p, 0.6, 0.72);
@@ -186,19 +199,19 @@ const beats: Beat[] = [
           <Input gap={GAP} labels={1} startLabels={0} />
           <Sums show={1} committed={committedMap(D.runB, n)} current={n > 0 && n < B ? D.runB.order[n - 1] : undefined} />
           <g opacity={1 - compare}>
-            <Commits run={D.runB} n={n} label="run 2: the same block sums, another order" />
+            <Commits run={D.runB} n={n} label={tr('run 2: the same block sums, another order', 'lần chạy 2: cùng các tổng khối đó, thứ tự khác')} />
           </g>
           <g opacity={compare} data-compare="1">
-            <text x={X0} y={150} fontSize="12" fontWeight="600">the two runs, side by side</text>
-            <text x={X0} y={178} fontSize="13">run 1 ({D.runA.order.join(', ')}):</text>
+            <text x={X0} y={150} fontSize="12" fontWeight="600"><Translated vi="hai lần chạy, đặt cạnh nhau">the two runs, side by side</Translated></text>
+            <text x={X0} y={178} fontSize="13"><Translated vi={<>lần chạy 1 ({D.runA.order.join(', ')}):</>}>run 1 ({D.runA.order.join(', ')}):</Translated></text>
             <text x={X0 + 260} y={178} fontSize="13">{f32short(D.runA.total)}</text>
             <Hex x={X0 + 400} y={178} value={D.runA.total} other={D.runB.total} />
-            <text x={X0} y={204} fontSize="13">run 2 ({D.runB.order.join(', ')}):</text>
+            <text x={X0} y={204} fontSize="13"><Translated vi={<>lần chạy 2 ({D.runB.order.join(', ')}):</>}>run 2 ({D.runB.order.join(', ')}):</Translated></text>
             <text x={X0 + 260} y={204} fontSize="13">{f32short(D.runB.total)}</text>
             <Hex x={X0 + 400} y={204} value={D.runB.total} other={D.runA.total} />
-            <text x={X0} y={236} fontSize="13" style={{ fill: 'var(--ink-2)' }}>float64 reference:</text>
+            <text x={X0} y={236} fontSize="13" style={{ fill: 'var(--ink-2)' }}><Translated vi="tham chiếu float64:">float64 reference:</Translated></text>
             <text x={X0 + 260} y={236} fontSize="13" style={{ fill: 'var(--ink-2)' }}>{f64short(D.ref)}</text>
-            <text x={X0 + 400} y={236} fontSize="13" className="mono" style={{ fill: 'var(--ink-2)' }}>nearest float32 {f32hex(f32(D.ref))}</text>
+            <text x={X0 + 400} y={236} fontSize="13" className="mono" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>float32 gần nhất {f32hex(f32(D.ref))}</>}>nearest float32 {f32hex(f32(D.ref))}</Translated></text>
           </g>
         </Stage>
       );
@@ -206,7 +219,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'commit-order-4',
-    label: 'Second pass',
+    get label() {
+      return tr('Second pass', 'Lượt thứ hai');
+    },
     draw: (p) => {
       // Sums land in the array in run 2's order, each at its own index. Each tree level
       // sits under the slots it overwrites: slot j absorbs slot j + half.
@@ -220,7 +235,7 @@ const beats: Beat[] = [
         <Stage>
           <Input gap={GAP} labels={1} startLabels={0} />
           <Sums show={1} />
-          <text x={X0} y={140} fontSize="12" fontWeight="600">leaders write partial[blockIdx.x]; a second launch, one block, reduces it</text>
+          <text x={X0} y={140} fontSize="12" fontWeight="600"><Translated vi="các luồng dẫn đầu ghi partial[blockIdx.x]; một lần khởi chạy thứ hai, một khối, rút gọn nó">leaders write partial[blockIdx.x]; a second launch, one block, reduces it</Translated></text>
           {LEVELS.map((level, d) => {
             const y = 152 + d * 34;
             const half = level.length;
@@ -247,10 +262,10 @@ const beats: Beat[] = [
             );
           })}
           <g opacity={ramp(p, 0.75, 0.85)} data-final={f32hex(LEVELS[last][0])}>
-            <text x={slotX(2)} y={152 + last * 34 + 11} fontSize="12" className="mono">run 1: {f32hex(D.twoPass.total)}</text>
-            <text x={slotX(2)} y={152 + last * 34 + 26} fontSize="12" className="mono">run 2: {f32hex(D.twoPass.total)}</text>
+            <text x={slotX(2)} y={152 + last * 34 + 11} fontSize="12" className="mono"><Translated vi={<>lần chạy 1: {f32hex(D.twoPass.total)}</>}>run 1: {f32hex(D.twoPass.total)}</Translated></text>
+            <text x={slotX(2)} y={152 + last * 34 + 26} fontSize="12" className="mono"><Translated vi={<>lần chạy 2: {f32hex(D.twoPass.total)}</>}>run 2: {f32hex(D.twoPass.total)}</Translated></text>
             <rect x={slotX(4) + 10} y={152 + last * 34 + 2} width={120} height={22} rx="11" fill="var(--ok-wash)" stroke="var(--ok)" />
-            <text x={slotX(4) + 70} y={152 + last * 34 + 17} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ok)' }}>same every run</text>
+            <text x={slotX(4) + 70} y={152 + last * 34 + 17} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ok)' }}><Translated vi="như nhau mọi lần chạy">same every run</Translated></text>
           </g>
         </Stage>
       );
@@ -258,25 +273,27 @@ const beats: Beat[] = [
   },
   {
     clip: 'commit-order-5',
-    label: 'The cost',
+    get label() {
+      return tr('The cost', 'Cái giá');
+    },
     draw: (p) => (
       <Stage note={false}>
-        <text x={X0} y={30} fontSize="14" fontWeight="600">what the second pass costs</text>
+        <text x={X0} y={30} fontSize="14" fontWeight="600"><Translated vi="lượt thứ hai tốn gì">what the second pass costs</Translated></text>
         <g opacity={ramp(p, 0.05, 0.15)}>
-          <text x={X0} y={60} fontSize="13">one more launch, and one float per block:</text>
-          <text x={X0 + 20} y={84} fontSize="13">{`here: ${B} blocks, ${B} floats, ${4 * B} bytes`}</text>
+          <text x={X0} y={60} fontSize="13"><Translated vi="thêm một lần khởi chạy, và một float cho mỗi khối:">one more launch, and one float per block:</Translated></text>
+          <text x={X0 + 20} y={84} fontSize="13">{tr(`here: ${B} blocks, ${B} floats, ${4 * B} bytes`, `ở đây: ${B} khối, ${B} float, ${4 * B} byte`)}</text>
         </g>
         <g opacity={ramp(p, 0.22, 0.32)}>
           <text x={X0 + 20} y={108} fontSize="13" data-million={MILLION.blocks}>
-            {`1,000,000 logits at 1024 threads: ${MILLION.blocks} blocks, ${MILLION.blocks} floats, ${(4 * MILLION.blocks).toLocaleString('en-US')} bytes`}
+            {tr(`1,000,000 logits at 1024 threads: ${MILLION.blocks} blocks, ${MILLION.blocks} floats, ${(4 * MILLION.blocks).toLocaleString('en-US')} bytes`, `1,000,000 logits với 1024 luồng: ${MILLION.blocks} khối, ${MILLION.blocks} float, ${(4 * MILLION.blocks).toLocaleString('en-US')} byte`)}
           </text>
         </g>
         <g opacity={ramp(p, 0.45, 0.55)}>
-          <text x={X0} y={150} fontSize="13" fontWeight="600">committing across blocks with an atomic</text>
+          <text x={X0} y={150} fontSize="13" fontWeight="600"><Translated vi="ghi kết quả giữa các khối bằng một atomic">committing across blocks with an atomic</Translated></text>
           {[
-            ['sum', 'float atomic add on CUDA, HIP and Metal'],
-            ['max', 'no float atomic max on Metal or in CUDA’s legacy API (HIP has one)'],
-            ['argmax', 'value and index must move together: a 64-bit key, or two passes'],
+            ['sum', tr('float atomic add on CUDA, HIP and Metal', 'phép cộng nguyên tử float trên CUDA, HIP và Metal')],
+            ['max', tr('no float atomic max on Metal or in CUDA’s legacy API (HIP has one)', 'không có atomic max cho float trên Metal hay trong API cũ của CUDA (HIP có)')],
+            ['argmax', tr('value and index must move together: a 64-bit key, or two passes', 'giá trị và chỉ số phải đi cùng nhau: một khóa 64-bit, hoặc hai lượt')],
           ].map(([op, what], i) => (
             <g key={op}>
               <text x={X0 + 20} y={176 + i * 24} fontSize="13" fontWeight="600">{op}</text>
@@ -285,8 +302,8 @@ const beats: Beat[] = [
           ))}
         </g>
         <g opacity={ramp(p, 0.75, 0.85)}>
-          <text x={X0} y={270} fontSize="13">two passes work on every backend:</text>
-          <text x={X0 + 20} y={294} fontSize="13">llama.cpp's Metal argmax uses two dispatches, a partial pass and a final pass</text>
+          <text x={X0} y={270} fontSize="13"><Translated vi="hai lượt chạy được trên mọi backend:">two passes work on every backend:</Translated></text>
+          <text x={X0 + 20} y={294} fontSize="13"><Translated vi="argmax trên Metal của llama.cpp dùng hai dispatch, một lượt từng phần và một lượt cuối">llama.cpp's Metal argmax uses two dispatches, a partial pass and a final pass</Translated></text>
         </g>
       </Stage>
     ),
@@ -294,5 +311,5 @@ const beats: Beat[] = [
 ];
 
 export function CommitOrderScene() {
-  return <Scene chapter="ch10" title="Blocks finish in any order" beats={beats} />;
+  return <Scene chapter="ch10" title={tr('Blocks finish in any order', 'Các khối xong theo thứ tự bất kỳ')} beats={beats} />;
 }

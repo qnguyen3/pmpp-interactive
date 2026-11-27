@@ -1,0 +1,1 @@
+Một token mới đến một lớp dưới dạng một hàng duy nhất. Ba phép nhân ma trận với vectơ biến nó thành q phẩy, k phẩy và v phẩy. Mọi trọng số của ba phép chiếu được đọc từ bộ nhớ một lần và dùng cho một phép nhân cộng. Hãy xem hai bộ đếm cùng tăng: khoảng một phép toán cho mỗi byte.

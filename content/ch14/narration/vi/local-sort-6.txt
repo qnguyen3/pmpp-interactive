@@ -1,0 +1,1 @@
+Mức tiết kiệm phụ thuộc vào số khóa cùng chung một bucket cục bộ. Với khối 256 luồng và khóa ngẫu nhiên, một lần ghi của warp giảm từ khoảng 16 sector xuống 6 ở 4 bit, nhưng chỉ từ 30 xuống 22 ở 8 bit, khi mỗi bucket chứa khoảng một khóa. Các mục 14.7 và 14.8 tiếp tục từ đó.

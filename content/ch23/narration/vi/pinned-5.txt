@@ -1,0 +1,1 @@
+Giờ cùng lần chạy đó với các buffer từ cuda malloc host. Copy engine đọc chúng trực tiếp, nên mọi lời gọi trả về ngay, và host xếp hàng cả 12 thao tác ngay lập tức. Lần sao chép vào của chunk 1 chạy cùng lúc với kernel 0, và mọi lần sao chép ra, trừ lần cuối, chạy cùng lúc với một kernel sau đó. 10 đơn vị thay vì 16.

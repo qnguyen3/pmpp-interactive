@@ -14,6 +14,8 @@
 // launchArgmaxRows (lab 10.3), M5's launchSampleRows (lab X1.3). RMSNorm, RoPE and SwiGLU are
 // lab X3.1's (launchRmsNorm, launchRope, launchSwiGLU, as llama.h declares them).
 
+import { tr } from '../lib/locale.ts';
+
 export const HEAD = 128; // M7's HEAD_DIM (x3-facts E2, project notes)
 export const FLOAT = 4;
 
@@ -68,10 +70,10 @@ const kv = (c: Config) => c.kvHeads * c.head;
 const qw = (c: Config) => c.heads * c.head;
 
 export function validate(c: Config): string | null {
-  if (c.heads < 1 || c.kvHeads < 1) return 'heads must be positive';
-  if (c.heads % c.kvHeads) return 'the query heads must be a multiple of the KV heads';
-  if (c.d !== c.heads * c.head) return 'd must be heads × head size';
-  if (c.layers < 1 || c.hidden < 1 || c.vocab < 1) return 'sizes must be positive';
+  if (c.heads < 1 || c.kvHeads < 1) return tr('heads must be positive', 'số head phải dương');
+  if (c.heads % c.kvHeads) return tr('the query heads must be a multiple of the KV heads', 'số head truy vấn phải là bội của số head KV');
+  if (c.d !== c.heads * c.head) return tr('d must be heads × head size', 'd phải bằng số head × kích thước head');
+  if (c.layers < 1 || c.hidden < 1 || c.vocab < 1) return tr('sizes must be positive', 'các kích thước phải dương');
   return null;
 }
 
@@ -84,59 +86,62 @@ export function stepLaunches(c: Config, pos: number, sampler: 'greedy' | 'sample
   const add = (l: Omit<Launch, 'n'>) => out.push({ n: out.length, ...l });
   const linear = (layer: number, job: Job, inW: number, outW: number, inputs: string, outputs: string, project: string) =>
     add({
-      layer, job, kind: 'matmul', fn: 'LinearFn (launchGemvGather at batch 1)', lab: 'lab 22.1 (or 6.4, 15.6)', milestone: 'M8', exists: true,
+      layer, job, kind: 'matmul', fn: tr('LinearFn (launchGemvGather at batch 1)', 'LinearFn (launchGemvGather ở batch 1)'), lab: 'lab 22.1 (or 6.4, 15.6)', milestone: 'M8', exists: true,
       inputs, outputs, weightBytes: inW * outW * F, actBytes: (inW + outW) * F, cacheBytes: 0, tableBytes: 0, flops: 2 * inW * outW, project,
     });
   const rms = (layer: number | null, job: Job, inputs: string, outputs: string) =>
     add({
       layer, job, kind: 'norm', fn: 'launchRmsNorm', lab: 'lab X3.1', milestone: 'M10', exists: false,
-      inputs, outputs, weightBytes: c.d * F, actBytes: 2 * c.d * F, cacheBytes: 0, tableBytes: 0, flops: 0, project: 'rms_norm_f32 (norm.cu), kernel_rms_norm (norm.metal)',
+      inputs, outputs, weightBytes: c.d * F, actBytes: 2 * c.d * F, cacheBytes: 0, tableBytes: 0, flops: 0, project: 'rms_norm_f32 (norm.cu), kernel_rms_norm (norm.metal)', // i18n-ignore: kernel names and files
     });
 
   add({
     layer: null, job: 'embed', kind: 'gather', fn: 'launchEmbed', lab: 'lab 22.2', milestone: 'M8', exists: true,
-    inputs: 'token id, E [vocab × d]', outputs: `x [${c.d}]`, weightBytes: c.d * F, actBytes: (1 + c.d) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
-    project: 'GGML_OP_GET_ROWS: k_get_rows (getrows.cu), kernel_get_rows (Metal)',
+    inputs: tr('token id, E [vocab × d]', 'id token, E [vocab × d]'), outputs: `x [${c.d}]`, weightBytes: c.d * F, actBytes: (1 + c.d) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
+    project: 'GGML_OP_GET_ROWS: k_get_rows (getrows.cu), kernel_get_rows (Metal)', // i18n-ignore: op and kernel names
   });
   for (let l = 0; l < c.layers; l++) {
-    rms(l, 'rmsnorm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`);
-    linear(l, 'q', c.d, qw(c), `xb [${c.d}], Wq [${qw(c)} × ${c.d}]`, `q [${qw(c)}]`, 'GGML_OP_MUL_MAT: ggml_cuda_mul_mat, which picks a GEMV kernel for one token (x3 B4)');
-    linear(l, 'k', c.d, kv(c), `xb [${c.d}], Wk [${kv(c)} × ${c.d}]`, `k [${kv(c)}]`, 'GGML_OP_MUL_MAT');
-    linear(l, 'v', c.d, kv(c), `xb [${c.d}], Wv [${kv(c)} × ${c.d}]`, `v [${kv(c)}]`, 'GGML_OP_MUL_MAT');
+    rms(l, 'rmsnorm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`); // i18n-ignore: tensor shapes
+    linear(l, 'q', c.d, qw(c), `xb [${c.d}], Wq [${qw(c)} × ${c.d}]`, `q [${qw(c)}]`, // i18n-ignore: tensor shapes
+      tr('GGML_OP_MUL_MAT: ggml_cuda_mul_mat, which picks a GEMV kernel for one token (x3 B4)', 'GGML_OP_MUL_MAT: ggml_cuda_mul_mat, hàm chọn một kernel GEMV cho một token (x3 B4)'));
+    linear(l, 'k', c.d, kv(c), `xb [${c.d}], Wk [${kv(c)} × ${c.d}]`, `k [${kv(c)}]`, 'GGML_OP_MUL_MAT'); // i18n-ignore: tensor shapes
+    linear(l, 'v', c.d, kv(c), `xb [${c.d}], Wv [${kv(c)} × ${c.d}]`, `v [${kv(c)}]`, 'GGML_OP_MUL_MAT'); // i18n-ignore: tensor shapes
     for (const [job, buf, width, heads] of [['rope-q', 'q', qw(c), c.heads], ['rope-k', 'k', kv(c), c.kvHeads]] as const)
       add({
         layer: l, job, kind: 'rope', fn: 'launchRope', lab: 'lab X3.1', milestone: 'M10', exists: false,
-        inputs: `${buf} [${width}] as ${heads} heads, cos and sin row ${pos}`, outputs: `${buf} rotated in place`,
+        inputs: tr(`${buf} [${width}] as ${heads} heads, cos and sin row ${pos}`, `${buf} [${width}] thành ${heads} head, hàng ${pos} của cos và sin`),
+        outputs: tr(`${buf} rotated in place`, `${buf} được xoay tại chỗ`),
         weightBytes: 0, actBytes: 2 * width * F, cacheBytes: 0, tableBytes: c.head * F, flops: 0,
-        project: 'GGML_OP_ROPE: rope_norm or rope_neox (rope.cu), kernel_rope_norm (rope.metal)',
+        project: 'GGML_OP_ROPE: rope_norm or rope_neox (rope.cu), kernel_rope_norm (rope.metal)', // i18n-ignore: op and kernel names
       });
     add({
       layer: l, job: 'append', kind: 'cache', fn: 'launchKvAppend', lab: 'lab 20.4', milestone: 'M7', exists: true,
-      inputs: `k [${kv(c)}], v [${kv(c)}]`, outputs: `K, V cache row ${pos}`,
+      inputs: `k [${kv(c)}], v [${kv(c)}]`, outputs: tr(`K, V cache row ${pos}`, `hàng ${pos} của cache K, V`),
       weightBytes: 0, actBytes: 2 * kv(c) * F, cacheBytes: 2 * kv(c) * F, tableBytes: 0, flops: 0,
-      project: 'the cache write in llama.cpp’s graph (ch20 D3)',
+      project: tr('the cache write in llama.cpp’s graph (ch20 D3)', 'phép ghi cache trong đồ thị của llama.cpp (ch20 D3)'),
     });
     add({
       layer: l, job: 'attention', kind: 'attention', fn: c.heads === c.kvHeads ? 'launchDecodeAttention' : 'launchDecodeAttentionGrouped',
       lab: c.heads === c.kvHeads ? 'lab 20.4' : 'lab 20.5', milestone: 'M7', exists: true,
-      inputs: `q [${qw(c)}], ${pos + 1} cached rows of K and V [${kv(c)}] each`, outputs: `o [${qw(c)}]`,
+      inputs: tr(`q [${qw(c)}], ${pos + 1} cached rows of K and V [${kv(c)}] each`, `q [${qw(c)}], ${pos + 1} hàng K và V trong cache, mỗi hàng [${kv(c)}]`),
+      outputs: `o [${qw(c)}]`,
       weightBytes: 0, actBytes: 2 * qw(c) * F, cacheBytes: 2 * (pos + 1) * kv(c) * F, tableBytes: 0, flops: 4 * (pos + 1) * qw(c),
-      project: 'GGML_OP_FLASH_ATTN_EXT: fattn-vec.cuh, Metal flash attention (ch20 D1, D2)',
+      project: 'GGML_OP_FLASH_ATTN_EXT: fattn-vec.cuh, Metal flash attention (ch20 D1, D2)', // i18n-ignore: op and file names, citation
     });
-    linear(l, 'wo', qw(c), c.d, `o [${qw(c)}], Wo [${c.d} × ${qw(c)}]`, `t [${c.d}]`, 'GGML_OP_MUL_MAT');
+    linear(l, 'wo', qw(c), c.d, `o [${qw(c)}], Wo [${c.d} × ${qw(c)}]`, `t [${c.d}]`, 'GGML_OP_MUL_MAT'); // i18n-ignore: tensor shapes
     add({
       layer: l, job: 'residual', kind: 'elementwise', fn: 'launchAddResidual', lab: 'lab 2.3', milestone: 'M0', exists: true,
       inputs: `x [${c.d}], t [${c.d}]`, outputs: 'x += t', weightBytes: 0, actBytes: 3 * c.d * F, cacheBytes: 0, tableBytes: 0, flops: 0,
-      project: 'GGML_OP_ADD: k_bin_bcast (binbcast.cu), often fused (ch03 D1, x3 A1)',
+      project: tr('GGML_OP_ADD: k_bin_bcast (binbcast.cu), often fused (ch03 D1, x3 A1)', 'GGML_OP_ADD: k_bin_bcast (binbcast.cu), thường được gộp (ch03 D1, x3 A1)'),
     });
-    rms(l, 'rmsnorm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`);
-    linear(l, 'w1', c.d, c.hidden, `xb [${c.d}], W1 [${c.hidden} × ${c.d}]`, `h1 [${c.hidden}]`, 'GGML_OP_MUL_MAT');
-    linear(l, 'w3', c.d, c.hidden, `xb [${c.d}], W3 [${c.hidden} × ${c.d}]`, `h3 [${c.hidden}]`, 'GGML_OP_MUL_MAT');
+    rms(l, 'rmsnorm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`); // i18n-ignore: tensor shapes
+    linear(l, 'w1', c.d, c.hidden, `xb [${c.d}], W1 [${c.hidden} × ${c.d}]`, `h1 [${c.hidden}]`, 'GGML_OP_MUL_MAT'); // i18n-ignore: tensor shapes
+    linear(l, 'w3', c.d, c.hidden, `xb [${c.d}], W3 [${c.hidden} × ${c.d}]`, `h3 [${c.hidden}]`, 'GGML_OP_MUL_MAT'); // i18n-ignore: tensor shapes
     add({
       layer: l, job: 'swiglu', kind: 'elementwise', fn: 'launchSwiGLU', lab: 'lab X3.1', milestone: 'M10', exists: false,
       inputs: `h1 [${c.hidden}], h3 [${c.hidden}]`, outputs: `h = silu(h1) · h3 [${c.hidden}]`,
       weightBytes: 0, actBytes: 3 * c.hidden * F, cacheBytes: 0, tableBytes: 0, flops: 0,
-      project: 'GGML_GLU_OP_SWIGLU: unary_gated_op_kernel (unary.cu), kernel_swiglu (Metal)',
+      project: 'GGML_GLU_OP_SWIGLU: unary_gated_op_kernel (unary.cu), kernel_swiglu (Metal)', // i18n-ignore: op and kernel names
     });
     linear(l, 'w2', c.hidden, c.d, `h [${c.hidden}], W2 [${c.d} × ${c.hidden}]`, `t [${c.d}]`, 'GGML_OP_MUL_MAT');
     add({
@@ -145,26 +150,29 @@ export function stepLaunches(c: Config, pos: number, sampler: 'greedy' | 'sample
       project: 'GGML_OP_ADD',
     });
   }
-  rms(null, 'final-norm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`);
-  linear(-1, 'lm-head', c.d, c.vocab, `xb [${c.d}], E [${c.vocab} × ${c.d}] (tied)`, `logits [${c.vocab}]`, 'GGML_OP_MUL_MAT on the output weight');
+  rms(null, 'final-norm', `x [${c.d}], w [${c.d}]`, `xb [${c.d}]`); // i18n-ignore: tensor shapes
+  linear(-1, 'lm-head', c.d, c.vocab, tr(`xb [${c.d}], E [${c.vocab} × ${c.d}] (tied)`, `xb [${c.d}], E [${c.vocab} × ${c.d}] (dùng chung với embedding)`),
+    `logits [${c.vocab}]`, // i18n-ignore: tensor shape
+    tr('GGML_OP_MUL_MAT on the output weight', 'GGML_OP_MUL_MAT trên trọng số đầu ra'));
   out[out.length - 1].layer = null;
   if (sampler === 'greedy')
     add({
       layer: null, job: 'argmax', kind: 'select', fn: 'launchArgmaxRows', lab: 'lab 10.3', milestone: 'M4', exists: true,
-      inputs: `logits [${c.vocab}]`, outputs: 'next token id, written in place', weightBytes: 0, actBytes: (c.vocab + 1) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
-      project: 'argmax_f32 (argmax.cu), kernel_argmax_f32 (Metal), or the host greedy sampler',
+      inputs: `logits [${c.vocab}]`, // i18n-ignore: tensor shape
+      outputs: tr('next token id, written in place', 'id token tiếp theo, ghi tại chỗ'), weightBytes: 0, actBytes: (c.vocab + 1) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
+      project: tr('argmax_f32 (argmax.cu), kernel_argmax_f32 (Metal), or the host greedy sampler', 'argmax_f32 (argmax.cu), kernel_argmax_f32 (Metal), hoặc bộ lấy mẫu greedy trên host'),
     });
   else
     add({
       layer: null, job: 'sample', kind: 'select', fn: 'launchSampleRows', lab: 'lab X1.3', milestone: 'M5', exists: true,
-      inputs: `logits [${c.vocab}], counts, seed`, outputs: 'next token id', weightBytes: 0, actBytes: (c.vocab + 1) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
-      project: 'src/llama-sampler.cpp on the host by default (x1 D1)',
+      inputs: tr(`logits [${c.vocab}], counts, seed`, `logits [${c.vocab}], số đếm, seed`), outputs: tr('next token id', 'id token tiếp theo'), weightBytes: 0, actBytes: (c.vocab + 1) * F, cacheBytes: 0, tableBytes: 0, flops: 0,
+      project: tr('src/llama-sampler.cpp on the host by default (x1 D1)', 'src/llama-sampler.cpp, mặc định chạy trên host (x1 D1)'),
     });
   add({
     layer: null, job: 'advance', kind: 'select', fn: 'launchAdvancePositions', lab: 'lab X3.2 (yours)', milestone: 'M10', exists: false,
-    inputs: 'tokens, pos, the prompt', outputs: `out[${pos}], the next input token, pos and len + 1`,
+    inputs: tr('tokens, pos, the prompt', 'tokens, pos và prompt'), outputs: tr(`out[${pos}], the next input token, pos and len + 1`, `out[${pos}], token đầu vào tiếp theo, pos và len + 1`),
     weightBytes: 0, actBytes: 0, cacheBytes: 0, tableBytes: 0, flops: 0,
-    project: 'no counterpart read in the facts pass',
+    project: tr('no counterpart read in the facts pass', 'chưa đọc phần tương ứng nào trong lượt kiểm tra dữ kiện'),
   });
   return out;
 }
@@ -214,7 +222,14 @@ export const SYNTHETIC: Config = { d: 512, hidden: 1376, layers: 4, heads: 4, kv
 
 /** Short job names for drawing. */
 export const JOB_LABEL: Record<Job, string> = {
-  embed: 'embed', rmsnorm: 'RMSNorm', q: 'q = Wq x', k: 'k = Wk x', v: 'v = Wv x', 'rope-q': 'RoPE on q', 'rope-k': 'RoPE on k', append: 'KV append',
-  attention: 'attention', wo: 'Wo', residual: 'residual add', w1: 'W1', w3: 'W3', swiglu: 'SwiGLU', w2: 'W2',
-  'final-norm': 'final RMSNorm', 'lm-head': 'LM head', argmax: 'argmax', sample: 'sample', advance: 'advance',
+  embed: 'embed', rmsnorm: 'RMSNorm', q: 'q = Wq x', k: 'k = Wk x', v: 'v = Wv x',
+  get 'rope-q'() { return tr('RoPE on q', 'RoPE trên q'); },
+  get 'rope-k'() { return tr('RoPE on k', 'RoPE trên k'); },
+  get append() { return tr('KV append', 'nối thêm KV'); },
+  attention: 'attention', wo: 'Wo',
+  get residual() { return tr('residual add', 'cộng residual'); },
+  w1: 'W1', w3: 'W3', swiglu: 'SwiGLU', w2: 'W2',
+  get 'final-norm'() { return tr('final RMSNorm', 'RMSNorm cuối'); },
+  get 'lm-head'() { return tr('LM head', 'LM head'); },
+  argmax: 'argmax', sample: 'sample', advance: 'advance',
 };

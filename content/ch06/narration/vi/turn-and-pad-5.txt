@@ -1,0 +1,1 @@
+Cái giá nhỏ nhưng có thật. Một cột 32 số float không chứa gì, tức là 128 byte mỗi ô. Và tìm một hàng giờ tốn một phép dịch và một phép cộng, thay vì chỉ một phép dịch. Sách in phép dịch đó theo chiều sai. Nhân với 32 là dịch trái 5 bit.

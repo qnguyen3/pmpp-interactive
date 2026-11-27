@@ -37,6 +37,7 @@
 
 import { loopBatch, shuffledTrips, type LoopBatch } from './divergence';
 import { warpAccess } from './coalesce';
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- row-length generators
 export type Shape = 'uniform' | 'spread' | 'long' | 'power' | 'fig1713';
@@ -144,39 +145,63 @@ export interface Preset {
 export const PRESETS: readonly Preset[] = [
   {
     id: 'book',
-    label: "The book's 1000 × 1000",
+    get label() {
+      return tr("The book's 1000 × 1000", 'Ví dụ 1000 × 1000 của sách');
+    },
     params: { shape: 'long', rows: 1000, mean: 10, longCount: 1, longLen: 200 },
-    note: "The book's worked example (pp. 412–413): 1% non-zero, one row of 200. The others are 9 or 10, so that the total stays 1%; the book's \"fewer than 10\" cannot hold together with 1%.",
+    get note() {
+      return tr("The book's worked example (pp. 412–413): 1% non-zero, one row of 200. The others are 9 or 10, so that the total stays 1%; the book's \"fewer than 10\" cannot hold together with 1%.", 'Ví dụ mẫu của sách (pp. 412–413): 1% khác 0, một hàng dài 200. Các hàng khác dài 9 hoặc 10, để tổng vẫn là 1%; cụm "fewer than 10" (ít hơn 10) của sách không thể khớp với 1%.');
+    },
   },
   {
     id: 'fig1713',
-    label: 'Fig. 17.13',
+    get label() {
+      return tr('Fig. 17.13', 'Hình 17.13');
+    },
     params: { shape: 'fig1713', rows: 8, mean: 2, longCount: 0, longLen: 0 },
-    note: "The eight rows of Fig. 17.13 (p. 415): lengths 1, 5, 2, 2, 1, 2, 4, 1, 18 non-zeros.",
+    get note() {
+      return tr("The eight rows of Fig. 17.13 (p. 415): lengths 1, 5, 2, 2, 1, 2, 4, 1, 18 non-zeros.", 'Tám hàng của Hình 17.13 (p. 415): độ dài 1, 5, 2, 2, 1, 2, 4, 1, 18 phần tử khác 0.');
+    },
   },
   {
     id: 'uniform',
-    label: 'Uniform, 16 per row',
+    get label() {
+      return tr('Uniform, 16 per row', 'Đều, 16 mỗi hàng');
+    },
     params: { shape: 'uniform', rows: 1024, mean: 16, longCount: 0, longLen: 0 },
-    note: 'Every row has the same length: the case ELL was made for.',
+    get note() {
+      return tr('Every row has the same length: the case ELL was made for.', 'Mọi hàng có cùng độ dài: trường hợp mà ELL được tạo ra để xử lý.');
+    },
   },
   {
     id: 'spread',
-    label: 'Spread, 1 to 31',
+    get label() {
+      return tr('Spread, 1 to 31', 'Trải, 1 đến 31');
+    },
     params: { shape: 'spread', rows: 1024, mean: 16, longCount: 0, longLen: 0 },
-    note: 'Lengths spread evenly from 1 to 31, in a shuffled order.',
+    get note() {
+      return tr('Lengths spread evenly from 1 to 31, in a shuffled order.', 'Độ dài trải đều từ 1 đến 31, theo thứ tự xáo trộn.');
+    },
   },
   {
     id: 'skewed',
-    label: 'Skewed: 1 row in 512 is 16× longer',
+    get label() {
+      return tr('Skewed: 1 row in 512 is 16× longer', 'Lệch: cứ 512 hàng có 1 hàng dài gấp 16 lần');
+    },
     params: { shape: 'long', rows: 4096, mean: 16, longCount: 8, longLen: 256 },
-    note: 'Eight rows of 256 in 4096; the others share the rest of 16 per row on average.',
+    get note() {
+      return tr('Eight rows of 256 in 4096; the others share the rest of 16 per row on average.', 'Tám hàng dài 256 trong 4096 hàng; các hàng còn lại chia phần còn lại để trung bình là 16 mỗi hàng.');
+    },
   },
   {
     id: 'power',
-    label: 'Power law (ours)',
+    get label() {
+      return tr('Power law (ours)', 'Luật lũy thừa (của khóa học này)');
+    },
     params: { shape: 'power', rows: 4096, mean: 16, longCount: 0, longLen: 0 },
-    note: 'Ours, not the book\'s: a Pareto shape with exponent 1.5, a few very long rows and many short ones.',
+    get note() {
+      return tr('Ours, not the book\'s: a Pareto shape with exponent 1.5, a few very long rows and many short ones.', 'Của khóa học này, không phải của sách: dạng Pareto với số mũ 1.5, vài hàng rất dài và nhiều hàng ngắn.');
+    },
   },
 ];
 export const preset = (id: Preset['id']): Preset => PRESETS.find((p) => p.id === id)!;

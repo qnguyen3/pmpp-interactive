@@ -1,0 +1,1 @@
+Giờ thêm một cột không dùng. Mỗi hàng dài 33 word, nên đi xuống một hàng cũng dịch sang phải một bank. Lane 0 rơi vào bank 0, lane 1 vào bank 1, và cứ thế qua cả 32 bank. Hàng đợi biến mất, và cả lần ghi chỉ mất một lượt.

@@ -1,0 +1,1 @@
+Mỗi lane vẫn cần chỗ riêng của mình trong dải. Nó che đi chính nó và mọi lane phía trên nó, rồi đếm các lane đạt còn lại. Kết quả là các thứ hạng 0, 1, 2 và 3. Các khóa nằm cạnh nhau ở các vị trí 40 đến 43, theo thứ tự lane, sau một phép toán nguyên tử thay vì bốn.

@@ -1,0 +1,1 @@
+Giờ hãy lưu cùng các trọng số đó dưới dạng Q4 zero. Mỗi trọng số là một mã 4 bit, và mỗi khối 32 trọng số dùng chung một hệ số tỉ lệ 2 byte. Tức là 4 bit rưỡi cho mỗi trọng số, nên dòng dữ liệu chỉ dài khoảng một phần bảy. Các activation và đầu ra đi kèm như những lát mỏng. Chúng gần như không làm thay đổi tổng.

@@ -1,0 +1,1 @@
+Cuối cùng, thu nhỏ ô thành một hàng duy nhất, như khi một mô hình decode từng token một. Toàn bộ dải B vẫn được nạp, chỉ cho một hàng đầu ra. Tỉ lệ giảm xuống dưới một nửa, và làm ô rộng hơn cũng không thể nâng nó lên. Giới hạn đó là phép suy dẫn của khóa học này, không phải của sách.

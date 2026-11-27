@@ -1,0 +1,1 @@
+Hãy đếm số bước. Warp này tốn 8 bước, trong khi một warp đồng nhất chỉ cần 5. Giờ kéo ngưỡng từ 24 lên 32. Chỗ chia chạm tới mép của warp, và lượt chạy thứ hai biến mất. [short pause] Chi phí đến từ số đường đi bên trong một warp. Một chỗ chia rơi vào giữa các warp thì không tốn gì.

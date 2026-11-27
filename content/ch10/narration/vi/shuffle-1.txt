@@ -1,0 +1,1 @@
+Đây là 32 lane của một warp. Mỗi lane giữ một số trong một thanh ghi, và không dùng đến bộ nhớ chia sẻ. Giờ mỗi lane xin giá trị do lane cao hơn nó 16 vị trí giữ. Các lane 0 đến 15 nhận giá trị của các lane 16 đến 31. 16 lane trên cùng không có gì phía trên, nên mỗi lane giữ giá trị của chính nó.

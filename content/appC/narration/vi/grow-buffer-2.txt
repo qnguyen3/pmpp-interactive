@@ -1,0 +1,1 @@
+Tiếp tục sinh token và chuyện đó lại xảy ra. Ở token 9, bạn chép 8. Ở token 17, bạn chép 16. Mỗi lần sao chép lớn hơn lần trước, và mỗi lần di chuyển cho buffer một địa chỉ gốc mới, nên mọi thứ đang giữ con trỏ cũ đều phải được báo lại. Đến token 32, bạn đã chép tổng cộng 28 token.

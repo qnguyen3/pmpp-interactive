@@ -1,0 +1,1 @@
+Giờ mỗi expert nhân một lát activation liên tiếp với trọng số của riêng nó. Ở đây mỗi lát được đệm lên thành một ô trọn vẹn gồm 4, để mọi luồng có thể ghi mà không cần kiểm tra hàng của mình có tồn tại hay không. llama.cpp đệm danh sách id của nó vì cùng lý do đó, và kernel Metal của nó đệm mỗi lát thêm 1 phần tử.

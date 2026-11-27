@@ -1,0 +1,1 @@
+Một lời cảnh báo. Trong số học chính xác, c luôn bằng không, nên một trình biên dịch được phép sắp xếp lại các phép cộng có thể xóa nó đi, chỉ để lại tổng thông thường. Trên CUDA, hãy viết các phép cộng bằng các hàm intrinsic làm tròn đến gần nhất. Trên HIP, hãy tắt fast math. Trên Metal, hãy đặt pragma chế độ toán an toàn trong kernel. Lab A1 kiểm tra thiết bị của bạn.

@@ -24,6 +24,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export const SIGN = 0x80000000;
 const view = new DataView(new ArrayBuffer(4));
 
@@ -54,9 +56,15 @@ export const keyDesc = (u: number) => ~keyAsc(u) >>> 0;
 
 export type Transform = 'none' | 'sign' | 'full';
 export const TRANSFORM_LABEL: Record<Transform, string> = {
-  none: 'none: raw bits',
-  sign: 'flip the sign bit only',
-  full: 'full: set the sign bit, or invert a negative',
+  get none() {
+    return tr('none: raw bits', 'không: bit thô');
+  },
+  get sign() {
+    return tr('flip the sign bit only', 'chỉ lật bit dấu');
+  },
+  get full() {
+    return tr('full: set the sign bit, or invert a negative', 'đầy đủ: đặt bit dấu, hoặc đảo mọi bit của số âm');
+  },
 };
 export const transform = (u: number, t: Transform) => (t === 'none' ? u >>> 0 : t === 'sign' ? signFlip(u) : twiddle(u));
 
@@ -83,8 +91,8 @@ export function stableDescByValue(xs: Item[]): Item[] {
 }
 
 /** The reference order this course uses for a descending sort (E1, A3). */
-export function referenceDesc(xs: Item[]): { order: Item[]; rule: 'stable_sort with >' | "CUB's bits rule" } {
-  if (xs.some((x) => isNaNBits(x.bits))) return { order: stableBy(xs, (x) => keyDesc(x.bits)), rule: "CUB's bits rule" };
+export function referenceDesc(xs: Item[]): { order: Item[]; rule: 'stable_sort with >' | "CUB's bits rule" } { // i18n-ignore: rule ids the chapter compares and words itself
+  if (xs.some((x) => isNaNBits(x.bits))) return { order: stableBy(xs, (x) => keyDesc(x.bits)), rule: "CUB's bits rule" }; // i18n-ignore: rule id the chapter compares
   return { order: stableDescByValue(xs), rule: 'stable_sort with >' };
 }
 
@@ -149,16 +157,26 @@ export const NEG_QNAN = 0xffc00000;
 
 /** E1's ten values, in the table's order, with the transform's expected results. */
 export const E1: { label: string; bits: number; key: number; canon: number; desc: number }[] = [
-  { label: '−inf', bits: 0xff800000, key: 0x007fffff, canon: 0x007fffff, desc: 0xff800000 },
+  { label: '−inf', bits: 0xff800000, key: 0x007fffff, canon: 0x007fffff, desc: 0xff800000 }, // i18n-ignore: a float value, written as a value
   { label: '−FLT_MAX', bits: 0xff7fffff, key: 0x00800000, canon: 0x00800000, desc: 0xff7fffff },
   { label: '−1.0', bits: 0xbf800000, key: 0x407fffff, canon: 0x407fffff, desc: 0xbf800000 },
-  { label: 'smallest negative subnormal', bits: 0x80000001, key: 0x7ffffffe, canon: 0x7ffffffe, desc: 0x80000001 },
+  {
+    get label() {
+      return tr('smallest negative subnormal', 'số subnormal âm nhỏ nhất');
+    },
+    bits: 0x80000001, key: 0x7ffffffe, canon: 0x7ffffffe, desc: 0x80000001,
+  },
   { label: '−0.0', bits: 0x80000000, key: 0x7fffffff, canon: 0x80000000, desc: 0x7fffffff },
   { label: '+0.0', bits: 0x00000000, key: 0x80000000, canon: 0x80000000, desc: 0x7fffffff },
-  { label: 'smallest positive subnormal', bits: 0x00000001, key: 0x80000001, canon: 0x80000001, desc: 0x7ffffffe },
+  {
+    get label() {
+      return tr('smallest positive subnormal', 'số subnormal dương nhỏ nhất');
+    },
+    bits: 0x00000001, key: 0x80000001, canon: 0x80000001, desc: 0x7ffffffe,
+  },
   { label: '1.0', bits: 0x3f800000, key: 0xbf800000, canon: 0xbf800000, desc: 0x407fffff },
   { label: 'FLT_MAX', bits: 0x7f7fffff, key: 0xff7fffff, canon: 0xff7fffff, desc: 0x00800000 },
-  { label: '+inf', bits: 0x7f800000, key: 0xff800000, canon: 0xff800000, desc: 0x007fffff },
+  { label: '+inf', bits: 0x7f800000, key: 0xff800000, canon: 0xff800000, desc: 0x007fffff }, // i18n-ignore: a float value, written as a value
 ];
 
 export interface Preset {
@@ -171,20 +189,28 @@ export interface Preset {
 export const PRESETS: Preset[] = [
   {
     id: 'ties',
-    label: 'logits with ties',
+    get label() {
+      return tr('logits with ties', 'logits có giá trị bằng nhau');
+    },
     // Two tied pairs: tokens 1 and 4, tokens 3 and 7.
     bits: [-0.5, 2.25, -1.75, 1.0, 2.25, -3.0, 0.25, 1.0].map(bitsOf),
   },
   {
     id: 'zeros',
-    label: 'signs and zeros',
+    get label() {
+      return tr('signs and zeros', 'dấu và số không');
+    },
     bits: [-2.0, -1.0, -0, 0, 0.5, 1.0].map(bitsOf),
   },
   {
     id: 'edges',
-    label: 'edges (E1 plus two NaNs)',
+    get label() {
+      return tr('edges (E1 plus two NaNs)', 'các giá trị biên (E1 cộng hai NaN)');
+    },
     bits: [...E1.map((e) => e.bits), POS_QNAN, NEG_QNAN],
-    labels: [...E1.map((e) => e.label), '+NaN', '−NaN'],
+    get labels() {
+      return [...E1.map((e) => e.label), '+NaN', '−NaN'];
+    },
   },
 ];
 

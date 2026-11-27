@@ -1,0 +1,1 @@
+Thiết bị của bạn gãy ở một chỗ khác, nên hãy đo nó: bài thực hành batching đo thời gian bước này bằng chính các kernel của bạn. Một lời cảnh báo. Một kernel có ô cao 128 hàng sẽ tính 128 hàng bất kể batch là bao nhiêu, nên đường của nó đi ngang tới 128 vì một lý do không liên quan đến băng thông. Một ô 16 hàng tạo ra các bậc cách nhau 16 hàng.

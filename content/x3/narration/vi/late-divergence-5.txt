@@ -1,0 +1,1 @@
+Khi dùng teacher forcing, cả hai lần chạy đều được đưa token tham chiếu vào ở mọi bước. Giờ chỉ có bước mười chín khác, và khoảng cách giữa hai logit đầu của nó nhỏ hơn hai lần sai số logit, nên nó được đánh dấu là quá sát để phán xét. M10 chạy cả hai phép kiểm tra: logits nằm trong một dung sai đã nêu, và greedy khớp nhau ở mọi chỗ khoảng cách đó đủ lớn.

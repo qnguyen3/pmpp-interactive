@@ -1,0 +1,1 @@
+Mỗi bước bắt đầu bằng một mặt phẳng mới. Mọi luồng nạp điểm của mình ở mặt phẳng 2 vào buffer kế tiếp. Rồi khối chờ ở một rào chắn: mỗi luồng sắp đọc điểm của các luồng láng giềng. Giờ 16 luồng bên trong, mỗi luồng kết hợp năm giá trị từ mặt phẳng hiện tại và một giá trị từ mỗi phía, và mặt phẳng đầu ra 1 đã xong.

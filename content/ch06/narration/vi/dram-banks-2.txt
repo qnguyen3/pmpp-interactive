@@ -1,0 +1,1 @@
+Ở đây thời gian chờ dài gấp 20 lần một loạt truyền. Vậy cứ mỗi 21 khe thời gian, bus chỉ bận 1 khe. Tức là khoảng 4.8 phần trăm. [short pause] Một kênh có bus chuyển được 16 gigabyte mỗi giây chỉ giao được khoảng 0.76 gigabyte.

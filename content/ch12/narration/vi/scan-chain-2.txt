@@ -1,0 +1,1 @@
+Phần cứng khởi động các khối theo một thứ tự không ai chọn. Ở đây nó khởi động khối chỉ số 2, rồi khối chỉ số 1, và mỗi lúc chỉ vừa 2 khối. Vì vậy mỗi khối lấy số tiếp theo từ một bộ đếm khi nó bắt đầu. Khối chỉ số 2 trở thành số 0. Một số nhỏ hơn luôn thuộc về một khối đã bắt đầu rồi.

@@ -1,0 +1,1 @@
+Sau lớp cuối cùng, một RMSNorm cuối và LM head tạo ra một logit cho mỗi token trong bộ từ vựng. Head dùng lại bảng embedding làm trọng số của nó. Rồi argmax của lab 10.3 ghi token id tiếp theo tại chỗ, trên thiết bị, sẵn sàng làm đầu vào cho bước kế tiếp.

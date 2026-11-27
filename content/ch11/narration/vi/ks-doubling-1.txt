@@ -1,0 +1,1 @@
+Đây là 8 giá trị từ bài tập 1, mỗi vị trí một giá trị. Lúc này mỗi vị trí chỉ giữ giá trị của chính nó. Mục tiêu của một scan bao gồm là mỗi vị trí cuối cùng giữ tổng của mọi thứ tính đến và bao gồm chính nó. Kogge-Stone đạt được điều đó trong vài bước, với mọi vị trí cùng làm việc một lúc.

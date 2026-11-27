@@ -1,0 +1,1 @@
+Đây là 8 con số, và hai vòng lặp trông gần như giống nhau. Vòng đầu ghi mỗi tổng vào một mảng thứ hai, gọi là y. Vòng thứ hai ghi ngược lại vào chính x. Giờ hãy giao mỗi bước của từng vòng cho một luồng riêng, và đặt một câu hỏi. Thứ tự chạy của các luồng có làm thay đổi kết quả không?

@@ -1,0 +1,1 @@
+Ô hai chứa một điểm số lớn hơn, 2.9. Mọi thứ giữ lại đến giờ đều được đo so với giá trị lớn nhất cũ, nên giờ chúng quá lớn. D và đầu ra đều thu nhỏ theo e mũ giá trị lớn nhất cũ trừ giá trị lớn nhất mới, khoảng 0.27. Rồi các số hạng của ô hai, vốn đã được đo so với giá trị lớn nhất mới, được cộng vào.

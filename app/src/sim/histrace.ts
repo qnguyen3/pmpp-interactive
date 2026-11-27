@@ -18,14 +18,18 @@
 // concurrent plain ++ is a data race and undefined behaviour (notes/today/ch09-facts.md
 // A2, A3); the lost update is the typical outcome, not a promise.
 
+import { tr } from '../lib/locale.ts';
+
 export type Op = 'load' | 'add' | 'store' | 'atomic';
 export const OPS: Op[] = ['load', 'add', 'store'];
 /** The book's wording for each step. */
 export const OP_TEXT: Record<Op, string> = {
-  load: 'Old ← bins[x]',
-  add: 'New ← Old + 1',
-  store: 'bins[x] ← New',
-  atomic: 'atomic: Old ← bins[x]; bins[x] ← Old + 1',
+  load: 'Old ← bins[x]', // i18n-ignore: the book's pseudocode, shown as written
+  add: 'New ← Old + 1', // i18n-ignore: the book's pseudocode, shown as written
+  store: 'bins[x] ← New', // i18n-ignore: the book's pseudocode, shown as written
+  get atomic() {
+    return tr('atomic: Old ← bins[x]; bins[x] ← Old + 1', 'nguyên tử: Old ← bins[x]; bins[x] ← Old + 1');
+  },
 };
 
 export interface Options {
@@ -163,13 +167,43 @@ export interface Preset {
 }
 
 export const PRESETS: Preset[] = [
-  { id: 't1-first', label: 'thread 1 first', book: 'Fig. 9.4(a)', n: 2, schedule: () => [0, 0, 0, 1, 1, 1] },
-  { id: 'overlap-t1', label: 'overlapped, thread 1 ahead', book: 'Fig. 9.4(b)', n: 2, schedule: () => [0, 0, 1, 0, 1, 1] },
-  { id: 't2-first', label: 'thread 2 first', book: 'Fig. 9.5(a)', n: 2, schedule: () => [1, 1, 1, 0, 0, 0] },
-  { id: 'overlap-t2', label: 'overlapped, thread 2 ahead', book: 'Fig. 9.5(b)', n: 2, schedule: () => [1, 1, 0, 1, 0, 0] },
+  {
+    id: 't1-first',
+    get label() {
+      return tr('thread 1 first', 'luồng 1 chạy trước');
+    },
+    book: 'Fig. 9.4(a)', // i18n-ignore: citation
+    n: 2, schedule: () => [0, 0, 0, 1, 1, 1],
+  },
+  {
+    id: 'overlap-t1',
+    get label() {
+      return tr('overlapped, thread 1 ahead', 'xen kẽ, luồng 1 đi trước');
+    },
+    book: 'Fig. 9.4(b)', // i18n-ignore: citation
+    n: 2, schedule: () => [0, 0, 1, 0, 1, 1],
+  },
+  {
+    id: 't2-first',
+    get label() {
+      return tr('thread 2 first', 'luồng 2 chạy trước');
+    },
+    book: 'Fig. 9.5(a)', // i18n-ignore: citation
+    n: 2, schedule: () => [1, 1, 1, 0, 0, 0],
+  },
+  {
+    id: 'overlap-t2',
+    get label() {
+      return tr('overlapped, thread 2 ahead', 'xen kẽ, luồng 2 đi trước');
+    },
+    book: 'Fig. 9.5(b)', // i18n-ignore: citation
+    n: 2, schedule: () => [1, 1, 0, 1, 0, 0],
+  },
   {
     id: 'lockstep',
-    label: 'lockstep warp',
+    get label() {
+      return tr('lockstep warp', 'warp chạy đồng bộ (lockstep)');
+    },
     book: null,
     n: null,
     // Every thread loads, then every thread adds, then every thread stores.

@@ -1,0 +1,1 @@
+Hãy giao cho cả hai thiết kế một chuỗi 16 phép toán. Mỗi bước cần kết quả của bước trước nó. Nên chỉ một đơn vị có thể làm việc, dù có bao nhiêu đơn vị đi nữa. Đơn vị nhanh xong ở thời điểm 4. Đơn vị thường xong ở thời điểm 16, trong khi 63 đơn vị khác ngồi không. Ở đây thiết kế nhanh thắng gấp 4 lần.

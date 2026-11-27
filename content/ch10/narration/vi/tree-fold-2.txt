@@ -1,0 +1,1 @@
+Giờ gộp cùng các giá trị đó theo từng cặp. Ở bước đầu, 4 bộ cộng làm việc cùng lúc và tạo ra 11, 5, 13 và 15. Ở bước thứ hai, 2 bộ cộng tạo ra 16 và 28. Ở bước thứ ba, một bộ cộng duy nhất tạo ra 44. Số bộ cộng đang bận giảm một nửa sau mỗi bước.

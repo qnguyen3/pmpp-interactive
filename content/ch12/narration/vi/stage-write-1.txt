@@ -1,0 +1,1 @@
+Đây là mười sáu khóa của sách, chia cho hai khối, mỗi khối tám luồng. Trong ví dụ đồ chơi này một warp có 4 lane, nên mỗi khối chứa 2 warp. Tám khóa được giữ. Phép scan cho mỗi khóa được giữ độ lệch của nó trong đầu ra: số khóa được giữ đứng trước nó.

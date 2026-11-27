@@ -1,0 +1,1 @@
+Đây là ô đầu ra của một khối: 128 nhân 128 số float, được cắt thành 256 mảng 8 nhân 8, mỗi luồng một mảng. Warp 6 giờ chạy một lệnh ghi. Mỗi lane trong 32 lane của nó ghi một số float, và các lane cạnh nhau cách nhau 32 byte. Lệnh đó chạm vào 32 sector, và chỉ dùng 4 byte của mỗi sector.

@@ -1,0 +1,1 @@
+Giờ hãy lưu N theo từng cột, đó là điều bạn nhận được khi một ma trận được đọc như chính chuyển vị của nó. Cùng những lane đó giờ rơi cách nhau Width phần tử. Với Width bằng 1024, các lane kề nhau cách nhau 4096 byte, nên mỗi lane cần một sector riêng. Đó là 32 giao dịch, và cứ 4 byte warp dùng thì phải nạp 32 byte.

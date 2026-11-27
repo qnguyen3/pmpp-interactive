@@ -1,0 +1,1 @@
+Một vòng lặp cũng có thể phân kỳ. Ở đây mỗi luồng đọc số vòng lặp của riêng nó, từ 4 đến 8. Trong 4 vòng đầu, mọi lane đều làm việc. Rồi các lane lần lượt rời đi, mỗi lần vài lane, cho đến khi chỉ còn những lane dài nhất. Warp chạy lâu bằng lane dài nhất của nó, và các lane khác phải chờ.

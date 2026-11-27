@@ -1,0 +1,1 @@
+Sau vòng mười, các từ của hàng không đúng bằng đáp án công bố của Random123 cho một bộ đếm không và một khóa không. Sự trùng khớp đó là phép kiểm thử mà mọi backend phải vượt qua. Từ không trở thành u của hàng: giữ hai mươi bốn bit cao nhất của nó, rồi co giãn chúng vào khoảng từ không đến một.

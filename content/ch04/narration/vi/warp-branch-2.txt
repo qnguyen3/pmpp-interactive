@@ -1,0 +1,1 @@
+Giờ warp gặp một nhánh rẽ. Mỗi luồng kiểm tra xem chỉ số của nó có nhỏ hơn 24 không. 24 lane đầu trả lời có, và muốn đi đường A. 8 lane cuối trả lời không, và muốn đi đường B. Giờ các luồng muốn những lệnh khác nhau, mà phần cứng chỉ có một dòng lệnh để đưa cho chúng.

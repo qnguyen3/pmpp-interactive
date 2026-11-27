@@ -1,0 +1,1 @@
+Tiếp theo, trình điều khiển lấy trang khỏi chủ sở hữu của nó. Ánh xạ của CPU cho trang đó bị gỡ bỏ. Trong một khoảnh khắc, không bộ xử lý nào dùng được trang, nên không ai có thể thay đổi nó khi nó đang di chuyển. Đó là cách việc di chuyển trang giữ cho hai bên nhất quán: mỗi lúc chỉ một chủ sở hữu.

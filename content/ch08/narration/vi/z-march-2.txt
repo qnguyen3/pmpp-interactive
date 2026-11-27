@@ -1,0 +1,1 @@
+Vậy hãy làm phẳng khối. Giữ một luồng cho mỗi điểm của một mặt phẳng duy nhất, 36 luồng, và để khối đi dần theo trục z. 16 luồng bên trong tính toán. Vòng ngoài quanh chúng chỉ nạp dữ liệu. Trước khi bắt đầu đi, mỗi luồng nạp điểm của mình ở mặt phẳng 0 vào buffer trước, và ở mặt phẳng 1 vào buffer hiện tại.

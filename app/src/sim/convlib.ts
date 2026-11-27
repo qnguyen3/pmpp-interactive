@@ -23,6 +23,8 @@
 // conditions only, as read on one day. Data types, hardware checks and every condition
 // the facts file does not record are left out, and the results say "not modelled".
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- the layer
 
 /** A layer in the chapter's names, plus the library-only parameters. */
@@ -245,23 +247,157 @@ export interface NameRow {
 }
 
 export const NAMES: NameRow[] = [
-  { cudnn: 'N', meaning: 'images in the batch', chapter: 'N', from: 'Table 19.1' },
-  { cudnn: 'C', meaning: 'input feature maps', chapter: 'C', from: 'Table 19.1' },
-  { cudnn: 'H', meaning: 'input height', chapter: 'H', from: 'Table 19.1' },
-  { cudnn: 'W', meaning: 'input width', chapter: 'W', from: 'Table 19.1' },
-  { cudnn: 'K', meaning: 'output feature maps', chapter: 'M', from: 'Table 19.1' },
-  { cudnn: 'R', meaning: 'filter height', chapter: 'K', from: 'Table 19.1' },
-  { cudnn: 'S', meaning: 'filter width', chapter: 'K', from: 'Table 19.1' },
-  { cudnn: 'u', meaning: 'vertical stride', chapter: null, none: 'the chapter always steps by 1', from: 'Table 19.1' },
-  { cudnn: 'v', meaning: 'horizontal stride', chapter: null, none: 'the chapter always steps by 1', from: 'Table 19.1' },
-  { cudnn: 'pad_h', meaning: 'zero rows added at the top and at the bottom', chapter: null, none: 'the chapter adds no zeros', from: 'Table 19.1' },
-  { cudnn: 'pad_w', meaning: 'zero columns added at the left and at the right', chapter: null, none: 'the chapter adds no zeros', from: 'Table 19.1' },
-  { cudnn: 'dilation', meaning: 'spacing between filter taps', chapter: null, none: 'the chapter\'s taps are adjacent', from: 'cuDNN docs (A2)' },
-  { cudnn: 'P', meaning: 'output height', chapter: 'H_out', from: 'p. 472–473' },
-  { cudnn: 'Q', meaning: 'output width', chapter: 'W_out', from: 'p. 472–473' },
-  { cudnn: 'D', meaning: 'the input tensor, N × C × H × W', chapter: 'X', from: 'p. 472–473' },
-  { cudnn: 'F', meaning: 'the filter tensor, K × C × R × S', chapter: 'F', from: 'p. 472–473' },
-  { cudnn: 'O', meaning: 'the output tensor, N × K × P × Q', chapter: 'Y', from: 'p. 472–473' },
+  {
+    cudnn: 'N',
+    get meaning() {
+      return tr('images in the batch', 'số ảnh trong batch');
+    },
+    chapter: 'N',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'C',
+    get meaning() {
+      return tr('input feature maps', 'feature map đầu vào');
+    },
+    chapter: 'C',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'H',
+    get meaning() {
+      return tr('input height', 'chiều cao đầu vào');
+    },
+    chapter: 'H',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'W',
+    get meaning() {
+      return tr('input width', 'chiều rộng đầu vào');
+    },
+    chapter: 'W',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'K',
+    get meaning() {
+      return tr('output feature maps', 'feature map đầu ra');
+    },
+    chapter: 'M',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'R',
+    get meaning() {
+      return tr('filter height', 'chiều cao bộ lọc');
+    },
+    chapter: 'K',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'S',
+    get meaning() {
+      return tr('filter width', 'chiều rộng bộ lọc');
+    },
+    chapter: 'K',
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'u',
+    get meaning() {
+      return tr('vertical stride', 'bước nhảy dọc');
+    },
+    chapter: null,
+    get none() {
+      return tr('the chapter always steps by 1', 'chương này luôn dùng bước nhảy 1');
+    },
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'v',
+    get meaning() {
+      return tr('horizontal stride', 'bước nhảy ngang');
+    },
+    chapter: null,
+    get none() {
+      return tr('the chapter always steps by 1', 'chương này luôn dùng bước nhảy 1');
+    },
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'pad_h',
+    get meaning() {
+      return tr('zero rows added at the top and at the bottom', 'các hàng số 0 thêm vào ở trên và ở dưới');
+    },
+    chapter: null,
+    get none() {
+      return tr('the chapter adds no zeros', 'chương này không thêm số 0 nào');
+    },
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'pad_w',
+    get meaning() {
+      return tr('zero columns added at the left and at the right', 'các cột số 0 thêm vào bên trái và bên phải');
+    },
+    chapter: null,
+    get none() {
+      return tr('the chapter adds no zeros', 'chương này không thêm số 0 nào');
+    },
+    from: 'Table 19.1', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'dilation',
+    get meaning() {
+      return tr('spacing between filter taps', 'khoảng cách giữa các điểm (tap) của bộ lọc');
+    },
+    chapter: null,
+    get none() {
+      return tr('the chapter\'s taps are adjacent', 'các tap của chương này nằm liền kề nhau');
+    },
+    from: 'cuDNN docs (A2)', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'P',
+    get meaning() {
+      return tr('output height', 'chiều cao đầu ra');
+    },
+    chapter: 'H_out',
+    from: 'p. 472–473', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'Q',
+    get meaning() {
+      return tr('output width', 'chiều rộng đầu ra');
+    },
+    chapter: 'W_out',
+    from: 'p. 472–473', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'D',
+    get meaning() {
+      return tr('the input tensor, N × C × H × W', 'tensor đầu vào, N × C × H × W');
+    },
+    chapter: 'X',
+    from: 'p. 472–473', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'F',
+    get meaning() {
+      return tr('the filter tensor, K × C × R × S', 'tensor bộ lọc, K × C × R × S');
+    },
+    chapter: 'F',
+    from: 'p. 472–473', // i18n-ignore: source identifier compared with === in S194
+  },
+  {
+    cudnn: 'O',
+    get meaning() {
+      return tr('the output tensor, N × K × P × Q', 'tensor đầu ra, N × K × P × Q');
+    },
+    chapter: 'Y',
+    from: 'p. 472–473', // i18n-ignore: source identifier compared with === in S194
+  },
 ];
 
 /** The chapter's name for a cuDNN symbol, or null when the chapter has none. */
@@ -299,17 +435,73 @@ export interface Card {
   why: string;
 }
 
-export const NO_COUNTERPART = 'no counterpart';
+export const NO_COUNTERPART = 'no counterpart'; // i18n-ignore: identifier also shown to the reader
 
 export const CARDS: Card[] = [
-  { id: 'M', from: 'chapter', symbol: 'M', options: ['K', 'M', 'R', 'C'], answer: 'K', why: 'cuDNN calls the number of output feature maps K.' },
-  { id: 'K', from: 'chapter', symbol: 'K', options: ['K', 'R and S', 'P and Q', 'u and v'], answer: 'R and S', why: 'The chapter\'s square K × K filter is R rows by S columns in cuDNN.' },
-  { id: 'cK', from: 'cudnn', symbol: 'K', options: ['K', 'M', 'C', 'H_out'], answer: 'M', why: 'cuDNN\'s K counts output feature maps: the chapter\'s M, not its filter side.' },
-  { id: 'R', from: 'cudnn', symbol: 'R', options: ['K', 'M', 'H', 'H_out'], answer: 'K', why: 'R is the filter height, which the chapter calls K.' },
-  { id: 'P', from: 'cudnn', symbol: 'P', options: ['H_out', 'H', 'K', 'M'], answer: 'H_out', why: 'P is the output height, the chapter\'s H_out = H − K + 1 when nothing is padded or strided.' },
-  { id: 'Y', from: 'chapter', symbol: 'Y', options: ['O', 'D', 'F', 'P'], answer: 'O', why: 'The book calls cuDNN\'s output tensor O and its input D.' },
-  { id: 'u', from: 'cudnn', symbol: 'u', options: [NO_COUNTERPART, 'K', 'W', 'M'], answer: NO_COUNTERPART, why: 'u is the vertical stride. The chapter\'s kernels always step by 1, so they have no such parameter.' },
-  { id: 'pad_h', from: 'cudnn', symbol: 'pad_h', options: [NO_COUNTERPART, 'K − 1', 'H − H_out', 'C'], answer: NO_COUNTERPART, why: 'pad_h adds zero rows at the top and the bottom. The chapter adds none: its output shrinks instead.' },
+  {
+    id: 'M', from: 'chapter', symbol: 'M',
+    options: ['K', 'M', 'R', 'C'],
+    answer: 'K',
+    get why() {
+      return tr('cuDNN calls the number of output feature maps K.', 'cuDNN gọi số feature map đầu ra là K.');
+    },
+  },
+  {
+    id: 'K', from: 'chapter', symbol: 'K',
+    options: ['K', 'R and S', 'P and Q', 'u and v'], // i18n-ignore: identifier also shown to the reader
+    answer: 'R and S', // i18n-ignore: identifier also shown to the reader
+    get why() {
+      return tr('The chapter\'s square K × K filter is R rows by S columns in cuDNN.', 'Bộ lọc vuông K × K của chương này là R hàng nhân S cột trong cuDNN.');
+    },
+  },
+  {
+    id: 'cK', from: 'cudnn', symbol: 'K',
+    options: ['K', 'M', 'C', 'H_out'],
+    answer: 'M',
+    get why() {
+      return tr('cuDNN\'s K counts output feature maps: the chapter\'s M, not its filter side.', 'K của cuDNN đếm số feature map đầu ra: đó là M của chương này, không phải cạnh bộ lọc.');
+    },
+  },
+  {
+    id: 'R', from: 'cudnn', symbol: 'R',
+    options: ['K', 'M', 'H', 'H_out'],
+    answer: 'K',
+    get why() {
+      return tr('R is the filter height, which the chapter calls K.', 'R là chiều cao bộ lọc, mà chương này gọi là K.');
+    },
+  },
+  {
+    id: 'P', from: 'cudnn', symbol: 'P',
+    options: ['H_out', 'H', 'K', 'M'],
+    answer: 'H_out',
+    get why() {
+      return tr('P is the output height, the chapter\'s H_out = H − K + 1 when nothing is padded or strided.', 'P là chiều cao đầu ra, tức H_out = H − K + 1 của chương này khi không có đệm và bước nhảy bằng 1.');
+    },
+  },
+  {
+    id: 'Y', from: 'chapter', symbol: 'Y',
+    options: ['O', 'D', 'F', 'P'],
+    answer: 'O',
+    get why() {
+      return tr('The book calls cuDNN\'s output tensor O and its input D.', 'Sách gọi tensor đầu ra của cuDNN là O và tensor đầu vào là D.');
+    },
+  },
+  {
+    id: 'u', from: 'cudnn', symbol: 'u',
+    options: [NO_COUNTERPART, 'K', 'W', 'M'],
+    answer: NO_COUNTERPART,
+    get why() {
+      return tr('u is the vertical stride. The chapter\'s kernels always step by 1, so they have no such parameter.', 'u là bước nhảy dọc. Các kernel của chương này luôn dùng bước nhảy 1, nên chúng không có tham số như vậy.');
+    },
+  },
+  {
+    id: 'pad_h', from: 'cudnn', symbol: 'pad_h',
+    options: [NO_COUNTERPART, 'K − 1', 'H − H_out', 'C'], // i18n-ignore: formulas compared as card options
+    answer: NO_COUNTERPART,
+    get why() {
+      return tr('pad_h adds zero rows at the top and the bottom. The chapter adds none: its output shrinks instead.', 'pad_h thêm các hàng số 0 ở trên và ở dưới. Chương này không thêm hàng nào: thay vào đó, đầu ra của nó co lại.');
+    },
+  },
 ];
 
 /** The answer a card should have, from the translation table. */
@@ -338,55 +530,55 @@ export interface Algo {
 
 export const CUDNN_FWD_ALGOS: Algo[] = [
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM', short: 'implicit GEMM',
-    chapter: '§19.3, Fig. 19.11: B formed tile by tile, never stored', workspace: 'none mentioned',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM', get short() { return tr('implicit GEMM', 'GEMM ngầm (implicit GEMM)'); },
+    get chapter() { return tr('§19.3, Fig. 19.11: B formed tile by tile, never stored', '§19.3, Fig. 19.11: B được tạo từng ô một, không bao giờ được lưu'); }, get workspace() { return tr('none mentioned', 'không được nhắc đến'); },
     hipify: 'miopenConvolutionFwdAlgoImplicitGEMM',
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM', short: 'implicit GEMM, precomputed indices',
-    chapter: 'Fig. 19.11 with the index map precomputed', workspace: 'some, for precomputed indices',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM', get short() { return tr('implicit GEMM, precomputed indices', 'GEMM ngầm, chỉ số tính sẵn'); },
+    get chapter() { return tr('Fig. 19.11 with the index map precomputed', 'Fig. 19.11 với bảng ánh xạ chỉ số được tính sẵn'); }, get workspace() { return tr('some, for precomputed indices', 'có một ít, cho các chỉ số tính sẵn'); },
     hipify: null,
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_GEMM', short: 'explicit GEMM',
-    chapter: '§19.3, explicit unfolding (the cost on p. 467)', workspace: 'significant: holds the unfolded input',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_GEMM', get short() { return tr('explicit GEMM', 'GEMM tường minh (explicit GEMM)'); },
+    get chapter() { return tr('§19.3, explicit unfolding (the cost on p. 467)', '§19.3, mở rộng tường minh (chi phí ở p. 467)'); }, get workspace() { return tr('significant: holds the unfolded input', 'đáng kể: chứa đầu vào đã mở rộng'); },
     hipify: 'miopenConvolutionFwdAlgoGEMM',
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_DIRECT', short: 'direct',
-    chapter: '§19.2, no matrix multiplication', workspace: 'none mentioned',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_DIRECT', get short() { return tr('direct', 'trực tiếp'); },
+    get chapter() { return tr('§19.2, no matrix multiplication', '§19.2, không có phép nhân ma trận'); }, get workspace() { return tr('none mentioned', 'không được nhắc đến'); },
     hipify: 'miopenConvolutionFwdAlgoDirect',
   },
   {
     name: 'CUDNN_CONVOLUTION_FWD_ALGO_FFT', short: 'FFT',
-    chapter: 'not in this chapter', workspace: 'significant: intermediate results',
+    get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('significant: intermediate results', 'đáng kể: kết quả trung gian'); },
     hipify: 'miopenConvolutionFwdAlgoFFT',
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_FFT_TILING', short: 'FFT on tiles',
-    chapter: 'not in this chapter', workspace: 'less than FFT for large images',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_FFT_TILING', get short() { return tr('FFT on tiles', 'FFT trên từng ô'); },
+    get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('less than FFT for large images', 'ít hơn FFT với ảnh lớn'); },
     hipify: null,
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD', short: 'Winograd',
-    chapter: 'not in this chapter', workspace: 'reasonably sized',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD', get short() { return tr('Winograd', 'Winograd'); },
+    get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('reasonably sized', 'kích thước vừa phải'); },
     hipify: 'miopenConvolutionFwdAlgoWinograd',
-    note: 'not supported on Hopper and later GPUs',
+    get note() { return tr('not supported on Hopper and later GPUs', 'không được hỗ trợ trên Hopper và các GPU mới hơn'); },
   },
   {
-    name: 'CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED', short: 'Winograd, not fused',
-    chapter: 'not in this chapter', workspace: 'may be significant: intermediate results',
+    name: 'CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED', get short() { return tr('Winograd, not fused', 'Winograd, không gộp'); },
+    get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('may be significant: intermediate results', 'có thể đáng kể: kết quả trung gian'); },
     hipify: null,
   },
 ];
 
 /** MIOpen 3.6.2's forward algorithms with their enum values (B3). */
 export const MIOPEN_FWD_ALGOS: (Algo & { value: number })[] = [
-  { name: 'miopenConvolutionFwdAlgoGEMM', value: 0, short: 'GEMM', chapter: '§19.3', workspace: 'not checked here' },
-  { name: 'miopenConvolutionFwdAlgoDirect', value: 1, short: 'direct', chapter: '§19.2', workspace: 'not checked here' },
-  { name: 'miopenConvolutionFwdAlgoFFT', value: 2, short: 'FFT', chapter: 'not in this chapter', workspace: 'not checked here' },
-  { name: 'miopenConvolutionFwdAlgoWinograd', value: 3, short: 'Winograd', chapter: 'not in this chapter', workspace: 'not checked here' },
-  { name: 'miopenConvolutionFwdAlgoImplicitGEMM', value: 5, short: 'implicit GEMM', chapter: '§19.3, Fig. 19.11', workspace: 'not checked here' },
+  { name: 'miopenConvolutionFwdAlgoGEMM', value: 0, short: 'GEMM', chapter: '§19.3', get workspace() { return tr('not checked here', 'không kiểm tra ở đây'); } },
+  { name: 'miopenConvolutionFwdAlgoDirect', value: 1, get short() { return tr('direct', 'trực tiếp'); }, chapter: '§19.2', get workspace() { return tr('not checked here', 'không kiểm tra ở đây'); } },
+  { name: 'miopenConvolutionFwdAlgoFFT', value: 2, short: 'FFT', get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('not checked here', 'không kiểm tra ở đây'); } },
+  { name: 'miopenConvolutionFwdAlgoWinograd', value: 3, get short() { return tr('Winograd', 'Winograd'); }, get chapter() { return tr('not in this chapter', 'không có trong chương này'); }, get workspace() { return tr('not checked here', 'không kiểm tra ở đây'); } },
+  { name: 'miopenConvolutionFwdAlgoImplicitGEMM', value: 5, get short() { return tr('implicit GEMM', 'GEMM ngầm (implicit GEMM)'); }, chapter: '§19.3, Fig. 19.11', get workspace() { return tr('not checked here', 'không kiểm tra ở đây'); } },
 ];
 
 /** Apple exposes no algorithm choice in MPSGraph, MPSCNNConvolution or MPP (C3 to C5). */
@@ -436,8 +628,8 @@ export function llamaCuda(l: Layer): LlamaChoice {
     small,
     checks: [
       { label: 'pointwise: K = 1', shown: `K = ${l.K}`, holds: k1 },
-      { label: 'pointwise: stride 1', shown: `stride ${l.stride}`, holds: s1 },
-      { label: 'pointwise: no padding', shown: `pad ${l.pad}`, holds: p0 },
+      { label: tr('pointwise: stride 1', 'pointwise: bước nhảy 1'), shown: tr(`stride ${l.stride}`, `bước nhảy ${l.stride}`), holds: s1 },
+      { label: tr('pointwise: no padding', 'pointwise: không đệm'), shown: tr(`pad ${l.pad}`, `đệm ${l.pad}`), holds: p0 },
       { label: 'small_conv: C·K·K < 64', shown: `${l.C}·${l.K}·${l.K} = ${reduction}`, holds: shortReduction },
       { label: 'small_conv: P·Q < 512', shown: `${P}·${Q} = ${pixels}`, holds: smallMap },
     ],
@@ -445,10 +637,18 @@ export function llamaCuda(l: Layer): LlamaChoice {
 }
 
 export const LLAMA_PATH_TEXT: Record<LlamaPath, string> = {
-  cublas: 'a cuBLAS GEMM on the input as it is (cublasGemmEx)',
-  direct: 'the direct kernel, one thread per output (conv2d_kernel)',
-  implicit: 'implicit GEMM (conv2d_implicit_gemm_f16), Fig. 19.11 in production',
-  'cublas-or-direct': 'either the cuBLAS GEMM or the direct kernel: both conditions hold',
+  get cublas() {
+    return tr('a cuBLAS GEMM on the input as it is (cublasGemmEx)', 'một GEMM cuBLAS trên đầu vào giữ nguyên (cublasGemmEx)');
+  },
+  get direct() {
+    return tr('the direct kernel, one thread per output (conv2d_kernel)', 'kernel trực tiếp, một luồng cho mỗi đầu ra (conv2d_kernel)');
+  },
+  get implicit() {
+    return tr('implicit GEMM (conv2d_implicit_gemm_f16), Fig. 19.11 in production', 'GEMM ngầm (conv2d_implicit_gemm_f16), Fig. 19.11 trong mã sản phẩm thực tế');
+  },
+  get 'cublas-or-direct'() {
+    return tr('either the cuBLAS GEMM or the direct kernel: both conditions hold', 'hoặc GEMM cuBLAS hoặc kernel trực tiếp: cả hai điều kiện đều thỏa');
+  },
 };
 
 export interface Slow2dChoice {
@@ -473,8 +673,8 @@ export function slow2d(l: Layer): Slow2dChoice {
     requiresColumns: k || s || p,
     checks: [
       { label: 'K ≠ 1', shown: `K = ${l.K}`, holds: k },
-      { label: 'stride ≠ 1', shown: `stride ${l.stride}`, holds: s },
-      { label: 'pad ≠ 0', shown: `pad ${l.pad}`, holds: p },
+      { label: tr('stride ≠ 1', 'bước nhảy ≠ 1'), shown: tr(`stride ${l.stride}`, `bước nhảy ${l.stride}`), holds: s },
+      { label: tr('pad ≠ 0', 'đệm ≠ 0'), shown: tr(`pad ${l.pad}`, `đệm ${l.pad}`), holds: p },
     ],
   };
 }
@@ -496,10 +696,10 @@ export interface MlxChoice {
  */
 export function mlx(l: Layer): MlxChoice {
   const checks: Check[] = [
-    { label: '3 × 3 filter', shown: `${l.K} × ${l.K}`, holds: l.K === 3 },
-    { label: 'stride 1', shown: `stride ${l.stride}`, holds: l.stride === 1 },
-    { label: 'C a multiple of 32', shown: `C = ${l.C}`, holds: l.C % 32 === 0 },
-    { label: 'output maps a multiple of 32', shown: `M = ${l.M}`, holds: l.M % 32 === 0 },
+    { label: tr('3 × 3 filter', 'bộ lọc 3 × 3'), shown: `${l.K} × ${l.K}`, holds: l.K === 3 },
+    { label: tr('stride 1', 'bước nhảy 1'), shown: tr(`stride ${l.stride}`, `bước nhảy ${l.stride}`), holds: l.stride === 1 },
+    { label: tr('C a multiple of 32', 'C là bội số của 32'), shown: `C = ${l.C}`, holds: l.C % 32 === 0 },
+    { label: tr('output maps a multiple of 32', 'số feature map đầu ra là bội số của 32'), shown: `M = ${l.M}`, holds: l.M % 32 === 0 },
   ];
   const all = checks.every((c) => c.holds);
   return { path: all ? 'winograd-candidate' : 'gemm', checks, dilationUnknown: all && l.dilation !== 1 };
@@ -517,21 +717,21 @@ const L = (N: number, C: number, H: number, W: number, M: number, K: number, pad
 
 /** Layers for the "describe a layer" explorer. */
 export const PRESETS: Preset[] = [
-  { id: 'fig19-2', label: 'The book’s example, Fig. 19.2', layer: L(1, 3, 3, 3, 2, 2) },
-  { id: 'lenet-c1', label: 'LeNet C1', layer: L(1, 1, 32, 32, 6, 5) },
-  { id: 'lenet-c3', label: 'LeNet C3', layer: L(1, 6, 14, 14, 16, 5) },
-  { id: 'stem', label: '7 × 7, stride 2, padded, on 224 × 224', layer: L(1, 3, 224, 224, 64, 7, 3, 2) },
-  { id: 'same3', label: '3 × 3, 64 channels, padded to keep the size', layer: L(8, 64, 56, 56, 64, 3, 1) },
-  { id: 'dilated', label: 'Dilated 3 × 3 on 224 × 224', layer: L(1, 64, 224, 224, 64, 3, 1, 1, 2) },
-  { id: 'patch', label: 'Vision patch embedding, 16 × 16, stride 16', layer: L(1, 3, 224, 224, 768, 16, 0, 16) },
-  { id: 'pointwise', label: '1 × 1, 256 to 512 channels', layer: L(1, 256, 14, 14, 512, 1) },
+  { id: 'fig19-2', get label() { return tr('The book’s example, Fig. 19.2', 'Ví dụ của sách, Fig. 19.2'); }, layer: L(1, 3, 3, 3, 2, 2) },
+  { id: 'lenet-c1', get label() { return tr('LeNet C1', 'LeNet C1'); }, layer: L(1, 1, 32, 32, 6, 5) },
+  { id: 'lenet-c3', get label() { return tr('LeNet C3', 'LeNet C3'); }, layer: L(1, 6, 14, 14, 16, 5) },
+  { id: 'stem', get label() { return tr('7 × 7, stride 2, padded, on 224 × 224', '7 × 7, bước nhảy 2, có đệm, trên 224 × 224'); }, layer: L(1, 3, 224, 224, 64, 7, 3, 2) },
+  { id: 'same3', get label() { return tr('3 × 3, 64 channels, padded to keep the size', '3 × 3, 64 kênh, đệm để giữ nguyên kích thước'); }, layer: L(8, 64, 56, 56, 64, 3, 1) },
+  { id: 'dilated', get label() { return tr('Dilated 3 × 3 on 224 × 224', '3 × 3 giãn (dilated) trên 224 × 224'); }, layer: L(1, 64, 224, 224, 64, 3, 1, 1, 2) },
+  { id: 'patch', get label() { return tr('Vision patch embedding, 16 × 16, stride 16', 'Patch embedding thị giác, 16 × 16, bước nhảy 16'); }, layer: L(1, 3, 224, 224, 768, 16, 0, 16) },
+  { id: 'pointwise', get label() { return tr('1 × 1, 256 to 512 channels', '1 × 1, 256 lên 512 kênh'); }, layer: L(1, 256, 14, 14, 512, 1) },
 ];
 
 /** The three layers the dispatch explorer asks you to predict, with llama.cpp's answer. */
 export const DISPATCH_PRESETS: (Preset & { expect: LlamaPath })[] = [
-  { id: 'lenet-c1', label: 'LeNet C1', layer: L(1, 1, 32, 32, 6, 5), expect: 'implicit' },
-  { id: 'tiny', label: 'A tiny layer: C 2, 3 × 3, 16 × 16 output', layer: L(1, 2, 18, 18, 8, 3), expect: 'direct' },
-  { id: 'pointwise', label: '1 × 1, 256 to 512 channels', layer: L(1, 256, 14, 14, 512, 1), expect: 'cublas' },
+  { id: 'lenet-c1', get label() { return tr('LeNet C1', 'LeNet C1'); }, layer: L(1, 1, 32, 32, 6, 5), expect: 'implicit' },
+  { id: 'tiny', get label() { return tr('A tiny layer: C 2, 3 × 3, 16 × 16 output', 'Một lớp rất nhỏ: C 2, 3 × 3, đầu ra 16 × 16'); }, layer: L(1, 2, 18, 18, 8, 3), expect: 'direct' },
+  { id: 'pointwise', get label() { return tr('1 × 1, 256 to 512 channels', '1 × 1, 256 lên 512 kênh'); }, layer: L(1, 256, 14, 14, 512, 1), expect: 'cublas' },
 ];
 
 /** The three choices the dispatch prediction offers. */

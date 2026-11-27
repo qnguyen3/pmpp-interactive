@@ -1,0 +1,1 @@
+Ô một mang đến bốn điểm số. Giá trị lớn nhất của riêng nó là 1.6. Kernel tính e mũ mỗi điểm số trừ giá trị lớn nhất đó, rồi cộng các kết quả lại: đó là mẫu số đang chạy, D. Nó cũng cộng bốn hàng value, mỗi hàng nhân với hàm mũ của nó. Tổng có trọng số đó là đầu ra, chưa chia cho gì cả.

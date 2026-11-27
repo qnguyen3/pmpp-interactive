@@ -1,0 +1,1 @@
+Trường hợp tệ nhất cho một khối. Mọi mã trọng số là 127, và mọi mã activation là 127, nên mọi tích đều là 16,129. Ba mươi hai tích được cộng từng cái một, vào bốn bộ tích lũy đặt cạnh nhau: một số nguyên 16 bit, một half, một số nguyên 32 bit, và một float.

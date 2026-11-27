@@ -1,0 +1,1 @@
+Giờ mỗi đầu ra trong mảng chỉ cần một tích: giá trị của hàng nó trong dải A nhân với giá trị của cột nó trong dải B. Cả 64 ô cùng được cập nhật. Đây là một tích ngoài, một phép cập nhật hạng 1 cho toàn bộ mảng. 16 lần đọc từ bộ nhớ chia sẻ đã nuôi 64 phép nhân cộng.

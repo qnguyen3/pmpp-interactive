@@ -22,6 +22,7 @@
 //
 // No imports and only erasable TypeScript, so browser checks can load this file
 // directly with Node.
+import { tr } from '../lib/locale.ts';
 
 export interface Attrs {
   /** cudaDevAttrConcurrentManagedAccess */
@@ -48,30 +49,30 @@ export interface Row {
 export const ROWS: Row[] = [
   {
     key: 'limited',
-    name: 'Limited',
+    get name() { return tr('Limited', 'Hạn chế'); },
     condition: 'ConcurrentManagedAccess = 0',
-    where: 'Windows, including WSL, and some Tegra systems; devices of compute capability below 6.0',
+    get where() { return tr('Windows, including WSL, and some Tegra systems; devices of compute capability below 6.0', 'Windows, kể cả WSL, và một số hệ thống Tegra; các thiết bị có compute capability dưới 6.0'); },
     source: 'A10, A14',
   },
   {
     key: 'managed',
-    name: 'Full, managed allocations only',
+    get name() { return tr('Full, managed allocations only', 'Đầy đủ, chỉ vùng cấp phát managed'); },
     condition: 'ConcurrentManagedAccess = 1, PageableMemoryAccess = 0',
-    where: 'compute capability 6.0 or later without pageable memory access, for example Linux without HMM',
+    get where() { return tr('compute capability 6.0 or later without pageable memory access, for example Linux without HMM', 'compute capability 6.0 trở lên nhưng không truy cập được bộ nhớ phân trang (pageable), ví dụ Linux không có HMM'); },
     source: 'A12, A14',
   },
   {
     key: 'hmm',
-    name: 'Full, all memory, software coherence (HMM)',
-    condition: 'both 1, PageableMemoryAccessUsesHostPageTables = 0',
-    where: 'Linux 6.1.24+, 6.2.11+ or 6.3+, compute capability 7.5 or later, driver 535+ with the open kernel modules',
+    get name() { return tr('Full, all memory, software coherence (HMM)', 'Đầy đủ, mọi bộ nhớ, nhất quán bằng phần mềm (HMM)'); },
+    get condition() { return tr('both 1, PageableMemoryAccessUsesHostPageTables = 0', 'cả hai bằng 1, PageableMemoryAccessUsesHostPageTables = 0'); },
+    get where() { return tr('Linux 6.1.24+, 6.2.11+ or 6.3+, compute capability 7.5 or later, driver 535+ with the open kernel modules', 'Linux 6.1.24+, 6.2.11+ hoặc 6.3+, compute capability 7.5 trở lên, driver 535+ với các kernel module mã nguồn mở'); },
     source: 'A12, A14',
   },
   {
     key: 'ats',
-    name: 'Full, all memory, hardware coherence (ATS)',
-    condition: 'all three 1',
-    where: 'Grace Hopper and Grace Blackwell (NVLink chip-to-chip)',
+    get name() { return tr('Full, all memory, hardware coherence (ATS)', 'Đầy đủ, mọi bộ nhớ, nhất quán bằng phần cứng (ATS)'); },
+    get condition() { return tr('all three 1', 'cả ba bằng 1'); },
+    get where() { return tr('Grace Hopper and Grace Blackwell (NVLink chip-to-chip)', 'Grace Hopper và Grace Blackwell (NVLink chip-to-chip)'); },
     source: 'A12, A14',
   },
 ];
@@ -91,7 +92,7 @@ export function paradigm(a: Attrs): Paradigm {
       return {
         row: row('limited'),
         listed: false,
-        note: 'NVIDIA lists the limited paradigm by ConcurrentManagedAccess = 0 alone and does not say what the other two attributes mean alongside it.',
+        note: tr('NVIDIA lists the limited paradigm by ConcurrentManagedAccess = 0 alone and does not say what the other two attributes mean alongside it.', 'NVIDIA xác định mô hình hạn chế chỉ bằng ConcurrentManagedAccess = 0 và không nói hai thuộc tính còn lại có nghĩa gì khi đi kèm.'),
       };
     return { row: row('limited'), listed: true };
   }
@@ -100,7 +101,7 @@ export function paradigm(a: Attrs): Paradigm {
       return {
         row: row('managed'),
         listed: false,
-        note: 'UsesHostPageTables = 1 with PageableMemoryAccess = 0 is not a row of NVIDIA\'s table. Read as managed only, since system memory needs PageableMemoryAccess.',
+        note: tr('UsesHostPageTables = 1 with PageableMemoryAccess = 0 is not a row of NVIDIA\'s table. Read as managed only, since system memory needs PageableMemoryAccess.', 'UsesHostPageTables = 1 cùng PageableMemoryAccess = 0 không phải một hàng trong bảng của NVIDIA. Hiểu là chỉ managed, vì bộ nhớ hệ thống cần PageableMemoryAccess.'),
       };
     return { row: row('managed'), listed: true };
   }
@@ -120,46 +121,46 @@ export interface Check {
 /** What works on a machine with these attributes. */
 export function checklist(a: Attrs): Check[] {
   const full = a.concurrentManagedAccess;
-  const malloc: Answer = full ? (a.pageableMemoryAccess ? 'yes' : 'no') : a.pageableMemoryAccess ? 'not stated' : 'no';
+  const malloc: Answer = full ? (a.pageableMemoryAccess ? 'yes' : 'no') : a.pageableMemoryAccess ? 'not stated' : 'no'; // i18n-ignore: identifier also shown to the reader
   return [
     {
       key: 'malloc',
-      what: 'A kernel uses a pointer from malloc, new or mmap',
+      what: tr('A kernel uses a pointer from malloc, new or mmap', 'Một kernel dùng con trỏ từ malloc, new hoặc mmap'),
       answer: malloc,
       why:
         malloc === 'yes'
-          ? 'PageableMemoryAccess = 1: all system memory behaves as unified memory, file-backed mmap included (A12).'
+          ? tr('PageableMemoryAccess = 1: all system memory behaves as unified memory, file-backed mmap included (A12).', 'PageableMemoryAccess = 1: mọi bộ nhớ hệ thống hoạt động như unified memory, kể cả mmap gắn với tệp (A12).')
           : malloc === 'no'
-            ? 'PageableMemoryAccess = 0: only memory allocated as managed behaves as unified memory (A12).'
-            : 'An unlisted combination; NVIDIA does not say (A14).',
+            ? tr('PageableMemoryAccess = 0: only memory allocated as managed behaves as unified memory (A12).', 'PageableMemoryAccess = 0: chỉ bộ nhớ cấp phát dạng managed mới hoạt động như unified memory (A12).')
+            : tr('An unlisted combination; NVIDIA does not say (A14).', 'Một tổ hợp không có trong bảng; NVIDIA không nói (A14).'),
     },
     {
       key: 'concurrent',
-      what: 'The CPU touches managed memory while a kernel runs',
+      what: tr('The CPU touches managed memory while a kernel runs', 'CPU chạm vào bộ nhớ managed khi một kernel đang chạy'),
       answer: full ? 'yes' : 'no',
       why: full
-        ? 'ConcurrentManagedAccess = 1: coherent concurrent access (A11, A14).'
-        : 'Not while the GPU is active; concurrent access can end in a segmentation fault (A10).',
+        ? tr('ConcurrentManagedAccess = 1: coherent concurrent access (A11, A14).', 'ConcurrentManagedAccess = 1: truy cập đồng thời và nhất quán (A11, A14).')
+        : tr('Not while the GPU is active; concurrent access can end in a segmentation fault (A10).', 'Không được khi GPU đang hoạt động; truy cập đồng thời có thể kết thúc bằng lỗi segmentation fault (A10).'),
     },
     {
       key: 'oversubscribe',
-      what: 'Managed allocations larger than GPU memory',
+      what: tr('Managed allocations larger than GPU memory', 'Vùng cấp phát managed lớn hơn bộ nhớ GPU'),
       answer: full ? 'yes' : 'no',
-      why: full ? 'Oversubscription is allowed (A11).' : 'No more managed memory than the GPU physically has (A10).',
+      why: full ? tr('Oversubscription is allowed (A11).', 'Được phép cấp phát vượt dung lượng (oversubscription) (A11).') : tr('No more managed memory than the GPU physically has (A10).', 'Không được nhiều bộ nhớ managed hơn lượng GPU thực sự có (A10).'),
     },
     {
       key: 'fault',
-      what: 'Managed pages move on demand, when the GPU touches them',
+      what: tr('Managed pages move on demand, when the GPU touches them', 'Các trang managed di chuyển theo nhu cầu, khi GPU chạm vào chúng'),
       answer: full ? 'yes' : 'no',
       why: full
-        ? 'Migrated when used by another processor, by fault and migrate by default (A11, A13).'
-        : 'All managed memory generally moves to the GPU at each launch, and back at synchronisation (A10).',
+        ? tr('Migrated when used by another processor, by fault and migrate by default (A11, A13).', 'Được di chuyển khi một bộ xử lý khác dùng tới, mặc định theo cơ chế lỗi trang rồi di chuyển (fault and migrate) (A11, A13).')
+        : tr('All managed memory generally moves to the GPU at each launch, and back at synchronisation (A10).', 'Toàn bộ bộ nhớ managed thường được chuyển sang GPU ở mỗi lần khởi chạy, và chuyển về khi đồng bộ hóa (A10).'),
     },
     {
       key: 'cudamalloc-host',
-      what: 'Host code dereferences a cudaMalloc pointer',
+      what: tr('Host code dereferences a cudaMalloc pointer', 'Mã host giải tham chiếu một con trỏ cudaMalloc'),
       answer: 'no',
-      why: 'Never, on any paradigm: hardware coherence does not open GPU-only allocations to the host (A12).',
+      why: tr('Never, on any paradigm: hardware coherence does not open GPU-only allocations to the host (A12).', 'Không bao giờ, trên mọi mô hình: nhất quán bằng phần cứng không mở các vùng cấp phát chỉ dành cho GPU cho host (A12).'),
     },
   ];
 }
@@ -168,10 +169,10 @@ export function checklist(a: Attrs): Check[] {
 export function granularityText(a: Attrs): string {
   const k = paradigm(a).row.key;
   return k === 'ats'
-    ? 'cache lines: hardware coherence (A11)'
+    ? tr('cache lines: hardware coherence (A11)', 'dòng cache: nhất quán bằng phần cứng (A11)')
     : k === 'limited'
-      ? 'all managed memory, moved in bulk at launch and synchronisation (A10)'
-      : 'pages: software coherence (A11)';
+      ? tr('all managed memory, moved in bulk at launch and synchronisation (A10)', 'toàn bộ bộ nhớ managed, chuyển một lần cả khối khi khởi chạy và khi đồng bộ hóa (A10)')
+      : tr('pages: software coherence (A11)', 'trang: nhất quán bằng phần mềm (A11)');
 }
 
 // ---------------------------------------------------------------- lab C.1's 'paradigm' bench row

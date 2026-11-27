@@ -1,0 +1,1 @@
+Đây là hướng đi tiếp theo. Mỗi khối trước hết đếm vào bản sao bin của riêng nó, trong bộ nhớ trên chip, nơi một phép toán nguyên tử chỉ tốn vài chu kỳ. Rồi mỗi khối có một luồng cộng số đếm của khối vào bin toàn cục. Chuỗi toàn cục dài trở thành một lần ghi nhận ngắn cho mỗi khối. Đó là riêng tư hóa, phần tiếp theo.

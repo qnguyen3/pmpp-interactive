@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { threadTile } from '../../sim/gemmmap';
 import { BOOK_SHAPE, afterStrip, run, sharedReadsV1, sharedReadsV2, smallInputs, stateAfterOps, stateAt, type State } from '../../sim/gemmreads';
 
@@ -109,34 +110,34 @@ function Stage(f: Frame) {
   }
   const bar = (n: number) => (300 * n) / SCENE.readsV1;
   return (
-    <svg viewBox="0 0 720 360" role="img" aria-label="One thread's multiply-adds in two loop orders" style={{ width: '100%', maxWidth: 720, display: 'block' }} data-order={f.order}>
-      <text x={BX} y={BY - 4} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>B_s: the thread's 8 columns</text>
-      <text x={AX} y={AY - 6} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>A_s: its 8 rows</text>
+    <svg viewBox="0 0 720 360" role="img" aria-label={tr("One thread's multiply-adds in two loop orders", 'Các phép nhân-cộng của một luồng theo hai thứ tự vòng lặp')} style={{ width: '100%', maxWidth: 720, display: 'block' }} data-order={f.order}>
+      <text x={BX} y={BY - 4} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>{tr("B_s: the thread's 8 columns", 'B_s: 8 cột của luồng')}</text>
+      <text x={AX} y={AY - 6} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>{tr('A_s: its 8 rows', 'A_s: 8 hàng của nó')}</text>
       {f.strips ? (
         <>
           <text x={SAX + C / 2} y={AY - 6} fontSize="10" textAnchor="middle" style={{ fill: 'var(--reg)' }}>a_r</text>
           <text x={BX + S.tN * C + 4} y={SBY + 12} fontSize="10" style={{ fill: 'var(--reg)' }}>b_r</text>
         </>
       ) : null}
-      <text x={CX} y={CY + S.tM * C + 14} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--reg)' }}>C_r: its 8 × 8 patch (registers)</text>
+      <text x={CX} y={CY + S.tM * C + 14} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--reg)' }}>{tr('C_r: its 8 × 8 patch (registers)', 'C_r: mảng 8 × 8 của nó (thanh ghi)')}</text>
       {cells}
       {/* counters */}
-      <text x={RX} y={34} fontSize="11.5" fontWeight="600">shared-memory reads, one thread, one tile pair</text>
-      <text x={RX} y={58} fontSize="11">first order (Fig. 15.6)</text>
+      <text x={RX} y={34} fontSize="11.5" fontWeight="600">{tr('shared-memory reads, one thread, one tile pair', 'số lần đọc bộ nhớ chia sẻ, một luồng, một cặp ô')}</text>
+      <text x={RX} y={58} fontSize="11">{tr('first order (Fig. 15.6)', 'thứ tự đầu tiên (Hình 15.6)')}</text>
       <rect x={RX} y={64} width={300} height={14} fill="var(--cell)" stroke="var(--rule)" />
       <rect x={RX} y={64} width={bar(f.r1)} height={14} fill="var(--shared)" data-bar="v1" />
       <text x={RX + 306} y={75} fontSize="11" data-count="v1">{f.r1}</text>
       {f.r2 != null ? (
         <>
-          <text x={RX} y={104} fontSize="11">loops swapped (Fig. 15.9)</text>
+          <text x={RX} y={104} fontSize="11">{tr('loops swapped (Fig. 15.9)', 'đổi chỗ hai vòng lặp (Hình 15.9)')}</text>
           <rect x={RX} y={110} width={300} height={14} fill="var(--cell)" stroke="var(--rule)" />
           <rect x={RX} y={110} width={bar(f.r2)} height={14} fill="var(--shared)" data-bar="v2" />
           <text x={RX + 306} y={121} fontSize="11" data-count="v2">{f.r2}</text>
         </>
       ) : null}
-      <text x={RX} y={156} fontSize="11" style={{ fill: 'var(--ink-2)' }}>multiply-adds so far: {st.fmas} of {V1.fmas}</text>
+      <text x={RX} y={156} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>số phép nhân-cộng đến giờ: {st.fmas} trên {V1.fmas}</>}>multiply-adds so far: {st.fmas} of {V1.fmas}</Translated></text>
       {f.same ? (
-        <text x={RX} y={180} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--ok)' }} data-same>✓ same 64 values as the first order</text>
+        <text x={RX} y={180} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--ok)' }} data-same><Translated vi="✓ cùng 64 giá trị như thứ tự đầu tiên">✓ same 64 values as the first order</Translated></text>
       ) : null}
       <text x={RX} y={330} fontSize="12.5" fontWeight="600">{f.headline}</text>
     </svg>
@@ -187,16 +188,16 @@ function Zoom({ p }: { p: number }) {
   const i = 3;
   const show = ramp(p, 0.35, 0.6);
   return (
-    <svg viewBox="0 0 720 360" role="img" aria-label="Tiling at two levels" style={{ width: '100%', maxWidth: 720, display: 'block' }} data-zoom>
-      <text x={ax} y={22} fontSize="11.5" fontWeight="600">one block</text>
+    <svg viewBox="0 0 720 360" role="img" aria-label={tr('Tiling at two levels', 'Phân ô ở hai cấp')} style={{ width: '100%', maxWidth: 720, display: 'block' }} data-zoom>
+      <text x={ax} y={22} fontSize="11.5" fontWeight="600">{tr('one block', 'một khối')}</text>
       <rect x={bx} y={by} width={tile} height={8 * s} fill="var(--shared-wash)" stroke="var(--shared)" />
       <rect x={bx + tCol * s} y={by} width={8 * s} height={8 * s} fill="var(--shared)" opacity={0.55} />
       <rect x={bx + tCol * s} y={by + i * s} width={8 * s} height={s} fill="var(--shared)" />
-      <text x={bx + tile + 6} y={by + 10} fontSize="10" style={{ fill: 'var(--shared)' }}>B_s (shared)</text>
+      <text x={bx + tile + 6} y={by + 10} fontSize="10" style={{ fill: 'var(--shared)' }}>{tr('B_s (shared)', 'B_s (chia sẻ)')}</text>
       <rect x={ax} y={ay} width={8 * s} height={tile} fill="var(--shared-wash)" stroke="var(--shared)" />
       <rect x={ax} y={ay + tRow * s} width={8 * s} height={8 * s} fill="var(--shared)" opacity={0.55} />
       <rect x={ax + i * s} y={ay + tRow * s} width={s} height={8 * s} fill="var(--shared)" />
-      <text x={ax - 4} y={ay - 6} fontSize="10" style={{ fill: 'var(--shared)' }}>A_s (shared)</text>
+      <text x={ax - 4} y={ay - 6} fontSize="10" style={{ fill: 'var(--shared)' }}>{tr('A_s (shared)', 'A_s (chia sẻ)')}</text>
       <rect x={bx} y={ay} width={tile} height={tile} fill="var(--cell)" stroke="var(--ink)" />
       {Array.from({ length: 15 }, (_, k) => (
         <g key={k} stroke="var(--rule-soft)">
@@ -205,20 +206,22 @@ function Zoom({ p }: { p: number }) {
         </g>
       ))}
       <rect x={bx + tCol * s} y={ay + tRow * s} width={8 * s} height={8 * s} fill="var(--reg)" />
-      <text x={bx} y={ay + tile + 16} fontSize="10" style={{ fill: 'var(--ink-2)' }}>C tile, 128 × 128, in the registers of 256 threads</text>
+      <text x={bx} y={ay + tile + 16} fontSize="10" style={{ fill: 'var(--ink-2)' }}>{tr('C tile, 128 × 128, in the registers of 256 threads', 'ô C, 128 × 128, nằm trong thanh ghi của 256 luồng')}</text>
       <g opacity={show}>
         <line x1={bx + tCol * s + 12} y1={ay + tRow * s} x2={430} y2={110} stroke="var(--reg)" strokeDasharray="3 2" />
         <line x1={bx + tCol * s + 12} y1={ay + tRow * s + 12} x2={430} y2={250} stroke="var(--reg)" strokeDasharray="3 2" />
-        <text x={430} y={84} fontSize="11.5" fontWeight="600">one thread</text>
+        <text x={430} y={84} fontSize="11.5" fontWeight="600">{tr('one thread', 'một luồng')}</text>
         {Array.from({ length: 8 }, (_, r) => <rect key={'a' + r} x={430} y={124 + r * 15} width={13} height={13} fill="var(--reg-wash)" stroke="var(--reg)" />)}
         {Array.from({ length: 8 }, (_, c) => <rect key={'b' + c} x={450 + c * 15} y={104} width={13} height={13} fill="var(--reg-wash)" stroke="var(--reg)" />)}
         {Array.from({ length: 64 }, (_, k) => <rect key={'c' + k} x={450 + (k % 8) * 15} y={124 + Math.floor(k / 8) * 15} width={13} height={13} fill="var(--reg)" opacity={0.85} />)}
         <text x={575} y={114} fontSize="10" style={{ fill: 'var(--reg)' }}>b_r</text>
         <text x={430} y={258} fontSize="10" style={{ fill: 'var(--reg)' }}>a_r</text>
-        <text x={430} y={280} fontSize="11" style={{ fill: 'var(--reg)' }}>C_r += a_r ⊗ b_r, once per step i</text>
+        <text x={430} y={280} fontSize="11" style={{ fill: 'var(--reg)' }}>{tr('C_r += a_r ⊗ b_r, once per step i', 'C_r += a_r ⊗ b_r, mỗi bước i một lần')}</text>
       </g>
       <text x={ax} y={330} fontSize="12.5" fontWeight="600" opacity={ramp(p, 0.6, 0.8)}>
-        global → shared, once per block; shared → registers, once per thread: an accumulated outer product
+        <Translated vi="toàn cục → chia sẻ, mỗi khối một lần; chia sẻ → thanh ghi, mỗi luồng một lần: một tích ngoài (outer product) được cộng dồn">
+          global → shared, once per block; shared → registers, once per thread: an accumulated outer product
+        </Translated>
       </text>
     </svg>
   );
@@ -228,49 +231,59 @@ const finalV1 = stateAt(V1, V1.fmas);
 const beats: Beat[] = [
   {
     clip: 'outer-product-1',
-    label: 'One output',
+    get label() {
+      return tr('One output', 'Một đầu ra');
+    },
     draw: (p) => {
       const k = Math.min(S.bK, Math.floor(ramp(p, 0.3, 0.95) * (S.bK + 0.99)));
       const st = stateAt(V1, k);
-      return <Stage st={st} order="v1" {...hot(st, 'v1')} r1={st.sharedReads} r2={null} headline={`output (0, 0): ${st.sharedReads} shared reads so far`} />;
+      return <Stage st={st} order="v1" {...hot(st, 'v1')} r1={st.sharedReads} r2={null} headline={tr(`output (0, 0): ${st.sharedReads} shared reads so far`, `đầu ra (0, 0): đến giờ có ${st.sharedReads} lần đọc bộ nhớ chia sẻ`)} />;
     },
   },
   {
     clip: 'outer-product-2',
-    label: 'Read again',
+    get label() {
+      return tr('Read again', 'Đọc lại');
+    },
     draw: (p) => {
       const k = p < 0.45 ? S.bK + Math.floor(ramp(p, 0.02, 0.4) * S.bK) : Math.round(2 * S.bK + ramp(p, 0.45, 0.92) * (V1.fmas - 2 * S.bK));
       const st = stateAt(V1, k);
       return (
         <Stage st={st} order="v1" {...hot(st, 'v1')} counts r1={st.sharedReads} r2={null}
-          headline={k >= V1.fmas ? `${st.sharedReads} shared reads for ${V1.fmas} multiply-adds` : 'the same values of A, read again for every column'} />
+          headline={k >= V1.fmas ? tr(`${st.sharedReads} shared reads for ${V1.fmas} multiply-adds`, `${st.sharedReads} lần đọc bộ nhớ chia sẻ cho ${V1.fmas} phép nhân-cộng`) : tr('the same values of A, read again for every column', 'cùng những giá trị của A, bị đọc lại cho mỗi cột')} />
       );
     },
   },
   {
     clip: 'outer-product-3',
-    label: 'Swap the loops',
+    get label() {
+      return tr('Swap the loops', 'Đổi chỗ hai vòng lặp');
+    },
     draw: (p) => {
       const n = Math.round(ramp(p, 0.25, 0.85) * (S.tM + S.tN));
       const st = stateAfterOps(V2, n);
-      return <Stage st={st} order="v2" {...hot(st, 'v2')} strips r1={SCENE.readsV1} r2={st.sharedReads} headline="step 0: column 0 of A and row 0 of B into registers" />;
+      return <Stage st={st} order="v2" {...hot(st, 'v2')} strips r1={SCENE.readsV1} r2={st.sharedReads} headline={tr('step 0: column 0 of A and row 0 of B into registers', 'bước 0: cột 0 của A và hàng 0 của B vào thanh ghi')} />;
     },
   },
   {
     clip: 'outer-product-4',
-    label: 'Outer product',
+    get label() {
+      return tr('Outer product', 'Tích ngoài');
+    },
     draw: (p) => {
       const k = Math.round(ramp(p, 0.1, 0.6) * S.tM * S.tN);
       // Before the first multiply-add: both strips loaded, nothing computed yet.
       const st = k ? stateAt(V2, k) : stateAfterOps(V2, S.tM + S.tN);
       const h = k >= S.tM * S.tN ? rank1(0) : k ? hot(st, 'v2') : {};
       return <Stage st={st} order="v2" {...h} strips r1={SCENE.readsV1} r2={st.sharedReads}
-        headline={`${st.sharedReads} shared reads feed ${S.tM * S.tN} multiply-adds`} />;
+        headline={tr(`${st.sharedReads} shared reads feed ${S.tM * S.tN} multiply-adds`, `${st.sharedReads} lần đọc bộ nhớ chia sẻ nuôi ${S.tM * S.tN} phép nhân-cộng`)} />;
     },
   },
   {
     clip: 'outer-product-5',
-    label: 'Steps 1 to 7',
+    get label() {
+      return tr('Steps 1 to 7', 'Bước 1 đến 7');
+    },
     draw: (p) => {
       const k = Math.round(afterStrip(S, 0) + ramp(p, 0.05, 0.75) * (V2.fmas - afterStrip(S, 0)));
       const i = Math.min(S.bK - 1, Math.floor((k - 1) / (S.tM * S.tN)));
@@ -278,13 +291,19 @@ const beats: Beat[] = [
       const done = k >= V2.fmas;
       return (
         <Stage st={st} order="v2" {...rank1(i)} strips r1={SCENE.readsV1} r2={st.sharedReads} same={done && p > 0.8 && st.C.every((v, j) => v === finalV1.C[j])}
-          headline={done ? `${st.sharedReads} reads against ${SCENE.readsV1}: ${SCENE.readsV1 / SCENE.readsV2} times fewer` : `step ${i}: ${st.sharedReads} reads so far`} />
+          headline={done ? tr(`${st.sharedReads} reads against ${SCENE.readsV1}: ${SCENE.readsV1 / SCENE.readsV2} times fewer`, `${st.sharedReads} lần đọc so với ${SCENE.readsV1}: ít hơn ${SCENE.readsV1 / SCENE.readsV2} lần`) : tr(`step ${i}: ${st.sharedReads} reads so far`, `bước ${i}: đến giờ ${st.sharedReads} lần đọc`)} />
       );
     },
   },
-  { clip: 'outer-product-6', label: 'Two levels', draw: (p) => <Zoom p={p} /> },
+  {
+    clip: 'outer-product-6',
+    get label() {
+      return tr('Two levels', 'Hai cấp');
+    },
+    draw: (p) => <Zoom p={p} />,
+  },
 ];
 
 export function OuterProductScene() {
-  return <Scene chapter="ch15" title="Filling a register tile with outer products" beats={beats} />;
+  return <Scene chapter="ch15" title={tr('Filling a register tile with outer products', 'Lấp đầy một ô thanh ghi bằng các tích ngoài')} beats={beats} />;
 }

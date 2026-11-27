@@ -1,0 +1,1 @@
+Phương pháp của Kahan giữ thêm một thanh ghi thứ hai, gọi là c, bắt đầu bằng không. Với mỗi giá trị, trước hết nó tính y, bằng giá trị trừ c. Rồi nó tính t, bằng tổng cộng y. Với giá trị nhỏ đầu tiên, c vẫn bằng không, nên y chính là giá trị đó, và t làm tròn về 1, y như trước.

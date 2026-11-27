@@ -1,0 +1,1 @@
+Một câu lệnh khởi chạy. Host tính cấu hình trước. 22 cộng 7 là 29. Và 29 chia 8, lấy phần nguyên, là 3. Vậy là 3 khối, mỗi khối 8 luồng. [short pause] Rồi nó tính các đối số. Ba địa chỉ trên device, và n, con số 22, truyền theo giá trị.

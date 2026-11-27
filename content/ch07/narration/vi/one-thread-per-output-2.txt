@@ -1,0 +1,1 @@
+Chọn một luồng: luồng 1, 1 của khối 1, 1. Chỉ số khối nhân kích thước khối, cộng chỉ số luồng, cho ra hàng 5 và cột 5. Vậy luồng này tính P 5, 5. Mảng đầu vào của nó bắt đầu cao hơn 2 hàng và lệch trái 2 cột, tại hàng 3, cột 3, và phủ 5 nhân 5 phần tử.

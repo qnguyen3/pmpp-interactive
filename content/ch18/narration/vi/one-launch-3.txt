@@ -1,0 +1,1 @@
+Cách khắc phục là chỉ khởi chạy một lần. Một tập khối cố định, tất cả đều thường trú, chạy mọi mức. Mỗi frontier được chia theo bước nhảy: luồng i lấy phần tử i, rồi i cộng tổng số luồng, và cứ thế. Một rào chắn toàn lưới thay cho mỗi chuyến khứ hồi. CPU được rảnh tay, và dữ liệu có thể ở lại trên chip giữa các mức.

@@ -1,0 +1,1 @@
+Giờ bỏ bộ đếm và tin vào chỉ số do phần cứng cấp. Giả sử bộ lập lịch bắt đầu các khối 3, 4 và 5 trước. Khối 3 quay vòng chờ khối 2, khối chưa bắt đầu. Khối 4 và 5 quay vòng chờ những khối mà chính chúng cũng đang quay vòng chờ. Không khối nào xong, nên không có chỗ nào trống, và thiết bị rơi vào bế tắc.

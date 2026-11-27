@@ -23,6 +23,7 @@
 // Imports batching.ts (read-only) for the Device type, the book's example device and the
 // readers of lab 5.1's measured roofline.
 import { BOOK_DEVICE, effectivePeak, measuredDevices, thresholdOf, type Device, type ReportsLike, type RowLike } from './batching';
+import { tr } from '../lib/locale.ts';
 
 export { BOOK_DEVICE, measuredDevices, thresholdOf, type Device };
 
@@ -58,21 +59,87 @@ export interface WeightFormat {
   facts: string;
 }
 
-const MLX = 'MLX affine 4-bit';
+const MLX = 'MLX affine 4-bit'; // i18n-ignore: format name
 export const FORMATS: Record<FormatId, WeightFormat> = {
-  f32: { id: 'f32', label: 'FP32', owner: 'IEEE float32', blockWeights: 1, blockBytes: 4, overheadBytes: 0, facts: 'x2-facts E1' },
-  f16: { id: 'f16', label: 'FP16 / BF16', owner: '16-bit float', blockWeights: 1, blockBytes: 2, overheadBytes: 0, facts: 'x2-facts E1; appA-facts A2' },
+  f32: { id: 'f32', label: 'FP32', owner: 'IEEE float32', blockWeights: 1, blockBytes: 4, overheadBytes: 0, facts: 'x2-facts E1' }, // i18n-ignore: standard name
+  f16: {
+    id: 'f16', label: 'FP16 / BF16', // i18n-ignore: format names
+    get owner() {
+      return tr('16-bit float', 'số thực 16-bit');
+    },
+    blockWeights: 1, blockBytes: 2, overheadBytes: 0, facts: 'x2-facts E1; appA-facts A2',
+  },
   q8_0: { id: 'q8_0', label: 'Q8_0', owner: 'llama.cpp', blockWeights: 32, blockBytes: 34, overheadBytes: 2, facts: 'x2-facts D1, E1' },
   q4_0: { id: 'q4_0', label: 'Q4_0', owner: 'llama.cpp', blockWeights: 32, blockBytes: 18, overheadBytes: 2, facts: 'x2-facts D1, E1' },
   q4_1: { id: 'q4_1', label: 'Q4_1', owner: 'llama.cpp', blockWeights: 32, blockBytes: 20, overheadBytes: 4, facts: 'x2-facts D1, E1' },
   q4_k: { id: 'q4_k', label: 'Q4_K', owner: 'llama.cpp', blockWeights: 256, blockBytes: 144, overheadBytes: 16, facts: 'x2-facts D2, E1' },
-  mxfp4: { id: 'mxfp4', label: 'MXFP4', owner: 'OCP MX; llama.cpp block_mxfp4', blockWeights: 32, blockBytes: 17, overheadBytes: 1, facts: 'x2-facts E1; appA-facts D3' },
-  mlx4_g32: { id: 'mlx4_g32', label: `${MLX}, g32, FP16 scale and bias`, owner: 'MLX', blockWeights: 32, blockBytes: 20, overheadBytes: 4, facts: 'x2-facts D5, E1' },
-  mlx4_g64: { id: 'mlx4_g64', label: `${MLX}, g64, FP16 scale and bias`, owner: 'MLX (its default)', blockWeights: 64, blockBytes: 36, overheadBytes: 4, facts: 'x2-facts D5, E1' },
-  mlx4_g128: { id: 'mlx4_g128', label: `${MLX}, g128, FP16 scale and bias`, owner: 'MLX', blockWeights: 128, blockBytes: 68, overheadBytes: 4, facts: 'x2-facts D5, E1' },
-  mlx4_g32_f32: { id: 'mlx4_g32_f32', label: `${MLX}, g32, FP32 scale and bias`, owner: 'MLX, float32 input', blockWeights: 32, blockBytes: 24, overheadBytes: 8, facts: 'x2-facts D5 (scales take the input type); our arithmetic' },
-  mlx4_g64_f32: { id: 'mlx4_g64_f32', label: `${MLX}, g64, FP32 scale and bias`, owner: 'MLX, float32 input', blockWeights: 64, blockBytes: 40, overheadBytes: 8, facts: 'x2-facts D5, E1' },
-  mlx4_g128_f32: { id: 'mlx4_g128_f32', label: `${MLX}, g128, FP32 scale and bias`, owner: 'MLX, float32 input', blockWeights: 128, blockBytes: 72, overheadBytes: 8, facts: 'x2-facts D5 (scales take the input type); our arithmetic' },
+  mxfp4: { id: 'mxfp4', label: 'MXFP4', owner: 'OCP MX; llama.cpp block_mxfp4', blockWeights: 32, blockBytes: 17, overheadBytes: 1, facts: 'x2-facts E1; appA-facts D3' }, // i18n-ignore: standard and type names
+  mlx4_g32: {
+    id: 'mlx4_g32',
+    get label() {
+      return tr(`${MLX}, g32, FP16 scale and bias`, `${MLX}, g32, scale và bias FP16`);
+    },
+    owner: 'MLX',
+    blockWeights: 32, blockBytes: 20, overheadBytes: 4,
+    facts: 'x2-facts D5, E1',
+  },
+  mlx4_g64: {
+    id: 'mlx4_g64',
+    get label() {
+      return tr(`${MLX}, g64, FP16 scale and bias`, `${MLX}, g64, scale và bias FP16`);
+    },
+    get owner() {
+      return tr('MLX (its default)', 'MLX (mặc định của nó)');
+    },
+    blockWeights: 64, blockBytes: 36, overheadBytes: 4,
+    facts: 'x2-facts D5, E1',
+  },
+  mlx4_g128: {
+    id: 'mlx4_g128',
+    get label() {
+      return tr(`${MLX}, g128, FP16 scale and bias`, `${MLX}, g128, scale và bias FP16`);
+    },
+    owner: 'MLX',
+    blockWeights: 128, blockBytes: 68, overheadBytes: 4,
+    facts: 'x2-facts D5, E1',
+  },
+  mlx4_g32_f32: {
+    id: 'mlx4_g32_f32',
+    get label() {
+      return tr(`${MLX}, g32, FP32 scale and bias`, `${MLX}, g32, scale và bias FP32`);
+    },
+    get owner() {
+      return tr('MLX, float32 input', 'MLX, đầu vào float32');
+    },
+    blockWeights: 32, blockBytes: 24, overheadBytes: 8,
+    get facts() {
+      return tr('x2-facts D5 (scales take the input type); our arithmetic', 'x2-facts D5 (scale lấy kiểu của đầu vào); phép tính của chúng tôi');
+    },
+  },
+  mlx4_g64_f32: {
+    id: 'mlx4_g64_f32',
+    get label() {
+      return tr(`${MLX}, g64, FP32 scale and bias`, `${MLX}, g64, scale và bias FP32`);
+    },
+    get owner() {
+      return tr('MLX, float32 input', 'MLX, đầu vào float32');
+    },
+    blockWeights: 64, blockBytes: 40, overheadBytes: 8,
+    facts: 'x2-facts D5, E1',
+  },
+  mlx4_g128_f32: {
+    id: 'mlx4_g128_f32',
+    get label() {
+      return tr(`${MLX}, g128, FP32 scale and bias`, `${MLX}, g128, scale và bias FP32`);
+    },
+    get owner() {
+      return tr('MLX, float32 input', 'MLX, đầu vào float32');
+    },
+    blockWeights: 128, blockBytes: 72, overheadBytes: 8,
+    get facts() {
+      return tr('x2-facts D5 (scales take the input type); our arithmetic', 'x2-facts D5 (scale lấy kiểu của đầu vào); phép tính của chúng tôi');
+    },
+  },
 };
 export const FORMAT_IDS = Object.keys(FORMATS) as FormatId[];
 
@@ -98,10 +165,31 @@ export interface Layer {
   source: string;
 }
 export const LAYERS: Layer[] = [
-  { id: '1024x4096', in: 1024, out: 4096, label: "1024 → 4096 (the book's layer)", source: 'ch. 20 §20.6, p. 505' },
-  { id: '4096x4096', in: 4096, out: 4096, label: '4096 → 4096', source: 'a square projection' },
-  { id: '4096x14336', in: 4096, out: 14336, label: '4096 → 14336', source: 'an up-projection' },
-  { id: '14336x4096', in: 14336, out: 4096, label: '14336 → 4096', source: 'a down-projection' },
+  {
+    id: '1024x4096', in: 1024, out: 4096,
+    get label() {
+      return tr("1024 → 4096 (the book's layer)", '1024 → 4096 (lớp của sách)');
+    },
+    source: 'ch. 20 §20.6, p. 505',
+  },
+  {
+    id: '4096x4096', in: 4096, out: 4096, label: '4096 → 4096',
+    get source() {
+      return tr('a square projection', 'một phép chiếu vuông');
+    },
+  },
+  {
+    id: '4096x14336', in: 4096, out: 14336, label: '4096 → 14336',
+    get source() {
+      return tr('an up-projection', 'một phép chiếu lên (up-projection)');
+    },
+  },
+  {
+    id: '14336x4096', in: 14336, out: 4096, label: '14336 → 4096',
+    get source() {
+      return tr('a down-projection', 'một phép chiếu xuống (down-projection)');
+    },
+  },
 ];
 export const layer = (id: string): Layer => LAYERS.find((l) => l.id === id) ?? LAYERS[0];
 
@@ -165,10 +253,34 @@ export function kneeBatch(f: FormatId, L: { in: number; out: number }, actBytes:
 // ---------------------------------------------------------------- fused or unfused
 export type PipelineId = 'f32' | 'unfused-f32' | 'unfused-f16' | 'fused';
 export const PIPELINES: { id: PipelineId; label: string; kernels: number }[] = [
-  { id: 'f32', label: 'float32 weights, float32 GEMV', kernels: 1 },
-  { id: 'unfused-f32', label: 'dequantise to float32, then a float32 GEMV', kernels: 2 },
-  { id: 'unfused-f16', label: 'dequantise to FP16, then an FP16 GEMV', kernels: 2 },
-  { id: 'fused', label: 'fused: unpack inside the GEMV', kernels: 1 },
+  {
+    id: 'f32',
+    get label() {
+      return tr('float32 weights, float32 GEMV', 'trọng số float32, GEMV float32');
+    },
+    kernels: 1,
+  },
+  {
+    id: 'unfused-f32',
+    get label() {
+      return tr('dequantise to float32, then a float32 GEMV', 'giải lượng tử hóa sang float32, rồi một GEMV float32');
+    },
+    kernels: 2,
+  },
+  {
+    id: 'unfused-f16',
+    get label() {
+      return tr('dequantise to FP16, then an FP16 GEMV', 'giải lượng tử hóa sang FP16, rồi một GEMV FP16');
+    },
+    kernels: 2,
+  },
+  {
+    id: 'fused',
+    get label() {
+      return tr('fused: unpack inside the GEMV', 'gộp (fused): giải nén bên trong GEMV');
+    },
+    kernels: 1,
+  },
 ];
 
 /**
@@ -194,18 +306,18 @@ export interface Pass {
 /** Every stream that crosses the memory bus, in order. */
 export function pipelinePasses(p: PipelineId, f: FormatId, L: { in: number; out: number }, batch: number, actBytes: number): Pass[] {
   const n = L.in * L.out;
-  const x: Pass = { kernel: 0, kind: 'read-x', label: 'read the activations X', bytes: actBytes * batch * L.in };
-  const y: Pass = { kernel: 0, kind: 'write-y', label: 'write the outputs Y', bytes: actBytes * batch * L.out };
+  const x: Pass = { kernel: 0, kind: 'read-x', label: tr('read the activations X', 'đọc các activation X'), bytes: actBytes * batch * L.in };
+  const y: Pass = { kernel: 0, kind: 'write-y', label: tr('write the outputs Y', 'ghi các đầu ra Y'), bytes: actBytes * batch * L.out };
   const last = p === 'unfused-f32' || p === 'unfused-f16' ? 2 : 1;
   const io = [{ ...x, kernel: last }, { ...y, kernel: last }];
-  if (p === 'f32') return [{ kernel: 1, kind: 'read-weights', label: 'read float32 weights', bytes: 4 * n }, ...io];
-  if (p === 'fused') return [{ kernel: 1, kind: 'read-weights', label: `read ${FORMATS[f].label} weights`, bytes: bytesPerWeight(f) * n }, ...io];
+  if (p === 'f32') return [{ kernel: 1, kind: 'read-weights', label: tr('read float32 weights', 'đọc trọng số float32'), bytes: 4 * n }, ...io];
+  if (p === 'fused') return [{ kernel: 1, kind: 'read-weights', label: tr(`read ${FORMATS[f].label} weights`, `đọc trọng số ${FORMATS[f].label}`), bytes: bytesPerWeight(f) * n }, ...io];
   const w = p === 'unfused-f32' ? 4 : 2;
   const name = p === 'unfused-f32' ? 'float32' : 'FP16';
   return [
-    { kernel: 1, kind: 'read-weights', label: `read ${FORMATS[f].label} weights`, bytes: bytesPerWeight(f) * n },
-    { kernel: 1, kind: 'write-copy', label: `write a ${name} copy`, bytes: w * n },
-    { kernel: 2, kind: 'read-copy', label: `read the ${name} copy back`, bytes: w * n },
+    { kernel: 1, kind: 'read-weights', label: tr(`read ${FORMATS[f].label} weights`, `đọc trọng số ${FORMATS[f].label}`), bytes: bytesPerWeight(f) * n },
+    { kernel: 1, kind: 'write-copy', label: tr(`write a ${name} copy`, `ghi một bản sao ${name}`), bytes: w * n },
+    { kernel: 2, kind: 'read-copy', label: tr(`read the ${name} copy back`, `đọc lại bản sao ${name}`), bytes: w * n },
     ...io,
   ];
 }

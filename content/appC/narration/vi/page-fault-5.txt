@@ -1,0 +1,1 @@
+Sau đó CPU chạm vào trang, và cả chuỗi bước chạy theo chiều ngược lại: một lỗi trang phía CPU, GPU mất ánh xạ, và trang đi ngược trở về. Một trang mà cả hai bên cứ liên tục chạm vào sẽ bị chuyển qua lại mỗi lần. Đó là lúc ánh xạ trực tiếp nó, hoặc dùng một gợi ý, thắng việc di chuyển trang.

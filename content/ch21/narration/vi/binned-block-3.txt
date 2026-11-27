@@ -1,0 +1,1 @@
+Giờ mỗi luồng kiểm tra từng nguyên tử đã nạp với bán kính cắt quanh điểm của chính nó. Với nguyên tử này, một số lane chấp nhận và số khác từ chối, nên warp bị phân kỳ và chạy cả hai nhánh. Một nguyên tử giả khiến mọi lane tốn một phép kiểm tra mà không thêm được gì cả.

@@ -1,0 +1,1 @@
+Một kernel nạp dữ liệu từ một trang được quản lý, mà lúc này trang đó đang nằm trong bộ nhớ CPU. GPU không có ánh xạ hợp lệ cho trang này, nên lần truy cập không thể hoàn tất. Nó gây ra một lỗi trang, và lần nạp phải chờ trong khi trình điều khiển Unified Memory xử lý.

@@ -31,6 +31,8 @@
 // Erasable TypeScript and no imports: the browser check imports this file directly.
 // elementIndex() repeats line 12 of histcoarsen.ts; a unit test ties the two together.
 
+import { tr } from '../lib/locale.ts';
+
 export type Partitioning = 'contiguous' | 'interleaved';
 
 /** Line 12 of Figs. 9.12 and 9.14 (line 15 of Fig. 9.15). */
@@ -50,11 +52,51 @@ export const CONSTANT_VALUE = 200;
 export const BINS = 256;
 
 export const PRESETS: Record<PresetId, { id: PresetId; label: string; note: string }> = {
-  noise: { id: 'noise', label: 'noise', note: 'every byte drawn uniformly from 0 to 255' },
-  constant: { id: 'constant', label: 'constant', note: `every byte ${CONSTANT_VALUE}` },
-  sky: { id: 'sky', label: 'sky', note: `rows ${SKY_WIDTH} pixels wide, each row one value, neighbouring rows different` },
-  stripes: { id: 'stripes', label: 'short stripes', note: `runs of ${STRIPE} equal bytes, each run a new value` },
-  tokens: { id: 'tokens', label: 'token ids', note: 'ids 0 to 255 drawn from a Zipf-like distribution, neighbours independent' },
+  noise: {
+    id: 'noise',
+    get label() {
+      return tr('noise', 'nhiễu');
+    },
+    get note() {
+      return tr('every byte drawn uniformly from 0 to 255', 'mỗi byte được rút ngẫu nhiên đều trong khoảng 0 đến 255');
+    },
+  },
+  constant: {
+    id: 'constant',
+    get label() {
+      return tr('constant', 'hằng');
+    },
+    get note() {
+      return tr(`every byte ${CONSTANT_VALUE}`, `mọi byte đều bằng ${CONSTANT_VALUE}`);
+    },
+  },
+  sky: {
+    id: 'sky',
+    get label() {
+      return tr('sky', 'bầu trời');
+    },
+    get note() {
+      return tr(`rows ${SKY_WIDTH} pixels wide, each row one value, neighbouring rows different`, `các hàng rộng ${SKY_WIDTH} pixel, mỗi hàng một giá trị, các hàng kề nhau khác nhau`);
+    },
+  },
+  stripes: {
+    id: 'stripes',
+    get label() {
+      return tr('short stripes', 'sọc ngắn');
+    },
+    get note() {
+      return tr(`runs of ${STRIPE} equal bytes, each run a new value`, `các dãy ${STRIPE} byte bằng nhau, mỗi dãy một giá trị mới`);
+    },
+  },
+  tokens: {
+    id: 'tokens',
+    get label() {
+      return tr('token ids', 'id token');
+    },
+    get note() {
+      return tr('ids 0 to 255 drawn from a Zipf-like distribution, neighbours independent', 'các id từ 0 đến 255 rút từ một phân phối kiểu Zipf, các phần tử kề nhau độc lập');
+    },
+  },
 };
 export const PRESET_ORDER: PresetId[] = ['noise', 'constant', 'sky', 'stripes', 'tokens'];
 

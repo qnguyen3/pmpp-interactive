@@ -1,0 +1,1 @@
+Tất cả các con số này theo quy tắc NVIDIA công bố. Trên một GPU AMD với 64 bank và 64 lane, cùng lần ghi cột đó được đếm khác, và dù sao AMD cũng phục vụ 16 lane mỗi chu kỳ. Apple không công bố gì về bank cả. Vì vậy lab 6.3 đo xem thiết bị của chính bạn làm gì.

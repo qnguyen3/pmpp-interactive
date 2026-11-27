@@ -1,0 +1,1 @@
+Hãy bắt đầu với vòng lặp bạn sẽ viết trên CPU. Một luồng. Một biến đếm, i, chạy từ 0 đến 9. Mỗi lượt, luồng đọc một phần tử của A và một phần tử của B, cộng chúng lại, và lưu tổng vào C. 10 lượt, lần lượt nối tiếp nhau.

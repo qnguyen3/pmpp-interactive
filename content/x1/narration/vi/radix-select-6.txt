@@ -1,0 +1,1 @@
+Một lượt cuối ghi ra kết quả. Các khóa trên ngưỡng được giữ lại, và các khóa bằng nhau được giữ theo thứ tự cột cho đến khi dùng hết hạn mức 2. Mỗi lane tìm vị trí của mình từ một ballot và số lane đứng trước nó. Phép chọn đọc mỗi khóa 5 lần. Một phép sắp xếp đầy đủ di chuyển số byte gấp 4 lần cho mỗi khóa.

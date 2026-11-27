@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { br as brOf, fmtv, type BlockTrace, type KProblem, type KStep, type Snapshot } from '../../sim/flashkernel';
+import { Translated, tr } from '../../lib/i18n';
 
 // One block of the flash kernel drawn from a flashkernel.ts snapshot: global arrays in amber,
 // shared tiles in teal, registers in purple, as the memory-tier colours are used everywhere
@@ -86,11 +87,11 @@ export function FlashBlockView({
   const height = RY + BR * 22 + 34;
 
   return (
-    <svg viewBox={`0 0 720 ${height}`} role="img" aria-label="One block of the flash kernel: global, shared and register storage" style={{ width: '100%', maxWidth: 720, display: 'block' }} data-block-view>
-      {globalGrid(gx[0], 'Q (global)', 'Q')}
-      {globalGrid(gx[1], 'K (global)', 'K')}
-      {globalGrid(gx[2], 'V (global)', 'V')}
-      {globalGrid(gx[3], 'O (global)', 'O')}
+    <svg viewBox={`0 0 720 ${height}`} role="img" aria-label={tr('One block of the flash kernel: global, shared and register storage', 'Một khối của kernel flash: bộ nhớ toàn cục, bộ nhớ chia sẻ và thanh ghi')} style={{ width: '100%', maxWidth: 720, display: 'block' }} data-block-view>
+      {globalGrid(gx[0], tr('Q (global)', 'Q (toàn cục)'), 'Q')}
+      {globalGrid(gx[1], tr('K (global)', 'K (toàn cục)'), 'K')}
+      {globalGrid(gx[2], tr('V (global)', 'V (toàn cục)'), 'V')}
+      {globalGrid(gx[3], tr('O (global)', 'O (toàn cục)'), 'O')}
 
       <text x={KX} y={KY - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--shared)' }}>KT_j</text>
       {snap.KT.map((v, i) => {
@@ -103,12 +104,12 @@ export function FlashBlockView({
             fill={hot ? 'var(--shared)' : t >= 0 ? 'var(--shared-wash)' : 'var(--cell)'}
             stroke={staleTile(t) && ktR.has(i) ? 'var(--fail)' : 'var(--shared)'} strokeWidth={staleTile(t) && ktR.has(i) ? 1.6 : 0.6}
             data-kt={i} data-tile={t}>
-            <title>{`KT_j[${dd}][${jj}] = ${short(v)}${t >= 0 ? ` (tile ${t})` : ''}`}</title>
+            <title>{tr(`KT_j[${dd}][${jj}] = ${short(v)}${t >= 0 ? ` (tile ${t})` : ''}`, `KT_j[${dd}][${jj}] = ${short(v)}${t >= 0 ? ` (ô ${t})` : ''}`)}</title>
           </rect>
         );
       })}
 
-      <text x={SX} y={SY - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--shared)' }}>S_i, overwritten with P</text>
+      <text x={SX} y={SY - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--shared)' }}><Translated vi="S_i, bị ghi đè bằng P">S_i, overwritten with P</Translated></text>
       {snap.S.map((v, i) => {
         const lr = Math.floor(i / c.bc);
         const jj = i % c.bc;
@@ -148,11 +149,17 @@ export function FlashBlockView({
       })}
       {curTile != null ? (
         <text x={KX} y={Math.max(KY + d * KC, SY + BR * SH) + 16} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-          working on tile {curTile} (K and V rows {curTile * c.bc} to {Math.min(n, (curTile + 1) * c.bc) - 1})
+          <Translated vi={<>đang xử lý ô {curTile} (các hàng K và V từ {curTile * c.bc} đến {Math.min(n, (curTile + 1) * c.bc) - 1})</>}>
+            working on tile {curTile} (K and V rows {curTile * c.bc} to {Math.min(n, (curTile + 1) * c.bc) - 1})
+          </Translated>
         </text>
       ) : null}
 
-      <text x={14} y={RY - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--reg)' }}>registers, per row of the panel (lane 0's copy of m and D; Õ / D gathered from the lanes)</text>
+      <text x={14} y={RY - 8} fontSize="11" fontWeight="600" style={{ fill: 'var(--reg)' }}>
+        <Translated vi="thanh ghi, theo từng hàng của panel (bản sao m và D của lane 0; Õ / D gom từ các lane)">
+          registers, per row of the panel (lane 0's copy of m and D; Õ / D gathered from the lanes)
+        </Translated>
+      </text>
       {rowsShown.map((lr) => {
         const w = Math.floor(lr / c.brWarp);
         const ii = lr % c.brWarp;
@@ -163,7 +170,11 @@ export function FlashBlockView({
         return (
           <g key={lr} data-reg-row={row}>
             {on ? <rect x={10} y={y - 2} width={700} height={20} rx="3" fill="var(--rule-soft)" /> : null}
-            <text x={14} y={y + 12} fontSize="10.5">row {row}{row >= n ? ' (past N)' : ''}, warp {w}</text>
+            <text x={14} y={y + 12} fontSize="10.5">
+              <Translated vi={<>hàng {row}{row >= n ? ' (quá N)' : ''}, warp {w}</>}>
+                row {row}{row >= n ? ' (past N)' : ''}, warp {w}
+              </Translated>
+            </text>
             <text x={128} y={y + 12} fontSize="10.5" style={{ fill: 'var(--reg)' }}>m {fmtv(reg.m[ii])}</text>
             <text x={236} y={y + 12} fontSize="10.5" style={{ fill: 'var(--reg)' }}>D {fmtv(reg.D[ii])}</text>
             {Array.from({ length: d }, (_, dd) => {
@@ -181,7 +192,7 @@ export function FlashBlockView({
                   {shown ? (
                     <text x={318 + dd * 40 + 19} y={y + 12} fontSize="9" textAnchor="middle" style={{ fill: broken ? 'var(--fail)' : 'var(--ink)' }}>{short(v)}</text>
                   ) : null}
-                  <title>{`Õ/D column ${dd}: ${short(v)}; exact over the whole row: ${short(exact)}`}</title>
+                  <title>{tr(`Õ/D column ${dd}: ${short(v)}; exact over the whole row: ${short(exact)}`, `Õ/D cột ${dd}: ${short(v)}; giá trị chính xác trên cả hàng: ${short(exact)}`)}</title>
                 </g>
               );
             })}

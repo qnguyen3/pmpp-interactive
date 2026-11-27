@@ -1,0 +1,1 @@
+Rồi đến đường B. Giờ 8 lane chạy và 24 lane chờ. Sau đó, cả 32 lane cùng nhau đi tiếp với những gì đến sau. Mỗi luồng đều đi đúng đường của mình, đúng như mã nói. Cái giá là một lượt chạy thứ hai, mà trong lượt đó phần lớn các lane đều rảnh.

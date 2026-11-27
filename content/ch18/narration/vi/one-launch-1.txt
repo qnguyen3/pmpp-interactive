@@ -1,0 +1,1 @@
+Hãy hình dung một bản đồ đường sá dưới dạng một lưới, được tìm kiếm từ một góc. Ở mỗi mức, CPU khởi chạy kernel, chờ, chép kích thước frontier mới về, rồi quyết định có khởi chạy lại hay không. Mỗi thanh kernel đều ngắn, vì một mức chỉ là một đường chéo mỏng của lưới. Mỗi khoảng trống là một chuyến khứ hồi, và mỗi mức đều phải trả một chuyến.

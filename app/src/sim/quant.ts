@@ -39,6 +39,7 @@
 // the facts show it cannot happen outside such degenerate groups).
 
 import { FP16, encode, round as roundTo } from './minifloat';
+import { tr } from '../lib/locale.ts';
 
 export const f32 = Math.fround;
 /** C's roundf: to nearest, halves away from zero. Exact for every float input. */
@@ -75,7 +76,14 @@ export function gauss(r: () => number): number {
   return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
 }
 export type Dist = 'normal' | 't3';
-export const DIST_LABEL: Record<Dist, string> = { normal: 'normal', t3: 'Student t, 3 degrees of freedom' };
+export const DIST_LABEL: Record<Dist, string> = {
+  get normal() {
+    return tr('normal', 'chuẩn');
+  },
+  get t3() {
+    return tr('Student t, 3 degrees of freedom', 'Student t, 3 bậc tự do');
+  },
+};
 
 /**
  * n float32 weights with standard deviation sigma: normal, or Student t with 3 degrees of
@@ -220,15 +228,28 @@ export function quantizeRowQ8_0(row: number[]): Q8_0Block[] {
 export type Rule = 'q8_0' | 'q4_0' | 'sym4' | 'q4_1' | 'mlx-doc' | 'mlx-code';
 export const RULES: Rule[] = ['q8_0', 'q4_0', 'sym4', 'q4_1', 'mlx-doc', 'mlx-code'];
 export const RULE_LABEL: Record<Rule, string> = {
-  q8_0: 'llama.cpp Q8_0',
-  q4_0: 'llama.cpp Q4_0',
-  sym4: 'symmetric ±7 (textbook)',
-  q4_1: 'llama.cpp Q4_1',
-  'mlx-doc': 'MLX affine 4-bit, as documented',
-  'mlx-code': 'MLX affine 4-bit, as coded',
+  q8_0: 'llama.cpp Q8_0', // i18n-ignore: format name
+  q4_0: 'llama.cpp Q4_0', // i18n-ignore: format name
+  get sym4() {
+    return tr('symmetric ±7 (textbook)', 'đối xứng ±7 (sách giáo khoa)');
+  },
+  q4_1: 'llama.cpp Q4_1', // i18n-ignore: format name
+  get 'mlx-doc'() {
+    return tr('MLX affine 4-bit, as documented', 'MLX affine 4-bit, theo tài liệu');
+  },
+  get 'mlx-code'() {
+    return tr('MLX affine 4-bit, as coded', 'MLX affine 4-bit, theo mã nguồn');
+  },
 };
 export const RULE_FACT: Record<Rule, string> = {
-  q8_0: 'D1', q4_0: 'D1', sym4: 'ours (E2 "sym4")', q4_1: 'D1', 'mlx-doc': 'D5', 'mlx-code': 'D5',
+  q8_0: 'D1',
+  q4_0: 'D1',
+  get sym4() {
+    return tr('ours (E2 "sym4")', 'của chúng tôi (E2 "sym4")');
+  },
+  q4_1: 'D1',
+  'mlx-doc': 'D5',
+  'mlx-code': 'D5',
 };
 
 export interface Trace {
@@ -376,13 +397,20 @@ export const SCENE_BLOCK = demoBlock();
 // ---------------------------------------------------------------- error against bits and blocks (E2's shape)
 export type Scheme = 'signed-extreme' | 'symmetric' | 'affine';
 export const SCHEME_LABEL: Record<Scheme, string> = {
-  'signed-extreme': 'Q4_0-style: signed extreme over -2^(b-1)',
-  symmetric: 'symmetric: ±(2^(b-1) - 1)',
-  affine: 'affine: min and max (MLX as documented)',
+  get 'signed-extreme'() {
+    return tr('Q4_0-style: signed extreme over -2^(b-1)', 'kiểu Q4_0: giá trị cực trị có dấu chia cho -2^(b-1)');
+  },
+  get symmetric() {
+    return tr('symmetric: ±(2^(b-1) - 1)', 'đối xứng: ±(2^(b-1) - 1)');
+  },
+  get affine() {
+    return tr('affine: min and max (MLX as documented)', 'affine: min và max (MLX theo tài liệu)');
+  },
 };
 export type Gran = number | 'row' | 'tensor';
 export const GRANS: Gran[] = [16, 32, 64, 128, 256, 'row', 'tensor'];
-export const granLabel = (g: Gran) => (g === 'row' ? 'one per row' : g === 'tensor' ? 'one per tensor' : `block ${g}`);
+export const granLabel = (g: Gran) =>
+  g === 'row' ? tr('one per row', 'một cho mỗi hàng') : g === 'tensor' ? tr('one per tensor', 'một cho mỗi tensor') : tr(`block ${g}`, `khối ${g}`);
 
 export interface SweepPoint {
   bits: number;
@@ -530,9 +558,15 @@ export function unpackQ4K(qs: number[]): number[] {
 
 export type Layout = 'q4_0' | 'mlx4' | 'q4_k';
 export const LAYOUT_LABEL: Record<Layout, string> = {
-  q4_0: 'llama.cpp Q4_0 (32 weights, 16 bytes of quants)',
-  mlx4: 'MLX 4-bit (32 weights, four uint32 words)',
-  q4_k: 'llama.cpp Q4_K (one 64-weight chunk, 32 bytes)',
+  get q4_0() {
+    return tr('llama.cpp Q4_0 (32 weights, 16 bytes of quants)', 'llama.cpp Q4_0 (32 trọng số, 16 byte mã lượng tử)');
+  },
+  get mlx4() {
+    return tr('MLX 4-bit (32 weights, four uint32 words)', 'MLX 4-bit (32 trọng số, bốn word uint32)');
+  },
+  get q4_k() {
+    return tr('llama.cpp Q4_K (one 64-weight chunk, 32 bytes)', 'llama.cpp Q4_K (một chunk 64 trọng số, 32 byte)');
+  },
 };
 /** Weights the explorer shows per layout. */
 export const LAYOUT_WEIGHTS: Record<Layout, number> = { q4_0: 32, mlx4: 32, q4_k: 64 };
@@ -582,10 +616,10 @@ export function packScaleMinK4(sc: number[], m: number[]): number[] {
 }
 /** Where get_scale_min_k4 finds the bits of scale j and min j, for the table in X2.2. */
 export function scaleMinSources(j: number): { sc: string; m: string } {
-  if (j < 4) return { sc: `byte ${j}, bits 0–5`, m: `byte ${j + 4}, bits 0–5` };
+  if (j < 4) return { sc: tr(`byte ${j}, bits 0–5`, `byte ${j}, bit 0–5`), m: tr(`byte ${j + 4}, bits 0–5`, `byte ${j + 4}, bit 0–5`) };
   return {
-    sc: `byte ${j + 4}, bits 0–3, and byte ${j - 4}, bits 6–7`,
-    m: `byte ${j + 4}, bits 4–7, and byte ${j}, bits 6–7`,
+    sc: tr(`byte ${j + 4}, bits 0–3, and byte ${j - 4}, bits 6–7`, `byte ${j + 4}, bit 0–3, và byte ${j - 4}, bit 6–7`),
+    m: tr(`byte ${j + 4}, bits 4–7, and byte ${j}, bits 6–7`, `byte ${j + 4}, bit 4–7, và byte ${j}, bit 6–7`),
   };
 }
 
@@ -647,30 +681,30 @@ export function unpackTrace(variant: UnpackVariant, qs: number[], i: number, y: 
           { lo: 8 * k + 4, hi: 8 * k + 7, weight: highW[k], value: codes[highW[k]] },
         ]),
         out: [],
-        text: `Two 16-bit loads, ${hex(lo16, 4)} from qs[${4 * i}] and ${hex(hi16, 4)} from qs[${4 * i + 2}], make the 32-bit word ${hex(v, 8)}: bytes ${4 * i} to ${4 * i + 3} of the quants.`,
+        text: tr(`Two 16-bit loads, ${hex(lo16, 4)} from qs[${4 * i}] and ${hex(hi16, 4)} from qs[${4 * i + 2}], make the 32-bit word ${hex(v, 8)}: bytes ${4 * i} to ${4 * i + 3} of the quants.`, `Hai lần load 16-bit, ${hex(lo16, 4)} từ qs[${4 * i}] và ${hex(hi16, 4)} từ qs[${4 * i + 2}], tạo thành word 32-bit ${hex(v, 8)}: các byte ${4 * i} đến ${4 * i + 3} của mã lượng tử.`),
       },
       {
         op: 'mask', word: vi0, width: 32,
         fields: [0, 1, 2, 3].map((k) => ({ lo: 8 * k, hi: 8 * k + 3, weight: lowW[k], value: codes[lowW[k]] })),
-        out: lowW.map((w) => ({ weight: w, value: codes[w], note: 'low nibble' })),
-        text: `v & 0x0F0F0F0F = ${hex(vi0, 8)}: one byte per lane, holding weights ${lowW[0]} to ${lowW[3]}, codes ${lowW.map((w) => codes[w]).join(', ')}. Four neighbours, ready to meet four neighbouring int8 activations.`,
+        out: lowW.map((w) => ({ weight: w, value: codes[w], note: tr('low nibble', 'nibble thấp') })),
+        text: tr(`v & 0x0F0F0F0F = ${hex(vi0, 8)}: one byte per lane, holding weights ${lowW[0]} to ${lowW[3]}, codes ${lowW.map((w) => codes[w]).join(', ')}. Four neighbours, ready to meet four neighbouring int8 activations.`, `v & 0x0F0F0F0F = ${hex(vi0, 8)}: mỗi lane một byte, chứa các trọng số ${lowW[0]} đến ${lowW[3]}, mã ${lowW.map((w) => codes[w]).join(', ')}. Bốn phần tử liền kề, sẵn sàng gặp bốn activation int8 liền kề.`),
       },
       {
         op: 'shift', word: vi1, width: 32,
         fields: [0, 1, 2, 3].map((k) => ({ lo: 8 * k, hi: 8 * k + 3, weight: highW[k], value: codes[highW[k]] })),
-        out: highW.map((w) => ({ weight: w, value: codes[w], note: 'high nibble' })),
-        text: `(v >> 4) & 0x0F0F0F0F = ${hex(vi1, 8)}: weights ${highW[0]} to ${highW[3]}, codes ${highW.map((w) => codes[w]).join(', ')}. The same mask after one shift, and these four meet the activations 16 further on.`,
+        out: highW.map((w) => ({ weight: w, value: codes[w], note: tr('high nibble', 'nibble cao') })),
+        text: tr(`(v >> 4) & 0x0F0F0F0F = ${hex(vi1, 8)}: weights ${highW[0]} to ${highW[3]}, codes ${highW.map((w) => codes[w]).join(', ')}. The same mask after one shift, and these four meet the activations 16 further on.`, `(v >> 4) & 0x0F0F0F0F = ${hex(vi1, 8)}: các trọng số ${highW[0]} đến ${highW[3]}, mã ${highW.map((w) => codes[w]).join(', ')}. Cùng mặt nạ đó sau một lần dịch bit, và bốn trọng số này gặp các activation cách 16 vị trí về phía sau.`),
       },
       {
         op: 'sub8', word: vi1, width: 32,
         fields: [],
         out: all.map((w, k) => ({ weight: w, value: signed[k], note: `${codes[w]} - 8` })),
-        text: `Subtract 8 from each code: ${signed.join(', ')}. llama.cpp's CUDA kernel does not do this per weight; it subtracts 8 times the activations' sum once per block (section X2.5).`,
+        text: tr(`Subtract 8 from each code: ${signed.join(', ')}. llama.cpp's CUDA kernel does not do this per weight; it subtracts 8 times the activations' sum once per block (section X2.5).`, `Trừ 8 khỏi mỗi mã: ${signed.join(', ')}. Kernel CUDA của llama.cpp không làm việc này cho từng trọng số; nó trừ 8 lần tổng các activation một lần cho mỗi khối (mục X2.5).`),
       },
       {
         op: 'dot', word: vi1, width: 32, fields: [],
         out: all.map((w, k) => ({ weight: w, value: f32(signed[k] * y[w]), note: `(${signed[k]}) × y[${w}]` })),
-        text: `These eight codes times their activations add up to ${dot.toPrecision(6)}, still to be multiplied by the block's d.`,
+        text: tr(`These eight codes times their activations add up to ${dot.toPrecision(6)}, still to be multiplied by the block's d.`, `Tám mã này nhân với các activation của chúng cộng lại được ${dot.toPrecision(6)}, vẫn còn phải nhân với d của khối.`),
       },
     ];
   }
@@ -689,18 +723,18 @@ export function unpackTrace(variant: UnpackVariant, qs: number[], i: number, y: 
       op: 'load', word: u, width: 16,
       fields: W.map((w, k) => ({ lo: LO[k], hi: LO[k] + 3, weight: w, value: codes[w] })),
       out: [],
-      text: `One 16-bit load from qs[${2 * i}]: ${hex(u, 4)}, bytes ${2 * i} and ${2 * i + 1}, four weights: ${W.join(', ')}.`,
+      text: tr(`One 16-bit load from qs[${2 * i}]: ${hex(u, 4)}, bytes ${2 * i} and ${2 * i + 1}, four weights: ${W.join(', ')}.`, `Một lần load 16-bit từ qs[${2 * i}]: ${hex(u, 4)}, các byte ${2 * i} và ${2 * i + 1}, bốn trọng số: ${W.join(', ')}.`),
     },
     ...MASK.map((m, k): UnpackStep => ({
       op: 'mask', word: masked[k], width: 16,
       fields: [{ lo: LO[k], hi: LO[k] + 3, weight: W[k], value: codes[W[k]] }],
       out: [{ weight: W[k], value: masked[k], note: `${codes[W[k]]} × ${DIV[k]}` }],
-      text: `u & ${hex(m, 4)} = ${masked[k]}: weight ${W[k]}'s code ${codes[W[k]]}, left where it sits, so it counts ${DIV[k]} times over. No shift.`,
+      text: tr(`u & ${hex(m, 4)} = ${masked[k]}: weight ${W[k]}'s code ${codes[W[k]]}, left where it sits, so it counts ${DIV[k]} times over. No shift.`, `u & ${hex(m, 4)} = ${masked[k]}: mã ${codes[W[k]]} của trọng số ${W[k]}, để nguyên tại chỗ, nên nó được tính gấp ${DIV[k]} lần. Không dịch bit.`),
     })),
     {
       op: 'dot', word: u, width: 16, fields: [],
       out: W.map((w, k) => ({ weight: w, value: prods[k], note: `${masked[k]} × y[${w}]/${DIV[k]}` })),
-      text: `The activations were divided by 1, 256, 16 and 4096 when they were loaded, so each product is exactly code × activation: ${prods.map((p) => p.toPrecision(4)).join(', ')}. Sum ${acc.toPrecision(6)}; the 8 comes off later as 8 × (sum of these activations) = 8 × ${sumy.toPrecision(5)}.`,
+      text: tr(`The activations were divided by 1, 256, 16 and 4096 when they were loaded, so each product is exactly code × activation: ${prods.map((p) => p.toPrecision(4)).join(', ')}. Sum ${acc.toPrecision(6)}; the 8 comes off later as 8 × (sum of these activations) = 8 × ${sumy.toPrecision(5)}.`, `Các activation đã được chia cho 1, 256, 16 và 4096 khi load, nên mỗi tích đúng bằng mã × activation: ${prods.map((p) => p.toPrecision(4)).join(', ')}. Tổng ${acc.toPrecision(6)}; số 8 được trừ sau dưới dạng 8 × (tổng các activation này) = 8 × ${sumy.toPrecision(5)}.`),
     },
   ];
 }
@@ -743,8 +777,12 @@ export const MAT_FORMAT_LABEL: Record<MatFormat, string> = {
   f32: 'F32',
   q8_0: 'Q8_0',
   q4_0: 'Q4_0',
-  affine3: 'affine 3-bit, group 64',
-  affine2: 'affine 2-bit, group 64',
+  get affine3() {
+    return tr('affine 3-bit, group 64', 'affine 3-bit, nhóm 64');
+  },
+  get affine2() {
+    return tr('affine 2-bit, group 64', 'affine 2-bit, nhóm 64');
+  },
 };
 /** Dequantised copy of a rows × cols matrix quantised along each row. Affine is MLX's documented rule with FP16 scale and bias. */
 export function fakeQuant(w: number[], rows: number, cols: number, fmt: MatFormat): number[] {

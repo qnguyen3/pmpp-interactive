@@ -14,6 +14,8 @@
 // section's tie-rule question). It still converges, to the co-rank that sends
 // ties to B, so keys stay sorted while stability is lost.
 
+import { tr } from '../lib/locale.ts';
+
 export type Src = 'A' | 'B';
 
 /** One element of a merge, tagged with where it came from. */
@@ -126,7 +128,7 @@ export function evaluate(
     t1.right = B[j];
     t1.holds = rule === 'book' ? A[i - 1] > B[j] : A[i - 1] >= B[j];
   }
-  if (t1.holds) return { verdict: 'i-too-high', t1, t2: null, reads };
+  if (t1.holds) return { verdict: 'i-too-high', t1, t2: null, reads }; // i18n-ignore: verdict id; the chapter shows its own text
   // Test 2: j > 0 && i < m && B[j-1] >= A[i]   (swapped: >)
   const t2: TestEval = { inBounds: j > 0 && i < m, holds: false };
   if (t2.inBounds) {
@@ -320,22 +322,56 @@ export function sortedRandom(r: () => number, n: number, lo: number, hi: number)
 export type PresetId = 'running' | 'duplicates' | 'a-below' | 'b-below' | 'equal' | 'a-empty' | 'random';
 
 export const PRESETS: { id: PresetId; label: string; make: (seed: number) => { A: number[]; B: number[] } }[] = [
-  { id: 'running', label: 'The running example', make: () => ({ A: [1, 7, 8, 9, 10], B: [7, 10, 10, 12] }) },
+  {
+    id: 'running',
+    get label() {
+      return tr('The running example', 'Ví dụ xuyên suốt');
+    },
+    make: () => ({ A: [1, 7, 8, 9, 10], B: [7, 10, 10, 12] }),
+  },
   {
     id: 'duplicates',
-    label: 'Many duplicates (keys 0 to 3)',
+    get label() {
+      return tr('Many duplicates (keys 0 to 3)', 'Nhiều khóa trùng (khóa 0 đến 3)');
+    },
     make: (seed) => {
       const r = rng(seed);
       return { A: sortedRandom(r, 8, 0, 3), B: sortedRandom(r, 7, 0, 3) };
     },
   },
-  { id: 'a-below', label: 'All of A below B', make: () => ({ A: [1, 2, 3, 4, 5], B: [6, 7, 8, 9] }) },
-  { id: 'b-below', label: 'All of B below A', make: () => ({ A: [6, 7, 8, 9, 10], B: [1, 2, 3, 4] }) },
-  { id: 'equal', label: 'All keys equal', make: () => ({ A: [5, 5, 5, 5, 5], B: [5, 5, 5, 5] }) },
-  { id: 'a-empty', label: 'A empty', make: () => ({ A: [], B: [2, 4, 6, 8, 10] }) },
+  {
+    id: 'a-below',
+    get label() {
+      return tr('All of A below B', 'Toàn bộ A nhỏ hơn B');
+    },
+    make: () => ({ A: [1, 2, 3, 4, 5], B: [6, 7, 8, 9] }),
+  },
+  {
+    id: 'b-below',
+    get label() {
+      return tr('All of B below A', 'Toàn bộ B nhỏ hơn A');
+    },
+    make: () => ({ A: [6, 7, 8, 9, 10], B: [1, 2, 3, 4] }),
+  },
+  {
+    id: 'equal',
+    get label() {
+      return tr('All keys equal', 'Mọi khóa bằng nhau');
+    },
+    make: () => ({ A: [5, 5, 5, 5, 5], B: [5, 5, 5, 5] }),
+  },
+  {
+    id: 'a-empty',
+    get label() {
+      return tr('A empty', 'A rỗng');
+    },
+    make: () => ({ A: [], B: [2, 4, 6, 8, 10] }),
+  },
   {
     id: 'random',
-    label: 'Random',
+    get label() {
+      return tr('Random', 'Ngẫu nhiên');
+    },
     make: (seed) => {
       const r = rng(seed);
       const m = 3 + Math.floor(r() * 8);
@@ -352,15 +388,15 @@ export function parseSorted(text: string, max = MAX_INPUT): { ok: true; values: 
   const t = text.trim();
   if (t === '') return { ok: true, values: [] };
   const parts = t.split(/[\s,]+/).filter((s) => s !== '');
-  if (parts.length > max) return { ok: false, error: `at most ${max} numbers` };
+  if (parts.length > max) return { ok: false, error: tr(`at most ${max} numbers`, `tối đa ${max} số`) };
   const values: number[] = [];
   for (const p of parts) {
-    if (!/^-?\d+$/.test(p)) return { ok: false, error: `"${p}" is not a whole number` };
+    if (!/^-?\d+$/.test(p)) return { ok: false, error: tr(`"${p}" is not a whole number`, `"${p}" không phải số nguyên`) };
     const v = Number(p);
-    if (Math.abs(v) > 999) return { ok: false, error: 'keep numbers between -999 and 999' };
+    if (Math.abs(v) > 999) return { ok: false, error: tr('keep numbers between -999 and 999', 'giữ các số trong khoảng -999 đến 999') };
     values.push(v);
   }
   for (let q = 1; q < values.length; q++)
-    if (values[q - 1] > values[q]) return { ok: false, error: `not sorted: ${values[q - 1]} comes before ${values[q]}` };
+    if (values[q - 1] > values[q]) return { ok: false, error: tr(`not sorted: ${values[q - 1]} comes before ${values[q]}`, `chưa sắp xếp: ${values[q - 1]} đứng trước ${values[q]}`) };
   return { ok: true, values };
 }

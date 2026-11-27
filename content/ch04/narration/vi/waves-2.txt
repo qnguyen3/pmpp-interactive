@@ -1,0 +1,1 @@
+Thiết bị nhỏ này có 2 chỗ. Khối 0 và khối 1 đi trước. Khi chúng xong, khối 2 và khối 3 thế chỗ, và cứ thế xuống hết danh sách. Mỗi lần 2 khối, 4 lượt. Sách gọi mỗi lượt là một đợt. 8 khối, mỗi lần 2 khối, thành 4 đợt.

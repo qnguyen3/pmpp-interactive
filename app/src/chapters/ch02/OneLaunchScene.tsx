@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   SCENE,
   blockCount,
@@ -42,7 +43,7 @@ const GY = 162; // thread boxes
 const TH = 36;
 const AY = 252; // first array row
 const RH = 26;
-const MONO = { fontVariationSettings: "'MONO' 1, 'CASL' 0" } as const;
+const MONO = { fontVariationSettings: "'MONO' 1, 'CASL' 0" } as const; // i18n-ignore: CSS font settings
 
 const clamp = (v: number) => Math.max(0, Math.min(1, v));
 const ramp = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
@@ -79,10 +80,18 @@ interface Frame {
 const HOST_LINES = ['', 'CHECK(cudaGetLastError());', 'CHECK(cudaDeviceSynchronize());'];
 const STATE_WORD: Record<BlockState, string> = {
   hidden: '',
-  queued: 'in the queue',
-  running: 'running',
-  done: 'finished',
-  ghost: 'never created',
+  get queued() {
+    return tr('in the queue', 'trong hàng đợi');
+  },
+  get running() {
+    return tr('running', 'đang chạy');
+  },
+  get done() {
+    return tr('finished', 'đã xong');
+  },
+  get ghost() {
+    return tr('never created', 'không bao giờ được tạo');
+  },
 };
 
 function Stage(f: Frame) {
@@ -91,10 +100,10 @@ function Stage(f: Frame) {
   // On a phone the drawing keeps a legible size and scrolls sideways inside its frame.
   return (
     <div style={{ overflowX: 'auto' }}>
-    <svg viewBox={`0 0 ${VW} 392`} role="img" aria-label="Animation of one kernel launch" style={{ width: '100%', minWidth: 600, maxWidth: VW, display: 'block' }}>
+    <svg viewBox={`0 0 ${VW} 392`} role="img" aria-label={tr('Animation of one kernel launch', 'Hoạt hình một lần khởi chạy kernel')} style={{ width: '100%', minWidth: 600, maxWidth: VW, display: 'block' }}>
       {/* host thread */}
       <rect x={10} y={8} width={476} height={86} rx="3" fill="var(--cell)" stroke="var(--rule)" />
-      <text x={20} y={24} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>host thread</text>
+      <text x={20} y={24} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>{tr('host thread', 'luồng host')}</text>
       {lines.map((ln, k) => (
         <g key={k}>
           {k === f.hostLine ? <rect x={14} y={31 + k * 19} width={468} height={18} rx="2" fill="var(--rule-soft)" /> : null}
@@ -108,16 +117,18 @@ function Stage(f: Frame) {
 
       {/* runtime and device */}
       <rect x={498} y={8} width={252} height={86} rx="3" fill="var(--cell)" stroke="var(--rule)" />
-      <text x={508} y={24} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>runtime and device</text>
-      <text x={508} y={42} fontSize="11.5">{f.runtime ?? 'nothing queued'}</text>
-      <text x={508} y={63} fontSize="11" style={{ fill: 'var(--ink-2)' }}>queue</text>
+      <text x={508} y={24} fontSize="11" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>{tr('runtime and device', 'runtime và device')}</text>
+      <text x={508} y={42} fontSize="11.5">{f.runtime ?? tr('nothing queued', 'chưa có gì trong hàng đợi')}</text>
+      <text x={508} y={63} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{tr('queue', 'hàng đợi')}</text>
       {(f.queue ?? []).map((b, k) => (
         <g key={b}>
           <rect x={548 + k * 30} y={51} width={26} height={17} rx="2" fill="var(--page)" stroke="var(--ink-2)" />
           <text x={561 + k * 30} y={63.5} fontSize="10.5" textAnchor="middle">b{b}</text>
         </g>
       ))}
-      <text x={508} y={85} fontSize="11" style={{ fill: 'var(--ink-2)' }}>runs {S} at once</text>
+      <text x={508} y={85} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
+        <Translated vi={<>chạy {S} cùng lúc</>}>runs {S} at once</Translated>
+      </text>
       {Array.from({ length: S }, (_, k) => {
         const b = f.slots?.[k] ?? null;
         return (
@@ -145,7 +156,7 @@ function Stage(f: Frame) {
                 stroke={ghost ? 'var(--fail)' : s === 'running' ? 'var(--ink)' : 'var(--rule)'}
                 strokeWidth={s === 'running' ? 2 : 1} strokeDasharray={ghost ? '5 4' : undefined} />
               <text x={x + 5} y={GY - 7} fontSize="11" fontWeight="600" style={{ fill: ghost ? 'var(--fail)' : 'var(--ink)' }}>
-                block {b}
+                {tr(`block ${b}`, `khối ${b}`)}
                 <tspan fontWeight="400" style={{ fill: ghost ? 'var(--fail)' : 'var(--ink-2)' }}> · {STATE_WORD[s]}</tspan>
               </text>
               {ghost
@@ -194,7 +205,9 @@ function Stage(f: Frame) {
         </g>
       ))}
       <text x={X0} y={AY + 3 * RH + 12} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-        device global memory, elements 0 to {n - 1}. A question mark is memory nothing has written yet.
+        <Translated vi={<>bộ nhớ toàn cục của device, phần tử 0 đến {n - 1}. Dấu hỏi là ô nhớ chưa có gì ghi vào.</>}>
+          device global memory, elements 0 to {n - 1}. A question mark is memory nothing has written yet.
+        </Translated>
       </text>
       {f.headline ? <text x={X0} y={382} fontSize="13" fontWeight="600">{f.headline}</text> : null}
     </svg>
@@ -216,54 +229,86 @@ const KERNEL_LINE = 'int i = blockIdx.x * blockDim.x + threadIdx.x;  if (i < n) 
 const beats: Beat[] = [
   {
     clip: 'one-launch-1',
-    label: 'The statement',
+    get label() {
+      return tr('The statement', 'Câu lệnh');
+    },
     draw: (p) => (
       <Stage
         statement={GOOD_STATEMENT}
         hostLine={0}
         blocks={QUEUED.map(() => 'hidden')}
         strip={[
-          p > 0.08 ? `1. the configuration:  ${s0.text} = ${s0.value}` + (p > 0.26 ? `,  ${s1.text} = ${s1.value}  (whole numbers: ${showValue(s0.value / B, 'double')} becomes ${s1.value})` : '') : '',
-          p > 0.62 ? `2. the arguments:  A_d, B_d, C_d are three device addresses;  n = ${n}, passed by value` : '',
+          p > 0.08
+            ? tr(`1. the configuration:  ${s0.text} = ${s0.value}`, `1. cấu hình:  ${s0.text} = ${s0.value}`) +
+              (p > 0.26
+                ? tr(
+                    `,  ${s1.text} = ${s1.value}  (whole numbers: ${showValue(s0.value / B, 'double')} becomes ${s1.value})`,
+                    `,  ${s1.text} = ${s1.value}  (số nguyên: ${showValue(s0.value / B, 'double')} thành ${s1.value})`,
+                  )
+                : '')
+            : '',
+          p > 0.62
+            ? tr(
+                `2. the arguments:  A_d, B_d, C_d are three device addresses;  n = ${n}, passed by value`,
+                `2. các đối số:  A_d, B_d, C_d là ba địa chỉ trên device;  n = ${n}, truyền theo giá trị`,
+              )
+            : '',
         ]}
-        headline={p > 0.42 ? `${count.blocks} blocks of ${B} threads` : undefined}
+        headline={p > 0.42 ? tr(`${count.blocks} blocks of ${B} threads`, `${count.blocks} khối, mỗi khối ${B} luồng`) : undefined}
       />
     ),
   },
   {
     clip: 'one-launch-2',
-    label: 'It returns',
+    get label() {
+      return tr('It returns', 'Nó trả về');
+    },
     draw: (p) => (
       <Stage
         statement={GOOD_STATEMENT}
         hostLine={p > 0.45 ? 1 : 0}
-        hostNote={p > 0.45 ? 'the statement has returned' : undefined}
-        runtime={p > 0.12 ? 'configuration accepted' : 'checking the configuration'}
+        hostNote={p > 0.45 ? tr('the statement has returned', 'câu lệnh đã trả về') : undefined}
+        runtime={p > 0.12 ? tr('configuration accepted', 'cấu hình được chấp nhận') : tr('checking the configuration', 'đang kiểm tra cấu hình')}
         queue={p > 0.28 ? range(0, count.blocks) : []}
         blocks={QUEUED.map(() => 'hidden')}
-        strip={[p > 0.55 ? 'No thread has run yet.' : '', p > 0.72 ? 'A configuration the device cannot satisfy is reported here, on the next line.' : '']}
+        strip={[
+          p > 0.55 ? tr('No thread has run yet.', 'Chưa luồng nào chạy.') : '',
+          p > 0.72
+            ? tr(
+                'A configuration the device cannot satisfy is reported here, on the next line.',
+                'Một cấu hình mà device không đáp ứng được sẽ được báo ở đây, trên dòng tiếp theo.',
+              )
+            : '',
+        ]}
       />
     ),
   },
   {
     clip: 'one-launch-3',
-    label: 'The grid',
+    get label() {
+      return tr('The grid', 'Lưới');
+    },
     draw: (p) => (
       <Stage
         statement={GOOD_STATEMENT}
         hostLine={1}
-        runtime="configuration accepted"
+        runtime={tr('configuration accepted', 'cấu hình được chấp nhận')}
         queue={range(0, count.blocks)}
         blocks={QUEUED}
         gridOpacity={ramp(p, 0.02, 0.22)}
-        strip={[p > 0.35 ? KERNEL_LINE : '', p > 0.6 ? 'Each box: block index, thread index.' : '']}
-        headline={`${good.blocks} blocks × ${B} threads = ${good.threads} threads, one kernel`}
+        strip={[p > 0.35 ? KERNEL_LINE : '', p > 0.6 ? tr('Each box: block index, thread index.', 'Mỗi ô: chỉ số khối, chỉ số luồng.') : '']}
+        headline={tr(
+          `${good.blocks} blocks × ${B} threads = ${good.threads} threads, one kernel`,
+          `${good.blocks} khối × ${B} luồng = ${good.threads} luồng, một kernel`,
+        )}
       />
     ),
   },
   {
     clip: 'one-launch-4',
-    label: 'Two at a time',
+    get label() {
+      return tr('Two at a time', 'Mỗi lần hai khối');
+    },
     draw: (p) => {
       const taken = p > 0.14;
       const done = Math.floor(ramp(p, 0.5, 0.92) * B + 0.001);
@@ -271,19 +316,32 @@ const beats: Beat[] = [
         <Stage
           statement={GOOD_STATEMENT}
           hostLine={1}
-          runtime={taken ? `took block ${FIRST[0]} and block ${FIRST[1]}` : 'choosing blocks'}
+          runtime={
+            taken
+              ? tr(`took block ${FIRST[0]} and block ${FIRST[1]}`, `đã lấy khối ${FIRST[0]} và khối ${FIRST[1]}`)
+              : tr('choosing blocks', 'đang chọn khối')
+          }
           queue={taken ? SECOND : range(0, count.blocks)}
           slots={taken ? FIRST : []}
           blocks={QUEUED.map((_, b) => (taken && FIRST.includes(b) ? 'running' : 'queued'))}
           indexed={QUEUED.map((_, b) => (FIRST.includes(b) ? done : 0))}
-          strip={[p > 0.45 ? `i = blockIdx.x * ${B} + threadIdx.x, in a register of its own for every thread` : '']}
+          strip={[
+            p > 0.45
+              ? tr(
+                  `i = blockIdx.x * ${B} + threadIdx.x, in a register of its own for every thread`,
+                  `i = blockIdx.x * ${B} + threadIdx.x, trong một thanh ghi riêng của mỗi luồng`,
+                )
+              : '',
+          ]}
         />
       );
     },
   },
   {
     clip: 'one-launch-5',
-    label: 'The guard',
+    get label() {
+      return tr('The guard', 'Phép chặn');
+    },
     draw: (p) => {
       const second = p > 0.66;
       const t1 = Math.floor(ramp(p, 0.26, 0.58) * B + 0.001); // threads of the first wave that have stored
@@ -296,7 +354,11 @@ const beats: Beat[] = [
         <Stage
           statement={GOOD_STATEMENT}
           hostLine={1}
-          runtime={second ? `took block ${SECOND[0]}` : `running block ${FIRST[0]} and block ${FIRST[1]}`}
+          runtime={
+            second
+              ? tr(`took block ${SECOND[0]}`, `đã lấy khối ${SECOND[0]}`)
+              : tr(`running block ${FIRST[0]} and block ${FIRST[1]}`, `đang chạy khối ${FIRST[0]} và khối ${FIRST[1]}`)
+          }
           queue={second ? [] : SECOND}
           slots={second ? SECOND : FIRST}
           blocks={QUEUED.map((_, b) => (FIRST.includes(b) ? (second ? 'done' : 'running') : second ? 'running' : 'queued'))}
@@ -305,8 +367,13 @@ const beats: Beat[] = [
           hot={hot}
           stored={stored}
           strip={[
-            p > 0.1 ? `if (i < n): threads with i = ${[...STOPPED].join(' and ')} fail the test and stop` : '',
-            p > 0.26 ? 'C[i] = A[i] + B[i] for every other thread' : '',
+            p > 0.1
+              ? tr(
+                  `if (i < n): threads with i = ${[...STOPPED].join(' and ')} fail the test and stop`,
+                  `if (i < n): các luồng có i = ${[...STOPPED].join(' và ')} không qua phép kiểm tra và dừng`,
+                )
+              : '',
+            p > 0.26 ? tr('C[i] = A[i] + B[i] for every other thread', 'C[i] = A[i] + B[i] với mọi luồng còn lại') : '',
           ]}
         />
       );
@@ -314,25 +381,36 @@ const beats: Beat[] = [
   },
   {
     clip: 'one-launch-6',
-    label: 'Only now',
+    get label() {
+      return tr('Only now', 'Chỉ đến lúc này');
+    },
     draw: (p) => (
       <Stage
         statement={GOOD_STATEMENT}
         hostLine={p > 0.3 ? 2 : 1}
-        hostNote={p > 0.3 ? 'the blocking call returns now' : undefined}
-        runtime="the grid has finished"
+        hostNote={p > 0.3 ? tr('the blocking call returns now', 'lời gọi chặn giờ mới trả về') : undefined}
+        runtime={tr('the grid has finished', 'lưới đã chạy xong')}
         blocks={QUEUED.map(() => 'done')}
         indexed={QUEUED.map(() => B)}
         stopped={STOPPED}
         stored={new Set(range(0, n))}
-        strip={[p > 0.55 ? `Every order of ${count.blocks} blocks, 1 to ${count.blocks} at a time: ${every.runs} runs of the model.` : '']}
-        headline={p > 0.62 ? `different results: ${every.distinct}` : 'C is complete'}
+        strip={[
+          p > 0.55
+            ? tr(
+                `Every order of ${count.blocks} blocks, 1 to ${count.blocks} at a time: ${every.runs} runs of the model.`,
+                `Mọi thứ tự của ${count.blocks} khối, mỗi lần 1 đến ${count.blocks} khối: ${every.runs} lần chạy mô hình.`,
+              )
+            : '',
+        ]}
+        headline={p > 0.62 ? tr(`different results: ${every.distinct}`, `số kết quả khác nhau: ${every.distinct}`) : tr('C is complete', 'C đã hoàn chỉnh')}
       />
     ),
   },
   {
     clip: 'one-launch-7',
-    label: 'The bug',
+    get label() {
+      return tr('The bug', 'Lỗi');
+    },
     draw: (p) => {
       const t = Math.floor(ramp(p, 0.42, 0.62) * B + 0.001);
       const missing = new Set(bad.unprocessed.flatMap((r) => range(r.first, r.last + 1)));
@@ -341,16 +419,33 @@ const beats: Beat[] = [
         <Stage
           statement={BAD_STATEMENT}
           hostLine={p > 0.36 ? 2 : 0}
-          runtime={p > 0.3 ? 'configuration accepted' : 'nothing queued'}
+          runtime={p > 0.3 ? tr('configuration accepted', 'cấu hình được chấp nhận') : tr('nothing queued', 'chưa có gì trong hàng đợi')}
           blocks={QUEUED.map((_, b) => (b < bad.blocks ? (p > 0.62 ? 'done' : p > 0.36 ? 'running' : p > 0.24 ? 'queued' : 'hidden') : p > 0.24 ? 'ghost' : 'hidden'))}
           indexed={QUEUED.map((_, b) => (b < bad.blocks && p > 0.4 ? B : 0))}
           stored={reached(ran, p > 0.36 ? t : 0)}
           missing={p > 0.66 ? missing : undefined}
           strip={[
-            p > 0.08 ? `${badCount.steps[0].text} = ${badCount.steps[0].value}  (whole numbers: ${showValue(n / B, 'double')} becomes ${badCount.blocks})` : '',
-            p > 0.66 ? `elements ${bad.unprocessed[0].first} to ${bad.unprocessed[0].last}: no thread exists for them` : '',
+            p > 0.08
+              ? tr(
+                  `${badCount.steps[0].text} = ${badCount.steps[0].value}  (whole numbers: ${showValue(n / B, 'double')} becomes ${badCount.blocks})`,
+                  `${badCount.steps[0].text} = ${badCount.steps[0].value}  (số nguyên: ${showValue(n / B, 'double')} thành ${badCount.blocks})`,
+                )
+              : '',
+            p > 0.66
+              ? tr(
+                  `elements ${bad.unprocessed[0].first} to ${bad.unprocessed[0].last}: no thread exists for them`,
+                  `phần tử ${bad.unprocessed[0].first} đến ${bad.unprocessed[0].last}: không có luồng nào cho chúng`,
+                )
+              : '',
           ]}
-          headline={p > 0.24 ? `${bad.blocks} blocks, ${bad.threads} threads, ${bad.unprocessedCount} elements never written` : undefined}
+          headline={
+            p > 0.24
+              ? tr(
+                  `${bad.blocks} blocks, ${bad.threads} threads, ${bad.unprocessedCount} elements never written`,
+                  `${bad.blocks} khối, ${bad.threads} luồng, ${bad.unprocessedCount} phần tử không bao giờ được ghi`,
+                )
+              : undefined
+          }
         />
       );
     },
@@ -358,5 +453,5 @@ const beats: Beat[] = [
 ];
 
 export function OneLaunchScene() {
-  return <Scene chapter="ch02" title="One launch, start to finish" beats={beats} />;
+  return <Scene chapter="ch02" title={tr('One launch, start to finish', 'Một lần khởi chạy, từ đầu đến cuối')} beats={beats} />;
 }

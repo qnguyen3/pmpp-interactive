@@ -1,0 +1,1 @@
+Các thư viện làm theo chiều ngược lại. Trước tiên, chúng tìm trong bộ nhớ toàn cục xem ô kết thúc ở đâu: ở đây là sau 5 phần tử của A và 3 của B. Rồi chúng nạp đúng 8 phần tử đó, và phần tử nào cũng được dùng. Cái giá là thêm một lần tìm kiếm mỗi ô. Giờ số lần nạp bằng số đầu ra, 32 cho 32.

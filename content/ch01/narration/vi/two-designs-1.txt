@@ -1,0 +1,1 @@
+Hãy bắt đầu với một ngân sách điện năng cố định: 64 ô vuông bằng nhau. Theo quy tắc của sách, giảm một nửa độ trễ của một đơn vị tốn gấp 4 lần điện năng. Giảm một nửa hai lần, và một đơn vị nhanh gấp 4 lần nhưng tốn 16 ô. Vậy ngân sách đó mua được 4 đơn vị nhanh, hoặc 64 đơn vị thường. Một ngân sách, hai thiết kế.

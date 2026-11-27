@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { tr } from '../../lib/i18n';
 import { KAT_WORD, SCENE_ROW, SCENE_SETTINGS, rankDesc, sceneChain } from '../../sim/chain';
 
 // "One row through the chain": the scene row of src/sim/chain.ts through M5's order, one
@@ -50,7 +51,7 @@ const pc = (v: number) => `${Math.round(v * 100)}%`;
 
 function Frame({ headline, sub, children }: { headline: string; sub?: string; children: ReactNode }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="One row of logits through the sampler chain" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('One row of logits through the sampler chain', 'Một hàng logits đi qua chuỗi sampler')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <text x={X0 - 8} y={22} fontSize="14" fontWeight="650" data-headline>{headline}</text>
       {sub ? <text x={X0 - 8} y={40} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>{sub}</text> : null}
       {children}
@@ -72,7 +73,7 @@ function LogitBar({ id, x, v, opacity = 1, strong = false, count, dim = false }:
       <text x={x + BW / 2} y={v >= 0 ? y - 4 : y + h + 12} fontSize="10.5" textAnchor="middle" data-value={f2(v)}>{f2(v)}</text>
       <text x={x + BW / 2} y={258} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{id}</text>
       {count != null && count > 0 ? (
-        <text x={x + BW / 2} y={274} fontSize="10.5" textAnchor="middle" fontWeight="650" data-count={count}>used {count}</text>
+        <text x={x + BW / 2} y={274} fontSize="10.5" textAnchor="middle" fontWeight="650" data-count={count}>{tr(`used ${count}`, `dùng ${count}`)}</text>
       ) : null}
     </g>
   );
@@ -147,9 +148,9 @@ function penalties(p: number) {
   const penTop = rankDesc(PEN, PEN.map(() => true));
   return (
     <Frame
-      headline={p < 0.2 ? `${N} logits, and how often each token is in the context` : `penalties: repetition ${S.repeat}, frequency ${S.freq}, presence ${S.presence}`}
-      sub={p < 0.75 ? 'positive logits are divided, negative ones multiplied, then count × frequency + presence is subtracted'
-        : `token ${rawTop} was first; now token ${penTop[0]} is first and token ${rawTop} is ${penTop.indexOf(rawTop) === 1 ? 'second' : 'lower'}`}>
+      headline={p < 0.2 ? tr(`${N} logits, and how often each token is in the context`, `${N} logits, và số lần mỗi token có trong ngữ cảnh`) : tr(`penalties: repetition ${S.repeat}, frequency ${S.freq}, presence ${S.presence}`, `penalty: lặp lại ${S.repeat}, tần suất ${S.freq}, hiện diện ${S.presence}`)}
+      sub={p < 0.75 ? tr('positive logits are divided, negative ones multiplied, then count × frequency + presence is subtracted', 'logit dương bị chia, logit âm bị nhân, rồi trừ đi count × frequency + presence')
+        : tr(`token ${rawTop} was first; now token ${penTop[0]} is first and token ${rawTop} is ${penTop.indexOf(rawTop) === 1 ? 'second' : 'lower'}`, `token ${rawTop} từng đứng đầu; giờ token ${penTop[0]} đứng đầu và token ${rawTop} ${penTop.indexOf(rawTop) === 1 ? 'đứng thứ hai' : 'xuống thấp hơn'}`)}>
       <ZeroLine />
       {RAW.map((v, i) => (
         <LogitBar key={i} id={i} x={slotX(i)} v={lerp(v, PEN[i], COUNTS[i] > 0 ? t : 0)} count={COUNTS[i]} strong={COUNTS[i] > 0} />
@@ -161,8 +162,8 @@ function penalties(p: number) {
 function topK(p: number) {
   const fade = ramp(p, 0.25, 0.6);
   return (
-    <Frame headline={`top-k, k = ${S.k}: ${TOPK.length} stay lit, ${N - TOPK.length} fade where they stand`}
-      sub={CUT && p > 0.55 ? `tokens ${CUT.kept} and ${CUT.dropped} tie at the cut (${f2(CUT.value)}): the lower id, ${CUT.kept}, stays` : 'a selection finds the cut; nothing is sorted'}>
+    <Frame headline={tr(`top-k, k = ${S.k}: ${TOPK.length} stay lit, ${N - TOPK.length} fade where they stand`, `top-k, k = ${S.k}: ${TOPK.length} vẫn sáng, ${N - TOPK.length} mờ đi tại chỗ`)}
+      sub={CUT && p > 0.55 ? tr(`tokens ${CUT.kept} and ${CUT.dropped} tie at the cut (${f2(CUT.value)}): the lower id, ${CUT.kept}, stays`, `token ${CUT.kept} và ${CUT.dropped} hòa nhau tại điểm cắt (${f2(CUT.value)}): id nhỏ hơn, ${CUT.kept}, được giữ`) : tr('a selection finds the cut; nothing is sorted', 'một phép chọn tìm điểm cắt; không có gì được sắp xếp')}>
       <ZeroLine />
       {PEN.map((v, i) => {
         const kept = TOPK.includes(i);
@@ -177,8 +178,8 @@ function sortSoftmax(p: number) {
   const morph = ramp(p, 0.5, 0.85);
   const sum = TOPK_SORTED.reduce((s, i) => s + TOPK_PROBS[i], 0);
   return (
-    <Frame headline={morph < 1 ? `sort the ${TOPK.length} survivors, descending` : `softmax over ${TOPK.length} values: they add up to ${sum.toFixed(2)}`}
-      sub={`only ${TOPK.length} values sorted and normalised, not the whole vocabulary`}>
+    <Frame headline={morph < 1 ? tr(`sort the ${TOPK.length} survivors, descending`, `sắp xếp ${TOPK.length} token còn lại, giảm dần`) : tr(`softmax over ${TOPK.length} values: they add up to ${sum.toFixed(2)}`, `softmax trên ${TOPK.length} giá trị: tổng của chúng là ${sum.toFixed(2)}`)}
+      sub={tr(`only ${TOPK.length} values sorted and normalised, not the whole vocabulary`, `chỉ ${TOPK.length} giá trị được sắp xếp và chuẩn hóa, không phải cả bộ từ vựng`)}>
       {morph > 0 ? <ProbAxis /> : <ZeroLine />}
       {TOPK_SORTED.map((id, slot) => {
         const x = lerp(slotX(id), slotX(slot + 1), move);
@@ -196,8 +197,8 @@ function topPBeat(p: number) {
   const reached = Math.min(ids.length, Math.floor(ramp(p, 0.12, 0.85) * (ids.length + 0.999)));
   const markerAt = reached > 0 ? before[Math.min(reached, ids.length) - 1] : 0;
   return (
-    <Frame headline={`top-p at ${S.p}: keep a token while the mass ranked before it is below ${S.p}`}
-      sub={reached > 0 ? `token ${ids[reached - 1]}: mass before ${before[reached - 1].toFixed(2)} ${before[reached - 1] < S.p ? `< ${S.p}, kept` : `≥ ${S.p}, dropped`}` : 'the marker carries the mass ranked before each token'}>
+    <Frame headline={tr(`top-p at ${S.p}: keep a token while the mass ranked before it is below ${S.p}`, `top-p tại ${S.p}: giữ một token khi khối xác suất xếp hạng trước nó còn dưới ${S.p}`)}
+      sub={reached > 0 ? tr(`token ${ids[reached - 1]}: mass before ${before[reached - 1].toFixed(2)} ${before[reached - 1] < S.p ? `< ${S.p}, kept` : `≥ ${S.p}, dropped`}`, `token ${ids[reached - 1]}: khối xác suất trước nó ${before[reached - 1].toFixed(2)} ${before[reached - 1] < S.p ? `< ${S.p}, giữ` : `≥ ${S.p}, loại`}`) : tr('the marker carries the mass ranked before each token', 'con trỏ mang khối xác suất xếp hạng trước mỗi token')}>
       <ProbAxis />
       {ids.map((id, slot) => {
         const decided = slot < reached;
@@ -212,7 +213,7 @@ function topPBeat(p: number) {
           </g>
         );
       })}
-      <text x={slotX(0) + BW} y={PBASE + 28} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>before:</text>
+      <text x={slotX(0) + BW} y={PBASE + 28} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>{tr('before:', 'trước:')}</text>
       <Strip ids={ids} probs={probs} pLine={S.p} marker={markerAt} />
     </Frame>
   );
@@ -226,8 +227,8 @@ function minPBeat(p: number) {
   const decided = p > 0.62;
   const yLine = ZERO - lineV * LS;
   return (
-    <Frame headline={`min-p at ${S.minP}: keep a logit at or above max + ln ${S.minP} = ${f2(top)} − ${f2(-Math.log(S.minP))} = ${f2(th)}`}
-      sub={`the same test as probability ≥ ${S.minP} × the top probability, without a softmax`}>
+    <Frame headline={tr(`min-p at ${S.minP}: keep a logit at or above max + ln ${S.minP} = ${f2(top)} − ${f2(-Math.log(S.minP))} = ${f2(th)}`, `min-p tại ${S.minP}: giữ logit bằng hoặc trên max + ln ${S.minP} = ${f2(top)} − ${f2(-Math.log(S.minP))} = ${f2(th)}`)}
+      sub={tr(`the same test as probability ≥ ${S.minP} × the top probability, without a softmax`, `cùng phép kiểm tra như xác suất ≥ ${S.minP} × xác suất lớn nhất, mà không cần softmax`)}>
       <ZeroLine />
       {ids.map((id, slot) => {
         const kept = MINP.alive[id];
@@ -239,7 +240,7 @@ function minPBeat(p: number) {
       </g>
       {decided ? (
         <text x={slotX(ids.length + 2)} y={ZERO + 50} fontSize="12">
-          {ids.filter((i) => !MINP.alive[i]).map((i) => `token ${i} (${f2(PEN[i])}) falls`).join(', ')}; {idsOf(MINP.alive).length} left
+          {ids.filter((i) => !MINP.alive[i]).map((i) => tr(`token ${i} (${f2(PEN[i])}) falls`, `token ${i} (${f2(PEN[i])}) bị loại`)).join(', ')}; {idsOf(MINP.alive).length} {tr('left', 'còn lại')}
         </text>
       ) : null}
     </Frame>
@@ -256,8 +257,8 @@ function drawBeat(p: number) {
   const showU = p > 0.58;
   const chosen = p > 0.74 ? FINAL.token : undefined;
   return (
-    <Frame headline={chosen != null ? `u = ${FINAL.u.toFixed(3)} lands in token ${FINAL.token}: token ${FINAL.token} is written out` : `temperature ${S.T}: the ${ids.length} survivors reweighted`}
-      sub={showU ? `u from Philox4x32-10, counter 0, key 0 (seed 0, row 0, step 0): word ${KAT_WORD.toString(16)}, top 24 bits` : `token ${ids[0]}: ${pc(t1[0])} at T = 1, ${pc(tT[0])} at T = ${S.T}`}>
+    <Frame headline={chosen != null ? tr(`u = ${FINAL.u.toFixed(3)} lands in token ${FINAL.token}: token ${FINAL.token} is written out`, `u = ${FINAL.u.toFixed(3)} rơi vào token ${FINAL.token}: token ${FINAL.token} được ghi ra`) : tr(`temperature ${S.T}: the ${ids.length} survivors reweighted`, `temperature ${S.T}: ${ids.length} token còn lại được đánh lại trọng số`)}
+      sub={showU ? tr(`u from Philox4x32-10, counter 0, key 0 (seed 0, row 0, step 0): word ${KAT_WORD.toString(16)}, top 24 bits`, `u từ Philox4x32-10, counter 0, key 0 (seed 0, hàng 0, bước 0): word ${KAT_WORD.toString(16)}, 24 bit cao`) : tr(`token ${ids[0]}: ${pc(t1[0])} at T = 1, ${pc(tT[0])} at T = ${S.T}`, `token ${ids[0]}: ${pc(t1[0])} tại T = 1, ${pc(tT[0])} tại T = ${S.T}`)}>
       <ProbAxis />
       {ids.map((id, slot) => (
         <ProbBar key={id} id={id} x={slotX(slot + 1)} p={now[slot]} strong={chosen === id} />
@@ -268,14 +269,14 @@ function drawBeat(p: number) {
 }
 
 const beats: Beat[] = [
-  { clip: 'chain-row-1', label: 'Penalties', draw: penalties },
-  { clip: 'chain-row-2', label: 'Top-k', draw: topK },
-  { clip: 'chain-row-3', label: 'Sort, softmax', draw: sortSoftmax },
-  { clip: 'chain-row-4', label: 'Top-p', draw: topPBeat },
-  { clip: 'chain-row-5', label: 'Min-p', draw: minPBeat },
-  { clip: 'chain-row-6', label: 'Draw', draw: drawBeat },
+  { clip: 'chain-row-1', get label() { return tr('Penalties', 'Penalty'); }, draw: penalties },
+  { clip: 'chain-row-2', get label() { return tr('Top-k', 'Top-k'); }, draw: topK },
+  { clip: 'chain-row-3', get label() { return tr('Sort, softmax', 'Sắp xếp, softmax'); }, draw: sortSoftmax },
+  { clip: 'chain-row-4', get label() { return tr('Top-p', 'Top-p'); }, draw: topPBeat },
+  { clip: 'chain-row-5', get label() { return tr('Min-p', 'Min-p'); }, draw: minPBeat },
+  { clip: 'chain-row-6', get label() { return tr('Draw', 'Rút'); }, draw: drawBeat },
 ];
 
 export function ChainRowScene() {
-  return <Scene chapter="x1" title="One row through the chain" beats={beats} />;
+  return <Scene chapter="x1" title={tr('One row through the chain', 'Một hàng đi qua chuỗi')} beats={beats} />;
 }

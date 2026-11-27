@@ -1,0 +1,1 @@
+Các thanh so sánh lưu lượng DRAM cho mỗi đầu ra. Toàn trúng là trường hợp lý tưởng. Rồi đến 2 lần chạy của mô hình, và toàn trượt, khi không khối nào dùng lại các dòng của khối khác. Sách nói về một xác suất trúng đáng kể. GPU của bạn quyết định bạn nhận được thanh nào. Một trình profiler cho thấy tỉ lệ trúng của nó. Lab 7.2 đo xem điều đó tốn của bạn bao nhiêu.

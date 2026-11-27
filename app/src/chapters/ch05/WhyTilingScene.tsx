@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { makeProblem } from '../../sim/tiled';
+import { tr } from '../../lib/i18n';
 
 // "Why tiling works": block (0,0) of a 4x4 multiplication with 2x2 tiles, drawn
 // from the same small-integer problem the stepper uses. Six beats, one narration
@@ -83,12 +84,12 @@ function Tile({ x, y, values, name, hot }: { x: number; y: number; values: (numb
 function Stage(f: Frame) {
   const pVals = prob.ref.map((v, i) => (f.pOut && Math.floor(i / W) < T && i % W < T ? v : null));
   return (
-    <svg viewBox="0 0 720 348" role="img" aria-label="Animation of one block multiplying matrices" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+    <svg viewBox="0 0 720 348" role="img" aria-label={tr('Animation of one block multiplying matrices', 'Hoạt hình một khối nhân hai ma trận')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       <Grid x={MX} y={MY} values={prob.M} name="M" hot={f.hotM} wash={f.washM} />
       <Grid x={NX} y={NY} values={prob.N} name="N" hot={f.hotN} wash={f.washN} />
       <Grid x={PX} y={PY} values={pVals} name="P = M × N" wash={new Set([0, 1, 4, 5])} />
-      <text x={PX + 2 * C + 6} y={PY + C} fontSize="11" style={{ fill: 'var(--ink-2)' }}>this block's</text>
-      <text x={PX + 2 * C + 6} y={PY + C + 14} fontSize="11" style={{ fill: 'var(--ink-2)' }}>4 threads</text>
+      <text x={PX + 2 * C + 6} y={PY + C} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{tr("this block's", '4 luồng')}</text>
+      <text x={PX + 2 * C + 6} y={PY + C + 14} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{tr('4 threads', 'của khối này')}</text>
       {/* "fetched twice" overlay */}
       {f.times
         ? [...(f.washM ?? [])].map((i) => (
@@ -111,8 +112,8 @@ function Stage(f: Frame) {
       {/* shared memory */}
       {f.shared ? (
         <g opacity={f.shared}>
-          <Tile x={SX} y={40} values={f.mds ?? [null, null, null, null]} name="Mds (shared)" hot={f.hotShared} />
-          <Tile x={SX + 120} y={40} values={f.nds ?? [null, null, null, null]} name="Nds (shared)" hot={f.hotShared} />
+          <Tile x={SX} y={40} values={f.mds ?? [null, null, null, null]} name={tr('Mds (shared)', 'Mds (chia sẻ)')} hot={f.hotShared} />
+          <Tile x={SX + 120} y={40} values={f.nds ?? [null, null, null, null]} name={tr('Nds (shared)', 'Nds (chia sẻ)')} hot={f.hotShared} />
         </g>
       ) : null}
       {f.barrier ? (
@@ -123,7 +124,7 @@ function Stage(f: Frame) {
       ) : null}
       {f.sums ? (
         <g>
-          <text x={SX} y={182} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}>running sums (one register per thread)</text>
+          <text x={SX} y={182} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}>{tr('running sums (one register per thread)', 'tổng đang cộng dồn (mỗi luồng một thanh ghi)')}</text>
           {f.sums.map((s, i) => (
             <g key={i}>
               <rect x={SX + i * 74} y={190} width={68} height={30} rx="2" fill="var(--reg-wash)" stroke="var(--reg)" />
@@ -134,10 +135,10 @@ function Stage(f: Frame) {
       ) : null}
       {f.bars != null ? (
         <g>
-          <text x={SX} y={250} fontSize="11.5">fetched once per thread</text>
+          <text x={SX} y={250} fontSize="11.5">{tr('fetched once per thread', 'mỗi luồng nạp một lần')}</text>
           <rect x={SX} y={256} width={300 * f.bars} height={14} fill="var(--global)" />
           <text x={SX + 300 * f.bars + 6} y={267} fontSize="11.5">{Math.round(32 * f.bars)}</text>
-          <text x={SX} y={292} fontSize="11.5">fetched once per block</text>
+          <text x={SX} y={292} fontSize="11.5">{tr('fetched once per block', 'mỗi khối nạp một lần')}</text>
           <rect x={SX} y={298} width={150 * f.bars} height={14} fill="var(--shared)" />
           <text x={SX + 150 * f.bars + 6} y={309} fontSize="11.5">{Math.round(16 * f.bars)}</text>
         </g>
@@ -180,8 +181,12 @@ function phase(ph: number, p: number, last: boolean): Frame {
     mds: vals(prob.M, mTile),
     nds: vals(prob.N, nTile),
     hotShared: p >= 0.52 && p < 0.86,
-    barrier: waiting ? 'barrier: every thread waits for all the loads'
-      : p >= 0.86 ? (last ? 'last phase done: each thread stores its sum' : 'barrier: no overwriting until all have read') : null,
+    barrier: waiting ? tr('barrier: every thread waits for all the loads', 'rào chắn: mọi luồng chờ tất cả các lần nạp')
+      : p >= 0.86
+        ? last
+          ? tr('last phase done: each thread stores its sum', 'xong giai đoạn cuối: mỗi luồng ghi tổng của nó')
+          : tr('barrier: no overwriting until all have read', 'rào chắn: không ghi đè cho đến khi tất cả đã đọc')
+        : null,
     sums: p >= 0.6 ? partial(ph + 1) : partial(ph),
     pOut: last && p >= 0.9,
   };
@@ -190,7 +195,9 @@ function phase(ph: number, p: number, last: boolean): Frame {
 const beats: Beat[] = [
   {
     clip: 'why-tiling-1',
-    label: 'Four threads',
+    get label() {
+      return tr('Four threads', 'Bốn luồng');
+    },
     draw: (p) => {
       const k = Math.min(W - 1, Math.floor(p * 4.4));
       const seenM = new Set<number>();
@@ -201,35 +208,69 @@ const beats: Beat[] = [
       }
       return (
         <Stage hotM={new Set([idx(0, k), idx(1, k)])} hotN={new Set([idx(k, 0), idx(k, 1)])} washM={seenM} washN={seenN}
-          headline={`step k = ${k}: ${8 * (k + 1)} fetches from global memory so far`} />
+          headline={tr(
+            `step k = ${k}: ${8 * (k + 1)} fetches from global memory so far`,
+            `bước k = ${k}: đến giờ đã có ${8 * (k + 1)} lần nạp từ bộ nhớ toàn cục`,
+          )} />
       );
     },
   },
   {
     clip: 'why-tiling-2',
-    label: 'Count the fetches',
+    get label() {
+      return tr('Count the fetches', 'Đếm số lần nạp');
+    },
     draw: (p) => (
       <Stage washM={ROWS} washN={COLS} times={ramp(p, 0.1, 0.3)} bars={undefined}
-        headline={p < 0.55 ? '32 fetches, 16 different elements: each one fetched twice' : 'a block 32 threads wide would fetch each element 32 times'} />
+        headline={
+          p < 0.55
+            ? tr('32 fetches, 16 different elements: each one fetched twice', '32 lần nạp, 16 phần tử khác nhau: mỗi phần tử bị nạp hai lần')
+            : tr('a block 32 threads wide would fetch each element 32 times', 'một khối rộng 32 luồng sẽ nạp mỗi phần tử 32 lần')
+        } />
     ),
   },
   {
     clip: 'why-tiling-3',
-    label: 'The idea',
-    draw: (p) => <Stage washM={ROWS} washN={COLS} tiles={ramp(p, 0.45, 0.75)} shared={ramp(p, 0.1, 0.4)} headline="fetch once, share inside the block, one tile at a time" />,
+    get label() {
+      return tr('The idea', 'Ý tưởng');
+    },
+    draw: (p) => (
+      <Stage washM={ROWS} washN={COLS} tiles={ramp(p, 0.45, 0.75)} shared={ramp(p, 0.1, 0.4)}
+        headline={tr('fetch once, share inside the block, one tile at a time', 'nạp một lần, chia sẻ trong khối, mỗi lần một ô')} />
+    ),
   },
-  { clip: 'why-tiling-4', label: 'Phase 0', draw: (p) => <Stage {...phase(0, p, false)} headline="phase 0" /> },
-  { clip: 'why-tiling-5', label: 'Phase 1', draw: (p) => <Stage {...phase(1, p, true)} headline="phase 1: the same eight slots, the next tile" /> },
+  {
+    clip: 'why-tiling-4',
+    get label() {
+      return tr('Phase 0', 'Giai đoạn 0');
+    },
+    draw: (p) => <Stage {...phase(0, p, false)} headline={tr('phase 0', 'giai đoạn 0')} />,
+  },
+  {
+    clip: 'why-tiling-5',
+    get label() {
+      return tr('Phase 1', 'Giai đoạn 1');
+    },
+    draw: (p) => (
+      <Stage {...phase(1, p, true)} headline={tr('phase 1: the same eight slots, the next tile', 'giai đoạn 1: vẫn tám ô nhớ đó, ô (tile) tiếp theo')} />
+    ),
+  },
   {
     clip: 'why-tiling-6',
-    label: 'What changed',
+    get label() {
+      return tr('What changed', 'Điều gì đã thay đổi');
+    },
     draw: (p) => (
       <Stage tiles={1} shared={1} mds={mTile(1).map((c) => prob.M[c])} nds={nTile(1).map((c) => prob.N[c])} sums={partial(2)} pOut
-        bars={ramp(p, 0.12, 0.45)} headline={p > 0.5 ? 'tiles T wide: T times less traffic' : 'same answer, half the fetches'} />
+        bars={ramp(p, 0.12, 0.45)} headline={
+          p > 0.5
+            ? tr('tiles T wide: T times less traffic', 'ô rộng T: lưu lượng giảm T lần')
+            : tr('same answer, half the fetches', 'cùng kết quả, một nửa số lần nạp')
+        } />
     ),
   },
 ];
 
 export function WhyTilingScene() {
-  return <Scene chapter="ch05" title="Why tiling works" beats={beats} />;
+  return <Scene chapter="ch05" title={tr('Why tiling works', 'Vì sao phân ô hiệu quả')} beats={beats} />;
 }

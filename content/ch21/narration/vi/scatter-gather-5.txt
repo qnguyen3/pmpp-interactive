@@ -1,0 +1,1 @@
+Sau 4 bước, mỗi nguyên tử một bước, mỗi luồng giữ tổng của điểm mình. Nó ghi điểm đó một lần, bằng một lệnh ghi thông thường, vì không luồng nào khác chạm vào nó. Các nguyên tử được cộng theo thứ tự vòng lặp duyệt qua chúng, nên mọi lần chạy cho ra đúng cùng các bit.

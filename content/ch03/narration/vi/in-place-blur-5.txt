@@ -1,0 +1,1 @@
+Vì vậy phép làm mờ giữ hai buffer. Mỗi luồng chỉ ghi phần tử của riêng nó, và chỉ đọc dữ liệu mà không luồng nào ghi. Khi đó thứ tự không thể ảnh hưởng. Cả ba kernel của chương này đều theo quy tắc đó. Ở chương 5, các luồng bắt đầu dùng chung vùng nhớ mà chúng cũng ghi vào, và chúng sẽ cần rào chắn.

@@ -1,0 +1,1 @@
+Mỗi trọng số được chia cho hệ số tỉ lệ. Rồi cộng thêm 8 rưỡi, và kết quả được cắt phần thập phân và kẹp lại ở 15. Trọng số 5, giá trị cực trị, rơi đúng vào mã 0. Trọng số 21, ảnh đối xứng của nó ở dương 0.8, lẽ ra cần mã 16. Nó bị kẹp về 15, thiếu một bước.

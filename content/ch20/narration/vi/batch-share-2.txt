@@ -1,0 +1,1 @@
+Giờ hãy gộp bốn yêu cầu thành một batch. Trọng số vẫn được đọc một lần, nhưng mỗi trọng số giờ phục vụ bốn hàng thay vì một. Đó là gấp bốn lần lượng tính toán cho cùng số byte, nên cường độ tính toán của các phép chiếu tăng bốn lần. Không có gì khác phải thay đổi.

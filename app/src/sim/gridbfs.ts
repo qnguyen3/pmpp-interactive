@@ -32,12 +32,19 @@
 //
 // Erasable TypeScript only. Does not import bfs.ts.
 import { emuOrders, SCHEDULES, SCHEDULE_LABEL as EMU_LABEL, type Schedule } from './histpriv';
+import { tr } from '../lib/locale.ts';
 
 export { SCHEDULES, type Schedule };
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  forward: `${EMU_LABEL.forward} (thread 0 first)`,
-  reverse: `${EMU_LABEL.reverse} (thread 0 last)`,
-  shuffle: EMU_LABEL.shuffle,
+  get forward() {
+    return tr(`${EMU_LABEL.forward} (thread 0 first)`, `${EMU_LABEL.forward} (luồng 0 trước)`);
+  },
+  get reverse() {
+    return tr(`${EMU_LABEL.reverse} (thread 0 last)`, `${EMU_LABEL.reverse} (luồng 0 sau cùng)`);
+  },
+  get shuffle() {
+    return EMU_LABEL.shuffle;
+  },
 };
 
 export const UNVISITED = 0xffffffff;
@@ -111,7 +118,7 @@ export interface Residency {
   /** Blocks that wait for a slot that is never freed (0 when everything fits). */
   pending: number;
   /** Under an ordinary launch, the book's argument (p. 445): the barrier completes only if every block is resident. */
-  ordinary: 'completes' | 'never completes';
+  ordinary: 'completes' | 'never completes'; // i18n-ignore: union member, used as a data attribute
   /** Under a cooperative launch: CUDA and HIP check the same product at launch (A2, A3, B3). */
   cooperative: 'launches' | 'refused';
 }
@@ -122,7 +129,7 @@ export function residency(sms: number, blocksPerSM: number, grid: number): Resid
     slots, grid, fits,
     resident: Math.min(slots, grid),
     pending: Math.max(0, grid - slots),
-    ordinary: fits ? 'completes' : 'never completes',
+    ordinary: fits ? 'completes' : 'never completes', // i18n-ignore: union member, used as a data attribute
     cooperative: fits ? 'launches' : 'refused',
   };
 }
@@ -142,12 +149,48 @@ export const EX3: Shape = { kernel: 'ex3', sync1: true, sync2: true, sync3: true
 export type Variant = 'swap' | 'no-sync-1' | 'no-sync-2' | 'no-sync-3' | 'ex3' | 'ex3-no-sync';
 export const VARIANTS: Variant[] = ['swap', 'no-sync-1', 'no-sync-2', 'no-sync-3', 'ex3', 'ex3-no-sync'];
 export const VARIANT: Record<Variant, { kernel: string; label: string; shape: Shape }> = {
-  swap: { kernel: 'bfsCoop', label: 'all three barriers', shape: CORRECT },
-  'no-sync-1': { kernel: 'bfsCoopNoSync1', label: 'grid.sync() 1 removed', shape: { ...CORRECT, sync1: false } },
-  'no-sync-2': { kernel: 'bfsCoopNoSync2', label: 'grid.sync() 2 removed', shape: { ...CORRECT, sync2: false } },
-  'no-sync-3': { kernel: 'bfsCoopNoSync3', label: 'grid.sync() 3 removed', shape: { ...CORRECT, sync3: false } },
-  ex3: { kernel: 'bfsCoopEx3', label: 'Exercise 3: a counter per level', shape: EX3 },
-  'ex3-no-sync': { kernel: 'bfsCoopEx3NoSync', label: 'Exercise 3 without its barrier', shape: { ...EX3, sync1: false } },
+  swap: {
+    kernel: 'bfsCoop',
+    get label() {
+      return tr('all three barriers', 'cả ba rào chắn');
+    },
+    shape: CORRECT,
+  },
+  'no-sync-1': {
+    kernel: 'bfsCoopNoSync1',
+    get label() {
+      return tr('grid.sync() 1 removed', 'bỏ grid.sync() 1');
+    },
+    shape: { ...CORRECT, sync1: false },
+  },
+  'no-sync-2': {
+    kernel: 'bfsCoopNoSync2',
+    get label() {
+      return tr('grid.sync() 2 removed', 'bỏ grid.sync() 2');
+    },
+    shape: { ...CORRECT, sync2: false },
+  },
+  'no-sync-3': {
+    kernel: 'bfsCoopNoSync3',
+    get label() {
+      return tr('grid.sync() 3 removed', 'bỏ grid.sync() 3');
+    },
+    shape: { ...CORRECT, sync3: false },
+  },
+  ex3: {
+    kernel: 'bfsCoopEx3',
+    get label() {
+      return tr('Exercise 3: a counter per level', 'Bài tập 3: một bộ đếm cho mỗi mức');
+    },
+    shape: EX3,
+  },
+  'ex3-no-sync': {
+    kernel: 'bfsCoopEx3NoSync',
+    get label() {
+      return tr('Exercise 3 without its barrier', 'Bài tập 3 không có rào chắn của nó');
+    },
+    shape: { ...EX3, sync1: false },
+  },
 };
 export function variantOf(s: Shape): Variant | null {
   for (const v of VARIANTS) {
@@ -163,11 +206,11 @@ type LineKey =
 const WORK_HEAD = [
   'for (unsigned int i = grid.thread_rank(); i < numPrevFrontier;',
   '        i += grid.num_threads()) {',
-  '    unsigned int vertex = prevFrontier[i];',
-  '    for (unsigned int edge = csrGraph.srcPtrs[vertex];',
+  '    unsigned int vertex = prevFrontier[i];', // i18n-ignore: kernel source
+  '    for (unsigned int edge = csrGraph.srcPtrs[vertex];', // i18n-ignore: kernel source
   '            edge < csrGraph.srcPtrs[vertex + 1]; ++edge) {',
-  '        unsigned int neighbor = csrGraph.dst[edge];',
-  '        if (visitVertexAtomically(neighbor, level, currLevel)) {',
+  '        unsigned int neighbor = csrGraph.dst[edge];', // i18n-ignore: kernel source
+  '        if (visitVertexAtomically(neighbor, level, currLevel)) {', // i18n-ignore: kernel source
   '            cuda::atomic_ref<unsigned int, cuda::thread_scope_device>',
 ];
 const WORK_TAIL = ['            currFrontier[currFrontierIdx] = neighbor;', '        }', '    }', '}'];
@@ -190,17 +233,17 @@ function bodyLines(shape: Shape, placeholders: boolean): { key: LineKey | null; 
   add('loop', 'for (unsigned int currLevel = 1; numPrevFrontier > 0; ++currLevel) {');
   add('work', workText(shape.kernel));
   if (shape.kernel === 'ex3') {
-    if (shape.sync1) add('s1', '    grid.sync();  // the only barrier: every append is done');
+    if (shape.sync1) add('s1', '    grid.sync();  // the only barrier: every append is done'); // i18n-ignore: kernel source, must match the snippet file
     else gone('    // the barrier removed');
     add('read', '    numPrevFrontier = numFrontier[currLevel];');
   } else {
-    if (shape.sync1) add('s1', '    grid.sync();  // 1: every append is done');
+    if (shape.sync1) add('s1', '    grid.sync();  // 1: every append is done'); // i18n-ignore: kernel source, must match the snippet file
     else gone('    // grid.sync() 1 removed');
     add('read', '    numPrevFrontier = *numCurrFrontier;');
-    if (shape.sync2) add('s2', '    grid.sync();  // 2: everyone has read the size');
+    if (shape.sync2) add('s2', '    grid.sync();  // 2: everyone has read the size'); // i18n-ignore: kernel source, must match the snippet file
     else gone('    // grid.sync() 2 removed');
     add('reset', '    if (grid.thread_rank() == 0) {\n        *numCurrFrontier = 0;\n    }');
-    if (shape.sync3) add('s3', '    grid.sync();  // 3: the reset is visible');
+    if (shape.sync3) add('s3', '    grid.sync();  // 3: the reset is visible'); // i18n-ignore: kernel source, must match the snippet file
     else gone('    // grid.sync() 3 removed');
   }
   add('swap', '    unsigned int* tmp = prevFrontier;\n    prevFrontier = currFrontier;\n    currFrontier = tmp;');
@@ -259,7 +302,7 @@ export function gridGraph(W: number): Graph {
       if (y + 1 < W) o.push((y + 1) * W + x);
       out.push(o);
     }
-  return { label: `a ${W} × ${W} grid from a corner`, numVertices: W * W, ...csr(out), kind: 'grid', W };
+  return { label: tr(`a ${W} × ${W} grid from a corner`, `lưới ${W} × ${W} tính từ một góc`), numVertices: W * W, ...csr(out), kind: 'grid', W };
 }
 /** A b-ary tree of the given depth, vertex v linked to b*v + 1 ... b*v + b. */
 export function treeGraph(b: number, depth: number): Graph {
@@ -270,7 +313,7 @@ export function treeGraph(b: number, depth: number): Graph {
     for (let c = 1; c <= b; c++) if (b * v + c < n) o.push(b * v + c);
     return o;
   });
-  return { label: `a ${b}-ary tree of depth ${depth}`, numVertices: n, ...csr(out), kind: 'tree', b, depth };
+  return { label: tr(`a ${b}-ary tree of depth ${depth}`, `cây ${b}-phân có độ sâu ${depth}`), numVertices: n, ...csr(out), kind: 'tree', b, depth };
 }
 export type Preset = 'grid' | 'tree';
 export const PRESET_GRAPH: Record<Preset, () => Graph> = {
@@ -393,7 +436,7 @@ const cloneSnap = (s: Snapshot): Snapshot => ({
 });
 type Phase = 'work' | 'read' | 'reset' | 'swap';
 const plural = (n: number, one: string, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-const list = (xs: number[]) => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1]);
+const list = (xs: number[]) => (xs.length <= 1 ? xs.join('') : xs.slice(0, -1).join(', ') + tr(' and ', ' và ') + xs[xs.length - 1]);
 
 /**
  * The whole search in one cooperative launch of `blocks` blocks of `threads` threads. The
@@ -409,7 +452,7 @@ export function simulate(
   rule: Rule = 'gpu',
 ): Trace {
   const G = blocks * threads;
-  if (G > EMU_COOP_LIMIT) throw new Error('a grid the emulator would refuse');
+  if (G > EMU_COOP_LIMIT) throw new Error('a grid the emulator would refuse'); // i18n-ignore: developer error
   const n = graph.numVertices;
   const ex3 = shape.kernel === 'ex3';
   const st: Snapshot = {
@@ -429,7 +472,7 @@ export function simulate(
   const appendsAt = new Map<number, number>(); // level -> appends made for it
   const resetDone = new Set<number>(); // levels whose counter thread 0 has reset
   const L = (key: LineKey) => linesOf(shape, true, key);
-  const who = (r: number) => `Thread ${r} (block ${Math.floor(r / threads)})`;
+  const who = (r: number) => tr(`Thread ${r} (block ${Math.floor(r / threads)})`, `Luồng ${r} (khối ${Math.floor(r / threads)})`);
   const reference = referenceLevels(graph);
   /** The true size of each level's frontier. */
   const refSize: number[] = [];
@@ -459,7 +502,10 @@ export function simulate(
         for (let i = r; i < t.numPrev; i += G) {
           const vertex = bufP[i];
           if (vertex >= n) {
-            crashed = `thread ${r} reads prevFrontier[${i}] = ${vertex === UNWRITTEN ? '0xFFFFFFFF (never written)' : vertex}, which is not a vertex, and indexes srcPtrs with it`;
+            crashed = tr(
+              `thread ${r} reads prevFrontier[${i}] = ${vertex === UNWRITTEN ? '0xFFFFFFFF (never written)' : vertex}, which is not a vertex, and indexes srcPtrs with it`,
+              `luồng ${r} đọc prevFrontier[${i}] = ${vertex === UNWRITTEN ? '0xFFFFFFFF (chưa từng được ghi)' : vertex}, không phải một đỉnh, và dùng nó làm chỉ số vào srcPtrs`,
+            );
             break;
           }
           const el: Element = { i, vertex, appended: [], taken: [] };
@@ -472,13 +518,16 @@ export function simulate(
             st.level[nb] = lvl;
             const c = counterFor(lvl);
             if (c >= st.counters.length) {
-              crashed = `numFrontier[${lvl}] is past the end of the counters`;
+              crashed = tr(`numFrontier[${lvl}] is past the end of the counters`, `numFrontier[${lvl}] nằm quá phần cuối của dãy bộ đếm`);
               break;
             }
             const slot = st.counters[c];
             st.counters[c] = slot + 1;
             if (slot >= n) {
-              crashed = `thread ${r} writes currFrontier[${slot}], past the end of the ${n}-slot buffer`;
+              crashed = tr(
+                `thread ${r} writes currFrontier[${slot}], past the end of the ${n}-slot buffer`,
+                `luồng ${r} ghi currFrontier[${slot}], quá phần cuối của buffer ${n} vị trí`,
+              );
               break;
             }
             bufC[slot] = nb;
@@ -493,14 +542,32 @@ export function simulate(
         phase[r] = 'read';
         const got = els.flatMap((x) => x.appended);
         const mine = els.length
-          ? `It takes ${els.map((x) => `element ${x.i} (vertex ${x.vertex})`).join(', ')}` +
-            (got.length ? ` and appends ${plural(got.length, 'new vertex', 'new vertices')}: ${got.map((a) => `${a.vertex} at slot ${a.slot}`).join(', ')}.` : ', but every neighbour is already labelled.')
-          : `Its rank is not below numPrevFrontier = ${t.numPrev}, so it has no element to take.`;
+          ? tr(
+              `It takes ${els.map((x) => `element ${x.i} (vertex ${x.vertex})`).join(', ')}` +
+                (got.length ? ` and appends ${plural(got.length, 'new vertex', 'new vertices')}: ${got.map((a) => `${a.vertex} at slot ${a.slot}`).join(', ')}.` : ', but every neighbour is already labelled.'),
+              `Nó nhận ${els.map((x) => `phần tử ${x.i} (đỉnh ${x.vertex})`).join(', ')}` +
+                (got.length ? ` và nối thêm ${got.length} đỉnh mới: ${got.map((a) => `${a.vertex} ở vị trí ${a.slot}`).join(', ')}.` : ', nhưng mọi đỉnh kề đều đã được gán nhãn.'),
+            )
+          : tr(
+              `Its rank is not below numPrevFrontier = ${t.numPrev}, so it has no element to take.`,
+              `Rank của nó không nhỏ hơn numPrevFrontier = ${t.numPrev}, nên nó không có phần tử nào để nhận.`,
+            );
         const waits = shape.sync1 ? waitAfter(r, 1) : undefined;
         push({
           rank: r, op: 'work', level: lvl, elements: els, lines: L('work'), waits,
-          text: `${who(r)}, level ${lvl}: ${mine}${waits ? ' Then it waits at grid.sync() 1.' : ''}`,
-          violation: crashed ? { kind: 'crash', message: `${crashed}: the emulator stops here with an AddressSanitizer report` } : undefined,
+          text: tr(
+            `${who(r)}, level ${lvl}: ${mine}${waits ? ' Then it waits at grid.sync() 1.' : ''}`,
+            `${who(r)}, mức ${lvl}: ${mine}${waits ? ' Rồi nó chờ tại grid.sync() 1.' : ''}`,
+          ),
+          violation: crashed
+            ? {
+                kind: 'crash',
+                message: tr(
+                  `${crashed}: the emulator stops here with an AddressSanitizer report`,
+                  `${crashed}: trình giả lập dừng ở đây với một báo cáo AddressSanitizer`,
+                ),
+              }
+            : undefined,
         });
         if (crashed || waits) return;
         continue;
@@ -517,18 +584,24 @@ export function simulate(
         if (!ex3 && resetDone.has(lvl)) {
           violation = {
             kind: 'read-after-reset',
-            message: `grid thread 0 has already reset the counter for this level, so thread ${r} reads ${value} instead of the size of level ${lvl}`,
+            message: tr(
+              `grid thread 0 has already reset the counter for this level, so thread ${r} reads ${value} instead of the size of level ${lvl}`,
+              `luồng 0 của lưới đã đặt lại bộ đếm của mức này, nên luồng ${r} đọc được ${value} thay vì kích thước của mức ${lvl}`,
+            ),
           };
         } else if (unfinished.length) {
           // Judged after the run, when the level's full size is known.
-          note = `unfinished:${unfinished.join(',')}`;
+          note = `unfinished:${unfinished.join(',')}`; // i18n-ignore: internal marker, replaced before the run returns
         }
         if (ex3) phase[r] = 'swap';
         else phase[r] = 'reset';
         const waits = !ex3 && shape.sync2 ? waitAfter(r, 2) : undefined;
         push({
           rank: r, op: 'read', level: lvl, value, lines: L('read'), waits, violation, note,
-          text: `${who(r)} reads ${ex3 ? `numFrontier[${lvl}]` : '*numCurrFrontier'} = ${value} into its own numPrevFrontier.${waits ? ' It waits at grid.sync() 2.' : ''}`,
+          text: tr(
+            `${who(r)} reads ${ex3 ? `numFrontier[${lvl}]` : '*numCurrFrontier'} = ${value} into its own numPrevFrontier.${waits ? ' It waits at grid.sync() 2.' : ''}`,
+            `${who(r)} đọc ${ex3 ? `numFrontier[${lvl}]` : '*numCurrFrontier'} = ${value} vào numPrevFrontier của riêng nó.${waits ? ' Nó chờ tại grid.sync() 2.' : ''}`,
+          ),
         });
         if (waits) return;
         continue;
@@ -545,15 +618,27 @@ export function simulate(
           history.push({ kind: 'reset', step: steps.length, rank: r, level: lvl, before });
           push({
             rank: r, op: 'reset', level: lvl, lines: L('reset'), waits,
-            text: `${who(r)} is grid thread 0: it sets *numCurrFrontier from ${before} to 0.${waits ? ' It waits at grid.sync() 3.' : ''}`,
+            text: tr(
+              `${who(r)} is grid thread 0: it sets *numCurrFrontier from ${before} to 0.${waits ? ' It waits at grid.sync() 3.' : ''}`,
+              `${who(r)} là luồng 0 của lưới: nó đặt *numCurrFrontier từ ${before} về 0.${waits ? ' Nó chờ tại grid.sync() 3.' : ''}`,
+            ),
             violation: early
-              ? { kind: 'late-reset', message: `${plural(early, 'append')} of level ${lvl + 1} ${early === 1 ? 'was' : 'were'} already counted; the reset throws ${early === 1 ? 'it' : 'them'} away, and the next appends overwrite their slots` }
+              ? {
+                  kind: 'late-reset',
+                  message: tr(
+                    `${plural(early, 'append')} of level ${lvl + 1} ${early === 1 ? 'was' : 'were'} already counted; the reset throws ${early === 1 ? 'it' : 'them'} away, and the next appends overwrite their slots`,
+                    `${early} lần nối thêm của mức ${lvl + 1} đã được đếm; việc đặt lại vứt bỏ chúng, và các lần nối thêm tiếp theo ghi đè lên vị trí của chúng`,
+                  ),
+                }
               : undefined,
           });
         } else {
           push({
             rank: r, op: 'reset', level: lvl, lines: L('reset'), waits,
-            text: `${who(r)} is not grid thread 0, so it skips the reset.${waits ? ' It waits at grid.sync() 3.' : ''}`,
+            text: tr(
+              `${who(r)} is not grid thread 0, so it skips the reset.${waits ? ' It waits at grid.sync() 3.' : ''}`,
+              `${who(r)} không phải luồng 0 của lưới, nên nó bỏ qua bước đặt lại.${waits ? ' Nó chờ tại grid.sync() 3.' : ''}`,
+            ),
           });
         }
         if (waits) return;
@@ -570,10 +655,22 @@ export function simulate(
       push({
         rank: r, op: 'swap', level: lvl, exits, lines: [...L('swap'), ...L('loop')],
         text: exits
-          ? `${who(r)} swaps its pointers and tests numPrevFrontier = 0 > 0: false, so it leaves the loop and the kernel.`
-          : `${who(r)} swaps its pointers (prevFrontier is now ${t.prev}) and tests numPrevFrontier = ${t.numPrev} > 0: it goes on to level ${lvl + 1}.`,
+          ? tr(
+              `${who(r)} swaps its pointers and tests numPrevFrontier = 0 > 0: false, so it leaves the loop and the kernel.`,
+              `${who(r)} hoán đổi các con trỏ và kiểm tra numPrevFrontier = 0 > 0: sai, nên nó rời vòng lặp và kernel.`,
+            )
+          : tr(
+              `${who(r)} swaps its pointers (prevFrontier is now ${t.prev}) and tests numPrevFrontier = ${t.numPrev} > 0: it goes on to level ${lvl + 1}.`,
+              `${who(r)} hoán đổi các con trỏ (prevFrontier giờ là ${t.prev}) và kiểm tra numPrevFrontier = ${t.numPrev} > 0: nó đi tiếp sang mức ${lvl + 1}.`,
+            ),
         violation: exits && size > 0
-          ? { kind: 'early-exit', message: `level ${lvl} has ${plural(size, 'vertex', 'vertices')}, but this thread read 0 and leaves while the search is not finished` }
+          ? {
+              kind: 'early-exit',
+              message: tr(
+                `level ${lvl} has ${plural(size, 'vertex', 'vertices')}, but this thread read 0 and leaves while the search is not finished`,
+                `mức ${lvl} có ${size} đỉnh, nhưng luồng này đọc được 0 và rời đi khi việc tìm kiếm chưa xong`,
+              ),
+            }
           : undefined,
       });
       if (exits) return;
@@ -597,8 +694,11 @@ export function simulate(
       const gone = st.threads.filter((t) => t.status === 'exited').map((t) => t.rank);
       push({
         rank: -1, op: 'deadlock', level: waiting[0].currLevel, lines: L(at === 1 ? 's1' : at === 2 ? 's2' : 's3'),
-        text: `${waiting.length === 1 ? `Thread ${waiting[0].rank} waits` : `Threads ${list(waiting.map((t) => t.rank))} wait`} at grid.sync() ${at} for ${gone.length === 1 ? `thread ${gone[0]}, which has` : `threads ${list(gone)}, which have`} left the kernel. sync() lets no thread past until every thread of the grid arrives, so it never opens.`,
-        violation: { kind: 'deadlock', message: 'a deadlock: the kernel never finishes' },
+        text: tr(
+          `${waiting.length === 1 ? `Thread ${waiting[0].rank} waits` : `Threads ${list(waiting.map((t) => t.rank))} wait`} at grid.sync() ${at} for ${gone.length === 1 ? `thread ${gone[0]}, which has` : `threads ${list(gone)}, which have`} left the kernel. sync() lets no thread past until every thread of the grid arrives, so it never opens.`,
+          `${waiting.length === 1 ? `Luồng ${waiting[0].rank} chờ` : `Các luồng ${list(waiting.map((t) => t.rank))} chờ`} tại grid.sync() ${at}, đợi ${gone.length === 1 ? `luồng ${gone[0]}, vốn đã` : `các luồng ${list(gone)}, vốn đã`} rời kernel. sync() không cho luồng nào đi qua cho đến khi mọi luồng của lưới tới nơi, nên nó không bao giờ mở.`,
+        ),
+        violation: { kind: 'deadlock', message: tr('a deadlock: the kernel never finishes', 'một deadlock: kernel không bao giờ kết thúc') },
       });
       break;
     }
@@ -607,13 +707,20 @@ export function simulate(
       t.at = undefined;
     }
     const why =
-      shape.kernel === 'ex3' ? `every append to numFrontier[${waiting[0].currLevel}] is done, so its value is the level's size`
-        : at === 1 ? 'every append of this level is done, so *numCurrFrontier is the size of the new frontier'
-          : at === 2 ? 'every thread has read the size, so it is safe to reset it'
-            : 'the reset is visible to everyone, so the next level\'s appends start from 0';
+      shape.kernel === 'ex3'
+        ? tr(
+            `every append to numFrontier[${waiting[0].currLevel}] is done, so its value is the level's size`,
+            `mọi lần nối thêm vào numFrontier[${waiting[0].currLevel}] đã xong, nên giá trị của nó là kích thước của mức`,
+          )
+        : at === 1 ? tr('every append of this level is done, so *numCurrFrontier is the size of the new frontier', 'mọi lần nối thêm của mức này đã xong, nên *numCurrFrontier là kích thước của frontier mới')
+          : at === 2 ? tr('every thread has read the size, so it is safe to reset it', 'mọi luồng đã đọc kích thước, nên có thể an toàn đặt lại nó')
+            : tr('the reset is visible to everyone, so the next level\'s appends start from 0', 'mọi luồng đều thấy việc đặt lại, nên các lần nối thêm của mức tiếp theo bắt đầu từ 0');
     push({
       rank: -1, op: 'release', level: waiting[0].currLevel, barrier: at, lines: L(at === 1 ? 's1' : at === 2 ? 's2' : 's3'),
-      text: `grid.sync() ${at} opens${exited ? ` for the ${plural(live.length, 'thread')} still in the kernel (the emulator does not wait for threads that have left)` : ''}: ${why}.`,
+      text: tr(
+        `grid.sync() ${at} opens${exited ? ` for the ${plural(live.length, 'thread')} still in the kernel (the emulator does not wait for threads that have left)` : ''}: ${why}.`,
+        `grid.sync() ${at} mở${exited ? ` cho ${live.length} luồng còn trong kernel (trình giả lập không chờ các luồng đã rời đi)` : ''}: ${why}.`,
+      ),
     });
   }
 
@@ -622,14 +729,20 @@ export function simulate(
     if (s.op !== 'read' || !s.note?.startsWith('unfinished:')) continue;
     const pending = s.note.slice('unfinished:'.length).split(',').map(Number);
     const full = refSize[s.level] ?? 0;
-    const them = pending.length === 1 ? `thread ${pending[0]} has` : `threads ${list(pending)} have`;
+    const them = pending.length === 1 ? tr(`thread ${pending[0]} has`, `luồng ${pending[0]}`) : tr(`threads ${list(pending)} have`, `các luồng ${list(pending)}`);
     if (s.value !== full && !s.violation)
       s.violation = {
         kind: 'partial-count',
-        message: `${them} not finished appending, so ${s.value} is not the size of level ${s.level}, which is ${full}`,
+        message: tr(
+          `${them} not finished appending, so ${s.value} is not the size of level ${s.level}, which is ${full}`,
+          `${them} chưa nối thêm xong, nên ${s.value} không phải kích thước của mức ${s.level}, vốn là ${full}`,
+        ),
       };
     s.note = s.value === full
-      ? `${them[0].toUpperCase() + them.slice(1)} not finished appending, but ${pending.length === 1 ? 'it adds' : 'they add'} nothing to this level, so the number happens to be right.`
+      ? tr(
+          `${them[0].toUpperCase() + them.slice(1)} not finished appending, but ${pending.length === 1 ? 'it adds' : 'they add'} nothing to this level, so the number happens to be right.`,
+          `${them[0].toUpperCase() + them.slice(1)} chưa nối thêm xong, nhưng không thêm gì vào mức này, nên con số tình cờ lại đúng.`,
+        )
       : undefined;
   }
 
@@ -643,13 +756,13 @@ export function simulate(
         : first === 'read-after-reset' || first === 'early-exit' || first === 'deadlock' ? 'early-exit'
           : wrongVertices ? 'wrong' : 'correct';
   const label =
-    kind === 'crash' ? 'an out-of-range access'
-      : kind === 'early-exit' ? (deadlocked ? 'early exit, deadlock' : 'early exit')
-        : kind === 'lost-appends' ? 'appends lost to a late reset'
-          : kind === 'partial-count' ? 'a thread read a partial count'
-            : kind === 'wrong' ? 'levels wrong' : 'correct';
+    kind === 'crash' ? 'an out-of-range access' // i18n-ignore: identifier also shown to the reader (data-outcome compared by e2e/ch18-s186.mjs)
+      : kind === 'early-exit' ? (deadlocked ? 'early exit, deadlock' : 'early exit') // i18n-ignore: identifier also shown to the reader (data-outcome compared by e2e/ch18-s186.mjs)
+        : kind === 'lost-appends' ? 'appends lost to a late reset' // i18n-ignore: identifier also shown to the reader (data-outcome compared by e2e/ch18-s186.mjs)
+          : kind === 'partial-count' ? 'a thread read a partial count' // i18n-ignore: identifier also shown to the reader (data-outcome compared by e2e/ch18-s186.mjs)
+            : kind === 'wrong' ? 'levels wrong' : 'correct'; // i18n-ignore: identifier also shown to the reader (data-outcome compared by e2e/ch18-s186.mjs)
   const consequence = kind !== 'early-exit' && exitedEarly
-    ? (deadlocked ? 'then a thread leaves early: early exit, deadlock' : 'then a thread leaves early')
+    ? (deadlocked ? tr('then a thread leaves early: early exit, deadlock', 'rồi một luồng rời đi sớm: thoát sớm, deadlock') : tr('then a thread leaves early', 'rồi một luồng rời đi sớm'))
     : undefined;
   return {
     shape, schedule, rule, graph, blocks, threads, initial, steps, history, reference,
@@ -708,11 +821,46 @@ export function coopLoop(sizes: number[], barriersPerLevel = 3) {
 
 /** The swap's event order for one level, for the scene: what each barrier separates. */
 export const SWAP_ORDER = [
-  { what: 'every thread appends its new vertices', guard: null },
-  { what: 'grid.sync() 1', guard: 'no one reads the size before every append is in' },
-  { what: 'every thread reads *numCurrFrontier', guard: null },
-  { what: 'grid.sync() 2', guard: 'no one reads after the reset' },
-  { what: 'grid thread 0 sets it to 0', guard: null },
-  { what: 'grid.sync() 3', guard: 'no append starts before the reset' },
-  { what: 'every thread swaps its two pointers', guard: null },
+  {
+    get what() {
+      return tr('every thread appends its new vertices', 'mỗi luồng nối thêm các đỉnh mới của nó');
+    },
+    guard: null,
+  },
+  {
+    what: 'grid.sync() 1', // i18n-ignore: code
+    get guard() {
+      return tr('no one reads the size before every append is in', 'không ai đọc kích thước trước khi mọi lần nối thêm xong');
+    },
+  },
+  {
+    get what() {
+      return tr('every thread reads *numCurrFrontier', 'mỗi luồng đọc *numCurrFrontier');
+    },
+    guard: null,
+  },
+  {
+    what: 'grid.sync() 2', // i18n-ignore: code
+    get guard() {
+      return tr('no one reads after the reset', 'không ai đọc sau khi đặt lại');
+    },
+  },
+  {
+    get what() {
+      return tr('grid thread 0 sets it to 0', 'luồng 0 của lưới đặt nó về 0');
+    },
+    guard: null,
+  },
+  {
+    what: 'grid.sync() 3', // i18n-ignore: code
+    get guard() {
+      return tr('no append starts before the reset', 'không lần nối thêm nào bắt đầu trước khi đặt lại');
+    },
+  },
+  {
+    get what() {
+      return tr('every thread swaps its two pointers', 'mỗi luồng hoán đổi hai con trỏ của nó');
+    },
+    guard: null,
+  },
 ] as const;

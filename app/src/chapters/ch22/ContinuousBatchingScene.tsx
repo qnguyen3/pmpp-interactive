@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { M8_DEFAULT, precisionFor, relativeStep, stepBStar } from '../../sim/batching';
 import {
   SCENE_NAMES,
@@ -46,7 +47,7 @@ const f2 = (v: number) => (Math.round(v * 100) / 100).toString();
 
 function Frame({ children, headline, policy }: { children: ReactNode; headline: string; policy?: string }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Slots of a batch over decode steps" style={{ width: '100%', maxWidth: W, display: 'block' }}
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Slots of a batch over decode steps', 'Các khe của một batch qua các bước decode')} style={{ width: '100%', maxWidth: W, display: 'block' }}
       data-policy={policy ?? ''}>
       <text x={12} y={24} fontSize="15" fontWeight="600" data-headline="">{headline}</text>
       {children}
@@ -71,7 +72,7 @@ function SlotChart({ run, upTo, x, y, cw, rh, cols, title }: {
       ))}
       {Array.from({ length: run.slots }, (_, s) => (
         <g key={s}>
-          <text x={x - 8} y={y + s * rh + rh / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>slot {s + 1}</text>
+          <text x={x - 8} y={y + s * rh + rh / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>khe {s + 1}</>}>slot {s + 1}</Translated></text>
           {Array.from({ length: cols }, (_, k) => (
             <rect key={k} x={x + k * cw} y={y + s * rh} width={cw - 2} height={rh - 3} fill="none" stroke="var(--rule-soft)" />
           ))}
@@ -85,7 +86,7 @@ function SlotChart({ run, upTo, x, y, cw, rh, cols, title }: {
                 fill={c.state === 'gen' ? 'var(--cell)' : 'var(--rule)'} stroke={c.state === 'gen' ? 'var(--ink-2)' : 'none'} />
               <text x={x + k * cw + cw / 2 - 1} y={y + s * rh + rh / 2 + 2} fontSize={Math.min(12, rh * 0.45)} textAnchor="middle"
                 style={{ fill: c.state === 'gen' ? 'var(--ink)' : 'var(--ink-3)' }}>
-                {c.state === 'gen' ? SCENE_NAMES[c.id] : 'idle'}
+                {c.state === 'gen' ? SCENE_NAMES[c.id] : tr('idle', 'rảnh')}
               </text>
             </g>
           ) : null,
@@ -107,14 +108,14 @@ function Queue({ run, k, x, y }: { run: ServeResult; k: number; x: number; y: nu
   const waiting = k < run.steps.length ? waitingAt(run, k) : [];
   return (
     <g data-queue={waiting.map((i) => SCENE_NAMES[i]).join(' ')}>
-      <text x={x} y={y} fontSize="11.5">waiting:</text>
+      <text x={x} y={y} fontSize="11.5"><Translated vi="đang chờ:">waiting:</Translated></text>
       {waiting.map((i, j) => (
         <g key={i}>
           <rect x={x + 58 + j * 30} y={y - 14} width={24} height={20} rx={2} fill="var(--cell)" stroke="var(--ink-2)" />
           <text x={x + 70 + j * 30} y={y} fontSize="11.5" textAnchor="middle">{SCENE_NAMES[i]}</text>
         </g>
       ))}
-      {!waiting.length ? <text x={x + 58} y={y} fontSize="11.5" style={{ fill: 'var(--ink-3)' }}>nobody</text> : null}
+      {!waiting.length ? <text x={x + 58} y={y} fontSize="11.5" style={{ fill: 'var(--ink-3)' }}><Translated vi="không ai">nobody</Translated></text> : null}
     </g>
   );
 }
@@ -125,7 +126,9 @@ function Counters({ run, k, x, y }: { run: ServeResult; k: number; x: number; y:
   return (
     <g data-tokens-step={st.active} data-idle={idle}>
       <text x={x} y={y} fontSize="12">
-        step {Math.min(k, run.steps.length - 1)}: {st.active} {st.active === 1 ? 'token' : 'tokens'} made, {idle} {idle === 1 ? 'slot' : 'slots'} idle
+        <Translated vi={<>bước {Math.min(k, run.steps.length - 1)}: tạo {st.active} token, {idle} khe rảnh</>}>
+          step {Math.min(k, run.steps.length - 1)}: {st.active} {st.active === 1 ? 'token' : 'tokens'} made, {idle} {idle === 1 ? 'slot' : 'slots'} idle
+        </Translated>
       </text>
     </g>
   );
@@ -144,11 +147,11 @@ function Policy({ run, p, label }: { run: ServeResult; p: number; label: string 
       <Queue run={run} k={k} x={12} y={242} />
       <g>
         <rect x={430} y={230} width={16} height={14} rx={2} fill="none" stroke="var(--ok)" strokeWidth={2} />
-        <text x={452} y={241} fontSize="11">a short request returned to its user</text>
+        <text x={452} y={241} fontSize="11"><Translated vi="một yêu cầu ngắn đã trả về cho người dùng">a short request returned to its user</Translated></text>
       </g>
       <Counters run={run} k={k} x={12} y={276} />
       <text x={12} y={308} fontSize="12" data-steps-total={k + 1 >= run.steps.length ? run.steps.length : ''}>
-        {k + 1 >= run.steps.length ? `all 6 requests done after ${run.steps.length} steps, ${run.tokens} tokens` : ''}
+        {k + 1 >= run.steps.length ? tr(`all 6 requests done after ${run.steps.length} steps, ${run.tokens} tokens`, `cả 6 yêu cầu xong sau ${run.steps.length} bước, ${run.tokens} token`) : ''}
       </text>
     </Frame>
   );
@@ -169,9 +172,9 @@ function knobPlot(p: number) {
         {LIMITS.map((s) => (
           <text key={s} x={X(s) + dx} y={Y0 + PH + 14} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>{s}</text>
         ))}
-        <text x={X0 + dx + PW / 2} y={Y0 + PH + 30} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>slot limit</text>
+        <text x={X0 + dx + PW / 2} y={Y0 + PH + 30} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi="giới hạn khe">slot limit</Translated></text>
         <line x1={X(KNOB_BSTAR) + dx} x2={X(KNOB_BSTAR) + dx} y1={Y0} y2={Y0 + PH} stroke="var(--ink)" strokeDasharray="3 3" />
-        <text x={X(KNOB_BSTAR) + dx + 4} y={Y0 + PH - 8} fontSize="10.5">knee</text>
+        <text x={X(KNOB_BSTAR) + dx + 4} y={Y0 + PH - 8} fontSize="10.5"><Translated vi="điểm gãy">knee</Translated></text>
         <polyline points={vals.slice(0, n).map((v, i) => `${X(LIMITS[i]) + dx},${Y(v)}`).join(' ')} fill="none" stroke="var(--ink)" strokeWidth="2" />
         {vals.slice(0, n).map((v, i) => <circle key={i} cx={X(LIMITS[i]) + dx} cy={Y(v)} r={3} fill="var(--ink)" />)}
       </g>
@@ -179,8 +182,8 @@ function knobPlot(p: number) {
   };
   return (
     <>
-      {plot(0, KNOB.map((k) => k.tokens), 'tokens per batch-1 step', 'tokens')}
-      {plot(350, KNOB.map((k) => k.perToken), "each user's time per token", 'perToken')}
+      {plot(0, KNOB.map((k) => k.tokens), tr('tokens per batch-1 step', 'token mỗi bước ở batch 1'), 'tokens')}
+      {plot(350, KNOB.map((k) => k.perToken), tr("each user's time per token", 'thời gian mỗi token của từng người dùng'), 'perToken')}
     </>
   );
 }
@@ -190,70 +193,76 @@ const shortFinish = (r: ServeResult) => r.meanFinishShort ?? NaN;
 const beats: Beat[] = [
   {
     clip: 'continuous-batching-1',
-    label: 'Six requests',
+    get label() { return tr('Six requests', 'Sáu yêu cầu'); },
     draw: (p) => (
-      <Frame headline="6 requests, each wanting its own number of tokens">
+      <Frame headline={tr('6 requests, each wanting its own number of tokens', '6 yêu cầu, mỗi yêu cầu cần một số token riêng')}>
         {SCENE_REQUESTS.map((r, i) => (
           <g key={r.id} opacity={0.3 + 0.7 * ramp(p, 0.02 + i * 0.07, 0.08 + i * 0.07)} data-request={SCENE_NAMES[r.id]} data-length={r.length}>
-            <text x={12} y={70 + i * 24} fontSize="12">{SCENE_NAMES[r.id]}: arrives at step {r.arrival}</text>
+            <text x={12} y={70 + i * 24} fontSize="12"><Translated vi={<>{SCENE_NAMES[r.id]}: đến ở bước {r.arrival}</>}>{SCENE_NAMES[r.id]}: arrives at step {r.arrival}</Translated></text>
             {Array.from({ length: r.length }, (_, t) => (
               <rect key={t} x={170 + t * 18} y={58 + i * 24} width={14} height={14} rx={2} fill="var(--cell)" stroke="var(--ink-2)" />
             ))}
-            <text x={170 + r.length * 18 + 4} y={70 + i * 24} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{r.length} tokens</text>
+            <text x={170 + r.length * 18 + 4} y={70 + i * 24} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>{r.length} token</>}>{r.length} tokens</Translated></text>
           </g>
         ))}
         <g>
           <SlotChart run={CONTINUOUS} upTo={p > 0.7 ? 1 : 0} x={CX} y={240} cw={CW} rh={20} cols={12} />
-          <text x={CX + 12 * CW + 8} y={262} fontSize="11" style={{ fill: 'var(--ink-2)' }}>one column per step</text>
+          <text x={CX + 12 * CW + 8} y={262} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="mỗi cột một bước">one column per step</Translated></text>
         </g>
       </Frame>
     ),
   },
   {
     clip: 'continuous-batching-2',
-    label: 'Static, 4 slots',
-    draw: (p) => <Policy run={STATIC} p={p} label="static batching, 4 slots: the batch ends when its longest request does" />,
+    get label() { return tr('Static, 4 slots', 'Tĩnh, 4 khe'); },
+    draw: (p) => <Policy run={STATIC} p={p} label={tr('static batching, 4 slots: the batch ends when its longest request does', 'batching tĩnh, 4 khe: batch kết thúc khi yêu cầu dài nhất của nó kết thúc')} />,
   },
   {
     clip: 'continuous-batching-3',
-    label: 'Continuous',
-    draw: (p) => <Policy run={CONTINUOUS} p={p} label="continuous batching: leave and join at every step" />,
+    get label() { return tr('Continuous', 'Liên tục'); },
+    draw: (p) => <Policy run={CONTINUOUS} p={p} label={tr('continuous batching: leave and join at every step', 'batching liên tục: rời đi và gia nhập ở mỗi bước')} />,
   },
   {
     clip: 'continuous-batching-4',
-    label: 'The tally',
+    get label() { return tr('The tally', 'Bảng tổng kết'); },
     draw: (p) => (
-      <Frame headline="the same 6 requests, the same 4 slots">
+      <Frame headline={tr('the same 6 requests, the same 4 slots', 'cùng 6 yêu cầu, cùng 4 khe')}>
         <SlotChart run={STATIC} upTo={99} x={CX} y={62} cw={26} rh={20} cols={12} />
-        <text x={CX + 12 * 26 + 10} y={90} fontSize="12" fontWeight="600">static</text>
+        <text x={CX + 12 * 26 + 10} y={90} fontSize="12" fontWeight="600"><Translated vi="tĩnh">static</Translated></text>
         <SlotChart run={CONTINUOUS} upTo={99} x={CX} y={176} cw={26} rh={20} cols={12} />
-        <text x={CX + 12 * 26 + 10} y={204} fontSize="12" fontWeight="600">continuous</text>
+        <text x={CX + 12 * 26 + 10} y={204} fontSize="12" fontWeight="600"><Translated vi="liên tục">continuous</Translated></text>
         <g opacity={ramp(p, 0.15, 0.3)} data-tally=""
           data-static-steps={STATIC.steps.length} data-continuous-steps={CONTINUOUS.steps.length}
           data-static-tps={f2(STATIC.tokensPerSecond)} data-continuous-tps={f2(CONTINUOUS.tokensPerSecond)}
           data-static-short={f2(shortFinish(STATIC))} data-continuous-short={f2(shortFinish(CONTINUOUS))}>
-          <text x={500} y={74} fontSize="11.5">{STATIC.steps.length} steps, {f2(STATIC.tokensPerSecond)} tokens per unit</text>
-          <text x={500} y={90} fontSize="11.5">short ones back after {f2(shortFinish(STATIC))} on average</text>
-          <text x={500} y={188} fontSize="11.5">{CONTINUOUS.steps.length} steps, {f2(CONTINUOUS.tokensPerSecond)} tokens per unit</text>
-          <text x={500} y={204} fontSize="11.5">short ones back after {f2(shortFinish(CONTINUOUS))} on average</text>
+          <text x={500} y={74} fontSize="11.5"><Translated vi={<>{STATIC.steps.length} bước, {f2(STATIC.tokensPerSecond)} token mỗi đơn vị</>}>{STATIC.steps.length} steps, {f2(STATIC.tokensPerSecond)} tokens per unit</Translated></text>
+          <text x={500} y={90} fontSize="11.5"><Translated vi={<>yêu cầu ngắn trả về sau trung bình {f2(shortFinish(STATIC))}</>}>short ones back after {f2(shortFinish(STATIC))} on average</Translated></text>
+          <text x={500} y={188} fontSize="11.5"><Translated vi={<>{CONTINUOUS.steps.length} bước, {f2(CONTINUOUS.tokensPerSecond)} token mỗi đơn vị</>}>{CONTINUOUS.steps.length} steps, {f2(CONTINUOUS.tokensPerSecond)} tokens per unit</Translated></text>
+          <text x={500} y={204} fontSize="11.5"><Translated vi={<>yêu cầu ngắn trả về sau trung bình {f2(shortFinish(CONTINUOUS))}</>}>short ones back after {f2(shortFinish(CONTINUOUS))} on average</Translated></text>
         </g>
         <text x={12} y={300} fontSize="12" opacity={ramp(p, 0.55, 0.7)}>
-          time per token for each user: one step at the batch the server is running ({f2(CONTINUOUS.meanTimePerToken)} here)
+          <Translated vi={<>thời gian mỗi token của từng người dùng: một bước ở batch mà server đang chạy (ở đây là {f2(CONTINUOUS.meanTimePerToken)})</>}>
+            time per token for each user: one step at the batch the server is running ({f2(CONTINUOUS.meanTimePerToken)} here)
+          </Translated>
         </text>
         <text x={12} y={322} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-          unit: one decode step at batch 1, from the batching model at the book's example threshold
+          <Translated vi="đơn vị: một bước decode ở batch 1, theo mô hình batching tại ngưỡng trong ví dụ của sách">
+            unit: one decode step at batch 1, from the batching model at the book's example threshold
+          </Translated>
         </text>
       </Frame>
     ),
   },
   {
     clip: 'continuous-batching-5',
-    label: 'The knob',
+    get label() { return tr('The knob', 'Núm vặn'); },
     draw: (p) => (
-      <Frame headline="the slot limit sets the batch: throughput against each user's wait">
+      <Frame headline={tr("the slot limit sets the batch: throughput against each user's wait", 'giới hạn khe quyết định batch: thông lượng đổi lấy thời gian chờ của từng người dùng')}>
         {knobPlot(p)}
         <text x={12} y={318} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-          continuous batching, 600 requests all waiting, step times from the batching model (knee at B* = {KNOB_BSTAR.toFixed(1)})
+          <Translated vi={<>batching liên tục, 600 yêu cầu cùng chờ, thời gian bước theo mô hình batching (điểm gãy tại B* = {KNOB_BSTAR.toFixed(1)})</>}>
+            continuous batching, 600 requests all waiting, step times from the batching model (knee at B* = {KNOB_BSTAR.toFixed(1)})
+          </Translated>
         </text>
       </Frame>
     ),
@@ -261,5 +270,5 @@ const beats: Beat[] = [
 ];
 
 export function ContinuousBatchingScene() {
-  return <Scene chapter="ch22" title="Static and continuous batching" beats={beats} />;
+  return <Scene chapter="ch22" title={tr('Static and continuous batching', 'Batching tĩnh và liên tục')} beats={beats} />;
 }

@@ -1,0 +1,1 @@
+Mỗi mức tốn một lần khởi chạy, và một lần đọc ngược kích thước frontier để host biết có đi tiếp hay không. Lưới này cần 31 lần cho mỗi loại, và không làn sóng nào chứa quá 15 ô. Nhiều mức nhỏ nghĩa là nhiều chi phí cố định: đó là trường hợp mà trang tiếp theo xử lý, với một lần khởi chạy cho cả lần tìm kiếm.

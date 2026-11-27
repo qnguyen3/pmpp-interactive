@@ -1,0 +1,1 @@
+Min-p ở 0.1. Ngưỡng là một phần mười của xác suất cao nhất. Tính theo logits, đó là logit lớn nhất cộng logarit tự nhiên của 0.1: khoảng 3.2 trừ 2.3, tức là 0.9. Không cần softmax. Token 9 ở mức 0.8, ngay dưới đường kẻ, và bị loại. Còn lại ba token.

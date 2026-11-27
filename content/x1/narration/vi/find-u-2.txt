@@ -1,0 +1,1 @@
+Một khối sở hữu hàng đó. Nó đi qua hàng từng đoạn một, ở đây mỗi đoạn mười sáu token còn lại, và cộng tổng của mỗi đoạn vào một tổng gộp đang chạy. Đoạn đầu tiên kết thúc dưới mục tiêu, nên nó bị bỏ qua. Không luồng nào scan nó.

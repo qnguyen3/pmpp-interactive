@@ -1,0 +1,1 @@
+Tạo một phần bộ nhớ vật lý và ánh xạ nó vào đầu dải địa chỉ. Giờ các địa chỉ đã có bộ nhớ phía sau, nhưng một kernel đọc chúng vẫn bị sập, vì chưa thiết bị nào được cấp quyền truy cập. Hãy cấp quyền, và chỉ đến lúc này một kernel mới đọc được phần đầu tiên.

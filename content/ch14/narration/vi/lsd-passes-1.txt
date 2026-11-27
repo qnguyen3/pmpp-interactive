@@ -1,0 +1,1 @@
+Đây là 16 khóa của sách, mỗi khóa dài 4 bit. Lượt 1 chỉ nhìn vào bit thấp nhất. Mọi khóa có bit thấp nhất là 0 đi lên đầu, và mọi khóa có bit thấp nhất là 1 đi xuống cuối. Trong mỗi nhóm, các khóa giữ nguyên thứ tự chúng đến.

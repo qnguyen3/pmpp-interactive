@@ -1,0 +1,1 @@
+Đó là toàn bộ kernel: một vòng lặp, do 16 luồng chạy. Đây là kernel mà lab mốc dự án của chương này yêu cầu bạn viết, cho mọi kích thước. Chương 5 bắt đầu từ chính bức tranh này với một câu hỏi: mỗi phần tử của M và N đã bị nạp bao nhiêu lần?

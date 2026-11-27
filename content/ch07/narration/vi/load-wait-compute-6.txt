@@ -1,0 +1,1 @@
+Hãy đếm như sách làm, cho một khối nằm xa các mép. 64 lần nạp và 36 lần ghi phục vụ 324 phép nhân cộng. Kernel dùng bộ nhớ hằng thực hiện 324 lần nạp đầu vào cho cùng khối lượng công việc. Tức là 1.62 phép toán mỗi byte, so với 0.5. Với khối 32 nhân 32 và bộ lọc 5 nhân 5, cùng cách đếm đó cho ra 5.42.

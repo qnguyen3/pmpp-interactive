@@ -1,0 +1,1 @@
+Giờ hãy thay bộ lọc bằng một bảng mã 16 mục, loại mà một mô hình lượng tử hóa dùng để giải mã trọng số 4 bit. Mỗi lane xin mục mà mã trọng số của chính nó chỉ tới. Với các mã này, warp cần 14 mục khác nhau. Quy tắc của NVIDIA tuần tự hóa chúng. [short pause] 14 lượt, lượt này nối lượt kia, trong khi các lane khác chờ.

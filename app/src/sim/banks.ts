@@ -19,6 +19,8 @@
 // Left out everywhere: timing, accesses wider than 4 bytes per lane (NVIDIA splits
 // those differently and the facts files do not cover it), and atomics.
 
+import { tr } from '../lib/locale.ts';
+
 export const bankOf = (word: number, banks = 32) => ((word % banks) + banks) % banks;
 
 export interface BankLane {
@@ -169,47 +171,47 @@ export interface BankPreset {
 export const BANK_PRESETS: Record<BankPresetId, BankPreset> = {
   nvidia: {
     id: 'nvidia',
-    label: 'NVIDIA: 32 banks, 32 lanes',
+    get label() { return tr('NVIDIA: 32 banks, 32 lanes', 'NVIDIA: 32 bank, 32 lane'); },
     banks: 32,
     warpWidth: 32,
-    sameWord: 'a read of one word is broadcast to every lane that asks; no conflict',
+    get sameWord() { return tr('a read of one word is broadcast to every lane that asks; no conflict', 'một lần đọc một word được phát (broadcast) tới mọi lane yêu cầu; không có xung đột'); },
     caveat: null,
-    facts: 'notes/today/infra-facts.md A10; ch06-facts.md A12',
+    facts: 'notes/today/infra-facts.md A10; ch06-facts.md A12', // i18n-ignore: facts-file paths and item ids
   },
   'amd-cdna': {
     id: 'amd-cdna',
-    label: 'AMD CDNA 1–3: 32 banks, 64 lanes',
+    get label() { return tr('AMD CDNA 1–3: 32 banks, 64 lanes', 'AMD CDNA 1–3: 32 bank, 64 lane'); },
     banks: 32,
     warpWidth: 64,
-    sameWord: 'broadcast from one address is "handled efficiently without conflicts"',
-    caveat: 'AMD serves 16 lanes per cycle, so a 64-lane access takes several cycles anyway; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.',
-    facts: 'notes/today/infra-facts.md B10; ch06-facts.md B4',
+    get sameWord() { return tr('broadcast from one address is "handled efficiently without conflicts"', 'phát (broadcast) từ một địa chỉ được "xử lý hiệu quả, không có xung đột"'); },
+    get caveat() { return tr('AMD serves 16 lanes per cycle, so a 64-lane access takes several cycles anyway; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.', 'AMD phục vụ 16 lane mỗi chu kỳ, nên một truy cập 64 lane dù sao cũng mất vài chu kỳ; con số này là phép tính của NVIDIA áp lên số bank của AMD, không phải chi phí thật của AMD.'); },
+    facts: 'notes/today/infra-facts.md B10; ch06-facts.md B4', // i18n-ignore: facts-file paths and item ids
   },
   'amd-cdna4': {
     id: 'amd-cdna4',
-    label: 'AMD CDNA 4: 64 banks, 64 lanes',
+    get label() { return tr('AMD CDNA 4: 64 banks, 64 lanes', 'AMD CDNA 4: 64 bank, 64 lane'); },
     banks: 64,
     warpWidth: 64,
-    sameWord: 'broadcast from one address is "handled efficiently without conflicts"',
-    caveat: 'AMD serves 16 lanes per cycle, so a 64-lane access takes several cycles anyway; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.',
-    facts: 'notes/today/infra-facts.md B10; ch05-facts.md B5',
+    get sameWord() { return tr('broadcast from one address is "handled efficiently without conflicts"', 'phát (broadcast) từ một địa chỉ được "xử lý hiệu quả, không có xung đột"'); },
+    get caveat() { return tr('AMD serves 16 lanes per cycle, so a 64-lane access takes several cycles anyway; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.', 'AMD phục vụ 16 lane mỗi chu kỳ, nên một truy cập 64 lane dù sao cũng mất vài chu kỳ; con số này là phép tính của NVIDIA áp lên số bank của AMD, không phải chi phí thật của AMD.'); },
+    facts: 'notes/today/infra-facts.md B10; ch05-facts.md B5', // i18n-ignore: facts-file paths and item ids
   },
   'amd-rdna': {
     id: 'amd-rdna',
-    label: 'AMD RDNA 2–4: 64 banks, 32 lanes',
+    get label() { return tr('AMD RDNA 2–4: 64 banks, 32 lanes', 'AMD RDNA 2–4: 64 bank, 32 lane'); },
     banks: 64,
     warpWidth: 32,
-    sameWord: 'broadcast from one address is "handled efficiently without conflicts"',
-    caveat: 'AMD serves 16 lanes per cycle; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.',
-    facts: 'notes/today/infra-facts.md B10; ch05-facts.md B5',
+    get sameWord() { return tr('broadcast from one address is "handled efficiently without conflicts"', 'phát (broadcast) từ một địa chỉ được "xử lý hiệu quả, không có xung đột"'); },
+    get caveat() { return tr('AMD serves 16 lanes per cycle; this count is NVIDIA\'s arithmetic on AMD\'s bank number, not AMD\'s cost.', 'AMD phục vụ 16 lane mỗi chu kỳ; con số này là phép tính của NVIDIA áp lên số bank của AMD, không phải chi phí thật của AMD.'); },
+    facts: 'notes/today/infra-facts.md B10; ch05-facts.md B5', // i18n-ignore: facts-file paths and item ids
   },
   apple: {
     id: 'apple',
-    label: 'Apple: nothing documented',
+    get label() { return tr('Apple: nothing documented', 'Apple: không có tài liệu nào'); },
     banks: null,
     warpWidth: null,
-    sameWord: 'Apple advises removing accesses to the same location from many threads of a threadgroup',
-    caveat: 'Apple documents no bank structure for threadgroup memory; lab 6.3 measures what your Mac does.',
-    facts: 'notes/today/ch06-facts.md C2; infra-facts.md C13',
+    get sameWord() { return tr('Apple advises removing accesses to the same location from many threads of a threadgroup', 'Apple khuyên loại bỏ việc nhiều luồng của một threadgroup cùng truy cập một vị trí'); },
+    get caveat() { return tr('Apple documents no bank structure for threadgroup memory; lab 6.3 measures what your Mac does.', 'Apple không công bố cấu trúc bank nào cho bộ nhớ threadgroup; lab 6.3 đo xem máy Mac của bạn làm gì.'); },
+    facts: 'notes/today/ch06-facts.md C2; infra-facts.md C13', // i18n-ignore: facts-file paths and item ids
   },
 };

@@ -1,0 +1,1 @@
+Chạy vòng 2 theo chiều ngược lại. Giờ mỗi luồng đọc phần tử lân cận bên trái trước khi phần tử đó được cập nhật. Chỉ 2 kết quả đầu còn khớp với vòng lặp. 6 kết quả còn lại khác đi. Cùng mã, cùng dữ liệu, một đáp án khác. Và trên GPU, bạn không được chọn thứ tự chạy của các luồng.

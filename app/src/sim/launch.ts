@@ -40,6 +40,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- the block-count expression
 export type ExprKey = 'int-ceil' | 'book-ceil' | 'trunc' | 'ceil-trunc' | 'plus-one';
 
@@ -53,7 +55,7 @@ export interface Expression {
 
 export const EXPRESSIONS: readonly Expression[] = [
   { key: 'int-ceil', generic: '(n + B - 1) / B', source: (B) => `(n + ${B} - 1) / ${B}` },
-  { key: 'book-ceil', generic: 'ceil(n / (double)B)', source: (B) => `ceil(n / ${B}.0)` },
+  { key: 'book-ceil', generic: 'ceil(n / (double)B)', source: (B) => `ceil(n / ${B}.0)` }, // i18n-ignore: C++ expression
   { key: 'trunc', generic: 'n / B', source: (B) => `n / ${B}` },
   { key: 'ceil-trunc', generic: 'ceil(n / B)', source: (B) => `ceil(n / ${B})` },
   { key: 'plus-one', generic: 'n / B + 1', source: (B) => `n / ${B} + 1` },
@@ -102,7 +104,7 @@ export const showValue = (value: number, type: CType): string => {
 };
 
 const TO_COUNT =
-  'the number of blocks is a field of a dim3, an unsigned integer, so the double is converted on the way in';
+  'the number of blocks is a field of a dim3, an unsigned integer, so the double is converted on the way in'; // i18n-ignore: translated where it is used (rule: tr(TO_COUNT, ...))
 
 /**
  * Evaluates one of the five forms for int n and block size B with C++ semantics:
@@ -113,21 +115,21 @@ export function blockCount(key: ExprKey, n: number, B: number): BlockCount {
   checkSizes(n, B);
   const q = Math.trunc(n / B); // int / int
   const exact = n / B;
-  const dropped = n % B === 0 ? 'the division is exact' : `the exact quotient is ${showValue(exact, 'double')}; the fraction is dropped`;
+  const dropped = n % B === 0 ? tr('the division is exact', 'phép chia là chính xác') : tr(`the exact quotient is ${showValue(exact, 'double')}; the fraction is dropped`, `thương chính xác là ${showValue(exact, 'double')}; phần thập phân bị bỏ`);
   const steps: EvalStep[] = [];
   let blocks: number;
   switch (key) {
     case 'int-ceil': {
       const sum = n + B - 1;
-      steps.push({ text: `${n} + ${B} - 1`, value: sum, type: 'int', rule: 'int arithmetic' });
+      steps.push({ text: `${n} + ${B} - 1`, value: sum, type: 'int', rule: tr('int arithmetic', 'số học int') });
       blocks = Math.trunc(sum / B);
       steps.push({
         text: `${sum} / ${B}`,
         value: blocks,
         type: 'int',
         rule:
-          'both operands are int, so the division drops the fraction' +
-          (sum % B === 0 ? ' (there is none here)' : ` (${showValue(sum / B, 'double')} becomes ${blocks})`),
+          tr('both operands are int, so the division drops the fraction', 'cả hai toán hạng đều là int, nên phép chia bỏ phần thập phân') +
+          (sum % B === 0 ? tr(' (there is none here)', ' (ở đây không có)') : tr(` (${showValue(sum / B, 'double')} becomes ${blocks})`, ` (${showValue(sum / B, 'double')} thành ${blocks})`)),
       });
       break;
     }
@@ -136,34 +138,34 @@ export function blockCount(key: ExprKey, n: number, B: number): BlockCount {
         text: `${n} / ${B}.0`,
         value: exact,
         type: 'double',
-        rule: `${B}.0 is a double, so n is converted to double and nothing is dropped`,
+        rule: tr(`${B}.0 is a double, so n is converted to double and nothing is dropped`, `${B}.0 là một double, nên n được chuyển sang double và không có gì bị bỏ`),
       });
       blocks = Math.ceil(exact);
-      steps.push({ text: `ceil(${showValue(exact, 'double')})`, value: blocks, type: 'double', rule: 'rounds up to a whole number, still a double' });
-      steps.push({ text: `${showValue(blocks, 'double')} as a block count`, value: blocks, type: 'unsigned', rule: TO_COUNT });
+      steps.push({ text: `ceil(${showValue(exact, 'double')})`, value: blocks, type: 'double', rule: tr('rounds up to a whole number, still a double', 'làm tròn lên thành một số nguyên, vẫn là double') });
+      steps.push({ text: tr(`${showValue(blocks, 'double')} as a block count`, `${showValue(blocks, 'double')} làm số khối`), value: blocks, type: 'unsigned', rule: tr(TO_COUNT, 'số khối là một trường của một dim3, một số nguyên unsigned, nên double được chuyển đổi khi truyền vào') });
       break;
     }
     case 'trunc': {
       blocks = q;
-      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: `both operands are int: ${dropped}` });
+      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: tr(`both operands are int: ${dropped}`, `cả hai toán hạng đều là int: ${dropped}`) });
       break;
     }
     case 'ceil-trunc': {
-      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: `both operands are int: ${dropped}` });
+      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: tr(`both operands are int: ${dropped}`, `cả hai toán hạng đều là int: ${dropped}`) });
       blocks = q;
       steps.push({
         text: `ceil(${q})`,
         value: q,
         type: 'double',
-        rule: 'the int is converted to double; it is already whole, so ceil has nothing to round',
+        rule: tr('the int is converted to double; it is already whole, so ceil has nothing to round', 'int được chuyển sang double; nó đã là số nguyên, nên ceil không có gì để làm tròn'),
       });
-      steps.push({ text: `${showValue(q, 'double')} as a block count`, value: q, type: 'unsigned', rule: TO_COUNT });
+      steps.push({ text: tr(`${showValue(q, 'double')} as a block count`, `${showValue(q, 'double')} làm số khối`), value: q, type: 'unsigned', rule: tr(TO_COUNT, 'số khối là một trường của một dim3, một số nguyên unsigned, nên double được chuyển đổi khi truyền vào') });
       break;
     }
     case 'plus-one': {
-      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: `both operands are int: ${dropped}` });
+      steps.push({ text: `${n} / ${B}`, value: q, type: 'int', rule: tr(`both operands are int: ${dropped}`, `cả hai toán hạng đều là int: ${dropped}`) });
       blocks = q + 1;
-      steps.push({ text: `${q} + 1`, value: blocks, type: 'int', rule: 'one more block, whether or not anything was dropped' });
+      steps.push({ text: `${q} + 1`, value: blocks, type: 'int', rule: tr('one more block, whether or not anything was dropped', 'thêm một khối, dù có gì bị bỏ hay không') });
       break;
     }
   }
@@ -195,11 +197,22 @@ export const ZERO_BLOCKS: readonly ZeroBlocks[] = [
   {
     backend: 'cuda',
     name: 'CUDA',
-    outcome: 'not documented',
-    detail: "NVIDIA's pages describe a launch that fails when a dimension exceeds the maximum; they do not mention zero",
+    outcome: 'not documented', // i18n-ignore: identifier also shown to the reader
+    get detail() {
+      return tr(
+        "NVIDIA's pages describe a launch that fails when a dimension exceeds the maximum; they do not mention zero",
+        'Các trang của NVIDIA mô tả một lần khởi chạy thất bại khi một chiều vượt quá mức tối đa; chúng không nhắc đến số không',
+      );
+    },
   },
-  { backend: 'hip', name: 'HIP', outcome: 'error, documented', detail: 'hipErrorInvalidValue' },
-  { backend: 'emu', name: 'course emulator', outcome: 'error', detail: 'cudaErrorInvalidConfiguration' },
+  { backend: 'hip', name: 'HIP', outcome: 'error, documented', detail: 'hipErrorInvalidValue' }, // i18n-ignore: identifier also shown to the reader
+  {
+    backend: 'emu',
+    get name() {
+      return tr('course emulator', 'trình giả lập (emulator) của khóa học');
+    },
+    outcome: 'error', detail: 'cudaErrorInvalidConfiguration',
+  },
 ];
 
 export interface LaunchResult {

@@ -1,0 +1,1 @@
+Lookback đơn, với chỉ số được nhận từ một bộ đếm. Các khối nhận chỉ số 0, 1 và 2 theo thứ tự chúng bắt đầu. Khối 1 xong đoạn của mình trước khối 0, và quay vòng chờ cờ của khối 0. Khối 0 ghi tổng của mình, rồi giải phóng cờ theo kiểu release. Khối 1 nhận cờ theo kiểu acquire, và chỉ khi đó mới đọc tổng.

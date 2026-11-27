@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   activeThreads,
   cellAt,
@@ -45,16 +46,16 @@ const BUSY_SH = Array.from({ length: stepsPerTile(SH) }, (_, k) => activeThreads
 
 function Frame({ beat, data, headline, children }: { beat: number; data: Record<string, string | number>; headline: string; children: ReactNode }) {
   return (
-    <svg viewBox={`0 0 ${VW} ${VH}`} role="img" aria-label="Animation: shearing a tile of the Smith-Waterman table" style={{ width: '100%', maxWidth: VW, display: 'block' }}>
+    <svg viewBox={`0 0 ${VW} ${VH}`} role="img" aria-label={tr('Animation: shearing a tile of the Smith-Waterman table', 'Hoạt hình: trượt (shear) một ô của bảng Smith-Waterman')} style={{ width: '100%', maxWidth: VW, display: 'block' }}>
       <defs>
-        <marker id="shear-arrow-s" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id="shear-arrow-s" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute value */}
           <path d="M0,0 L8,4 L0,8 z" style={{ fill: 'var(--shared)' }} />
         </marker>
-        <marker id="shear-arrow-g" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id="shear-arrow-g" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute value */}
           <path d="M0,0 L8,4 L0,8 z" style={{ fill: 'var(--global)' }} />
         </marker>
       </defs>
-      <g data-beat={beat} {...Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, String(v)]))}>
+      <g data-beat={beat} {...Object.fromEntries(Object.entries(data).map(([k, v]) => [`data-${k}`, String(v)]))}>{/* i18n-ignore: data attribute name */}
         {children}
         <text x={VW / 2} y={VH - 10} fontSize="13.5" fontWeight="600" textAnchor="middle" data-headline>{headline}</text>
       </g>
@@ -67,10 +68,10 @@ function TableGrid() {
   return (
     <g>
       {COLS.map((q) => (
-        <text key={'c' + q} x={cx(q) + C / 2} y={Y0 - 8} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>q {q}</text>
+        <text key={'c' + q} x={cx(q) + C / 2} y={Y0 - 8} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>{tr(`q ${q}`, `q ${q}`)}</text>
       ))}
       {ROWS.map((r) => (
-        <text key={'r' + r} x={X0 - 8} y={cy(r) + C / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-3)' }}>r {r}</text>
+        <text key={'r' + r} x={X0 - 8} y={cy(r) + C / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-3)' }}>{tr(`r ${r}`, `r ${r}`)}</text>
       ))}
       {ROWS.flatMap((r) =>
         COLS.map((q) => (
@@ -109,10 +110,10 @@ function BusyBars({ busy, upto, title }: { busy: number[]; upto: number; title: 
                 fill={on && k <= upto ? 'var(--shared)' : 'none'} stroke={on ? 'var(--shared)' : 'var(--ink-3)'} strokeDasharray={on ? undefined : '3 2'} />
             );
           })}
-          <text x={RX + k * gap + lane * 0.8} y={Y0 + 20 + W * (lane + 3) + 12} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>step {k}</text>
+          <text x={RX + k * gap + lane * 0.8} y={Y0 + 20 + W * (lane + 3) + 12} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{tr(`step ${k}`, `bước ${k}`)}</text>
         </g>
       ))}
-      <text x={RX} y={Y0 + 20 + W * (lane + 3) + 34} fontSize="11" style={{ fill: 'var(--ink-2)' }}>filled: a busy thread; dashed: an idle one</text>
+      <text x={RX} y={Y0 + 20 + W * (lane + 3) + 34} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{tr('filled: a busy thread; dashed: an idle one', 'tô đậm: luồng đang bận; nét đứt: luồng rảnh')}</text>
     </g>
   );
 }
@@ -125,7 +126,7 @@ function beat1(p: number) {
   const busy = BUSY_SQ[s];
   return (
     <Frame beat={1} data={{ step: s, busy, steps: BUSY_SQ.length, lit: lit.map((c) => `${c.r},${c.q}`).join(' ') }}
-      headline={`step ${s}: ${busy} busy, ${W - busy} idle; ${W * W} cells take ${BUSY_SQ.length} steps, 0 to ${BUSY_SQ.length - 1}`}>
+      headline={tr(`step ${s}: ${busy} busy, ${W - busy} idle; ${W * W} cells take ${BUSY_SQ.length} steps, 0 to ${BUSY_SQ.length - 1}`, `bước ${s}: ${busy} bận, ${W - busy} rảnh; ${W * W} ô cần ${BUSY_SQ.length} bước, từ 0 đến ${BUSY_SQ.length - 1}`)}>
       <TableGrid />
       {Array.from({ length: W * W }, (_, i) => {
         const rt = Math.floor(i / W);
@@ -134,8 +135,8 @@ function beat1(p: number) {
         const k = rt + qt; // the step that computes it (square: d_tile = r_tile + q_tile)
         return <TileCell key={i} x={cx(q)} y={cy(r)} label={String(rt)} look={k === s ? 'hot' : k < s ? 'done' : 'idle'} />;
       })}
-      <text x={cx(4)} y={cy(7) + 16} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>tile (1, 1): each cell shows the thread that computes it</text>
-      <BusyBars busy={BUSY_SQ} upto={s} title="threads per step, square tile" />
+      <text x={cx(4)} y={cy(7) + 16} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>{tr('tile (1, 1): each cell shows the thread that computes it', 'ô (1, 1): mỗi ô con ghi luồng tính nó')}</text>
+      <BusyBars busy={BUSY_SQ} upto={s} title={tr('threads per step, square tile', 'số luồng mỗi bước, ô vuông')} />
     </Frame>
   );
 }
@@ -149,7 +150,7 @@ function beat2(p: number) {
   const lines = ramp(p, 0.62, 0.8);
   return (
     <Frame beat={2} data={{ shift: m.toFixed(2), diagonals: DIAGS.map((d) => d.join('/')).join(' '), lines: lines > 0 ? 1 : 0 }}
-      headline={m < 1 ? `row r_tile slides r_tile cells left: ${Math.round(m * 100)}% of the way` : 'each tile column now lies on one anti-diagonal of the table'}>
+      headline={m < 1 ? tr(`row r_tile slides r_tile cells left: ${Math.round(m * 100)}% of the way`, `hàng r_tile trượt sang trái r_tile ô: đã đi ${Math.round(m * 100)}% quãng đường`) : tr('each tile column now lies on one anti-diagonal of the table', 'giờ mỗi cột của ô nằm trên một đường chéo phụ của bảng')}>
       <TableGrid />
       {Array.from({ length: W * W }, (_, i) => {
         const rt = Math.floor(i / W);
@@ -176,18 +177,20 @@ function beat2(p: number) {
           })
         : null}
       <g>
-        <text x={RX} y={Y0 + 4} fontSize="12" fontWeight="600">the shear, factor −1</text>
-        <text x={RX} y={Y0 + 28} fontSize="12" style={{ fill: 'var(--ink-2)' }}>square: q = W·tile_col + q_tile + 1</text>
-        <text x={RX} y={Y0 + 48} fontSize="12" style={{ fill: 'var(--ink-2)' }}>sheared: q = W·tile_col + q_tile − r_tile + 1</text>
+        <text x={RX} y={Y0 + 4} fontSize="12" fontWeight="600">{tr('the shear, factor −1', 'phép trượt, hệ số −1')}</text>
+        <text x={RX} y={Y0 + 28} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('square: q = W·tile_col + q_tile + 1', 'vuông: q = W·tile_col + q_tile + 1')}</text>
+        <text x={RX} y={Y0 + 48} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('sheared: q = W·tile_col + q_tile − r_tile + 1', 'đã trượt: q = W·tile_col + q_tile − r_tile + 1')}</text>
         {Array.from({ length: W }, (_, rt) => (
           <text key={rt} x={RX} y={Y0 + 82 + rt * 20} fontSize="12">
-            row {rt} (thread {rt}): {rt === 0 ? 'stays' : `${rt} cell${rt === 1 ? '' : 's'} left`}
+            <Translated vi={<>hàng {rt} (luồng {rt}): {rt === 0 ? 'đứng yên' : `sang trái ${rt} ô`}</>}>
+              row {rt} (thread {rt}): {rt === 0 ? 'stays' : `${rt} cell${rt === 1 ? '' : 's'} left`}
+            </Translated>
           </text>
         ))}
         <g opacity={lines}>
-          <text x={RX} y={Y0 + 160} fontSize="12" fontWeight="600">each tile column, one anti-diagonal:</text>
+          <text x={RX} y={Y0 + 160} fontSize="12" fontWeight="600">{tr('each tile column, one anti-diagonal:', 'mỗi cột của ô, một đường chéo phụ:')}</text>
           {DIAGS.map((dg, qt) => (
-            <text key={qt} x={RX} y={Y0 + 182 + qt * 19} fontSize="12" style={{ fill: 'var(--ink-2)' }}>tile column {qt}: cells with r + q = {dg.join(', ')}</text>
+            <text key={qt} x={RX} y={Y0 + 182 + qt * 19} fontSize="12" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>cột {qt} của ô: các ô con có r + q = {dg.join(', ')}</>}>tile column {qt}: cells with r + q = {dg.join(', ')}</Translated></text>
           ))}
         </g>
       </g>
@@ -207,7 +210,17 @@ function inputsFor(k: number) {
     return { ...ld, earlier: same ? k - pr!.dTile : null };
   });
 }
-const NAME = { n: 'north', w: 'west', nw: 'north-west' } as const;
+const NAME = {
+  get n() {
+    return tr('north', 'bắc');
+  },
+  get w() {
+    return tr('west', 'tây');
+  },
+  get nw() {
+    return tr('north-west', 'tây bắc');
+  },
+} as const;
 
 function beat3(p: number) {
   const s = stepOf(p, BUSY_SH.length);
@@ -217,7 +230,7 @@ function beat3(p: number) {
   const arrows = ramp(p, 0.05 + (s / 3) * 0.88 + 0.06, 0.05 + (s / 3) * 0.88 + 0.16);
   return (
     <Frame beat={3} data={{ step: s, busy: lit.length, steps: BUSY_SH.length, lit: lit.map((c) => `${c.r},${c.q}`).join(' '), inputs: ins.map((x) => `${x.name}:${x.from}:${x.earlier ?? 'launch'}`).join(' ') }}
-      headline={`step ${s}: all ${lit.length} threads busy; ${W * W} cells take ${BUSY_SH.length} steps, 0 to ${BUSY_SH.length - 1}`}>
+      headline={tr(`step ${s}: all ${lit.length} threads busy; ${W * W} cells take ${BUSY_SH.length} steps, 0 to ${BUSY_SH.length - 1}`, `bước ${s}: cả ${lit.length} luồng đều bận; ${W * W} ô cần ${BUSY_SH.length} bước, từ 0 đến ${BUSY_SH.length - 1}`)}>
       <TableGrid />
       {ins.filter((x) => x.from === 'global').map((x) => (
         <rect key={'g' + x.name} x={cx(x.q)} y={cy(x.r)} width={C - 2} height={C - 2} rx="2" fill="var(--global-wash)" stroke="var(--global)" strokeWidth="1.6" opacity={arrows} />
@@ -244,12 +257,12 @@ function beat3(p: number) {
             markerEnd={`url(#shear-arrow-${x.from === 'tile' ? 's' : 'g'})`} />
         );
       })}
-      <BusyBars busy={BUSY_SH} upto={s} title="threads per step, sheared tile" />
+      <BusyBars busy={BUSY_SH} upto={s} title={tr('threads per step, sheared tile', 'số luồng mỗi bước, ô đã trượt')} />
       <g opacity={arrows}>
-        <text x={RX} y={Y0 + 164} fontSize="12" fontWeight="600">thread {FOCUS_T} at step {s}, cell ({focus.r}, {focus.q}):</text>
+        <text x={RX} y={Y0 + 164} fontSize="12" fontWeight="600"><Translated vi={<>luồng {FOCUS_T} ở bước {s}, ô ({focus.r}, {focus.q}):</>}>thread {FOCUS_T} at step {s}, cell ({focus.r}, {focus.q}):</Translated></text>
         {ins.map((x, i) => (
           <text key={x.name} x={RX} y={Y0 + 186 + i * 19} fontSize="12" data-input={x.name} style={{ fill: x.from === 'tile' ? 'var(--shared)' : 'var(--global)' }}>
-            {NAME[x.name]} ({x.r}, {x.q}): {x.earlier != null ? `this tile, ${x.earlier} step${x.earlier === 1 ? '' : 's'} earlier` : 'an earlier launch, global memory'}
+            {NAME[x.name]} ({x.r}, {x.q}): {x.earlier != null ? tr(`this tile, ${x.earlier} step${x.earlier === 1 ? '' : 's'} earlier`, `ô này, sớm hơn ${x.earlier} bước`) : tr('an earlier launch, global memory', 'một lần khởi chạy trước, bộ nhớ toàn cục')}
           </text>
         ))}
       </g>
@@ -271,7 +284,7 @@ function beat4(p: number) {
   const focus = slotCell(SH, TILE, F4.rt, F4.k);
   return (
     <Frame beat={4} data={{ focus: `${F4.rt},${F4.k}`, ...Object.fromEntries(F4_LOADS.map((l) => [l.name, l.slot ? l.slot.join(',') : 'global'])), shown: shown.join(' ') }}
-      headline="stored column = step: north and west one column left, north-west two">
+      headline={tr('stored column = step: north and west one column left, north-west two', 'cột lưu trữ = bước: bắc và tây lùi một cột, tây bắc lùi hai')}>
       <TableGrid />
       {Array.from({ length: W * W }, (_, i) => {
         const rt = Math.floor(i / W);
@@ -283,12 +296,12 @@ function beat4(p: number) {
       })}
       <text x={cx(focus.q) + C / 2} y={cy(focus.r) + C + 14} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>({focus.r}, {focus.q})</text>
       <g opacity={square}>
-        <text x={SQX} y={SQY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--shared)' }}>the tile in shared memory</text>
+        <text x={SQX} y={SQY - 34} fontSize="12" fontWeight="600" style={{ fill: 'var(--shared)' }}>{tr('the tile in shared memory', 'ô trong bộ nhớ chia sẻ')}</text>
         {Array.from({ length: W }, (_, k) => (
-          <text key={'h' + k} x={SQX + k * SC + SC / 2 - 1} y={SQY - 10} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>step {k}</text>
+          <text key={'h' + k} x={SQX + k * SC + SC / 2 - 1} y={SQY - 10} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{tr(`step ${k}`, `bước ${k}`)}</text>
         ))}
         {Array.from({ length: W }, (_, rt) => (
-          <text key={'t' + rt} x={SQX - 8} y={SQY + rt * SC + SC / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>thread {rt}</text>
+          <text key={'t' + rt} x={SQX - 8} y={SQY + rt * SC + SC / 2 + 4} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>{tr(`thread ${rt}`, `luồng ${rt}`)}</text>
         ))}
         {Array.from({ length: W * W }, (_, i) => {
           const rt = Math.floor(i / W);
@@ -309,7 +322,9 @@ function beat4(p: number) {
           const dr = F4.rt - rt;
           return (
             <text key={'o' + l.name} x={SQX} y={SQY + W * SC + 22 + ['n', 'w', 'nw'].indexOf(l.name) * 18} fontSize="12" data-offset={l.name}>
-              load_{l.name}: {dr ? `r_tile − ${dr}, ` : 'same row, '}q_tile − {dc}
+              <Translated vi={<>load_{l.name}: {dr ? `r_tile − ${dr}, ` : 'cùng hàng, '}q_tile − {dc}</>}>
+                load_{l.name}: {dr ? `r_tile − ${dr}, ` : 'same row, '}q_tile − {dc}
+              </Translated>
             </text>
           );
         })}
@@ -321,9 +336,21 @@ function beat4(p: number) {
 // ---------------------------------------------------------------- beat 5: the whole table
 
 const PC = 19; // a cell in beat 5
-const PANELS: { g: Geometry; x: number; label: string }[] = [
-  { g: SQ, x: 44, label: 'square tiles' },
-  { g: SH, x: 392, label: 'sheared tiles' },
+const PANELS: { g: Geometry; x: number; readonly label: string }[] = [
+  {
+    g: SQ,
+    x: 44,
+    get label() {
+      return tr('square tiles', 'ô vuông');
+    },
+  },
+  {
+    g: SH,
+    x: 392,
+    get label() {
+      return tr('sheared tiles', 'ô đã trượt');
+    },
+  },
 ];
 const PY = 46;
 const NSQ = launches(SQ);
@@ -335,7 +362,7 @@ function Panel({ g, x, label, n }: { g: Geometry; x: number; label: string; n: n
   const cur = Math.min(n, total - 1);
   const finished = n >= total;
   const plan = launchPlan(g, cur);
-  const clip = `shear-clip-${g.scheme}`;
+  const clip = `shear-clip-${g.scheme}`; // i18n-ignore: element id
   const all = Array.from({ length: total }, (_, d) => launchPlan(g, d));
   const most = Math.max(...all.map((pl) => pl.tiles.length));
   return (
@@ -366,14 +393,14 @@ function Panel({ g, x, label, n }: { g: Geometry; x: number; label: string; n: n
         )}
       </g>
       <text x={x} y={PY + L * PC + 22} fontSize="12" data-count>
-        {finished ? `done: ${total} launches, at most ${most} tiles in one` : `launch ${cur + 1} of ${total}: ${plan.tiles.length} tile${plan.tiles.length === 1 ? '' : 's'}`}
+        {finished ? tr(`done: ${total} launches, at most ${most} tiles in one`, `xong: ${total} lần khởi chạy, nhiều nhất ${most} ô trong một lần`) : tr(`launch ${cur + 1} of ${total}: ${plan.tiles.length} tile${plan.tiles.length === 1 ? '' : 's'}`, `lần khởi chạy ${cur + 1} trên ${total}: ${plan.tiles.length} ô`)}
       </text>
       <g>
         {all.map((pl, d) => (
           <rect key={d} x={x + d * 22} y={PY + L * PC + 34 + (3 - pl.tiles.length) * 9} width={18} height={pl.tiles.length * 9}
             fill={d === cur && !finished ? 'var(--shared)' : d < cur || finished ? 'var(--shared-wash)' : 'none'} stroke="var(--shared)" />
         ))}
-        <text x={x + total * 22 + 6} y={PY + L * PC + 58} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>tiles per launch</text>
+        <text x={x + total * 22 + 6} y={PY + L * PC + 58} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>{tr('tiles per launch', 'số ô mỗi lần khởi chạy')}</text>
       </g>
     </g>
   );
@@ -382,20 +409,50 @@ function Panel({ g, x, label, n }: { g: Geometry; x: number; label: string; n: n
 function beat5(p: number) {
   const n = Math.floor(ramp(p, 0.06, 0.9) * (NSH + 0.999));
   return (
-    <Frame beat={5} data={{ n }} headline={n < NSQ ? 'same table, same tiles, two schedules' : n < NSH ? `square tiles are done after ${NSQ}; sheared tiles still need ${NSH - n} more` : `${NSQ} launches against ${NSH}: the shear's price outside the tile`}>
+    <Frame beat={5} data={{ n }} headline={n < NSQ ? tr('same table, same tiles, two schedules', 'cùng bảng, cùng các ô, hai lịch chạy') : n < NSH ? tr(`square tiles are done after ${NSQ}; sheared tiles still need ${NSH - n} more`, `ô vuông xong sau ${NSQ} lần; ô đã trượt còn cần thêm ${NSH - n} lần`) : tr(`${NSQ} launches against ${NSH}: the shear's price outside the tile`, `${NSQ} lần khởi chạy so với ${NSH}: cái giá của phép trượt bên ngoài ô`)}>
       {PANELS.map((pn) => <Panel key={pn.g.scheme} {...pn} n={n} />)}
     </Frame>
   );
 }
 
 const beats: Beat[] = [
-  { clip: 'shear-1', label: 'A square tile', draw: beat1 },
-  { clip: 'shear-2', label: 'Shear it', draw: beat2 },
-  { clip: 'shear-3', label: 'Every thread busy', draw: beat3 },
-  { clip: 'shear-4', label: 'Stored as a square', draw: beat4 },
-  { clip: 'shear-5', label: 'The whole table', draw: beat5 },
+  {
+    clip: 'shear-1',
+    get label() {
+      return tr('A square tile', 'Một ô vuông');
+    },
+    draw: beat1,
+  },
+  {
+    clip: 'shear-2',
+    get label() {
+      return tr('Shear it', 'Trượt nó');
+    },
+    draw: beat2,
+  },
+  {
+    clip: 'shear-3',
+    get label() {
+      return tr('Every thread busy', 'Mọi luồng đều bận');
+    },
+    draw: beat3,
+  },
+  {
+    clip: 'shear-4',
+    get label() {
+      return tr('Stored as a square', 'Lưu dưới dạng hình vuông');
+    },
+    draw: beat4,
+  },
+  {
+    clip: 'shear-5',
+    get label() {
+      return tr('The whole table', 'Toàn bộ bảng');
+    },
+    draw: beat5,
+  },
 ];
 
 export function ShearScene() {
-  return <Scene chapter="ch16" title="Shearing a tile" beats={beats} />;
+  return <Scene chapter="ch16" title={tr('Shearing a tile', 'Trượt một ô')} beats={beats} />;
 }

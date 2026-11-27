@@ -1,0 +1,1 @@
+Lùi lại nhìn cả khối. Các ô A và B của nó nằm trong bộ nhớ chia sẻ, được nạp một lần từ bộ nhớ toàn cục và được nhiều luồng đọc. Các dải của mỗi luồng nằm trong thanh ghi, được nạp một lần từ bộ nhớ chia sẻ và dùng 8 lần. Đó là cùng một ý tưởng ở hai cấp. CUTLASS gọi cấp luồng là tích ngoài tích lũy.

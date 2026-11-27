@@ -19,6 +19,7 @@
 // Left out: timing, and every lane of an edge or partial tile (the tile is full).
 
 import { warpBanks, type BankResult } from './banks';
+import { tr } from '../lib/locale.ts';
 
 export type BankKernel = 'square' | 'sheared';
 export type BankLayout = 'unpadded' | 'rowgap' | 'pad';
@@ -28,12 +29,20 @@ export const COMPUTE_ACCESSES: BankAccess[] = ['write', 'n', 'w', 'nw'];
 export const BANK_WIDTHS = [8, 16, 32, 64] as const;
 
 export const LAYOUT_LABEL: Record<BankLayout, string> = {
-  unpadded: 'unpadded',
-  rowgap: 'one gap per row',
-  pad: "the book's pad()",
+  get unpadded() {
+    return tr('unpadded', 'không đệm');
+  },
+  get rowgap() {
+    return tr('one gap per row', 'một khoảng trống mỗi hàng');
+  },
+  get pad() {
+    return tr("the book's pad()", 'pad() của sách');
+  },
 };
 export const ACCESS_LABEL: Record<BankAccess, string> = {
-  write: 'write of the step',
+  get write() {
+    return tr('write of the step', 'lần ghi của bước');
+  },
   n: 'load_n',
   w: 'load_w',
   nw: 'load_nw',
@@ -50,8 +59,24 @@ export interface BankModel {
   logBanks: number;
 }
 export const BANK_MODELS: Record<BankModel['id'], BankModel> = {
-  nvidia: { id: 'nvidia', label: '32 banks, 32-lane warps (NVIDIA)', banks: 32, lanes: 32, logBanks: 5 },
-  amd64: { id: 'amd64', label: '64 banks, 64-lane wavefronts (an AMD model)', banks: 64, lanes: 64, logBanks: 6 },
+  nvidia: {
+    id: 'nvidia',
+    get label() {
+      return tr('32 banks, 32-lane warps (NVIDIA)', '32 bank, warp 32 lane (NVIDIA)');
+    },
+    banks: 32,
+    lanes: 32,
+    logBanks: 5,
+  },
+  amd64: {
+    id: 'amd64',
+    get label() {
+      return tr('64 banks, 64-lane wavefronts (an AMD model)', '64 bank, wavefront 64 lane (một mô hình AMD)');
+    },
+    banks: 64,
+    lanes: 64,
+    logBanks: 6,
+  },
 };
 
 /** Word index of tile slot (row, col). */

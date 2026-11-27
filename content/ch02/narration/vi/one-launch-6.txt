@@ -1,0 +1,1 @@
+Lưới đã chạy xong. Chỉ đến lúc này lời gọi chặn của host mới trả về. Lời gọi đó là bước sao chép ngược về, hoặc một lần đồng bộ hóa. [short pause] C đã hoàn chỉnh. Và nó sẽ là cùng một C với mọi thứ tự mà các khối có thể đã chạy.

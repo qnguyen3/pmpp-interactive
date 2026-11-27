@@ -1,0 +1,1 @@
+Cái giá là không gian. Tệp thanh ghi của một SM được chia cho các warp đang thường trú. Trong ví dụ của sách, 64 warp vừa khi mỗi luồng dùng 32 thanh ghi. Cho mỗi luồng 64 thanh ghi, và chỉ còn 32 warp vừa. Có bao nhiêu warp vừa là chủ đề của phần tiếp theo.

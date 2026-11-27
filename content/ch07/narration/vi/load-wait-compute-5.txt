@@ -1,0 +1,1 @@
+Mỗi luồng đang hoạt động ghi một kết quả, và cùng nhau chúng lấp đầy một ô đầu ra 6 nhân 6. Khối kế tiếp bắt đầu lệch sang phải 6 cột. Ô đầu vào của nó chồng lên ô này 2 cột, đó là vùng biên. Các đầu vào đó được nạp hai lần, mỗi khối một lần. Việc nạp lặp lại đó là cái giá của vùng biên.

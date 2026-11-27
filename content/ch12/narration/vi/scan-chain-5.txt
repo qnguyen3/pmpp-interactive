@@ -1,0 +1,1 @@
+Giờ hãy lấy số theo chỉ số khối, với cùng thứ tự khởi động. Khối 2 và khối 1 chiếm cả hai chỗ. Khối 2 quay vòng chờ khối 1, khối 1 quay vòng chờ khối 0, và khối 0 không bao giờ có được chỗ. CUDA chỉ hứa tiến triển cho những khối đã bắt đầu. AMD và Apple không ghi tài liệu gì về điều này.

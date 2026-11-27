@@ -1,0 +1,1 @@
+k phẩy và v phẩy được ghi thành hàng mới nhất của K cache và V cache của lớp này. Không có gì khác trong cache dịch chuyển. Mọi hàng cũ hơn vẫn giữ nguyên, vì các token sinh ra nó, và các trọng số đã tạo ra nó, đều không thay đổi.

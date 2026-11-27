@@ -1,0 +1,1 @@
+Cắt ô của warp 6 thành 4 góc phần tư, mỗi phần 32 hàng và 16 cột. Xếp 32 lane của nó thành 8 hàng, mỗi hàng 4 lane. Mỗi lane nhận một hình vuông 4 nhân 4, ở cùng một vị trí trong mọi góc phần tư. 4 hình vuông của nó tạo thành một ô 8 nhân 8, nên mỗi luồng vẫn sở hữu 64 đầu ra.

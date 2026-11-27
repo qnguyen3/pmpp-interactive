@@ -1,0 +1,1 @@
+Giả sử dữ liệu kết thúc ở lane 20, và các lane từ 20 trở lên đã thoát. Một lane đọc từ một trong số đó sẽ nhận một giá trị không xác định, vẽ thành dấu chấm hỏi. Hãy lần theo các dấu chấm hỏi: sau bước thứ hai, một dấu tới được lane 0, nên tổng là rác. Cách sửa là ở lại trong vòng lặp và đóng góp số 0.

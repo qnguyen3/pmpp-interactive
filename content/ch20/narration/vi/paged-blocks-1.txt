@@ -1,0 +1,1 @@
+Trước tiên là các cache liền mạch. Mỗi yêu cầu giữ chỗ cho độ dài tối đa ngay khi nó được nhận vào. Hầu hết các yêu cầu dừng lại còn xa mức đó, nên phần lớn mỗi chỗ giữ đều để trống, và chỉ 2 yêu cầu vừa trong vùng nhớ này cùng lúc. Những yêu cầu khác chờ trong hàng đợi.

@@ -1,0 +1,1 @@
+Có ba lối thoát. Cộng các giá trị nhỏ với nhau trước, theo dạng cây, để chúng lớn đủ mà được ghi nhận. Mang phần bị mất theo trong một biến thứ hai, đó là phương pháp của Kahan ở mục A.6. Hoặc tích lũy bằng độ chính xác đơn, với cửa sổ rộng 24 bit.

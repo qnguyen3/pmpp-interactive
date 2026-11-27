@@ -1,0 +1,1 @@
+Giờ mỗi khối có bản sao 8 bin của riêng nó, trong bộ nhớ chia sẻ. Bộ nhớ chia sẻ lúc đầu chứa bất cứ thứ gì còn sót lại từ trước, nên các luồng của khối trước hết ghi số 0 vào mọi bin. Sau đó là một rào chắn. Không luồng nào được bắt đầu đếm cho đến khi mọi bin trong bản sao của khối nó đều bằng 0.

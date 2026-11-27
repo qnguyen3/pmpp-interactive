@@ -1,0 +1,1 @@
+Chuỗi đó được viết trên một dòng của norm chấm metal, trong một thuộc tính host name, trên một lần khởi tạo của template norm, lần khởi tạo có mức gộp đặt là 2. Host tìm kernel theo tên đó, không theo bất kỳ ký hiệu C cộng cộng nào. Vậy hãy tìm chuỗi đó trong các tệp Metal.

@@ -1,0 +1,1 @@
+Giờ mỗi khối biết kích thước các bucket cục bộ của mình. Nó ghi chúng vào một bảng, số lượng số không của mọi khối trước, rồi số lượng số một của mọi khối. Một phép scan loại trừ trên bảng đó cho mỗi bucket cục bộ vị trí bắt đầu của nó. Các bucket số không bắt đầu ở 0, 2, 4 và 5. Các bucket số một bắt đầu ở 8, 10, 12 và 15.

@@ -1,0 +1,1 @@
+Vẫn 5 bước, nhưng đổi đối tác. Giờ mỗi lane trao đổi với lane có số thứ tự khác số của nó đúng một bit: cách 16, rồi 8, 4, 2 và 1. Giá trị đi qua lại theo cả hai chiều, nên cuối cùng mọi lane đều giữ tổng, 162, chứ không chỉ lane 0. Ví dụ trong hướng dẫn của chính NVIDIA rút gọn một warp theo cách này.

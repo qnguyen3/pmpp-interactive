@@ -1,0 +1,1 @@
+Khi cộng chính xác, số nguyên cho cùng một tổng theo bất kỳ thứ tự nào. Số float bị làm tròn sau mỗi phép cộng. Đây là 8 giá trị float từ mô hình. Vòng lặp và cây cộng cùng những số đó, vậy mà 2 tổng lệch nhau ở những bit cuối, hiển thị ở đây theo hệ thập lục phân. Cách nhóm đã thay đổi thứ bị làm tròn.

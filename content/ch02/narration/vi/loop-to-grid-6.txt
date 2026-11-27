@@ -1,0 +1,1 @@
+Cùng bức tranh đó trên Metal. Ở đây runtime truyền cho mỗi luồng vị trí của nó trong lưới dưới dạng một đối số, nên không cần viết phép tính chỉ số nào. Và host có thể yêu cầu một lưới đúng 10 luồng. Không có luồng thừa, nên không có gì phải chặn.

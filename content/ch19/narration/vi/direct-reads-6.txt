@@ -1,0 +1,1 @@
+Tổng cộng. 96 lần đọc đầu vào cho 27 giá trị khác nhau, và chừng ấy lần đọc bộ lọc. Mỗi phép nhân và cộng đòi 8 byte, nên kernel yêu cầu một phần tư phép toán mỗi byte. Sự tái sử dụng trải qua nhiều bản đồ đầu ra là điều mà cách diễn đạt bằng ma trận ở mục 19.3 nắm bắt được.

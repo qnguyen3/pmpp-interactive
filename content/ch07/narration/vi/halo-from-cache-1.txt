@@ -1,0 +1,1 @@
+Đây là một ảnh nhỏ, được cắt thành các ô, và kernel dùng bộ nhớ đệm đang chạy. Khối A, ở góc, chỉ nạp ô của chính nó vào bộ nhớ chia sẻ. Mỗi dòng nó cần đến từ DRAM và đi qua bộ nhớ đệm L2 trên đường đi. Rồi A đọc vùng biên của mình từ bộ nhớ toàn cục, và các dòng đó cũng nằm lại trong L2.

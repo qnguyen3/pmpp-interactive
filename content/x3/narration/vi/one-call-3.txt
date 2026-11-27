@@ -1,0 +1,1 @@
+Lời gọi gộp khởi chạy kernel trong norm chấm C U. Một khối nhận một hàng. Mỗi luồng cộng bình phương của phần việc mình, khối gộp các tổng từng phần đó trong hai giai đoạn, như ở chương 10, rồi mọi luồng nhân tỉ lệ các phần tử của mình. Bản build HIP biên dịch chính tệp này.

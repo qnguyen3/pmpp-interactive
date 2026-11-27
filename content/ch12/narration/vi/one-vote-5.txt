@@ -1,0 +1,1 @@
+Chỉ lane dẫn đầu chạm vào bộ đếm. Nó cộng 4 trong một phép toán nguyên tử duy nhất và nhận lại 40, điểm bắt đầu của một dải 4 vị trí giờ thuộc về warp này. Rồi một lệnh shuffle mang số 40 đó từ lane 1 sang ba lane đạt còn lại, để lane nào cũng biết dải bắt đầu từ đâu.

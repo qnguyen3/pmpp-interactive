@@ -30,6 +30,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- bus bandwidth
 export interface Bus {
   /** Width of one bus in bits. */
@@ -56,10 +58,20 @@ export function busesFor(targetGBs: number, perBusGBs: number): number {
 /** The book's two examples (p. 133). */
 export const BUS_PRESETS: Record<'ddr5' | 'hbm3e', Bus & { label: string }> = {
   // 64-bit DDR5-6400: 3.2 GHz, double data rate, one bus: 51.2 GB/s.
-  ddr5: { label: "DDR5-6400 (the book's example)", widthBits: 64, clockGHz: 3.2, ddr: true, buses: 1 },
+  ddr5: {
+    get label() {
+      return tr("DDR5-6400 (the book's example)", 'DDR5-6400 (ví dụ của sách)');
+    },
+    widthBits: 64, clockGHz: 3.2, ddr: true, buses: 1,
+  },
   // HBM3E as printed: a 4.9 GHz bus clock, 16 buses of 64 bits. The book says "1 TB/s";
   // its own formula gives 1254.4 GB/s (notes item 3, facts A8 and E1).
-  hbm3e: { label: "one HBM3E stack (the book's inputs)", widthBits: 64, clockGHz: 4.9, ddr: true, buses: 16 },
+  hbm3e: {
+    get label() {
+      return tr("one HBM3E stack (the book's inputs)", 'một stack HBM3E (số liệu đầu vào của sách)');
+    },
+    widthBits: 64, clockGHz: 4.9, ddr: true, buses: 16,
+  },
 };
 
 /** The book's two demand figures (p. 133): a modern CPU, a GPU. */

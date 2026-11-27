@@ -1,0 +1,1 @@
+Bước 2 cộng các cặp của cặp, nên các vị trí 3, 7, 11 và 15 mỗi vị trí giữ 4 đầu vào. Bước 3 đặt 8 đầu vào ở vị trí 7 và 15, và bước 4 đặt cả 16 ở vị trí 15. Tức là 15 phép cộng trong 4 bước. Các vị trí 0, 1, 3, 7 và 15 đã giữ tổng cuối cùng của mình.

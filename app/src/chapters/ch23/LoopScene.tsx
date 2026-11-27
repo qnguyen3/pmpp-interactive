@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { DEFAULTS, simulate, type Lane, type LoopResult, type Seg, type Version } from '../../sim/haloloop';
+import { Translated, tr } from '../../lib/i18n';
 
 // The timeline drawing shared by the narrated scene "One iteration with three streams" and the
 // explorer "Who waits" on page 23.3–23.5 (id 23.4). Everything it draws comes from src/sim/haloloop.ts.
@@ -18,42 +19,50 @@ const SLOTS_BLOCK = 8 * (SLOT_H + 1) + 22;
 const AXIS = 24;
 
 export function laneName(l: Lane, v: Version): string {
-  if (l === 'internal' && v === 'mpi') return 'default stream';
-  if (l === 'internal' && v === 'nvshmem') return 'stream';
-  return { host: 'host', top: 'top stream', bottom: 'bottom stream', internal: 'internal stream', linkTop: 'top exchange', linkBottom: 'bottom exchange' }[l];
+  if (l === 'internal' && v === 'mpi') return tr('default stream', 'stream mặc định');
+  if (l === 'internal' && v === 'nvshmem') return tr('stream', 'stream');
+  return tr(
+    { host: 'host', top: 'top stream', bottom: 'bottom stream', internal: 'internal stream', linkTop: 'top exchange', linkBottom: 'bottom exchange' }[l],
+    { host: 'host', top: 'stream trên', bottom: 'stream dưới', internal: 'stream bên trong', linkTop: 'trao đổi phía trên', linkBottom: 'trao đổi phía dưới' }[l],
+  );
 }
 
 export function timelineHeight(nLanes: number, slots: boolean): number {
   return nLanes * ROW + (slots ? SLOTS_BLOCK : 0) + AXIS;
 }
 
-const SHORT: [RegExp, string][] = [
-  [/cudaStreamSynchronize\(topStream\)/, 'sync top'],
-  [/cudaStreamSynchronize\(bottomStream\)/, 'sync bottom'],
-  [/cudaStreamSynchronize\(internalStream\)/, 'sync internal'],
-  [/cudaStreamSynchronize\(stream\)/, 'sync stream'],
-  [/cudaDeviceSynchronize/, 'sync device'],
-  [/MPI_Sendrecv \(top\)/, 'Sendrecv top'],
-  [/MPI_Sendrecv \(bottom\)/, 'Sendrecv bottom'],
+// A function, not a constant: the labels are read in the selected language at render time.
+const SHORT: () => [RegExp, string][] = () => [
+  [/cudaStreamSynchronize\(topStream\)/, tr('sync top', 'đồng bộ trên')],
+  [/cudaStreamSynchronize\(bottomStream\)/, tr('sync bottom', 'đồng bộ dưới')],
+  [/cudaStreamSynchronize\(internalStream\)/, tr('sync internal', 'đồng bộ bên trong')],
+  [/cudaStreamSynchronize\(stream\)/, tr('sync stream', 'đồng bộ stream')],
+  [/cudaDeviceSynchronize/, tr('sync device', 'đồng bộ device')],
+  [/MPI_Sendrecv \(top\)/, tr('Sendrecv top', 'Sendrecv trên')],
+  [/MPI_Sendrecv \(bottom\)/, tr('Sendrecv bottom', 'Sendrecv dưới')],
   [/MPI_Allreduce/, 'Allreduce'],
-  [/cudaMemcpy/, 'copy (waits)'],
+  [/cudaMemcpy/, tr('copy (waits)', 'sao chép (chờ)')],
 ];
 
 export function segLabel(s: Seg, v: Version): string {
   if (s.lane === 'host') {
     if (s.kind === 'call') return s.line;
-    for (const [re, name] of SHORT) if (re.test(s.label)) return name;
+    for (const [re, name] of SHORT()) if (re.test(s.label)) return name;
     return s.label;
   }
   switch (s.kind) {
     case 'kernel':
-      return s.part === 'whole' ? (v === 'nvshmem' ? 'kernel: all rows, puts' : 'kernel: all rows') : `${s.part} kernel`;
+      return s.part === 'whole'
+        ? v === 'nvshmem'
+          ? tr('kernel: all rows, puts', 'kernel: mọi hàng, puts')
+          : tr('kernel: all rows', 'kernel: mọi hàng')
+        : tr(`${s.part} kernel`, `kernel ${s.part ? { top: 'trên', bottom: 'dưới', internal: 'bên trong' }[s.part] : s.part}`);
     case 'pending':
-      return 'waits for slots';
+      return tr('waits for slots', 'chờ khe trống');
     case 'wait':
-      return `wait ${s.event}`;
+      return tr(`wait ${s.event}`, `chờ ${s.event}`);
     case 'exchange':
-      if (s.lane === 'top' || s.lane === 'bottom') return 'ncclSend + ncclRecv';
+      if (s.lane === 'top' || s.lane === 'bottom') return 'ncclSend + ncclRecv'; // i18n-ignore: API call names
       return v === 'nccl' ? 'NCCL' : v === 'nvshmem' ? 'puts' : 'MPI_Sendrecv';
     default:
       return s.kind;
@@ -103,7 +112,7 @@ export function Timeline(p: TimelineProps) {
   const laneY = (l: Lane) => p.y + lanes.indexOf(l) * ROW;
   const shown = (l: Lane) => lanes.includes(l) && (!p.content || p.content.includes(l));
   const inIter = (i: number) => !p.iters || p.iters.includes(i);
-  const hatch = `hatch-${uid}`;
+  const hatch = `hatch-${uid}`; // i18n-ignore: svg pattern id
   const out: ReactNode[] = [];
 
   // lane rows
@@ -193,7 +202,12 @@ export function Timeline(p: TimelineProps) {
           {s.kind !== 'call' && fit(label, b - a) ? (
             <text x={a + 4} y={y + LANE_H / 2 + 3.5} fontSize="10" style={{ fill: ink }}>{label}</text>
           ) : null}
-          <title>{`${s.lane === 'host' ? 'line ' + s.line + ': ' + s.label : label}, ${r2(s.start)} to ${r2(s.end)}`}</title>
+          <title>
+            {tr(
+              `${s.lane === 'host' ? 'line ' + s.line + ': ' + s.label : label}, ${r2(s.start)} to ${r2(s.end)}`,
+              `${s.lane === 'host' ? 'dòng ' + s.line + ': ' + s.label.replace(/^MPI_Sendrecv \(top\)$/, 'MPI_Sendrecv (trên)').replace(/^MPI_Sendrecv \(bottom\)$/, 'MPI_Sendrecv (dưới)') : label}, từ ${r2(s.start)} đến ${r2(s.end)}`,
+            )}
+          </title>
         </g>,
       );
     }
@@ -205,7 +219,7 @@ export function Timeline(p: TimelineProps) {
       out.push(
         <path key={`mark-${m.lane}-${m.iter}-${m.event}`} d={`M ${cx} ${cy - 5} L ${cx + 4} ${cy} L ${cx} ${cy + 5} L ${cx - 4} ${cy} Z`}
           fill="var(--page)" stroke="var(--ink)" data-mark={m.event} data-at={r2(m.at)}>
-          <title>{`cudaEventRecord(${m.event}), line ${m.line}: reached at ${r2(m.at)}`}</title>
+          <title>{tr(`cudaEventRecord(${m.event}), line ${m.line}: reached at ${r2(m.at)}`, `cudaEventRecord(${m.event}), dòng ${m.line}: đạt tới lúc ${r2(m.at)}`)}</title>
         </path>,
       );
     }
@@ -221,7 +235,7 @@ export function Timeline(p: TimelineProps) {
       const sy = p.y + lanes.length * ROW + 4;
       out.push(
         <text key="slots-label" x={6} y={sy + 16} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-          block slots
+          <Translated vi="khe cho các khối">block slots</Translated>
         </text>,
       );
       for (const b of r.blocks) {
@@ -247,7 +261,7 @@ export function Timeline(p: TimelineProps) {
             <line x1={b} x2={b} y1={y - 6} y2={y + 6} stroke="var(--ink)" />
             {b - a > 70 ? (
               <text x={(a + b) / 2} y={y - 4} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink)' }}>
-                ready, waiting {r2(it.bottomGap)}
+                <Translated vi={<>đã sẵn sàng, chờ {r2(it.bottomGap)}</>}>ready, waiting {r2(it.bottomGap)}</Translated>
               </text>
             ) : null}
           </g>,
@@ -274,7 +288,7 @@ export function Timeline(p: TimelineProps) {
         out.push(
           <g key={`iter-${it.iter}`}>
             <line x1={bx} x2={bx} y1={p.y - 4} y2={p.y + lanes.length * ROW - 6} stroke="var(--ink-2)" strokeDasharray="6 4" />
-            <text x={bx + 4} y={p.y - 6} fontSize="10" style={{ fill: 'var(--ink-2)' }}>iteration {it.iter}</text>
+            <text x={bx + 4} y={p.y - 6} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>lần lặp {it.iter}</>}>iteration {it.iter}</Translated></text>
           </g>,
         );
       }
@@ -298,7 +312,7 @@ export function Timeline(p: TimelineProps) {
           ) : null}
         </g>
       ))}
-      <text x={6} y={ay + 15} fontSize="10" style={{ fill: 'var(--ink-3)' }}>time (units)</text>
+      <text x={6} y={ay + 15} fontSize="10" style={{ fill: 'var(--ink-3)' }}><Translated vi="thời gian (đơn vị)">time (units)</Translated></text>
     </g>,
   );
 
@@ -317,10 +331,11 @@ export function Timeline(p: TimelineProps) {
 
 // ---------------------------------------------------------------- the scene
 
+// Getters, not stored runs: each run carries host-call labels, which must be read in the selected language.
 export const SCENE_RUNS: Record<'streams' | 'nccl' | 'nvshmem', LoopResult> = {
-  streams: simulate({ ...DEFAULTS, version: 'streams' }),
-  nccl: simulate({ ...DEFAULTS, version: 'nccl' }),
-  nvshmem: simulate({ ...DEFAULTS, version: 'nvshmem' }),
+  get streams() { return simulate({ ...DEFAULTS, version: 'streams' }); },
+  get nccl() { return simulate({ ...DEFAULTS, version: 'nccl' }); },
+  get nvshmem() { return simulate({ ...DEFAULTS, version: 'nvshmem' }); },
 };
 const S = SCENE_RUNS.streams;
 const S1 = S.iters[0];
@@ -336,7 +351,7 @@ const ALL_STREAMS: Lane[] = ['top', 'bottom', 'internal'];
 
 function Frame({ beat, headline, sub, children, h }: { beat: number; headline: string; sub?: string; children: ReactNode; h: number }) {
   return (
-    <svg viewBox={`0 0 ${VIEW_W} ${h}`} role="img" aria-label="One iteration of the book's loop, drawn against time" data-beat={beat}
+    <svg viewBox={`0 0 ${VIEW_W} ${h}`} role="img" aria-label={tr("One iteration of the book's loop, drawn against time", 'Một lần lặp của vòng lặp trong sách, vẽ theo thời gian')} data-beat={beat}
       style={{ width: '100%', minWidth: 680, display: 'block' }}>
       <text x={8} y={20} fontSize="14" fontWeight="600" data-headline="">{headline}</text>
       {sub ? <text x={8} y={37} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>{sub}</text> : null}
@@ -347,28 +362,41 @@ function Frame({ beat, headline, sub, children, h }: { beat: number; headline: s
 
 const Y = 56;
 const H6 = Y + timelineHeight(6, true) + 4;
-const SUB = `MPI with streams (Fig. 23.14), iteration 1: internal kernel ${DEFAULTS.internal}, boundary kernels ${DEFAULTS.boundary}, exchanges ${DEFAULTS.exTop} each (units)`;
+// A function, not a constant: read in the selected language at render time.
+const SUB = () =>
+  tr(
+    `MPI with streams (Fig. 23.14), iteration 1: internal kernel ${DEFAULTS.internal}, boundary kernels ${DEFAULTS.boundary}, exchanges ${DEFAULTS.exTop} each (units)`,
+    `MPI với stream (Hình 23.14), lần lặp 1: kernel bên trong ${DEFAULTS.internal}, các kernel biên ${DEFAULTS.boundary}, mỗi trao đổi ${DEFAULTS.exTop} (đơn vị)`,
+  );
 
 function Totals({ p }: { p: number }) {
   const rows: [string, LoopResult][] = [
-    ['MPI with streams', SCENE_RUNS.streams],
+    [tr('MPI with streams', 'MPI với stream'), SCENE_RUNS.streams],
     ['NCCL', SCENE_RUNS.nccl],
     ['NVSHMEM', SCENE_RUNS.nvshmem],
   ];
   const max = 10;
   const w = (v: number) => (v / max) * 420 * ramp(p, 0.05, 0.5);
   return (
-    <Frame beat={5} headline="The book's three loops: only who waits has changed" sub="time per iteration and host time spent blocked, from the model at the same durations" h={H6}>
+    <Frame
+      beat={5}
+      headline={tr("The book's three loops: only who waits has changed", 'Ba vòng lặp của sách: chỉ có ai phải chờ là thay đổi')}
+      sub={tr(
+        'time per iteration and host time spent blocked, from the model at the same durations',
+        'thời gian mỗi lần lặp và thời gian host bị chặn, từ mô hình với cùng các khoảng thời gian',
+      )}
+      h={H6}
+    >
       {rows.map(([name, r], k) => {
         const y = 70 + k * 74;
         return (
           <g key={name} data-total={r.input.version} data-iter-time={r2(r.iterTime)} data-blocked={r2(r.hostBlocked)}>
             <text x={8} y={y + 14} fontSize="12" fontWeight="600">{name}</text>
-            <text x={8} y={y + 30} fontSize="10" style={{ fill: 'var(--ink-2)' }}>{r.hidden ? 'exchanges hidden' : 'exchanges not hidden'}</text>
+            <text x={8} y={y + 30} fontSize="10" style={{ fill: 'var(--ink-2)' }}>{r.hidden ? tr('exchanges hidden', 'trao đổi được che giấu') : tr('exchanges not hidden', 'trao đổi không được che giấu')}</text>
             <rect x={190} y={y} width={w(r.iterTime)} height={18} fill="var(--ink-2)" />
-            <text x={196 + w(r.iterTime)} y={y + 13} fontSize="10.5" opacity={ramp(p, 0.45, 0.55)}>{r2(r.iterTime)} per iteration</text>
+            <text x={196 + w(r.iterTime)} y={y + 13} fontSize="10.5" opacity={ramp(p, 0.45, 0.55)}><Translated vi={<>{r2(r.iterTime)} mỗi lần lặp</>}>{r2(r.iterTime)} per iteration</Translated></text>
             <rect x={190} y={y + 24} width={w(r.hostBlocked)} height={18} fill="url(#tot-hatch)" stroke="var(--ink-2)" />
-            <text x={196 + w(r.hostBlocked)} y={y + 37} fontSize="10.5" opacity={ramp(p, 0.45, 0.55)}>{r2(r.hostBlocked)} host blocked</text>
+            <text x={196 + w(r.hostBlocked)} y={y + 37} fontSize="10.5" opacity={ramp(p, 0.45, 0.55)}><Translated vi={<>{r2(r.hostBlocked)} host bị chặn</>}>{r2(r.hostBlocked)} host blocked</Translated></text>
           </g>
         );
       })}
@@ -379,7 +407,12 @@ function Totals({ p }: { p: number }) {
         </pattern>
       </defs>
       <text x={8} y={H6 - 14} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-        {p > 0.6 ? 'In all three the host waits for most of the iteration: it needs the norm. What changed is that the exchanges no longer wait for the host.' : ''}
+        {p > 0.6
+          ? tr(
+              'In all three the host waits for most of the iteration: it needs the norm. What changed is that the exchanges no longer wait for the host.',
+              'Trong cả ba, host chờ gần hết lần lặp: nó cần giá trị norm. Điều đã thay đổi là các trao đổi không còn phải chờ host.',
+            )
+          : ''}
       </text>
     </Frame>
   );
@@ -388,57 +421,77 @@ function Totals({ p }: { p: number }) {
 const beats: Beat[] = [
   {
     clip: 'loop-1',
-    label: 'Insertion',
+    get label() {
+      return tr('Insertion', 'Đưa vào hàng đợi');
+    },
     draw: (p) => {
       const cur = ramp(p, 0.05, 0.75) * FIRST_WAIT;
       const n = SCENE_QUEUED.filter((q) => q.at <= cur + 1e-9).length;
       return (
-        <Frame beat={1} h={Y + timelineHeight(4, false) + 4} headline={`The host queues ${n} of ${SCENE_QUEUED.length} operations: ${r2(Math.max(0, ...SCENE_QUEUED.filter((q) => q.at <= cur + 1e-9).map((q) => q.at)))} time units so far`}
-          sub="lines 04 to 22 of Fig. 23.14, zoomed in: each call returns once its operation is queued">
-          <Timeline r={S} y={Y} t1={INS_T1} cursor={cur} iters={[1]} insertions rows={['host', ...ALL_STREAMS]} />
+        <Frame beat={1} h={Y + timelineHeight(4, false) + 4} headline={tr(
+            `The host queues ${n} of ${SCENE_QUEUED.length} operations: ${r2(Math.max(0, ...SCENE_QUEUED.filter((q) => q.at <= cur + 1e-9).map((q) => q.at)))} time units so far`,
+            `Host đã đưa ${n} trên ${SCENE_QUEUED.length} thao tác vào hàng đợi: đến giờ là ${r2(Math.max(0, ...SCENE_QUEUED.filter((q) => q.at <= cur + 1e-9).map((q) => q.at)))} đơn vị thời gian`,
+          )}
+          sub={tr(
+            'lines 04 to 22 of Fig. 23.14, zoomed in: each call returns once its operation is queued',
+            'các dòng 04 đến 22 của Hình 23.14, phóng to: mỗi lời gọi trả về ngay khi thao tác của nó đã vào hàng đợi',
+          )}>
+          <Timeline r={SCENE_RUNS.streams} y={Y} t1={INS_T1} cursor={cur} iters={[1]} insertions rows={['host', ...ALL_STREAMS]} />
         </Frame>
       );
     },
   },
   {
     clip: 'loop-2',
-    label: 'Execution',
+    get label() {
+      return tr('Execution', 'Thực thi');
+    },
     draw: (p) => {
       const cur = ramp(p, 0.04, 0.92) * S1.internal.end;
       return (
-        <Frame beat={2} h={H6} headline={cur < S1.top.end ? 'The reset, then both boundary kernels' : `Boundary kernels done by ${r2(S1.bottom.end)}; the internal kernel runs to ${r2(S1.internal.end)}`} sub={SUB}>
-          <Timeline r={S} y={Y} t1={T1} cursor={cur} iters={[1]} host="calls" content={['host', ...ALL_STREAMS]} slots />
+        <Frame beat={2} h={H6} headline={cur < S1.top.end ? tr('The reset, then both boundary kernels', 'Bước đặt lại, rồi đến cả hai kernel biên') : tr(`Boundary kernels done by ${r2(S1.bottom.end)}; the internal kernel runs to ${r2(S1.internal.end)}`, `Các kernel biên xong lúc ${r2(S1.bottom.end)}; kernel bên trong chạy đến ${r2(S1.internal.end)}`)} sub={SUB()}>
+          <Timeline r={SCENE_RUNS.streams} y={Y} t1={T1} cursor={cur} iters={[1]} host="calls" content={['host', ...ALL_STREAMS]} slots />{/* i18n-ignore: prop value */}
         </Frame>
       );
     },
   },
   {
     clip: 'loop-3',
-    label: 'Events join',
+    get label() {
+      return tr('Events join', 'Event hợp nhánh');
+    },
     draw: (p) => {
       const cur = S1.internal.end * 0.55 + ramp(p, 0.1, 0.9) * (S1.copy.end - S1.internal.end * 0.55);
       return (
-        <Frame beat={3} h={H6} headline={cur < S1.copy.start ? 'computeTop and computeBottom are reached; the copy waits' : `The copy runs at ${r2(S1.copy.start)}, after both events and its own kernel`} sub={SUB}>
-          <Timeline r={S} y={Y} t1={T1} cursor={cur} iters={[1]} host="calls" content={['host', ...ALL_STREAMS]} slots arrows />
+        <Frame beat={3} h={H6} headline={cur < S1.copy.start ? tr('computeTop and computeBottom are reached; the copy waits', 'Đã đạt tới computeTop và computeBottom; phép sao chép phải chờ') : tr(`The copy runs at ${r2(S1.copy.start)}, after both events and its own kernel`, `Phép sao chép chạy lúc ${r2(S1.copy.start)}, sau cả hai event và kernel của chính nó`)} sub={SUB()}>
+          <Timeline r={SCENE_RUNS.streams} y={Y} t1={T1} cursor={cur} iters={[1]} host="calls" content={['host', ...ALL_STREAMS]} slots arrows />{/* i18n-ignore: prop value */}
         </Frame>
       );
     },
   },
   {
     clip: 'loop-4',
-    label: 'The host waits',
+    get label() {
+      return tr('The host waits', 'Host chờ');
+    },
     draw: (p) => {
       const cur = ramp(p, 0.04, 0.9) * S1.hostEnd;
       return (
-        <Frame beat={4} h={H6} headline={cur < S1.exBottom.start ? `The host sits in the top exchange until ${r2(S1.exTop.end)}` : `Bottom rows ready at ${r2(S1.bottom.end)}, sent at ${r2(S1.exBottom.start)}: ${r2(S1.bottomGap)} lost`} sub={SUB}>
-          <Timeline r={S} y={Y} t1={T1} cursor={cur} iters={[1]} slots gap />
+        <Frame beat={4} h={H6} headline={cur < S1.exBottom.start ? tr(`The host sits in the top exchange until ${r2(S1.exTop.end)}`, `Host nằm chờ trong trao đổi phía trên đến ${r2(S1.exTop.end)}`) : tr(`Bottom rows ready at ${r2(S1.bottom.end)}, sent at ${r2(S1.exBottom.start)}: ${r2(S1.bottomGap)} lost`, `Các hàng dưới sẵn sàng lúc ${r2(S1.bottom.end)}, được gửi lúc ${r2(S1.exBottom.start)}: mất ${r2(S1.bottomGap)}`)} sub={SUB()}>
+          <Timeline r={SCENE_RUNS.streams} y={Y} t1={T1} cursor={cur} iters={[1]} slots gap />
         </Frame>
       );
     },
   },
-  { clip: 'loop-5', label: 'Totals', draw: (p) => <Totals p={p} /> },
+  {
+    clip: 'loop-5',
+    get label() {
+      return tr('Totals', 'Tổng');
+    },
+    draw: (p) => <Totals p={p} />,
+  },
 ];
 
 export function LoopScene() {
-  return <Scene chapter="ch23" title="One iteration with three streams" beats={beats} />;
+  return <Scene chapter="ch23" title={tr('One iteration with three streams', 'Một lần lặp với ba stream')} beats={beats} />;
 }

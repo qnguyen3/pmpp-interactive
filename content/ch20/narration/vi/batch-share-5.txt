@@ -1,0 +1,1 @@
+Đó là sự đánh đổi mà sách nêu ra. Phần bộ nhớ còn lại sau trọng số giới hạn tích của kích thước batch và độ dài ngữ cảnh. Với Llama 2 7B ở 16 bit, mỗi gibibyte còn dư chứa được 2048 token cache: một chuỗi 2048, hoặc 4 chuỗi 512, hoặc 16 chuỗi 128.

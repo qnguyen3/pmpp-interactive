@@ -1,0 +1,1 @@
+Giờ mỗi ô xong việc sẽ bật một cờ, và các ô được phát ra theo thứ tự mặt sóng. Một ô bắt đầu ngay khi cờ của ô phía trên và ô bên trái đã được bật. Ở bước 4, ô 6 lấy lane đang bỏ trống, vì ô bên trái nó đã xong. Lần chạy mất 9 bước. Một ô chỉ chờ các ô láng giềng của nó.

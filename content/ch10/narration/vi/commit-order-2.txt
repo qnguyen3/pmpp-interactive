@@ -1,0 +1,1 @@
+Mỗi khối rút gọn đoạn của riêng nó, luôn theo cùng một thứ tự. Rồi luồng dẫn đầu của nó, luồng 0, cộng tổng của khối vào một tổng chung trong bộ nhớ toàn cục, bằng một phép cộng nguyên tử. Phép nguyên tử ngăn hai luồng dẫn đầu làm mất cập nhật của nhau. Nó không quyết định ai đi trước. Hãy xem tổng chung. Nó được làm tròn về float sau mỗi lần cộng.

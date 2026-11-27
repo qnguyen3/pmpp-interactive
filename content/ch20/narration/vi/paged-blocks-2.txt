@@ -1,0 +1,1 @@
+Giờ là phân trang. Cùng vùng nhớ đó được cắt thành các khối kích thước cố định, mỗi khối 32 token. Mỗi yêu cầu có một bảng khối, một danh sách ngắn các số hiệu khối. Nó chỉ lấy một khối mới khi khối cuối cùng của nó đã đầy, nên nó không bao giờ giữ nhiều hơn một khối còn trống một phần.

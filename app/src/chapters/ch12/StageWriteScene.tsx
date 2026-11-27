@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { SCENE, sceneData, type Store } from '../../sim/compactstore';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Gather, then write together": the book's sixteen keys, two blocks of eight threads, warps
 // of four lanes, 16-byte toy segments (four keys). Every number drawn comes from sceneData()
@@ -52,12 +53,12 @@ function Stage(f: Frame) {
   const touched = new Set(stores.flatMap((s) => s.segments));
   const placed = new Set(keptIdx.slice(0, f.toShared ?? 0));
   const showShared = f.toShared != null || f.staged != null;
-  const attrs = Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}`, v]));
+  const attrs = Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}`, v])); // i18n-ignore: attribute name
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Animation: the stores of a direct scatter, then of a staged one" style={{ width: '100%', maxWidth: W, display: 'block' }} {...attrs}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Animation: the stores of a direct scatter, then of a staged one', 'Hoạt cảnh: các lần ghi của một phép rải trực tiếp, rồi của một phép rải có gom tạm')} style={{ width: '100%', maxWidth: W, display: 'block' }} {...attrs}>
       <defs>
         {(['global', 'shared'] as const).map((t) => (
-          <marker key={t} id={`sw-head-${t}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto">
+          <marker key={t} id={`sw-head-${t}`} viewBox="0 0 6 6" refX="5" refY="3" markerWidth="5" markerHeight="5" orient="auto">{/* i18n-ignore: SVG attribute */}
             <path d="M0,0 L6,3 L0,6 z" fill={`var(--${t})`} />
           </marker>
         ))}
@@ -70,7 +71,9 @@ function Stage(f: Frame) {
           return (
             <g key={b}>
               <text x={(x1 + x2) / 2} y={14} fontSize="11.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-                block {b}: {SCENE.blockDim} threads{f.coarse ? `, ${SCENE.coarse} keys each` : ''}
+                <Translated vi={<>khối {b}: {SCENE.blockDim} luồng{f.coarse ? `, mỗi luồng ${SCENE.coarse} khóa` : ''}</>}>
+                  block {b}: {SCENE.blockDim} threads{f.coarse ? tr(`, ${SCENE.coarse} keys each`, `, mỗi luồng ${SCENE.coarse} khóa`) : ''}
+                </Translated>
               </text>
               {Array.from({ length: per / SCENE.warp / (f.coarse ? SCENE.coarse : 1) }, (_, w) => {
                 const span = SCENE.warp * (f.coarse ? SCENE.coarse : 1);
@@ -79,7 +82,7 @@ function Stage(f: Frame) {
                 return (
                   <g key={w}>
                     <line x1={a} y1={IN_Y - 8} x2={z} y2={IN_Y - 8} stroke="var(--ink-3)" />
-                    <text x={(a + z) / 2} y={IN_Y - 12} fontSize="9.5" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>warp {w}</text>
+                    <text x={(a + z) / 2} y={IN_Y - 12} fontSize="9.5" textAnchor="middle" style={{ fill: 'var(--ink-3)' }}>{tr(`warp ${w}`, `warp ${w}`)}</text>
                   </g>
                 );
               })}
@@ -107,7 +110,9 @@ function Stage(f: Frame) {
               const x1 = inX(b * per) - CELL / 2;
               return (
                 <g key={b} data-shared={b}>
-                  <text x={x1} y={SH_Y - 8} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>block {b}'s staging array (shared memory)</text>
+                  <text x={x1} y={SH_Y - 8} fontSize="10.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>
+                    <Translated vi={<>mảng gom tạm của khối {b} (bộ nhớ chia sẻ)</>}>block {b}'s staging array (shared memory)</Translated>
+                  </text>
                   {Array.from({ length: per }, (_, s) => (
                     <rect key={s} x={inX(b * per + s) - CELL / 2 + 1} y={SH_Y} width={CELL - 2} height={24} rx="2" fill="var(--cell)" stroke="var(--shared)" strokeOpacity={0.5} />
                   ))}
@@ -128,15 +133,15 @@ function Stage(f: Frame) {
             {f.barrier ? (
               <g data-barrier="1">
                 <rect x={IN_X0} y={SH_Y + 32} width={KEYS * CELL + GAP} height={18} rx="3" fill="var(--ink)" />
-                <text x={W / 2} y={SH_Y + 45} fontSize="11" textAnchor="middle" style={{ fill: 'var(--page)' }}>barrier: the whole block has staged its keys</text>
+                <text x={W / 2} y={SH_Y + 45} fontSize="11" textAnchor="middle" style={{ fill: 'var(--page)' }}>{tr('barrier: the whole block has staged its keys', 'rào chắn: cả khối đã gom tạm xong các khóa của mình')}</text>
               </g>
             ) : null}
           </g>
         ) : null}
 
         {/* the output, with segment outlines */}
-        <text x={OUT_X0 - 10} y={OUT_Y + 12} fontSize="11" fontWeight="600" textAnchor="end" style={{ fill: 'var(--global)' }}>output</text>
-        <text x={OUT_X0 - 10} y={OUT_Y + 25} fontSize="10" textAnchor="end" style={{ fill: 'var(--global)' }}>(global)</text>
+        <text x={OUT_X0 - 10} y={OUT_Y + 12} fontSize="11" fontWeight="600" textAnchor="end" style={{ fill: 'var(--global)' }}>{tr('output', 'đầu ra')}</text>
+        <text x={OUT_X0 - 10} y={OUT_Y + 25} fontSize="10" textAnchor="end" style={{ fill: 'var(--global)' }}>{tr('(global)', '(toàn cục)')}</text>
         {Array.from({ length: Math.ceil(D.direct.totals.kept / SLOTS_PER_SEG) }, (_, g) => (
           <rect key={g} data-segment={g} data-touched={touched.has(g) ? 1 : 0}
             x={OUT_X0 + g * SLOTS_PER_SEG * OUT_CELL - 3} y={OUT_Y - 4} width={SLOTS_PER_SEG * OUT_CELL + 6} height={36} rx="4"
@@ -154,7 +159,7 @@ function Stage(f: Frame) {
           );
         })}
         <text x={OUT_X0 + D.direct.totals.kept * OUT_CELL + 10} y={OUT_Y + 18} fontSize="9.5" style={{ fill: 'var(--ink-3)' }}>
-          segment = {SCENE.segmentBytes} bytes
+          {tr('segment =', 'đoạn =')} {SCENE.segmentBytes} {tr('bytes', 'byte')}
         </text>
 
         {/* the stores: arrows and a bracket each */}
@@ -173,7 +178,9 @@ function Stage(f: Frame) {
               })}
               <line x1={outX(lo) - OUT_CELL / 2 + 4} y1={by} x2={outX(hi) + OUT_CELL / 2 - 4} y2={by} stroke="var(--ink)" strokeWidth={2} />
               <text x={(outX(lo) + outX(hi)) / 2} y={by + 11} fontSize="9.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-                store {k + 1}: block {s.block}, warp {s.warp}, {s.lanes.length} lane{s.lanes.length === 1 ? '' : 's'}
+                <Translated vi={<>lần ghi {k + 1}: khối {s.block}, warp {s.warp}, {s.lanes.length} lane</>}>
+                  store {k + 1}: block {s.block}, warp {s.warp}, {s.lanes.length} lane{s.lanes.length === 1 ? '' : 's'}
+                </Translated>
               </text>
             </g>
           );
@@ -183,17 +190,19 @@ function Stage(f: Frame) {
       {f.tally != null ? (
         <g data-tally="1">
           {[
-            { label: 'direct (Fig. 12.8)', t: D.direct.totals, y: 372 },
-            { label: 'staged (Fig. 12.9)', t: D.staged.totals, y: 396 },
+            { label: tr('direct (Fig. 12.8)', 'trực tiếp (Fig. 12.8)'), t: D.direct.totals, y: 372 },
+            { label: tr('staged (Fig. 12.9)', 'gom tạm (Fig. 12.9)'), t: D.staged.totals, y: 396 },
           ].map((r) => (
             <g key={r.y} data-row={r.label}>
               <text x={150} y={r.y + 11} fontSize="11.5" textAnchor="end">{r.label}</text>
               <rect x={160} y={r.y} width={(r.t.stores / D.direct.totals.stores) * 150 * f.tally!} height={14} fill="var(--global)" />
               <text x={160 + (r.t.stores / D.direct.totals.stores) * 150 * f.tally! + 6} y={r.y + 11} fontSize="11.5" fontWeight="600">
-                {Math.round(r.t.stores * f.tally!)} stores
+                {Math.round(r.t.stores * f.tally!)} {tr('stores', 'lần ghi')}
               </text>
               <text x={420} y={r.y + 11} fontSize="11.5">
-                {r.t.segments} segments, {r.t.bytesFetched} bytes moved for {r.t.bytesUseful} useful
+                <Translated vi={<>{r.t.segments} đoạn, {r.t.bytesFetched} byte được di chuyển cho {r.t.bytesUseful} byte hữu ích</>}>
+                  {r.t.segments} segments, {r.t.bytesFetched} bytes moved for {r.t.bytesUseful} useful
+                </Translated>
               </text>
             </g>
           ))}
@@ -209,42 +218,42 @@ function Stage(f: Frame) {
 const beats: Beat[] = [
   {
     clip: 'stage-write-1',
-    label: 'Sixteen keys',
+    get label() { return tr('Sixteen keys', 'Mười sáu khóa'); },
     draw: (p) => {
       const shown = Math.round(ramp(p, 0.3, 0.9) * keptIdx.length);
-      return <Stage offsets={shown} note={`${keptIdx.length} kept keys; each one's offset is the number of kept keys before it`} data={{ offsets: shown }} />;
+      return <Stage offsets={shown} note={tr(`${keptIdx.length} kept keys; each one's offset is the number of kept keys before it`, `${keptIdx.length} khóa được giữ; độ lệch của mỗi khóa là số khóa được giữ đứng trước nó`)} data={{ offsets: shown }} />;
     },
   },
   {
     clip: 'stage-write-2',
-    label: 'Direct scatter',
+    get label() { return tr('Direct scatter', 'Rải trực tiếp'); },
     draw: (p) => {
       const n = Math.round(ramp(p, 0.1, 0.85) * D.direct.stores.length);
       const segs = D.direct.stores.slice(0, n).reduce((a, s) => a + s.segments.length, 0);
       return (
         <Stage offsets={keptIdx.length} direct={n}
-          note={`store instructions so far: ${n}; segments touched: ${segs}`}
+          note={tr(`store instructions so far: ${n}; segments touched: ${segs}`, `số lệnh ghi đến giờ: ${n}; số đoạn bị chạm: ${segs}`)}
           data={{ stores: n, segments: segs }} />
       );
     },
   },
   {
     clip: 'stage-write-3',
-    label: 'Stage, then copy out',
+    get label() { return tr('Stage, then copy out', 'Gom tạm, rồi chép ra'); },
     draw: (p) => {
       const placed = Math.round(ramp(p, 0.05, 0.4) * keptIdx.length);
       const n = Math.round(ramp(p, 0.6, 0.95) * D.staged.stores.length);
       const segs = D.staged.stores.slice(0, n).reduce((a, s) => a + s.segments.length, 0);
       return (
         <Stage offsets={keptIdx.length} toShared={placed} barrier={p >= 0.42 && p < 0.6} staged={n}
-          note={n ? `store instructions so far: ${n}; segments touched: ${segs}` : 'each kept key goes to its block-local offset'}
+          note={n ? tr(`store instructions so far: ${n}; segments touched: ${segs}`, `số lệnh ghi đến giờ: ${n}; số đoạn bị chạm: ${segs}`) : tr('each kept key goes to its block-local offset', 'mỗi khóa được giữ đi tới độ lệch cục bộ trong khối của nó')}
           data={{ stores: n, segments: segs, placed }} />
       );
     },
   },
   {
     clip: 'stage-write-4',
-    label: 'The tally',
+    get label() { return tr('The tally', 'Kết quả đếm'); },
     draw: (p) => (
       <Stage offsets={keptIdx.length} toShared={keptIdx.length} staged={D.staged.stores.length} faint tally={ramp(p, 0.05, 0.5)}
         data={{ before: D.direct.totals.stores, after: D.staged.totals.stores }} />
@@ -252,28 +261,28 @@ const beats: Beat[] = [
   },
   {
     clip: 'stage-write-5',
-    label: 'Coarsen by two',
+    get label() { return tr('Coarsen by two', 'Gộp việc gấp đôi'); },
     draw: (p) => {
       const placed = Math.round(ramp(p, 0.05, 0.4) * keptIdx.length);
       const n = Math.round(ramp(p, 0.55, 0.9) * D.coarse.stores.length);
       return (
         <Stage offsets={keptIdx.length} coarse toShared={placed} staged={n}
-          note={`${D.coarse.totals.chunks} chunk of ${D.coarse.totals.meanChunk} keys instead of ${D.staged.totals.chunks} of ${D.staged.totals.meanChunk}; one block-level scan serves ${D.coarse.totals.keysPerBlock} keys`}
+          note={tr(`${D.coarse.totals.chunks} chunk of ${D.coarse.totals.meanChunk} keys instead of ${D.staged.totals.chunks} of ${D.staged.totals.meanChunk}; one block-level scan serves ${D.coarse.totals.keysPerBlock} keys`, `${D.coarse.totals.chunks} đoạn gồm ${D.coarse.totals.meanChunk} khóa thay vì ${D.staged.totals.chunks} đoạn gồm ${D.staged.totals.meanChunk}; một phép scan cấp khối phục vụ ${D.coarse.totals.keysPerBlock} khóa`)}
           data={{ stores: n, chunks: D.coarse.totals.chunks, keys: D.coarse.totals.keysPerBlock }} />
       );
     },
   },
   {
     clip: 'stage-write-6',
-    label: 'When staging pays',
+    get label() { return tr('When staging pays', 'Khi nào gom tạm có lợi'); },
     draw: () => (
       <Stage offsets={keptIdx.length} direct={D.direct.stores.length}
-        note={`each block keeps ${D.staged.runs[0].length} keys for ${SCENE.blockDim} threads: CUB would scatter directly here`}
+        note={tr(`each block keeps ${D.staged.runs[0].length} keys for ${SCENE.blockDim} threads: CUB would scatter directly here`, `mỗi khối giữ ${D.staged.runs[0].length} khóa cho ${SCENE.blockDim} luồng: ở đây CUB sẽ rải trực tiếp`)}
         data={{ kept: D.staged.runs[0].length, threads: SCENE.blockDim }} />
     ),
   },
 ];
 
 export function StageWriteScene() {
-  return <Scene chapter="ch12" title="Gather, then write together" beats={beats} />;
+  return <Scene chapter="ch12" title={tr('Gather, then write together', 'Gom lại, rồi ghi cùng nhau')} beats={beats} />;
 }

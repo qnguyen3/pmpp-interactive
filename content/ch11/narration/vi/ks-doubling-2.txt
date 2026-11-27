@@ -1,0 +1,1 @@
+Bước đầu tiên dùng bước nhảy 1. Mọi vị trí trừ vị trí đầu cộng giá trị của vị trí bên trái, tất cả trong cùng một bước. Giờ mỗi vị trí giữ một cửa sổ gồm 2 đầu vào. Vị trí 1 giữ x0 cộng x1, vốn đã là đáp án cuối cùng của nó, nên nó sẽ không thay đổi nữa.

@@ -1,0 +1,1 @@
+RMSNorm đầu tiên, từ lab X3.1, nhân hàng với nghịch đảo của căn trung bình bình phương của nó, rồi với một trọng số đã học. Ba lớp tuyến tính tạo ra query, key và value. Ở batch 1, mỗi lớp là một ma trận nhân với một vector, và GEMV gather của lab 22.1 làm việc đó.

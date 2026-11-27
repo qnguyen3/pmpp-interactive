@@ -1,0 +1,1 @@
+Với 4 warp, khoảng hở khép lại. Đúng lúc warp cuối cùng gửi yêu cầu, dữ liệu của warp đầu tiên về tới. Lúc nào cũng có một warp sẵn sàng, nên đơn vị không bao giờ rảnh. Không warp nào chạy nhanh hơn. Thời gian chờ của nó được che đi sau công việc của các warp khác. Sách gọi điều này là khả năng chịu độ trễ.

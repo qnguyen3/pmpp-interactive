@@ -1,0 +1,1 @@
+Hãy bắt đầu khi chưa có GPU nào. Một luồng trên host đi dọc A và B, cộng từng cặp, và ghi tổng vào C. Cả ba mảng nằm trong bộ nhớ host. Device bên phải có bộ nhớ riêng, và đến giờ trong đó chưa có gì là của ta.

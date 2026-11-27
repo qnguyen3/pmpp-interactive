@@ -1,0 +1,1 @@
+Giờ bỏ rào chắn sau lần đọc. Luồng 0 chạy trước: nó đọc, rồi ghi ngay vào vị trí của mình. Luồng 3 đến sau và đọc vị trí 0, mong nhận giá trị ban đầu. Thay vào đó, nó thấy giá trị của vòng lặp kế tiếp. Đó là lỗi ghi sau đọc: một lần ghi đã đến trước một lần đọc vẫn còn cần giá trị cũ.

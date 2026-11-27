@@ -27,9 +27,11 @@
 //  - The address model is one warp instruction at a time, with no caches: a
 //    sector fetched by one instruction is fetched again by the next.
 //
-// Erasable TypeScript only, and no value imports: the browser checks import this
-// file directly in Node. Sector counts come from coalesce.ts (warpAccess), which
+// Erasable TypeScript only, and the only value import is lib/locale.ts: the browser
+// checks import this file directly in Node. Sector counts come from coalesce.ts (warpAccess), which
 // the lesson and the unit tests apply to the addresses produced here.
+
+import { tr } from '../lib/locale.ts';
 
 /** The book's hypothetical device: it runs 264 blocks at the same time (p. 143). */
 export const BOOK_CAPACITY = 264;
@@ -115,8 +117,8 @@ export function largestWholeWaveFactor(units: number, threadsPerBlock: number, c
 
 /** The book's two worked cases (p. 143), as work units at 256 threads per block. */
 export const BOOK_CASES = [
-  { label: '1056 blocks', blocks: 1056, factor: 8 },
-  { label: '1584 blocks', blocks: 1584, factor: 4 },
+  { get label() { return tr('1056 blocks', '1056 khối'); }, blocks: 1056, factor: 8 },
+  { get label() { return tr('1584 blocks', '1584 khối'); }, blocks: 1584, factor: 4 },
 ] as const;
 
 // ---------------------------------------------------------------- the reader's device
@@ -188,7 +190,7 @@ export function warpVectorInstruction(warpWidth: number, warp = 0): number[] {
 
 // ---------------------------------------------------------------- pitfall cards
 export type Verdict = 'helps' | 'little or no change' | 'can hurt';
-export const VERDICTS: Verdict[] = ['helps', 'little or no change', 'can hurt'];
+export const VERDICTS: Verdict[] = ['helps', 'little or no change', 'can hurt']; // i18n-ignore: identifier also shown to the reader (Verdict union member)
 
 export interface Pitfall {
   id: string;
@@ -202,39 +204,87 @@ export interface Pitfall {
 export const PITFALLS: Pitfall[] = [
   {
     id: 'relu',
-    scenario: 'A ReLU kernel: one element per thread, no shared data, loads already coalesced. Coarsen it by 4 with scalar loads.',
-    answer: 'little or no change',
-    why: 'The threads are independent. There is no parallelisation overhead for coarsening to remove (pitfall 1).',
+    get scenario() {
+      return tr(
+        'A ReLU kernel: one element per thread, no shared data, loads already coalesced. Coarsen it by 4 with scalar loads.',
+        'Một kernel ReLU: mỗi luồng một phần tử, không có dữ liệu dùng chung, các lần nạp đã được hợp nhất. Gộp việc cho nó theo hệ số 4 với các lần nạp vô hướng.',
+      );
+    },
+    answer: 'little or no change', // i18n-ignore: identifier also shown to the reader (Verdict union member)
+    get why() {
+      return tr(
+        'The threads are independent. There is no parallelisation overhead for coarsening to remove (pitfall 1).',
+        'Các luồng độc lập với nhau. Không có chi phí song song hóa nào để việc gộp loại bỏ (cạm bẫy 1).',
+      );
+    },
     pages: '142–143',
   },
   {
     id: 'vector',
-    scenario:
-      'Vector addition at full occupancy, already moving bytes at about your measured bandwidth. Coarsen it by 4 so that each thread adds four neighbouring elements with one 16-byte load per input and one 16-byte store (Fig. 6.12).',
-    answer: 'little or no change',
-    why: 'It does remove a real overhead: four load and store instructions become one, which is why the book counts Fig. 6.12 as coarsening (p. 142). But the bytes are the same and moving them was already the limit. Fewer instructions and more bytes per request pay where they were the limit, as below full occupancy (p. 139). Sections 6.3 and 6.9 reach the same verdict, and lab 6.2 measures it.',
+    get scenario() {
+      return tr(
+        'Vector addition at full occupancy, already moving bytes at about your measured bandwidth. Coarsen it by 4 so that each thread adds four neighbouring elements with one 16-byte load per input and one 16-byte store (Fig. 6.12).',
+        'Phép cộng vector ở occupancy đầy đủ, vốn đã chuyển byte ở mức xấp xỉ băng thông bạn đo được. Gộp việc theo hệ số 4 để mỗi luồng cộng bốn phần tử liền kề, với một lần nạp 16 byte cho mỗi đầu vào và một lần ghi 16 byte (Fig. 6.12).',
+      );
+    },
+    answer: 'little or no change', // i18n-ignore: identifier also shown to the reader (Verdict union member)
+    get why() {
+      return tr(
+        'It does remove a real overhead: four load and store instructions become one, which is why the book counts Fig. 6.12 as coarsening (p. 142). But the bytes are the same and moving them was already the limit. Fewer instructions and more bytes per request pay where they were the limit, as below full occupancy (p. 139). Sections 6.3 and 6.9 reach the same verdict, and lab 6.2 measures it.',
+        'Nó thật sự loại bỏ một chi phí: bốn lệnh nạp và ghi trở thành một, đó là lý do sách coi Fig. 6.12 là gộp việc (p. 142). Nhưng số byte vẫn như cũ, và việc chuyển chúng vốn đã là giới hạn. Ít lệnh hơn và nhiều byte hơn cho mỗi yêu cầu có lợi ở nơi chúng là giới hạn, như khi dưới occupancy đầy đủ (p. 139). Mục 6.3 và 6.9 đi đến cùng kết luận, và lab 6.2 đo điều đó.',
+      );
+    },
     pages: '139, 142',
   },
   {
     id: 'matmul-tiles',
-    scenario:
-      "Chapter 5's tiled matrix multiplication on a large matrix. Each block now computes two neighbouring output tiles, so the tile of M it loads serves both. The grid still fills many waves, and occupancy does not change.",
+    get scenario() {
+      return tr(
+        "Chapter 5's tiled matrix multiplication on a large matrix. Each block now computes two neighbouring output tiles, so the tile of M it loads serves both. The grid still fills many waves, and occupancy does not change.",
+        'Phép nhân ma trận phân ô của chương 5 trên một ma trận lớn. Giờ mỗi khối tính hai ô đầu ra liền kề, nên ô của M mà nó nạp phục vụ cả hai. Lưới vẫn lấp đầy nhiều wave, và occupancy không đổi.',
+      );
+    },
     answer: 'helps',
-    why: 'This removes the overhead the book names for it: neighbouring blocks loading the same input tiles. Each tile of M now crosses from global memory half as often. Chapter 15 takes it further.',
+    get why() {
+      return tr(
+        'This removes the overhead the book names for it: neighbouring blocks loading the same input tiles. Each tile of M now crosses from global memory half as often. Chapter 15 takes it further.',
+        'Việc này loại bỏ đúng chi phí mà sách nêu cho nó: các khối liền kề nạp cùng các ô đầu vào. Giờ số lần mỗi ô của M phải đi ra từ bộ nhớ toàn cục giảm một nửa. Chương 15 đi xa hơn nữa.',
+      );
+    },
     pages: '142',
   },
   {
     id: 'below-wave',
-    scenario: "A grid of 1056 blocks on the book's device that runs 264 blocks at once. Coarsen it by 8.",
-    answer: 'can hurt',
-    why: '132 blocks are half a wave: half the device sits idle while each block does eight times the work (pitfall 2).',
+    get scenario() {
+      return tr(
+        "A grid of 1056 blocks on the book's device that runs 264 blocks at once. Coarsen it by 8.",
+        'Một lưới 1056 khối trên thiết bị của sách, thiết bị chạy 264 khối cùng lúc. Gộp việc theo hệ số 8.',
+      );
+    },
+    answer: 'can hurt', // i18n-ignore: identifier also shown to the reader (Verdict union member)
+    get why() {
+      return tr(
+        '132 blocks are half a wave: half the device sits idle while each block does eight times the work (pitfall 2).',
+        '132 khối là nửa wave: một nửa thiết bị nhàn rỗi trong khi mỗi khối làm gấp tám lần việc (cạm bẫy 2).',
+      );
+    },
     pages: '143',
   },
   {
     id: 'registers',
-    scenario: "Coarsening by 2 raises registers per thread from 32 to 64 on the book's example SM (65,536 registers, 2048 thread slots), and removes little overhead.",
-    answer: 'can hurt',
-    why: 'Only 1024 threads now fit: occupancy halves. The gain has to exceed what the lost warps were hiding, and here there is little gain (pitfall 3).',
+    get scenario() {
+      return tr(
+        "Coarsening by 2 raises registers per thread from 32 to 64 on the book's example SM (65,536 registers, 2048 thread slots), and removes little overhead.",
+        'Gộp việc theo hệ số 2 làm số thanh ghi mỗi luồng tăng từ 32 lên 64 trên SM ví dụ của sách (65,536 thanh ghi, 2048 chỗ cho luồng), và loại bỏ được ít chi phí.',
+      );
+    },
+    answer: 'can hurt', // i18n-ignore: identifier also shown to the reader (Verdict union member)
+    get why() {
+      return tr(
+        'Only 1024 threads now fit: occupancy halves. The gain has to exceed what the lost warps were hiding, and here there is little gain (pitfall 3).',
+        'Giờ chỉ còn 1024 luồng vừa: occupancy giảm một nửa. Phần lợi phải vượt qua những gì các warp bị mất đang che giấu, và ở đây lợi rất ít (cạm bẫy 3).',
+      );
+    },
     pages: '143',
   },
 ];

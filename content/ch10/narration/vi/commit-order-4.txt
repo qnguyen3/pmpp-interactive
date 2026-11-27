@@ -1,0 +1,1 @@
+Thiết kế thứ hai bỏ phép nguyên tử. Mỗi luồng dẫn đầu ghi tổng của nó vào một mảng, tại chỉ số của chính khối mình. Giờ thứ tự các lần ghi không còn quan trọng. Một lần khởi chạy thứ hai, chỉ với một khối, rút gọn mảng đó theo một cây cố định. Lần chạy nào cũng cho ra cùng các bit. Đây là chế độ mặc định của device reduce trong CUB.

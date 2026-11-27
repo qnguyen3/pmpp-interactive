@@ -1,0 +1,1 @@
+Lấy các khối 16 nhân 16 luồng và đặt từng khối một. Chiều rộng là 76, nên cần 5 khối theo chiều ngang. Chiều cao là 62, nên cần 4 khối theo chiều dọc. Tức là 20 khối, và 20 nhân 256 là 5120 luồng. Nhiều luồng hơn số điểm ảnh.

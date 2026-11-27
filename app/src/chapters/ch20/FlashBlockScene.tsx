@@ -1,6 +1,7 @@
 import { Scene, type Beat } from '../../components/Scene';
 import { TOY, makeProblem, runBlock, type KStep } from '../../sim/flashkernel';
 import { FlashBlockView } from './FlashBlockView';
+import { Translated, tr } from '../../lib/i18n';
 
 // "One block's journey through the flash kernel" (section 20.5): block 1 (rows 4 to 7) of
 // the toy kernel, lanes in lockstep, warps taking turns. Every frame is a snapshot of
@@ -34,20 +35,25 @@ const frame = (k: number, p: number) => {
 };
 
 const captions = [
-  'block 1 loads rows 4 to 7 of Q into registers',
-  'tile 0 of K (transposed) and V into shared memory, then a block barrier',
-  'scores from shuffled Q, masked by index; the max updates m and D',
-  'P in place, a warp barrier, then O rescaled and P·V added',
-  'tile 2 lies above the diagonal: every P is 0, the book computes it anyway',
-  'divide by D once; write O and L = m + log D',
+  <Translated vi="khối 1 nạp các hàng 4 đến 7 của Q vào thanh ghi">block 1 loads rows 4 to 7 of Q into registers</Translated>,
+  <Translated vi="ô 0 của K (chuyển vị) và V vào bộ nhớ chia sẻ, rồi một rào chắn khối">tile 0 of K (transposed) and V into shared memory, then a block barrier</Translated>,
+  <Translated vi="điểm số từ Q đã shuffle, che mặt nạ theo chỉ số; giá trị lớn nhất cập nhật m và D">scores from shuffled Q, masked by index; the max updates m and D</Translated>,
+  <Translated vi="P tại chỗ, một rào chắn warp, rồi O được co giãn lại và cộng thêm P·V">P in place, a warp barrier, then O rescaled and P·V added</Translated>,
+  <Translated vi="ô 2 nằm trên đường chéo: mọi P đều bằng 0, sách vẫn tính nó">tile 2 lies above the diagonal: every P is 0, the book computes it anyway</Translated>,
+  <Translated vi="chia cho D một lần; ghi O và L = m + log D">divide by D once; write O and L = m + log D</Translated>,
 ];
 
 const beats: Beat[] = captions.map((cap, k) => ({
   clip: `flash-block-${k + 1}`,
-  label: ['Load Q', 'Load a tile', 'Scores', 'P and O', 'Every tile', 'Store'][k],
+  get label() {
+    return tr(
+      ['Load Q', 'Load a tile', 'Scores', 'P and O', 'Every tile', 'Store'][k],
+      ['Nạp Q', 'Nạp một ô', 'Điểm số', 'P và O', 'Mọi ô', 'Ghi'][k],
+    );
+  },
   draw: (p: number) => <FlashBlockView trace={TRACE} prob={PROB} at={frame(k, p)} caption={cap} />,
 }));
 
 export function FlashBlockScene() {
-  return <Scene chapter="ch20" title="One block's journey through the flash kernel" beats={beats} />;
+  return <Scene chapter="ch20" title={tr("One block's journey through the flash kernel", 'Hành trình của một khối qua kernel flash')} beats={beats} />;
 }

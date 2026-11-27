@@ -1,0 +1,1 @@
+Mọi hàng của batch làm việc này cùng lúc, không luồng nào phải chờ luồng nào khác. [short pause] Đưa vào cùng seed, cùng stream và cùng bước, và bạn nhận được cùng các bit trên CUDA, trên HIP, trên Metal và trên CPU, miễn là mỗi nơi vượt qua các đáp án đã biết.

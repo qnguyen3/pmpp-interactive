@@ -1,0 +1,1 @@
+Giờ là cách không gộp. Kernel thứ nhất đọc dòng dữ liệu ngắn, biến mọi mã trở lại thành float32, và ghi một bản sao float32 đầy đủ vào bộ nhớ. Kernel thứ hai đọc lại bản sao đó cho một phép nhân thông thường. Vậy bản sao đi qua đường ống hai lần, và đồng hồ chạy quá vạch đích của float32, tới hơn 2 một chút.

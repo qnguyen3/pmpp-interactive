@@ -1,0 +1,1 @@
+Giờ 3 luồng còn lại của khối chạy. Các mảng vùng của chúng chồng lên nhau, nên hãy xem các số đếm trên đầu vào. Trong mỗi bản đồ, giá trị ở giữa bị nạp 4 lần, mỗi giá trị ở cạnh hai lần, và mỗi góc một lần. Một khối thực hiện 48 lần đọc đầu vào để phủ chỉ 27 giá trị khác nhau.

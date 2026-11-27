@@ -1,0 +1,1 @@
+Đây là một phép tích chập một chiều nhỏ. 8 đầu vào, 6 đầu ra, và mỗi đầu ra là tổng của 3 đầu vào liền kề. Đọc các mũi tên theo chiều ngược lại thì mỗi đầu vào cấp cho tối đa 3 đầu ra. Vậy có hai cách chia việc: giao cho mỗi luồng một đầu ra, hoặc giao cho mỗi luồng một đầu vào.

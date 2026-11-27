@@ -1,0 +1,1 @@
+Bước thứ hai dùng bước nhảy 2. Mỗi vị trí cộng giá trị cách nó 2 vị trí về bên trái, và giá trị đó đã là một cặp. Vì vậy các cửa sổ lớn lên từ 2 đầu vào thành 4. Vị trí 2 và 3 giờ đã xong. Dùng lại các tổng mà vị trí lân cận đã dựng ở bước trước, đó là toàn bộ mẹo.

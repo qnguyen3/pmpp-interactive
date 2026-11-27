@@ -1,0 +1,1 @@
+Đầu tiên là bước nạp. Nó cần 4 lệnh nạp. Trong mỗi lệnh, 4 luồng sao chép 4 phần tử liền kề, nên luồng t lấy phần tử t của đoạn, và toàn bộ lần truy cập là một vùng nhớ liên tục. Nếu thay vào đó mỗi luồng tự nạp dải phần tử của riêng mình, một lệnh sẽ chạm vào 4 vùng nhớ tách rời.

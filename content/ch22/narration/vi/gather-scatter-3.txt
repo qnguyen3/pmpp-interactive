@@ -1,0 +1,1 @@
+Giờ là mỗi đầu vào một luồng. Mỗi luồng lấy giá trị của nó và đẩy về mọi đầu ra mà nó cấp, tối đa 3 đầu ra. Hãy theo các mũi tên: chúng hội tụ lại. Giờ mỗi đầu ra có 3 luồng cùng cố cập nhật nó một lúc. Đó là mẫu scatter, và các đầu ra dùng chung đó cần cập nhật nguyên tử thì mới ra kết quả đúng.

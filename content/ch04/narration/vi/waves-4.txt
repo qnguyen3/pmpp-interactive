@@ -1,0 +1,1 @@
+Vì sao điều đó an toàn? Hãy nhìn vào bên trong một khối. Các luồng của nó gặp nhau ở một rào chắn. Nhưng rào chắn dừng lại ở mép của khối, và không có gì ràng buộc khối này với khối khác. Vì vậy runtime có thể giao các khối theo bất kỳ thứ tự nào. Xáo trộn danh sách, và mọi phần của kết quả vẫn được ghi.

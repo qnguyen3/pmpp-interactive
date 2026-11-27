@@ -1,0 +1,1 @@
+Sau ô cuối cùng là một phép chia: đầu ra chia cho D. Các cột rơi đúng vào attention chính xác, được tính với độ chính xác kép. Chúng chỉ chênh vài phần trên một trăm triệu, đó là sai số làm tròn của số thực độ chính xác đơn. Không lúc nào có bước nào cần cả hàng cùng một lúc.

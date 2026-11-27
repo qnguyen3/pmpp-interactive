@@ -1,0 +1,1 @@
+Giờ chạy cùng các luồng đó theo chiều ngược lại, luồng cuối chạy trước. Các phép đọc vẫn như trước, vì x không thay đổi. Nên y ra giống hệt, từng phần tử một. Thứ tự nào cũng được. Chạy tất cả cùng lúc cũng được. Đó chính là ý nghĩa của song song dữ liệu.

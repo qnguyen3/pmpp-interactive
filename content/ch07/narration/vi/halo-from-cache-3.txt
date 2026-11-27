@@ -1,0 +1,1 @@
+Láng giềng trong ảnh không phải là láng giềng về thời gian. Khối C, khối đầu tiên của hàng kế tiếp, chạy sau A cả một hàng khối. Vùng biên phía trên của nó gồm các hàng dưới cùng của A. Từ lúc đó đến giờ, bộ nhớ đệm nhỏ này đã đầy các ô khác và đã đẩy các dòng đó ra, nên các lần đọc của C tới chúng phải đi xuống DRAM.

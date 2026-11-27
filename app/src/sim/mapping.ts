@@ -17,12 +17,20 @@
 // were not measured on a device; that they sit on the right and bottom edges is
 // this model's assumption.
 
+import { tr as trText } from '../lib/locale.ts';
+
 export type Style = 'blocks' | 'threadgroups' | 'threads';
 
 export const STYLE_LABEL: Record<Style, string> = {
-  blocks: 'CUDA or HIP: whole blocks',
-  threadgroups: 'Metal: dispatchThreadgroups',
-  threads: 'Metal: dispatchThreads',
+  get blocks() {
+    return trText('CUDA or HIP: whole blocks', 'CUDA hoặc HIP: nguyên khối');
+  },
+  get threadgroups() {
+    return trText('Metal: dispatchThreadgroups', 'Metal: dispatchThreadgroups');
+  },
+  get threads() {
+    return trText('Metal: dispatchThreads', 'Metal: dispatchThreads');
+  },
 };
 
 export interface Launch {
@@ -428,45 +436,67 @@ export function stepsGrayscale(l: Launch, x: number, y: number): GrayStep[] {
   push({ op: 'row', set: 'row',
     text: `row = blockIdx.y*blockDim.y + threadIdx.y = ${t.blockIdx.y}*${t.blockDim.y} + ${t.threadIdx.y} = ${t.row}.` });
 
-  const colTest = `col < width is ${t.col} < ${l.width}, ${t.colOk}`;
-  const rowTest = `row < height is ${t.row} < ${l.height}, ${t.rowOk}`;
+  const colTest = trText(`col < width is ${t.col} < ${l.width}, ${t.colOk}`, `col < width là ${t.col} < ${l.width}, ${t.colOk}`);
+  const rowTest = trText(`row < height is ${t.row} < ${l.height}, ${t.rowOk}`, `row < height là ${t.row} < ${l.height}, ${t.rowOk}`);
   if (!t.works) {
     push({ op: 'guard', pass: false,
       text: t.failing === 'col'
-        ? `Guard: ${colTest}. The && stops there; the row test is not evaluated. The body is skipped.`
-        : `Guard: ${colTest}; ${rowTest}. The body is skipped.` });
-    push({ op: 'done', text: 'This thread has no pixel. It returns without reading or writing memory.' });
+        ? trText(
+            `Guard: ${colTest}. The && stops there; the row test is not evaluated. The body is skipped.`,
+            `Điều kiện chặn: ${colTest}. Toán tử && dừng ở đó; phép kiểm tra hàng không được tính. Phần thân bị bỏ qua.`,
+          )
+        : trText(`Guard: ${colTest}; ${rowTest}. The body is skipped.`, `Điều kiện chặn: ${colTest}; ${rowTest}. Phần thân bị bỏ qua.`) });
+    push({ op: 'done', text: trText('This thread has no pixel. It returns without reading or writing memory.', 'Luồng này không có điểm ảnh nào. Nó trả về mà không đọc hay ghi bộ nhớ.') });
     return steps;
   }
-  push({ op: 'guard', pass: true, text: `Guard: ${colTest}; ${rowTest}. This thread has a pixel.` });
+  push({ op: 'guard', pass: true, text: trText(`Guard: ${colTest}; ${rowTest}. This thread has a pixel.`, `Điều kiện chặn: ${colTest}; ${rowTest}. Luồng này có một điểm ảnh.`) });
 
   const go = t.grayOffset!;
   const ro = t.rgbOffset!;
   regs.grayOffset = go;
   push({ op: 'grayOffset', set: 'grayOffset',
-    text: `grayOffset = row*width + col = ${t.row}*${l.width} + ${t.col} = ${go}: ${t.row} full rows of ${l.width} come first.` });
+    text: trText(
+      `grayOffset = row*width + col = ${t.row}*${l.width} + ${t.col} = ${go}: ${t.row} full rows of ${l.width} come first.`,
+      `grayOffset = row*width + col = ${t.row}*${l.width} + ${t.col} = ${go}: ${t.row} hàng đầy đủ, mỗi hàng ${l.width} phần tử, đứng trước.`,
+    ) });
   regs.rgbOffset = ro;
   push({ op: 'rgbOffset', set: 'rgbOffset',
-    text: `rgbOffset = grayOffset*CHANNELS = ${go}*${CHANNELS} = ${ro}: every pixel before this one took ${CHANNELS} bytes.` });
+    text: trText(
+      `rgbOffset = grayOffset*CHANNELS = ${go}*${CHANNELS} = ${ro}: every pixel before this one took ${CHANNELS} bytes.`,
+      `rgbOffset = grayOffset*CHANNELS = ${go}*${CHANNELS} = ${ro}: mỗi điểm ảnh đứng trước điểm này chiếm ${CHANNELS} byte.`,
+    ) });
 
   const [r, g, b] = pixelAt(t.row, t.col);
-  const chans: ['r' | 'g' | 'b', number, string][] = [['r', r, 'red'], ['g', g, 'green'], ['b', b, 'blue']];
+  const chans: ['r' | 'g' | 'b', number, string][] = [
+    ['r', r, trText('red', 'đỏ')],
+    ['g', g, trText('green', 'lục')],
+    ['b', b, trText('blue', 'lam')],
+  ];
   chans.forEach(([name, value, word], k) => {
     regs[name] = value;
     push({ op: name, set: name, mem: { array: 'Pin', index: ro + k, value, write: false },
-      text: `${name} = Pin[rgbOffset${k ? ' + ' + k : ''}] = Pin[${ro + k}] = ${value}, the ${word} byte.` });
+      text: trText(
+        `${name} = Pin[rgbOffset${k ? ' + ' + k : ''}] = Pin[${ro + k}] = ${value}, the ${word} byte.`,
+        `${name} = Pin[rgbOffset${k ? ' + ' + k : ''}] = Pin[${ro + k}] = ${value}, byte màu ${word}.`,
+      ) });
   });
 
   const d = grayDetail(r, g, b, 'corrected');
   regs.sum = d.sum;
   push({ op: 'sum', set: 'sum',
-    text: `The sum is computed in float: 0.299f*${r} + 0.587f*${g} + 0.114f*${b} = ${fmtFloat(d.sum)}.` });
+    text: trText(
+      `The sum is computed in float: 0.299f*${r} + 0.587f*${g} + 0.114f*${b} = ${fmtFloat(d.sum)}.`,
+      `Tổng được tính bằng float: 0.299f*${r} + 0.587f*${g} + 0.114f*${b} = ${fmtFloat(d.sum)}.`,
+    ) });
   regs.byte = d.byte;
   push({ op: 'cast', set: 'byte',
-    text: `(unsigned char) applies to the whole sum and drops the fraction: ${fmtFloat(d.sum)} becomes ${d.byte}.` });
+    text: trText(
+      `(unsigned char) applies to the whole sum and drops the fraction: ${fmtFloat(d.sum)} becomes ${d.byte}.`,
+      `(unsigned char) áp dụng cho cả tổng và bỏ phần thập phân: ${fmtFloat(d.sum)} thành ${d.byte}.`,
+    ) });
   push({ op: 'store', mem: { array: 'Pout', index: go, value: d.byte, write: true },
-    text: `Pout[grayOffset] = Pout[${go}] = ${d.byte}. No other thread writes this element.` });
-  push({ op: 'done', text: 'The thread is finished: three bytes read, one byte written.' });
+    text: trText(`Pout[grayOffset] = Pout[${go}] = ${d.byte}. No other thread writes this element.`, `Pout[grayOffset] = Pout[${go}] = ${d.byte}. Không luồng nào khác ghi phần tử này.`) });
+  push({ op: 'done', text: trText('The thread is finished: three bytes read, one byte written.', 'Luồng đã xong: đọc ba byte, ghi một byte.') });
   return steps;
 }
 

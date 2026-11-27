@@ -15,16 +15,17 @@
 //      emulator ignores them. histpriv.test.ts runs the snippet file on both backends
 //      and compares.
 //   3. sceneData(): the numbers the narrated animation "Privatise, then commit" draws.
+import { tr } from '../lib/locale.ts';
 import { generateImage, rng, type ImageKind } from './histogram';
 
 // ------------------------------------------------------------------ 1. the explorer
 export type Scheme = 'public' | 'two' | 'four' | 'block';
 export const SCHEMES: Scheme[] = ['public', 'two', 'four', 'block'];
 export const SCHEME_LABEL: Record<Scheme, string> = {
-  public: 'one public copy (Fig. 9.6)',
-  two: 'two copies: even and odd blocks',
-  four: 'four copies: block i uses copy i mod 4',
-  block: 'one copy per block (Figs. 9.9, 9.10)',
+  get public() { return tr('one public copy (Fig. 9.6)', 'một bản sao chung (Fig. 9.6)'); },
+  get two() { return tr('two copies: even and odd blocks', 'hai bản sao: khối chẵn và khối lẻ'); },
+  get four() { return tr('four copies: block i uses copy i mod 4', 'bốn bản sao: khối i dùng bản sao i mod 4'); },
+  get block() { return tr('one copy per block (Figs. 9.9, 9.10)', 'mỗi khối một bản sao (Figs. 9.9, 9.10)'); },
 };
 
 /** Pixel levels of an 8-bit image (p. 202). */
@@ -167,8 +168,8 @@ export const ex5b = (n: number, bins: number, threadsPerBlock: number, coarse = 
 /** Vocabulary sizes from the models' public configs, read 2026-11-20 (notes/today/ch09-facts.md, D7). */
 export const VOCABS = [
   { id: 'gpt2', name: 'GPT-2', config: 'openai-community/gpt2', bins: 50_257 },
-  { id: 'qwen3', name: 'Qwen3-8B', config: 'Qwen/Qwen3-8B', bins: 151_936 },
-  { id: 'gptoss', name: 'gpt-oss-20b', config: 'openai/gpt-oss-20b', bins: 201_088 },
+  { id: 'qwen3', name: 'Qwen3-8B', config: 'Qwen/Qwen3-8B', bins: 151_936 }, // i18n-ignore: model name
+  { id: 'gptoss', name: 'gpt-oss-20b', config: 'openai/gpt-oss-20b', bins: 201_088 }, // i18n-ignore: model name
 ] as const;
 export const KIB = 1024;
 export const kib = (bytes: number) => bytes / KIB;
@@ -218,40 +219,61 @@ const CORRECT: Shape = {
  * documents in notes/today/ch09-facts.md (A2, A3, A10), not a measurement.
  */
 export const VARIANT: Record<Variant, { kernel: string; label: string; shape: Shape; gpu: string }> = {
-  correct: { kernel: 'histPrivatised', label: 'correct (the reference)', shape: CORRECT, gpu: 'Correct.' },
+  correct: {
+    kernel: 'histPrivatised', get label() { return tr('correct (the reference)', 'đúng (bản tham chiếu)'); }, shape: CORRECT,
+    get gpu() { return tr('Correct.', 'Đúng.'); },
+  },
   'no-zeroing': {
     kernel: 'histNoZeroing', label: 'A', shape: { ...CORRECT, zero: false },
-    gpu: 'Shared memory holds whatever was there before, so the counts start from leftovers. Usually visible, but a run that happens to find zeros passes.',
+    get gpu() {
+      return tr('Shared memory holds whatever was there before, so the counts start from leftovers. Usually visible, but a run that happens to find zeros passes.', 'Bộ nhớ chia sẻ giữ bất cứ thứ gì có sẵn ở đó, nên các số đếm bắt đầu từ giá trị còn sót lại. Thường thấy được, nhưng một lần chạy tình cờ gặp toàn số 0 thì vẫn qua.');
+    },
   },
   'no-barrier-after-zeroing': {
     kernel: 'histNoBarrierAfterZeroing', label: 'B', shape: { ...CORRECT, barrier1: false },
-    gpu: 'Wrong only when a thread counts before another thread has zeroed that bin, which depends on how its warps happen to run. Intermittent.',
+    get gpu() {
+      return tr('Wrong only when a thread counts before another thread has zeroed that bin, which depends on how its warps happen to run. Intermittent.', 'Chỉ sai khi một luồng đếm trước khi một luồng khác kịp đặt bin đó về 0, điều này phụ thuộc vào cách các warp của nó tình cờ chạy. Lúc có lúc không.');
+    },
   },
   'no-barrier-before-commit': {
     kernel: 'histNoBarrierBeforeCommit', label: 'C', shape: { ...CORRECT, barrier2: false },
-    gpu: 'Wrong only when a bin is committed before another warp has counted into it. Intermittent.',
+    get gpu() {
+      return tr('Wrong only when a bin is committed before another warp has counted into it. Intermittent.', 'Chỉ sai khi một bin được commit trước khi một warp khác kịp đếm vào nó. Lúc có lúc không.');
+    },
   },
   'plain-shared-update': {
     kernel: 'histPlainSharedUpdate', label: 'D', shape: { ...CORRECT, sharedAtomic: false },
-    gpu: 'Loses counts when threads of a block hit the same bin at once, so skewed images show it most. On CUDA, compute-sanitizer --tool racecheck examines shared memory and is the GPU-side tool for this one.',
+    get gpu() {
+      return tr('Loses counts when threads of a block hit the same bin at once, so skewed images show it most. On CUDA, compute-sanitizer --tool racecheck examines shared memory and is the GPU-side tool for this one.', 'Mất số đếm khi các luồng của một khối cùng lúc trúng một bin, nên ảnh bị lệch thấy rõ nhất. Trên CUDA, compute-sanitizer --tool racecheck kiểm tra bộ nhớ chia sẻ và là công cụ phía GPU cho trường hợp này.');
+    },
   },
   'plain-commit': {
     kernel: 'histPlainCommit', label: 'E', shape: { ...CORRECT, commitAtomic: false },
-    gpu: 'Loses a block\'s whole count for a bin when two blocks commit to it at once. Intermittent, and racecheck cannot see it: it examines shared memory only.',
+    get gpu() {
+      return tr('Loses a block\'s whole count for a bin when two blocks commit to it at once. Intermittent, and racecheck cannot see it: it examines shared memory only.', 'Mất toàn bộ số đếm của một khối cho một bin khi hai khối cùng lúc commit vào bin đó. Lúc có lúc không, và racecheck không thấy được: nó chỉ kiểm tra bộ nhớ chia sẻ.');
+    },
   },
   'block-scope-commit': {
     kernel: 'histBlockScopeCommit', label: 'F', shape: { ...CORRECT, commitScope: 'block' },
-    gpu: 'A data race and undefined behaviour under CUDA\'s memory model, whatever numbers it prints. No document says whether a GPU shows it; it may pass every run you ever make.',
+    get gpu() {
+      return tr('A data race and undefined behaviour under CUDA\'s memory model, whatever numbers it prints. No document says whether a GPU shows it; it may pass every run you ever make.', 'Một race condition (tranh chấp dữ liệu) và hành vi không xác định theo mô hình bộ nhớ của CUDA, dù nó in ra số nào. Không tài liệu nào nói GPU có để lộ lỗi này hay không; nó có thể qua mọi lần chạy bạn từng thực hiện.');
+    },
   },
   'commit-bound-blockDim': {
     kernel: 'histCommitBoundBlockDim', label: 'G', shape: { ...CORRECT, commitBound: 'blockDim' },
-    gpu: 'Wrong on every run on every device whenever there are more bins than threads in a block: the high bins are never committed.',
+    get gpu() {
+      return tr('Wrong on every run on every device whenever there are more bins than threads in a block: the high bins are never committed.', 'Sai ở mọi lần chạy trên mọi thiết bị mỗi khi số bin nhiều hơn số luồng trong một khối: các bin cao không bao giờ được commit.');
+    },
   },
 };
 
 export type Schedule = 'forward' | 'reverse' | 'shuffle';
 export const SCHEDULES: Schedule[] = ['forward', 'reverse', 'shuffle'];
-export const SCHEDULE_LABEL: Record<Schedule, string> = { forward: 'in order', reverse: 'reversed', shuffle: 'shuffled' };
+export const SCHEDULE_LABEL: Record<Schedule, string> = {
+  get forward() { return tr('in order', 'theo thứ tự'); },
+  get reverse() { return tr('reversed', 'đảo ngược'); },
+  get shuffle() { return tr('shuffled', 'xáo trộn'); },
+};
 
 /**
  * The emulator's thread order for each block of one launch: the identity, its reverse,
@@ -277,10 +299,10 @@ export function emuOrders(schedule: Schedule, blocks: number, threads: number, s
 
 export type Site = 'zero' | 'update' | 'commit-read' | 'commit-add';
 export const SITE_TEXT: Record<Site, string> = {
-  zero: 'the zeroing store',
-  update: 'the update of the private copy',
-  'commit-read': 'the read of the private count',
-  'commit-add': 'the add to the public bin',
+  get zero() { return tr('the zeroing store', 'lệnh ghi đặt về 0'); },
+  get update() { return tr('the update of the private copy', 'lần cập nhật bản sao riêng'); },
+  get 'commit-read'() { return tr('the read of the private count', 'lần đọc số đếm riêng'); },
+  get 'commit-add'() { return tr('the add to the public bin', 'phép cộng vào bin chung'); },
 };
 
 type Op =

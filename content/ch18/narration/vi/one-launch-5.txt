@@ -1,0 +1,1 @@
+Ở cuối mỗi mức, ba rào chắn, mỗi rào chắn bảo vệ một thứ tự. Rào chắn đầu tiên chờ mọi lần thêm vào, để số đếm được đầy đủ. Mọi luồng đọc nó. Rào chắn thứ hai đảm bảo không ai đọc sau khi đặt lại. Luồng 0 đặt lại số đếm. Rào chắn thứ ba đảm bảo không lần thêm vào nào bắt đầu trước khi đặt lại. [short pause] Với một bộ đếm cho mỗi mức, một rào chắn là đủ.

@@ -1,0 +1,1 @@
+Ba luồng cùng chia một phép trộn gồm 9 đầu ra. Cắt đầu ra thành các lát bằng nhau, và mỗi luồng biết các đầu ra của mình bắt đầu ở đâu: ở 0, 3, và 6. [short pause] Điều nó không biết là các đầu vào của mình bắt đầu ở đâu. Điều đó phụ thuộc vào các giá trị trong A và B, nên mỗi luồng phải tìm kiếm nó.

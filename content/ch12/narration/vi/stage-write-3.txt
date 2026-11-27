@@ -1,0 +1,1 @@
+Giờ là phiên bản qua vùng đệm của hình 12.9. Mỗi khóa được giữ trước hết được ghi vào bộ nhớ chia sẻ, tại độ lệch của nó bên trong khối. Một rào chắn chờ cả khối. Rồi các luồng 0, 1, 2 và 3 cùng sao chép đoạn của khối ra ngoài, nên một lệnh ghi viết được 4 vị trí liên tiếp.

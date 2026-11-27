@@ -1,0 +1,1 @@
+Phần 1. A và B vượt qua ranh giới, từng phần tử một. Trong khi mỗi lần sao chép chạy, luồng host bị chặn bên trong lời gọi. Hãy nhìn bộ đếm. Mỗi mảng là 8 số float, mỗi số 4 byte, nên mỗi lần sao chép là 32 byte. 64 byte đã đi qua trước khi có bất kỳ phép tính nào.

@@ -1,0 +1,1 @@
+Sau CUDA device synchronize, CPU đọc kết quả. Giờ đến lượt CPU gặp lỗi trang, và các trang mà kernel đã ghi quay về từng trang một. Hãy đếm: 8 trang sang, 8 trang về. Đó đúng bằng lượng mà hai lần sao chép tường minh lẽ ra đã chuyển. Ở đây, bộ nhớ được quản lý tiết kiệm mã, không tiết kiệm lưu lượng.

@@ -40,6 +40,7 @@
 //     shown and skipped.
 //
 // Erasable TypeScript only.
+import { tr } from '../lib/locale.ts';
 import { topP } from './scan';
 import { minPThreshold } from './stablescan';
 import { applyPenalties, countTokens, type PenaltyOrder, type RepRule } from './penalties';
@@ -74,60 +75,60 @@ export interface Stage {
 }
 
 export const LAB = {
-  counts: { num: '9.3', chapter: 'ch09', title: 'token counts for repetition penalties' },
-  softmax: { num: '10.3', chapter: 'ch10', title: 'softmax and argmax over logits (M4)' },
-  topp: { num: '11.6', chapter: 'ch11', title: 'top-p keep mask' },
-  compact: { num: '12.4', chapter: 'ch12', title: 'candidate compaction' },
-  sort: { num: '14.3', chapter: 'ch14', title: 'sorted candidates, every row descending and stable' },
-  radix: { num: 'X1.1', chapter: 'x1', title: 'top-k by radix select, measured against a full sort' },
-  filters: { num: 'X1.2', chapter: 'x1', title: 'top-p and min-p: composed from earlier labs, then fused' },
-  m5: { num: 'X1.3', chapter: 'x1', title: 'milestone M5: a batched GPU sampler' },
+  counts: { num: '9.3', chapter: 'ch09', title: 'token counts for repetition penalties' }, // i18n-ignore: identifier also shown to the reader
+  softmax: { num: '10.3', chapter: 'ch10', title: 'softmax and argmax over logits (M4)' }, // i18n-ignore: identifier also shown to the reader
+  topp: { num: '11.6', chapter: 'ch11', title: 'top-p keep mask' }, // i18n-ignore: identifier also shown to the reader
+  compact: { num: '12.4', chapter: 'ch12', title: 'candidate compaction' }, // i18n-ignore: identifier also shown to the reader
+  sort: { num: '14.3', chapter: 'ch14', title: 'sorted candidates, every row descending and stable' }, // i18n-ignore: identifier also shown to the reader
+  radix: { num: 'X1.1', chapter: 'x1', title: 'top-k by radix select, measured against a full sort' }, // i18n-ignore: identifier also shown to the reader
+  filters: { num: 'X1.2', chapter: 'x1', title: 'top-p and min-p: composed from earlier labs, then fused' }, // i18n-ignore: identifier also shown to the reader
+  m5: { num: 'X1.3', chapter: 'x1', title: 'milestone M5: a batched GPU sampler' }, // i18n-ignore: identifier also shown to the reader
 } as const satisfies Record<string, LabRef>;
 
 /** llama.cpp's default chain, in its order (x1-facts D1). The draw follows the last stage. */
 export const STAGES: Stage[] = [
   {
-    id: 'penalties', label: 'penalties', kind: 'reshape', modelled: true,
+    id: 'penalties', get label() { return tr('penalties', 'hình phạt'); }, kind: 'reshape', modelled: true,
     kernels: [
-      { what: 'count the tokens of each row', lab: LAB.counts },
-      { what: 'repetition, sign-aware', lab: LAB.m5 },
-      { what: 'frequency and presence', lab: LAB.counts },
+      { get what() { return tr('count the tokens of each row', 'đếm token của mỗi hàng'); }, lab: LAB.counts },
+      { get what() { return tr('repetition, sign-aware', 'phạt lặp lại, có xét dấu'); }, lab: LAB.m5 },
+      { get what() { return tr('frequency and presence', 'tần suất và hiện diện'); }, lab: LAB.counts },
     ],
   },
   { id: 'dry', label: 'DRY', kind: 'reshape', modelled: false, kernels: [] },
-  { id: 'top-n-sigma', label: 'top-n-sigma', kind: 'truncate', modelled: false, kernels: [] },
+  { id: 'top-n-sigma', label: 'top-n-sigma', kind: 'truncate', modelled: false, kernels: [] }, // i18n-ignore: sampler name, kept in English per the glossary
   {
-    id: 'top-k', label: 'top-k', kind: 'truncate', modelled: true,
+    id: 'top-k', label: 'top-k', kind: 'truncate', modelled: true, // i18n-ignore: sampler name, kept in English per the glossary
     kernels: [
-      { what: 'find the k-th largest logit by radix select', lab: LAB.radix },
-      { what: 'gather the candidates in column order', lab: LAB.compact },
-      { what: 'sort the k survivors, descending and stable', lab: LAB.sort },
+      { get what() { return tr('find the k-th largest logit by radix select', 'tìm logit lớn thứ k bằng radix select'); }, lab: LAB.radix },
+      { get what() { return tr('gather the candidates in column order', 'gom các ứng viên theo thứ tự cột'); }, lab: LAB.compact },
+      { get what() { return tr('sort the k survivors, descending and stable', 'sắp xếp k ứng viên còn lại, giảm dần và ổn định'); }, lab: LAB.sort },
     ],
   },
-  { id: 'typical', label: 'typical', kind: 'truncate', modelled: false, kernels: [] },
+  { id: 'typical', label: 'typical', kind: 'truncate', modelled: false, kernels: [] }, // i18n-ignore: sampler name, kept in English per the glossary
   {
-    id: 'top-p', label: 'top-p', kind: 'truncate', modelled: true,
+    id: 'top-p', label: 'top-p', kind: 'truncate', modelled: true, // i18n-ignore: sampler name, kept in English per the glossary
     kernels: [
-      { what: 'softmax of the survivors at T = 1', lab: LAB.softmax },
-      { what: 'scan and keep mask', lab: LAB.topp },
+      { get what() { return tr('softmax of the survivors at T = 1', 'softmax của các ứng viên còn lại ở T = 1'); }, lab: LAB.softmax },
+      { get what() { return tr('scan and keep mask', 'scan và mặt nạ giữ lại'); }, lab: LAB.topp },
     ],
   },
   {
-    id: 'min-p', label: 'min-p', kind: 'truncate', modelled: true,
-    kernels: [{ what: 'count the prefix at or above max + ln(min-p)', lab: LAB.filters }],
+    id: 'min-p', label: 'min-p', kind: 'truncate', modelled: true, // i18n-ignore: sampler name, kept in English per the glossary
+    kernels: [{ get what() { return tr('count the prefix at or above max + ln(min-p)', 'đếm phần tiền tố lớn hơn hoặc bằng max + ln(min-p)'); }, lab: LAB.filters }],
   },
   { id: 'xtc', label: 'XTC', kind: 'truncate', modelled: false, kernels: [] },
   {
-    id: 'temperature', label: 'temperature', kind: 'reshape', modelled: true,
-    kernels: [{ what: 'divide the survivors by T inside the draw', lab: LAB.m5 }],
+    id: 'temperature', get label() { return tr('temperature', 'nhiệt độ'); }, kind: 'reshape', modelled: true,
+    kernels: [{ get what() { return tr('divide the survivors by T inside the draw', 'chia các ứng viên còn lại cho T bên trong lần rút'); }, lab: LAB.m5 }],
   },
 ];
 export const stage = (id: StageId) => STAGES.find((s) => s.id === id)!;
 
 /** The last step of every chain. */
-export const DRAW: KernelStep = { what: 'Philox u, then an inverse-CDF search over a scan', lab: LAB.m5 };
+export const DRAW: KernelStep = { get what() { return tr('Philox u, then an inverse-CDF search over a scan', 'Philox u, rồi tìm kiếm CDF ngược trên một scan'); }, lab: LAB.m5 };
 /** Temperature at or below 0: no draw, the largest logit wins. */
-export const GREEDY: KernelStep = { what: 'argmax, ties to the lowest id', lab: LAB.softmax };
+export const GREEDY: KernelStep = { get what() { return tr('argmax, ties to the lowest id', 'argmax, hòa thì chọn id nhỏ nhất'); }, lab: LAB.softmax };
 
 /** M5's order, read from STAGES: llama.cpp's default restricted to the stages M5 builds. */
 export const M5_ORDER: ModelledStage[] = STAGES.filter((s) => s.modelled).map((s) => s.id as ModelledStage);
@@ -148,24 +149,24 @@ export interface OrderPreset {
 }
 export const ORDERS: Record<OrderId, OrderPreset> = {
   llama: {
-    id: 'llama', label: 'llama.cpp default',
+    id: 'llama', get label() { return tr('llama.cpp default', 'mặc định của llama.cpp'); },
     order: STAGES.map((s) => s.id),
     topKTies: 'lowest', repRule: 'llama', hasFreqPresence: true, facts: 'x1-facts D1, D2',
   },
   hf: {
-    id: 'hf', label: 'transformers',
+    id: 'hf', label: 'transformers', // i18n-ignore: product name
     order: ['penalties', 'temperature', 'top-k', 'top-p', 'min-p', 'typical'],
     topKTies: 'keep', repRule: 'hf', hasFreqPresence: false, facts: 'x1-facts D4',
   },
   mlx: {
-    id: 'mlx', label: 'mlx-lm',
+    id: 'mlx', label: 'mlx-lm', // i18n-ignore: product name
     order: ['penalties', 'top-p', 'min-p', 'xtc', 'top-k', 'temperature'],
-    topKTies: 'lowest', repRule: 'hf', hasFreqPresence: true, facts: 'x1-facts D8; penalties ch09 D5',
+    topKTies: 'lowest', repRule: 'hf', hasFreqPresence: true, facts: 'x1-facts D8; penalties ch09 D5', // i18n-ignore: citation
   },
   m5: {
-    id: 'm5', label: 'M5 (this course)',
+    id: 'm5', get label() { return tr('M5 (this course)', 'M5 (khóa học này)'); },
     order: [...M5_ORDER],
-    topKTies: 'lowest', repRule: 'llama', hasFreqPresence: true, facts: 'ours: llama.cpp’s order, lowest id on every tie',
+    topKTies: 'lowest', repRule: 'llama', hasFreqPresence: true, get facts() { return tr('ours: llama.cpp’s order, lowest id on every tie', 'của khóa học này: thứ tự của llama.cpp, mọi trường hợp hòa chọn id nhỏ nhất'); },
   },
 };
 export const ORDER_IDS: OrderId[] = ['llama', 'hf', 'mlx', 'm5'];
@@ -417,7 +418,7 @@ const CONTEXT16 = [7, 3, 7, 12, 3, 7, 5, 9];
 export const CHAIN_ROWS: RowPreset[] = [
   {
     id: 'peaked',
-    label: 'one favourite',
+    get label() { return tr('one favourite', 'một token nổi trội'); },
     row: { logits: [0.5, 3.6, 1.2, -0.4, 0.9, 2.1, -1.2, 0.3, 1.5, -0.8, 0.0, 2.6, -2.0, 0.7, -0.5, 1.0], context: CONTEXT16 },
   },
   {
@@ -425,7 +426,7 @@ export const CHAIN_ROWS: RowPreset[] = [
     // question keep clearly different numbers of tokens, with every cumulative mass at
     // least 0.008 away from p = 0.9 at T = 0.5, 1 and 2.
     id: 'tail',
-    label: 'three favourites, long tail',
+    get label() { return tr('three favourites, long tail', 'ba token nổi trội, đuôi dài'); },
     row: { logits: [-0.9, -0.8, -0.9, 2.1, -0.6, -1.3, -0.4, 1.9, 0.8, -1.1, 2.4, -0.5, -0.3, -1.4, -1.1, -0.7], context: CONTEXT16 },
   },
 ];
@@ -452,9 +453,9 @@ export interface TempPreset {
   logits: readonly number[];
 }
 export const TEMP_ROWS: TempPreset[] = [
-  { id: 'peaked', label: 'peaked', logits: [0.5, -0.4, 3.0, 1.2, -1.5, 2.0, 0.1, -0.9, 1.6, -2.2, 0.8, 0.3] },
-  { id: 'flat', label: 'flat', logits: [0.4, 0.1, 0.6, 0.3, 0.5, 0.0, 0.2, 0.7, 0.35, 0.15, 0.45, 0.25] },
-  { id: 'tied', label: 'two tied maxima', logits: [1.0, 2.5, 0.2, -0.5, 2.5, 1.4, 0.0, -1.0, 0.8, 1.9, -0.3, 0.6] },
+  { id: 'peaked', get label() { return tr('peaked', 'nhọn'); }, logits: [0.5, -0.4, 3.0, 1.2, -1.5, 2.0, 0.1, -0.9, 1.6, -2.2, 0.8, 0.3] },
+  { id: 'flat', get label() { return tr('flat', 'phẳng'); }, logits: [0.4, 0.1, 0.6, 0.3, 0.5, 0.0, 0.2, 0.7, 0.35, 0.15, 0.45, 0.25] },
+  { id: 'tied', get label() { return tr('two tied maxima', 'hai cực đại bằng nhau'); }, logits: [1.0, 2.5, 0.2, -0.5, 2.5, 1.4, 0.0, -1.0, 0.8, 1.9, -0.3, 0.6] },
 ];
 /** The pair the X1.2 explorer opens on: logits 3.0 and 2.0 of the peaked row, a difference of exactly 1. */
 export const OPENING_PAIR: [number, number] = [2, 5];

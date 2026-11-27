@@ -155,10 +155,10 @@ export interface Preset {
   m: Matrix;
 }
 export const PRESETS: readonly Preset[] = [
-  { id: 'fig17_1', label: 'Fig. 17.1', source: 'p. 402, the running example', m: FIG17_1 },
-  { id: 'ex1', label: 'Exercise 1', source: 'p. 422', m: EXERCISE1 },
-  { id: 'fig17_13', label: 'Fig. 17.13', source: 'p. 415, two long rows; values ours', m: FIG17_13 },
-  { id: 'fig17_14', label: 'Fig. 17.14', source: 'p. 416, letters; values ours', m: FIG17_14 },
+  { id: 'fig17_1', label: 'Fig. 17.1', source: 'p. 402, the running example', m: FIG17_1 }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
+  { id: 'ex1', label: 'Exercise 1', source: 'p. 422', m: EXERCISE1 }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
+  { id: 'fig17_13', label: 'Fig. 17.13', source: 'p. 415, two long rows; values ours', m: FIG17_13 }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
+  { id: 'fig17_14', label: 'Fig. 17.14', source: 'p. 416, letters; values ours', m: FIG17_14 }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
 ];
 
 // ---------------------------------------------------------------- formats
@@ -223,7 +223,7 @@ export interface CSC {
 export type Format = COO | CSR | ELL | Hybrid | JDS | CSC;
 export type FormatId = Format['kind'];
 export const FORMAT_NAME: Record<FormatId, string> = {
-  coo: 'COO', csr: 'CSR', ell: 'ELL', hyb: 'Hybrid ELL-COO', jds: 'JDS', csc: 'CSC',
+  coo: 'COO', csr: 'CSR', ell: 'ELL', hyb: 'Hybrid ELL-COO', jds: 'JDS', csc: 'CSC', // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
 };
 
 function cooOf(list: readonly Entry[]): COO {
@@ -373,7 +373,7 @@ export function storage(f: Format, m: Matrix): Storage {
     case 'csr': return mk(z, z, m.rows + 1, 0, '2z + m + 1');
     case 'ell': {
       const slots = f.stride * f.width;
-      return mk(slots, slots, f.numRows, slots - z, f.stride === f.numRows ? '2·m·K + m' : '2·stride·K + m');
+      return mk(slots, slots, f.numRows, slots - z, f.stride === f.numRows ? '2·m·K + m' : '2·stride·K + m'); // i18n-ignore: formula
     }
     case 'hyb': {
       const slots = f.ell.stride * f.ell.width;
@@ -442,7 +442,7 @@ function cooLaunch(f: COO, name: string, launch: number): { L: Launch; steps: St
   const n = f.value.length;
   const lanes: Lane[] = f.value.map((v, i) => ({ thread: i, index: i, pad: false, x: f.colIdx[i], y: f.rowIdx[i], atomic: true, v, xi: f.colIdx[i] }));
   return {
-    L: { name, mapping: 'per non-zero', threads: n, array: 'coo', atomic: true, trips: Array(n).fill(1), padTrips: Array(n).fill(0) },
+    L: { name, mapping: 'per non-zero', threads: n, array: 'coo', atomic: true, trips: Array(n).fill(1), padTrips: Array(n).fill(0) }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
     steps: n ? [{ launch, t: 0, array: 'coo', lanes }] : [],
   };
 }
@@ -466,7 +466,7 @@ function ellLaunch(f: ELL, loop: EllLoop, name: string, launch: number): { L: La
     steps.push({ launch, t, array: 'ell', lanes });
   }
   return {
-    L: { name, mapping: 'per row', threads: R, array: 'ell', atomic: false, trips, padTrips: loop === 'full' ? len.map((l) => f.width - l) : Array(R).fill(0) },
+    L: { name, mapping: 'per row', threads: R, array: 'ell', atomic: false, trips, padTrips: loop === 'full' ? len.map((l) => f.width - l) : Array(R).fill(0) }, // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
     steps,
   };
 }
@@ -497,15 +497,15 @@ export function spmvTrace(f: Format, { ellLoop = 'nnzPerRow' }: TraceOptions = {
             return { thread: r, index: i, pad: false, x: f.colIdx[i], y: r, atomic: false, v: f.value[i], xi: f.colIdx[i] };
           }),
         });
-      return { launches: [{ name: 'SpMV/CSR', mapping: 'per row', threads: R, array: 'csr', atomic: false, trips: len, padTrips: Array(R).fill(0) }], steps };
+      return { launches: [{ name: 'SpMV/CSR', mapping: 'per row', threads: R, array: 'csr', atomic: false, trips: len, padTrips: Array(R).fill(0) }], steps }; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
     }
     case 'ell': {
       const { L, steps } = ellLaunch(f, ellLoop, 'SpMV/ELL', 0);
       return { launches: [L], steps };
     }
     case 'hyb': {
-      const a = ellLaunch(f.ell, ellLoop, 'SpMV/ELL part', 0);
-      const b = cooLaunch(f.coo, 'SpMV/COO part', 1);
+      const a = ellLaunch(f.ell, ellLoop, 'SpMV/ELL part', 0); // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
+      const b = cooLaunch(f.coo, 'SpMV/COO part', 1); // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
       return { launches: [a.L, b.L], steps: [...a.steps, ...b.steps] };
     }
     case 'jds': {
@@ -523,7 +523,7 @@ export function spmvTrace(f: Format, { ellLoop = 'nnzPerRow' }: TraceOptions = {
             return { thread: p, index: i, pad: false, x: f.colIdx[i], y: orig, atomic: false, v: f.value[i], xi: f.colIdx[i] };
           }),
         });
-      return { launches: [{ name: 'SpMV/JDS', mapping: 'per sorted row', threads: R, array: 'jds', atomic: false, trips, padTrips: Array(R).fill(0) }], steps };
+      return { launches: [{ name: 'SpMV/JDS', mapping: 'per sorted row', threads: R, array: 'jds', atomic: false, trips, padTrips: Array(R).fill(0) }], steps }; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
     }
     case 'csc': {
       const C = f.colPtrs.length - 1;
@@ -541,7 +541,7 @@ export function spmvTrace(f: Format, { ellLoop = 'nnzPerRow' }: TraceOptions = {
             return { thread: c, index: i, pad: false, x, y: f.rowIdx[i], atomic: true, v: f.value[i], xi: c };
           }),
         });
-      return { launches: [{ name: 'SpMV/CSC', mapping: 'per column', threads: C, array: 'csc', atomic: true, trips: len, padTrips: Array(C).fill(0) }], steps };
+      return { launches: [{ name: 'SpMV/CSC', mapping: 'per column', threads: C, array: 'csc', atomic: true, trips: len, padTrips: Array(C).fill(0) }], steps }; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
     }
   }
 }
@@ -687,7 +687,7 @@ export const floatOutcomes = (terms: readonly number[], start = 0): number[] =>
 /** Fig. 17.1 row 0 with x all ones: the two products thread 0 and thread 1 add into y[0]. */
 export const ROW0_PRODUCTS: readonly [number, number] = [1, 7];
 
-export type RmwOp = 'load' | 'add' | 'store' | 'atomic add';
+export type RmwOp = 'load' | 'add' | 'store' | 'atomic add'; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
 export interface RmwEvent {
   thread: number;
   op: RmwOp;
@@ -706,7 +706,7 @@ export interface RmwState {
 
 export const rmwInit = (y0 = 0, threads = 2): RmwState => ({ y: y0, pc: Array(threads).fill(0), reg: Array(threads).fill(null), events: [] });
 export const rmwDone = (s: RmwState): boolean => s.pc.every((p) => p >= 3);
-export const RMW_NEXT = ['load y', 'add its product', 'store y', 'done'] as const;
+export const RMW_NEXT = ['load y', 'add its product', 'store y', 'done'] as const; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
 
 /**
  * One step of one thread. Without the atomic a step is one of load, add, store; with it
@@ -722,7 +722,7 @@ export function rmwStep(s: RmwState, thread: number, products: readonly number[]
     reg[thread] = f32(y + products[thread]);
     y = reg[thread]!;
     pc[thread] = 3;
-    op = 'atomic add';
+    op = 'atomic add'; // i18n-ignore: identifier also shown to the reader; S172 translates it by this English key
   } else if (pc[thread] === 0) {
     reg[thread] = y;
     pc[thread] = 1;

@@ -26,6 +26,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Parity = 0 | 1;
 
 /** What one thread did in one step. */
@@ -89,8 +91,12 @@ export const isAscending = (xs: number[]) => xs.every((v, k) => k === 0 || xs[k 
 /** 'book': stop after the first step with no swap. 'ours': stop after two quiet steps in a row (one even, one odd, in either order). */
 export type StopRule = 'book' | 'ours';
 export const STOP_LABEL: Record<StopRule, string> = {
-  book: 'after one quiet step (the book, literally)',
-  ours: 'after two quiet steps in a row, one even and one odd (ours)',
+  get book() {
+    return tr('after one quiet step (the book, literally)', 'sau một bước yên lặng (đúng nguyên văn sách)');
+  },
+  get ours() {
+    return tr('after two quiet steps in a row, one even and one odd (ours)', 'sau hai bước yên lặng liên tiếp, một chẵn và một lẻ (của khóa học này)');
+  },
 };
 
 export interface Run {
@@ -190,11 +196,41 @@ export const LARGEST_FIRST = [8, 1, 2, 3, 4, 5, 6, 7];
 export const TRAP = [1, 3, 2, 4, 5, 6, 7, 8];
 
 export const PRESETS: { id: string; label: string; values: number[] }[] = [
-  { id: 'fig', label: 'Fig. 14.1: 4 7 2 3 8 5 9 6', values: FIG_14_1 },
-  { id: 'reversed', label: 'reversed: 9 8 7 6 5 4 3 2', values: [9, 8, 7, 6, 5, 4, 3, 2] },
-  { id: 'sorted', label: 'already sorted', values: [2, 3, 4, 5, 6, 7, 8, 9] },
-  { id: 'largest', label: 'largest first: 8 1 2 3 4 5 6 7', values: LARGEST_FIRST },
-  { id: 'trap', label: 'the trap: 1 3 2 4 5 6 7 8', values: TRAP },
+  {
+    id: 'fig',
+    get label() {
+      return tr('Fig. 14.1: 4 7 2 3 8 5 9 6', 'Hình 14.1: 4 7 2 3 8 5 9 6');
+    },
+    values: FIG_14_1,
+  },
+  {
+    id: 'reversed',
+    get label() {
+      return tr('reversed: 9 8 7 6 5 4 3 2', 'đảo ngược: 9 8 7 6 5 4 3 2');
+    },
+    values: [9, 8, 7, 6, 5, 4, 3, 2],
+  },
+  {
+    id: 'sorted',
+    get label() {
+      return tr('already sorted', 'đã sắp xếp sẵn');
+    },
+    values: [2, 3, 4, 5, 6, 7, 8, 9],
+  },
+  {
+    id: 'largest',
+    get label() {
+      return tr('largest first: 8 1 2 3 4 5 6 7', 'lớn nhất đứng đầu: 8 1 2 3 4 5 6 7');
+    },
+    values: LARGEST_FIRST,
+  },
+  {
+    id: 'trap',
+    get label() {
+      return tr('the trap: 1 3 2 4 5 6 7 8', 'cái bẫy: 1 3 2 4 5 6 7 8');
+    },
+    values: TRAP,
+  },
 ];
 
 /** Reads "4 7 2 3" or "4, 7, 2, 3": up to `max` non-negative integers below 100; null if malformed. */

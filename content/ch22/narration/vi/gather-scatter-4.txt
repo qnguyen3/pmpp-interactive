@@ -1,0 +1,1 @@
+Phép toán nguyên tử làm cho đáp án đúng, nhưng nó không làm các lần cập nhật diễn ra đồng thời. Các lần cập nhật vào một địa chỉ được phục vụ từng lần một, nên ở mỗi đầu ra hình thành một hàng đợi, và mỗi nhịp xử lý xong một lần cập nhật. Ở đây scatter cần 3 nhịp. Gather đã xong cả 6 lần ghi ngay ở nhịp đầu tiên.

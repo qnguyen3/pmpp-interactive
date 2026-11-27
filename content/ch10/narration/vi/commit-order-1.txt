@@ -1,0 +1,1 @@
+Một đầu vào dài được cắt thành các đoạn, mỗi khối một đoạn. Mỗi đoạn chứa gấp hai lần kích thước khối, nên khối b bắt đầu tại hai lần kích thước khối, nhân với b. Với 4 luồng, một đoạn chứa 8 logit. 60 logit cần 8 khối, và khối cuối chỉ đầy một nửa. Các luồng thừa của nó vẫn chạy. Chúng cộng 0.

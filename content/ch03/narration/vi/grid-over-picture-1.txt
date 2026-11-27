@@ -1,0 +1,1 @@
+Đây là một bức ảnh: 62 hàng điểm ảnh, 76 cột. Tức là 4712 điểm ảnh, và ta muốn mỗi điểm ảnh có một luồng. Luồng đi theo khối. Vậy câu hỏi là đặt các khối lên bức ảnh này thế nào, và rồi mỗi luồng tìm ra điểm ảnh của riêng nó ra sao.

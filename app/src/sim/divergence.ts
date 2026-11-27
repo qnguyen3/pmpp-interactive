@@ -40,6 +40,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- programs
 /** `cost` straight-line instructions that every lane executes. */
 export interface OpStmt {
@@ -73,8 +75,12 @@ export interface Program {
 
 export type Order = 'serialised' | 'interleaved';
 export const ORDER_LABEL: Record<Order, string> = {
-  serialised: 'one path to completion, then the other',
-  interleaved: 'interleaved',
+  get serialised() {
+    return tr('one path to completion, then the other', 'chạy hết một đường rồi mới đến đường kia');
+  },
+  get interleaved() {
+    return tr('interleaved', 'xen kẽ');
+  },
 };
 
 /** One instruction issued to the warp: fetched once, executed by the active lanes. */
@@ -233,7 +239,7 @@ export const select = (width: number, costA: number, costB: number, cond = 'cond
     { kind: 'op', label: cond, cost: 1 },
     { kind: 'op', label: 'A', cost: costA },
     { kind: 'op', label: 'B', cost: costB },
-    { kind: 'op', label: 'select', cost: 1 },
+    { kind: 'op', label: 'select', cost: 1 }, // i18n-ignore: pseudo-instruction name, like A, B and C
     { kind: 'op', label: 'C', cost: 1 },
   ],
 });
@@ -336,9 +342,9 @@ export const inputB = (i: number): number => 10 * ((i % 8) + 1);
  * r3 hold something different in every lane.
  */
 export const STRAIGHT_LINE: readonly Instr[] = [
-  { text: 'load r2, a[i]', dst: 'r2', meaning: 'r2 = a[i]', value: (_r, i) => inputA(i) },
-  { text: 'load r3, b[i]', dst: 'r3', meaning: 'r3 = b[i]', value: (_r, i) => inputB(i) },
-  { text: 'add r1, r2, r3', dst: 'r1', meaning: 'r1 = r2 + r3', value: (r) => (r.r2 ?? 0) + (r.r3 ?? 0) },
+  { text: 'load r2, a[i]', dst: 'r2', meaning: 'r2 = a[i]', value: (_r, i) => inputA(i) }, // i18n-ignore: instruction text (code)
+  { text: 'load r3, b[i]', dst: 'r3', meaning: 'r3 = b[i]', value: (_r, i) => inputB(i) }, // i18n-ignore: instruction text (code)
+  { text: 'add r1, r2, r3', dst: 'r1', meaning: 'r1 = r2 + r3', value: (r) => (r.r2 ?? 0) + (r.r3 ?? 0) }, // i18n-ignore: instruction text (code)
 ];
 export const straightLine = (width: number): Program => ({
   width,

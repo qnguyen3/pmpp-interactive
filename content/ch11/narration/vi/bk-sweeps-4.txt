@@ -1,0 +1,1 @@
+Mức 2 làm việc với khoảng cách 2 vị trí. Các vị trí 5, 9 và 13 mỗi vị trí giữ một cặp. Các tổng chúng còn thiếu giờ nằm ở vị trí 3, 7 và 11, vốn đã xong, nên 3 phép cộng cùng lúc hoàn tất chúng. Mỗi mức giảm một nửa khoảng cách và gần như gấp đôi số bộ cộng.

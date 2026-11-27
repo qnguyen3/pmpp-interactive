@@ -1,0 +1,1 @@
+Bước lẻ dịch mọi cặp đi một vị trí. Giờ chỉ 3 luồng có cặp, và hai giá trị ở hai đầu đứng ngoài. [short pause] Xen kẽ hai loại bước là điều cho phép một giá trị vượt qua ranh giới giữa cặp này và cặp kế tiếp.

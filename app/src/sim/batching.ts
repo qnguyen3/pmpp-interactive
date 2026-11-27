@@ -26,7 +26,9 @@
 // no caches, no attention (attention proper does not batch: ch22-facts A6). NVIDIA calls
 // this comparison of intensity with a threshold "a simplified rule of thumb" (A4).
 //
-// Erasable TypeScript only and no imports: the browser checks import this file directly.
+// Erasable TypeScript only, importing only lib/locale.ts: the browser checks import this file directly.
+
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- devices
 export interface Device {
@@ -115,9 +117,15 @@ export const M8_DEFAULT: StepShape = { kind: 'step', d: 4096, layers: 2, vocab: 
 
 /** What lab 22.2 calls each GEMM a step can use, and where it comes from. */
 export const M8_GEMMS: Record<string, string> = {
-  m2: "M2 (lab 6.4's tiled kernel)",
-  m3: "M3 (lab 15.6's register-tiled kernel)",
-  gemv: "lab 22.1's gather (batches up to 8)",
+  get m2() {
+    return tr("M2 (lab 6.4's tiled kernel)", 'M2 (kernel phân ô của lab 6.4)');
+  },
+  get m3() {
+    return tr("M3 (lab 15.6's register-tiled kernel)", 'M3 (kernel phân ô thanh ghi của lab 15.6)');
+  },
+  get gemv() {
+    return tr("lab 22.1's gather (batches up to 8)", 'phép gather của lab 22.1 (batch tối đa 8)');
+  },
 };
 /** A 4096 → 4096 float projection: the section's worked example. */
 export const PROJ_4096: ProjShape = { kind: 'proj', k: 4096, n: 4096 };
@@ -207,12 +215,12 @@ export const SOFTMAX_OPS = 5;
 // ---------------------------------------------------------------- the decode step
 export type PieceKey = 'proj' | 'head' | 'rowwise' | 'softmax' | 'argmax' | 'embed';
 export const PIECES: { key: PieceKey; label: string; perRow: boolean }[] = [
-  { key: 'proj', label: 'layer projections', perRow: false },
-  { key: 'head', label: 'LM head', perRow: false },
-  { key: 'rowwise', label: 'bias and residual adds', perRow: true },
-  { key: 'softmax', label: 'softmax over the vocabulary', perRow: true },
-  { key: 'argmax', label: 'argmax', perRow: true },
-  { key: 'embed', label: 'embedding lookup', perRow: true },
+  { key: 'proj', get label() { return tr('layer projections', 'các phép chiếu của lớp'); }, perRow: false },
+  { key: 'head', get label() { return tr('LM head', 'LM head'); }, perRow: false },
+  { key: 'rowwise', get label() { return tr('bias and residual adds', 'cộng bias và residual'); }, perRow: true },
+  { key: 'softmax', get label() { return tr('softmax over the vocabulary', 'softmax trên từ vựng'); }, perRow: true },
+  { key: 'argmax', get label() { return tr('argmax', 'argmax'); }, perRow: true },
+  { key: 'embed', get label() { return tr('embedding lookup', 'tra cứu embedding'); }, perRow: true },
 ];
 
 export interface Kernel {
@@ -414,7 +422,7 @@ export function kneeOf(rows: Point[], factor = 1.5): number | null {
 
 // ---------------------------------------------------------------- reading the reader's reports
 // The shapes of reports/runs/<backend>.json that this file needs (lib/reports.ts has the
-// full types; this file stays import-free).
+// full types; this file imports only lib/locale.ts).
 export interface RowLike {
   name: string;
   [k: string]: string | number;
@@ -488,7 +496,7 @@ export function stepSeries(reports: ReportsLike, backend: string): Series[] {
       if (!batch || !s) return [];
       return [{ kernel: String(r.gemm ?? r.kernel ?? 'gemm'), batch, seconds: s }];
     });
-  return group(backend, rows, (k) => `lab 22.2, ${M8_GEMMS[k] ?? k}`, 'm8');
+  return group(backend, rows, (k) => tr(`lab 22.2, ${M8_GEMMS[k] ?? k}`, `lab 22.2, ${M8_GEMMS[k] ?? k}`), 'm8');
 }
 
 /** Lab 5.3's 'linear_layer' rows and lab 15.6's kernel rows for a K → N layer, one series per kernel. */
@@ -501,8 +509,8 @@ export function projectionSeries(reports: ReportsLike, backend: string, K: numbe
     .filter((r) => numOf(r.in) === K && numOf(r.out) === N && typeof r.kernel === 'string')
     .flatMap((r) => (numOf(r.batch) && seconds(r) ? [{ kernel: String(r.kernel), batch: numOf(r.batch)!, seconds: seconds(r)! }] : []));
   return [
-    ...group(backend, l53, () => 'lab 5.3, tiled (M2)', 'l53'),
-    ...group(backend, l156, (k) => `lab 15.6, ${k === 'vendor' ? 'vendor library' : k.toUpperCase()}`, 'l156'),
+    ...group(backend, l53, () => tr('lab 5.3, tiled (M2)', 'lab 5.3, phân ô (M2)'), 'l53'),
+    ...group(backend, l156, (k) => tr(`lab 15.6, ${k === 'vendor' ? 'vendor library' : k.toUpperCase()}`, `lab 15.6, ${k === 'vendor' ? 'thư viện của hãng' : k.toUpperCase()}`), 'l156'),
   ];
 }
 

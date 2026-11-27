@@ -11,6 +11,8 @@
 // does it in ch03-facts D2): a row-major M x N array read column-major is the N x M
 // transpose, so C = A·B is computed as Cᵀ = Bᵀ·Aᵀ with B passed first.
 
+import { tr } from '../lib/locale.ts';
+
 export type OpId = 'book' | 'linear' | 'xw' | 'qkt' | 'pv';
 export type Role = 'A' | 'B' | 'C';
 export type Trans = 'N' | 'T';
@@ -33,29 +35,59 @@ export interface Operation {
 
 export const OPERATIONS: readonly Operation[] = [
   {
-    id: 'book', label: "The book's C = A × B", formula: 'C = A × B',
+    id: 'book',
+    get label() {
+      return tr("The book's C = A × B", 'C = A × B của sách');
+    },
+    formula: 'C = A × B',
     dims: { M: 'M', N: 'N', K: 'K' }, names: { A: 'A', B: 'B', C: 'C' }, bStoredNK: false,
-    note: 'Both inputs row-major, as the chapter assumes (p. 350).',
+    get note() {
+      return tr('Both inputs row-major, as the chapter assumes (p. 350).', 'Cả hai đầu vào theo thứ tự hàng, như chương này giả định (p. 350).');
+    },
   },
   {
-    id: 'linear', label: 'nn.Linear, W stored (out, in)', formula: 'y = x Wᵀ',
+    id: 'linear',
+    get label() {
+      return tr('nn.Linear, W stored (out, in)', 'nn.Linear, W lưu dạng (out, in)');
+    },
+    formula: 'y = x Wᵀ',
     dims: { M: 'batch', N: 'out', K: 'in' }, names: { A: 'x', B: 'W', C: 'y' }, bStoredNK: true,
-    note: "PyTorch's weight has shape (out_features, in_features); ggml stores it the same way (ch03-facts D2, D6).",
+    get note() {
+      return tr("PyTorch's weight has shape (out_features, in_features); ggml stores it the same way (ch03-facts D2, D6).", 'Trọng số của PyTorch có hình dạng (out_features, in_features); ggml lưu nó theo cùng cách (ch03-facts D2, D6).');
+    },
   },
   {
-    id: 'xw', label: 'x @ W, W stored (in, out)', formula: 'y = x W',
+    id: 'xw',
+    get label() {
+      return tr('x @ W, W stored (in, out)', 'x @ W, W lưu dạng (in, out)');
+    },
+    formula: 'y = x W',
     dims: { M: 'batch', N: 'out', K: 'in' }, names: { A: 'x', B: 'W', C: 'y' }, bStoredNK: false,
-    note: 'A weight kept with one input feature per row: exactly the book\'s layout.',
+    get note() {
+      return tr('A weight kept with one input feature per row: exactly the book\'s layout.', 'Ma trận trọng số được lưu mỗi hàng một đặc trưng đầu vào: đúng cách bố trí của sách.');
+    },
   },
   {
-    id: 'qkt', label: 'Attention scores Q Kᵀ', formula: 'S = Q Kᵀ',
+    id: 'qkt',
+    get label() {
+      return tr('Attention scores Q Kᵀ', 'Điểm attention Q Kᵀ');
+    },
+    formula: 'S = Q Kᵀ',
     dims: { M: 'n_q', N: 'n_kv', K: 'd' }, names: { A: 'Q', B: 'K', C: 'S' }, bStoredNK: true,
-    note: 'Q and K both hold one token per row, d values long.',
+    get note() {
+      return tr('Q and K both hold one token per row, d values long.', 'Q và K đều giữ mỗi hàng một token, dài d giá trị.');
+    },
   },
   {
-    id: 'pv', label: 'Attention output P V', formula: 'O = P V',
+    id: 'pv',
+    get label() {
+      return tr('Attention output P V', 'Đầu ra attention P V');
+    },
+    formula: 'O = P V',
     dims: { M: 'n_q', N: 'd', K: 'n_kv' }, names: { A: 'P', B: 'V', C: 'O' }, bStoredNK: false,
-    note: 'P has one row of weights per query; V one row per key.',
+    get note() {
+      return tr('P has one row of weights per query; V one row per key.', 'P có mỗi truy vấn một hàng trọng số; V mỗi key một hàng.');
+    },
   },
 ];
 
@@ -150,9 +182,15 @@ export function blasCall(map: Mapping): BlasCall {
 
 export type BlasEdit = 'swap' | 'flipTransa' | 'mnBook';
 export const BLAS_EDITS: Record<BlasEdit, string> = {
-  swap: 'swap the two input pointers',
-  flipTransa: 'flip transa',
-  mnBook: 'pass m, n in the book\'s order (M, N)',
+  get swap() {
+    return tr('swap the two input pointers', 'đổi chỗ hai con trỏ đầu vào');
+  },
+  get flipTransa() {
+    return tr('flip transa', 'lật transa');
+  },
+  get mnBook() {
+    return tr('pass m, n in the book\'s order (M, N)', 'truyền m, n theo thứ tự của sách (M, N)');
+  },
 };
 
 /** The call with the reader's edits applied. Leading dimensions stay as they were. */

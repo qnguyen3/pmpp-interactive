@@ -1,0 +1,1 @@
+Vậy hãy nạp mỗi phần tử một lần, rồi đặt nó ở nơi cả khối đều với tới được: bộ nhớ chia sẻ. Bộ nhớ chia sẻ nhỏ, nên khối không thể giữ trọn các hàng và các cột của mình. Nó lấy chúng từng ô một.

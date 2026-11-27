@@ -42,6 +42,8 @@
 // Erasable TypeScript only, and no value imports: the browser checks import this file
 // directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- configuration
 export type StartOrder = 'index' | 'reversed' | 'shuffle';
 export type BlockIndex = 'hardware' | 'counter';
@@ -49,22 +51,40 @@ export type Scheme = 'barrier' | 'single' | 'decoupled';
 export type Progress = 'started' | 'none';
 
 export const ORDER_LABEL: Record<StartOrder, string> = {
-  index: 'index order',
-  reversed: 'reversed',
-  shuffle: 'seeded shuffle',
+  get index() {
+    return tr('index order', 'thứ tự chỉ số');
+  },
+  get reversed() {
+    return tr('reversed', 'đảo ngược');
+  },
+  get shuffle() {
+    return tr('seeded shuffle', 'xáo trộn có seed');
+  },
 };
 export const INDEX_LABEL: Record<BlockIndex, string> = {
   hardware: 'blockIdx.x',
-  counter: 'claimed from a counter',
+  get counter() {
+    return tr('claimed from a counter', 'lấy từ một bộ đếm');
+  },
 };
 export const SCHEME_LABEL: Record<Scheme, string> = {
-  barrier: 'grid-wide barrier',
-  single: 'single lookback',
-  decoupled: 'decoupled lookback',
+  get barrier() {
+    return tr('grid-wide barrier', 'rào chắn toàn lưới');
+  },
+  get single() {
+    return tr('single lookback', 'lookback đơn');
+  },
+  get decoupled() {
+    return tr('decoupled lookback', 'lookback tách rời (decoupled)');
+  },
 };
 export const PROGRESS_LABEL: Record<Progress, string> = {
-  started: 'a started block keeps progressing (CUDA)',
-  none: 'no guarantee (Metal)',
+  get started() {
+    return tr('a started block keeps progressing (CUDA)', 'một khối đã bắt đầu sẽ tiếp tục tiến triển (CUDA)');
+  },
+  get none() {
+    return tr('no guarantee (Metal)', 'không có bảo đảm (Metal)');
+  },
 };
 
 export interface LookbackConfig {
@@ -129,13 +149,27 @@ export function localRounds(G: number, seed: number, even = false): number[] {
 /** What a block does in a round. "spin" is waiting on a flag or at a barrier; "starved" is resident but not run. */
 export type Phase = 'local' | 'look' | 'spin' | 'barrier' | 'scan' | 'finish' | 'starved';
 export const PHASE_LABEL: Record<Phase, string> = {
-  local: 'scanning its segment',
-  look: 'looking back, adding',
-  spin: 'spinning on a flag',
-  barrier: 'waiting at the barrier',
-  scan: 'scanning the block sums',
-  finish: 'adding and storing',
-  starved: 'resident, not run',
+  get local() {
+    return tr('scanning its segment', 'đang scan đoạn của nó');
+  },
+  get look() {
+    return tr('looking back, adding', 'đang nhìn lại, cộng dồn');
+  },
+  get spin() {
+    return tr('spinning on a flag', 'đang quay chờ một cờ');
+  },
+  get barrier() {
+    return tr('waiting at the barrier', 'đang chờ ở rào chắn');
+  },
+  get scan() {
+    return tr('scanning the block sums', 'đang scan các tổng của khối');
+  },
+  get finish() {
+    return tr('adding and storing', 'đang cộng và lưu');
+  },
+  get starved() {
+    return tr('resident, not run', 'thường trú, không được chạy');
+  },
 };
 export interface Span {
   from: number;
@@ -210,12 +244,15 @@ export function simulate(config: LookbackConfig): LookbackRun {
   const base = { config, dispatch, local, blocks, events: [] as Event[], time: 0, criticalPath: 0, additions: 0, repeated: 0, waitTotal: 0, stuck: [] };
 
   if (scheme === 'barrier' && progress === 'none')
-    return { ...base, outcome: 'refused', refused: 'A grid-wide barrier needs a cooperative launch. Under this rule there is none: Metal has no grid barrier.' };
+    return { ...base, outcome: 'refused', refused: tr('A grid-wide barrier needs a cooperative launch. Under this rule there is none: Metal has no grid barrier.', 'Một rào chắn toàn lưới cần một lần khởi chạy cooperative. Theo quy tắc này thì không có: Metal không có rào chắn lưới.') };
   if (scheme === 'barrier' && G > R)
     return {
       ...base,
       outcome: 'refused',
-      refused: `A grid-wide barrier needs every block resident at once: ${G} blocks do not fit in ${R} slots, so the cooperative launch is refused.`,
+      refused: tr(
+        `A grid-wide barrier needs every block resident at once: ${G} blocks do not fit in ${R} slots, so the cooperative launch is refused.`,
+        `Một rào chắn toàn lưới cần mọi khối cùng thường trú một lúc: ${G} khối không vừa ${R} chỗ, nên lần khởi chạy cooperative bị từ chối.`,
+      ),
     };
 
   const st: State[] = Array.from({ length: G }, () => ({ status: 'queued', idx: null, phase: 'local', remaining: 0, lookPos: -1 }));
@@ -484,50 +521,59 @@ export interface MessagePassing {
   reader: string[];
 }
 
-const ORDER_NAME = (o: string) => `cuda::memory_order_${o}`;
+const ORDER_NAME = (o: string) => `cuda::memory_order_${o}`; // i18n-ignore: CUDA code
 export function messagePassing(store: StoreOrder, load: LoadOrder, scope: Scope): MessagePassing {
   const ref = `cuda::atomic_ref<unsigned int, cuda::thread_scope_${scope}>`;
   const writer = [
     `partialSums[bid] = prev + blockSum;          // plain store`,
-    `${ref} f(flags[bid]);`,
-    `f.store(1, ${ORDER_NAME(store)});`,
+    `${ref} f(flags[bid]);`, // i18n-ignore: CUDA code
+    `f.store(1, ${ORDER_NAME(store)});`, // i18n-ignore: CUDA code
   ];
   const reader = [
-    `${ref} f(flags[bid - 1]);`,
+    `${ref} f(flags[bid - 1]);`, // i18n-ignore: CUDA code
     `while (f.load(${ORDER_NAME(load)}) == 0) {}`,
     `prev = partialSums[bid - 1];                 // plain load`,
   ];
   if (scope === 'block')
     return {
-      verdict: 'scope',
-      title: 'Undefined: a block-scope atomic used across blocks',
+      verdict: 'scope', // i18n-ignore: verdict identifier
+      title: tr('Undefined: a block-scope atomic used across blocks', 'Không xác định: một atomic phạm vi khối được dùng giữa các khối'),
       why:
-        'A block-scope atomic orders accesses only among the threads of one block. The flag is written by one block and read by another, so even the flag accesses race. NVIDIA marks the variant with block scope on the store "UB: data race"; block scope on the load as well is no better.',
-      source: 'NVIDIA memory model, message-passing example (facts A5); ch09 A2',
+        tr(
+          'A block-scope atomic orders accesses only among the threads of one block. The flag is written by one block and read by another, so even the flag accesses race. NVIDIA marks the variant with block scope on the store "UB: data race"; block scope on the load as well is no better.',
+          'Một atomic phạm vi khối chỉ sắp thứ tự các truy cập giữa các luồng của một khối. Cờ được một khối ghi và một khối khác đọc, nên ngay cả các truy cập cờ cũng tranh chấp. NVIDIA đánh dấu biến thể có phạm vi khối ở phép store là "UB: data race"; thêm phạm vi khối ở phép load cũng không khá hơn.',
+        ),
+      source: tr('NVIDIA memory model, message-passing example (facts A5); ch09 A2', 'Mô hình bộ nhớ NVIDIA, ví dụ message-passing (facts A5); ch09 A2'),
       writer,
       reader,
     };
   if (store === 'release' && load === 'acquire')
     return {
-      verdict: 'guaranteed',
-      title: 'Guaranteed to see the sum',
+      verdict: 'guaranteed', // i18n-ignore: verdict identifier
+      title: tr('Guaranteed to see the sum', 'Bảo đảm thấy được tổng'),
       why:
-        'The release store cannot be moved before the plain store of the sum, and the acquire load cannot be moved after the plain load. A reader that sees the flag set therefore sees the sum. This is NVIDIA\'s message-passing example with partialSums in the role of x.',
-      source: 'NVIDIA memory model, message-passing example (facts A5); book pp. 278-279',
+        tr(
+          'The release store cannot be moved before the plain store of the sum, and the acquire load cannot be moved after the plain load. A reader that sees the flag set therefore sees the sum. This is NVIDIA\'s message-passing example with partialSums in the role of x.',
+          'Phép store release không thể bị dời lên trước phép store thường của tổng, và phép load acquire không thể bị dời xuống sau phép load thường. Vì vậy một bên đọc thấy cờ đã bật thì cũng thấy tổng. Đây là ví dụ message-passing của NVIDIA với partialSums đóng vai x.',
+        ),
+      source: tr('NVIDIA memory model, message-passing example (facts A5); book pp. 278-279', 'Mô hình bộ nhớ NVIDIA, ví dụ message-passing (facts A5); sách pp. 278-279'),
       writer,
       reader,
     };
   const which =
     store === 'relaxed' && load === 'relaxed'
-      ? 'Neither side orders the plain accesses'
+      ? tr('Neither side orders the plain accesses', 'Không bên nào sắp thứ tự các truy cập thường')
       : store === 'relaxed'
-        ? 'The writer\'s relaxed store lets the flag become visible before the sum'
-        : 'The reader\'s relaxed load lets the load of the sum be moved before the flag check';
+        ? tr('The writer\'s relaxed store lets the flag become visible before the sum', 'Phép store relaxed của bên ghi để cờ hiện ra trước tổng')
+        : tr('The reader\'s relaxed load lets the load of the sum be moved before the flag check', 'Phép load relaxed của bên đọc để phép load tổng bị dời lên trước lần kiểm tra cờ');
   return {
     verdict: 'race',
-    title: 'Data race on partialSums: undefined, in practice possibly a stale sum',
-    why: `${which}. The two blocks' accesses to partialSums are then not ordered, which is a data race: undefined behaviour, and on real hardware the reader can get the old value.`,
-    source: 'book p. 279 (acquire on the read, release on the write); NVIDIA memory model (facts A5)',
+    title: tr('Data race on partialSums: undefined, in practice possibly a stale sum', 'Race condition (tranh chấp dữ liệu) trên partialSums: không xác định, trong thực tế có thể là một tổng cũ'),
+    why: tr(
+      `${which}. The two blocks' accesses to partialSums are then not ordered, which is a data race: undefined behaviour, and on real hardware the reader can get the old value.`,
+      `${which}. Khi đó các truy cập của hai khối vào partialSums không được sắp thứ tự, tức là một race condition: hành vi không xác định, và trên phần cứng thật bên đọc có thể nhận giá trị cũ.`,
+    ),
+    source: tr('book p. 279 (acquire on the read, release on the write); NVIDIA memory model (facts A5)', 'sách p. 279 (acquire khi đọc, release khi ghi); mô hình bộ nhớ NVIDIA (facts A5)'),
     writer,
     reader,
   };
@@ -544,6 +590,6 @@ export const MP_TABLE: { store: StoreOrder; load: LoadOrder; scope: Scope; verdi
 
 /** What the MSL spelling still needs, and why it is not enough (facts C3, C4, C5). */
 export const METAL_NOTES = [
-  'partialSums must be declared coherent(device): by default device memory is only threadgroup-coherent (MSL 3.2 and later).',
-  'There is no sleep for the spin, and no documented forward progress between threadgroups: the single-pass scan is still unsafe on Metal.',
+  'partialSums must be declared coherent(device): by default device memory is only threadgroup-coherent (MSL 3.2 and later).', // i18n-ignore: a module-level array cannot hold getters without changing its English tokens; consumer fix needed in S119
+  'There is no sleep for the spin, and no documented forward progress between threadgroups: the single-pass scan is still unsafe on Metal.', // i18n-ignore: a module-level array cannot hold getters without changing its English tokens; consumer fix needed in S119
 ];

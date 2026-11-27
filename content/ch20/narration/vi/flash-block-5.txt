@@ -1,0 +1,1 @@
+Một rào chắn khối thứ hai, và ô tiếp theo được phép ghi đè các mảng chia sẻ. Khối lặp lại việc này cho mọi ô. Với dải này, ô 2 nằm hoàn toàn phía trên đường chéo: mọi điểm số đều bị che, và nó không đóng góp gì. FlashAttention 2 sẽ bỏ qua nó. Kernel của sách vẫn tính nó.

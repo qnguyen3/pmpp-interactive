@@ -1,6 +1,7 @@
-import type { ReactNode } from 'react';
+import { useMemo, type ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { SCENE, sceneRuns, type ChainFrame, type ChainPhase, type ChainRun } from '../../sim/inplace';
+import { Translated, tr, useLocale } from '../../lib/i18n';
 
 // "The scan chain orders the blocks" (section 12.7). Twelve keys of Fig. 12.10's pattern,
 // three blocks of four, two resident slots, the hardware starting blockIdx 2, 1, 0. Six
@@ -30,12 +31,12 @@ const cx = (slot: number) => AX + slot * CW + CW / 2;
 
 const PHASE_SHORT: Record<ChainPhase, string> = {
   queued: '',
-  index: 'take',
-  read: 'read',
-  scan: 'count',
-  wait: 'wait',
-  publish: 'flag',
-  write: 'write',
+  get index() { return tr('take', 'lấy'); },
+  get read() { return tr('read', 'đọc'); },
+  get scan() { return tr('count', 'đếm'); },
+  get wait() { return tr('wait', 'chờ'); },
+  get publish() { return tr('flag', 'cờ'); },
+  get write() { return tr('write', 'ghi'); },
   done: '',
 };
 
@@ -52,7 +53,7 @@ function ArrayRow({ y, values, label, keepMarks, read, brackets, numbered, label
             <g key={b}>
               <line x1={AX + b * K * CW + 2} x2={AX + (b + 1) * K * CW - 4} y1={y - 6} y2={y - 6} stroke="var(--ink-2)" />
               <text x={AX + b * K * CW + (K * CW) / 2} y={y - 10} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-                {numbered ? `number ${b}'s range` : `block ${b}`}
+                {numbered ? tr(`number ${b}'s range`, `vùng của số ${b}`) : tr(`block ${b}`, `khối ${b}`)}
               </text>
             </g>
           ))
@@ -79,10 +80,10 @@ function Arrows({ show }: { show: number }) {
   return (
     <g>
       <defs>
-        <marker id="sc-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <marker id="sc-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute */}
           <path d="M0,0 L10,5 L0,10 z" style={{ fill: 'var(--ink-2)' }} />
         </marker>
-        <marker id="sc-arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <marker id="sc-arrow-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute */}
           <path d="M0,0 L10,5 L0,10 z" style={{ fill: 'var(--fail)' }} />
         </marker>
       </defs>
@@ -136,10 +137,10 @@ function Gantt({ run, upto, x0 = GX, y0 = GY, col = GC, title, showFlags = true,
               );
             })}
             {stuck && stuckNote && b.phase === 'wait' ? (
-              <text x={x0 + frames.length * col + 4} y={y + 18} fontSize="10.5" style={{ fill: 'var(--fail)' }}>spins on #{b.waitsOn}</text>
+              <text x={x0 + frames.length * col + 4} y={y + 18} fontSize="10.5" style={{ fill: 'var(--fail)' }}>{tr('spins on #', 'quay chờ #')}{b.waitsOn}</text>
             ) : null}
             {stuck && stuckNote && b.phase === 'queued' ? (
-              <text x={x0 + frames.length * col + 4} y={y + 18} fontSize="10.5" style={{ fill: 'var(--fail)' }}>no slot: never starts</text>
+              <text x={x0 + frames.length * col + 4} y={y + 18} fontSize="10.5" style={{ fill: 'var(--fail)' }}>{tr('no slot: never starts', 'không có chỗ: không bao giờ bắt đầu')}</text>
             ) : null}
           </g>
         );
@@ -159,9 +160,9 @@ function Gantt({ run, upto, x0 = GX, y0 = GY, col = GC, title, showFlags = true,
           })
         : null}
       <text x={x0} y={y0 + NB * GR + 12} fontSize="10" style={{ fill: 'var(--ink-2)' }}>
-        step {cur.step}
-        {run === RUNS.dynamic ? ` · counter ${cur.counter}` : ''}
-        {upto === run.frames.length - 1 ? (run.outcome === 'finished' ? ' · finished' : compact ? ' · starved' : ' · starved: nothing can change any more') : ''}
+        {tr('step', 'bước')} {cur.step}
+        {run === RUNS.dynamic ? tr(` · counter ${cur.counter}`, ` · bộ đếm ${cur.counter}`) : ''}
+        {upto === run.frames.length - 1 ? (run.outcome === 'finished' ? tr(' · finished', ' · hoàn tất') : compact ? tr(' · starved', ' · bị bỏ đói') : tr(' · starved: nothing can change any more', ' · bị bỏ đói: không gì có thể thay đổi nữa')) : ''}
       </text>
     </g>
   );
@@ -170,14 +171,14 @@ function Gantt({ run, upto, x0 = GX, y0 = GY, col = GC, title, showFlags = true,
 function Slots({ frame, x = 520, y = 196 }: { frame: ChainFrame; x?: number; y?: number }) {
   return (
     <g data-part="slots">
-      <text x={x} y={y - 12} fontSize="11.5" fontWeight="600">resident slots ({SCENE.slots})</text>
+      <text x={x} y={y - 12} fontSize="11.5" fontWeight="600">{tr('resident slots', 'chỗ thường trú')} ({SCENE.slots})</text>
       {Array.from({ length: SCENE.slots }, (_, s) => {
         const b = frame.blocks.find((x) => x.slot === s);
         return (
           <g key={s} data-slot-holder={b ? b.hw : ''}>
             <rect x={x} y={y + s * 34} width={170} height={26} rx="3" fill="var(--cell)" stroke="var(--ink-2)" />
             <text x={x + 8} y={y + s * 34 + 17} fontSize="11">
-              {b ? `blockIdx ${b.hw} as #${b.num}` : 'free'}
+              {b ? tr(`blockIdx ${b.hw} as #${b.num}`, `blockIdx ${b.hw} là #${b.num}`) : tr('free', 'trống')}
             </text>
           </g>
         );
@@ -188,9 +189,9 @@ function Slots({ frame, x = 520, y = 196 }: { frame: ChainFrame; x?: number; y?:
 
 function Stage({ children, headline }: { children: ReactNode; headline?: ReactNode }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Animation of three blocks filtering one array in place" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Animation of three blocks filtering one array in place', 'Hoạt cảnh ba khối lọc tại chỗ một mảng')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <defs>
-        <marker id="sc-flag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+        <marker id="sc-flag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute */}
           <path d="M0,0 L10,5 L0,10 z" style={{ fill: 'var(--ink)' }} />
         </marker>
       </defs>
@@ -209,20 +210,24 @@ const readBy = (f: ChainFrame) => {
   return out;
 };
 
+// RUNS is built once at import, so its event text is in the language of that moment; Running rebuilds
+// the runs (cheap: twelve keys) when the language changes and reads the events from those.
 function Running({ run, a, b, p, headline }: { run: ChainRun; a: number; b: number; p: number; headline: (f: ChainFrame, k: number) => ReactNode }) {
   const k = frameAt(run, a, b, p);
   const f = run.frames[k];
+  const locale = useLocale();
+  const live = useMemo(() => sceneRuns(), [locale]);
   return (
     <Stage headline={headline(f, k)}>
-      <ArrayRow y={ROW_BEFORE} values={f.array} label="the array, as it is now (a dot: its key has been read)" keepMarks brackets numbered read={readBy(f)}
+      <ArrayRow y={ROW_BEFORE} values={f.array} label={tr('the array, as it is now (a dot: its key has been read)', 'mảng, như hiện tại (dấu chấm: khóa của ô đó đã được đọc)')} keepMarks brackets numbered read={readBy(f)}
         dimFrom={k === run.frames.length - 1 && run.outcome === 'finished' ? OV.count : undefined} />
       {k === run.frames.length - 1 && run.outcome === 'finished' ? (
-        <text x={AX + OV.count * CW + 2} y={ROW_BEFORE + 46} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>left over: past the output</text>
+        <text x={AX + OV.count * CW + 2} y={ROW_BEFORE + 46} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>{tr('left over: past the output', 'phần còn sót: nằm sau đầu ra')}</text>
       ) : null}
-      <Gantt run={run} upto={k} title={run === RUNS.dynamic ? 'numbers from a counter' : 'numbers from blockIdx'} />
+      <Gantt run={run} upto={k} title={run === RUNS.dynamic ? tr('numbers from a counter', 'số lấy từ một bộ đếm') : tr('numbers from blockIdx', 'số lấy từ blockIdx')} />
       <Slots frame={f} />
       <text x={AX} y={118} fontSize="11" data-events="" style={{ fill: 'var(--ink-2)' }}>
-        {f.events.join('; ')}
+        {(run === RUNS.dynamic ? live.dynamic : live.blockIdx).frames[k].events.join('; ')}
       </text>
     </Stage>
   );
@@ -237,76 +242,78 @@ const badWrites = OV.writes.filter((w) => w.kind === 'earlier').length;
 const beats: Beat[] = [
   {
     clip: 'scan-chain-1',
-    label: 'Who overwrites whom',
+    get label() { return tr('Who overwrites whom', 'Ai ghi đè lên ai'); },
     draw: (p) => (
-      <Stage headline={p > 0.75 ? `${badWrites} of ${OV.writes.length} writes land where an earlier block still has to read` : 'one array, three blocks, filtered in place'}>
-        <ArrayRow y={ROW_BEFORE} values={OV.before} label="the array before" keepMarks brackets />
-        <ArrayRow y={ROW_AFTER} values={OV.after.map((v, s) => (p > 0.6 && s < OV.count ? v : null))} label="the same array after" labelBelow />
+      <Stage headline={p > 0.75 ? tr(`${badWrites} of ${OV.writes.length} writes land where an earlier block still has to read`, `${badWrites} trong ${OV.writes.length} lần ghi rơi vào chỗ một khối trước đó vẫn còn phải đọc`) : tr('one array, three blocks, filtered in place', 'một mảng, ba khối, lọc tại chỗ')}>
+        <ArrayRow y={ROW_BEFORE} values={OV.before} label={tr('the array before', 'mảng trước khi lọc')} keepMarks brackets />
+        <ArrayRow y={ROW_AFTER} values={OV.after.map((v, s) => (p > 0.6 && s < OV.count ? v : null))} label={tr('the same array after', 'cùng mảng đó sau khi lọc')} labelBelow />
         <Arrows show={ramp(p, 0.08, 0.6)} />
         <g opacity={ramp(p, 0.7, 0.9)} data-part="red-list">
           {OV.writes.filter((w) => w.kind === 'earlier').map((w, k) => (
             <text key={w.key} x={AX} y={212 + k * 20} fontSize="11.5">
-              k{w.key} (block {w.writer}) → slot {w.to}, over k{w.victim}: block {w.reader} must read k{w.victim} first
+              <Translated vi={<>k{w.key} (khối {w.writer}) → ô {w.to}, đè lên k{w.victim}: khối {w.reader} phải đọc k{w.victim} trước</>}>
+                k{w.key} (block {w.writer}) → slot {w.to}, over k{w.victim}: block {w.reader} must read k{w.victim} first
+              </Translated>
             </text>
           ))}
         </g>
         <g opacity={ramp(p, 0.62, 0.8)}>
-          <text x={AX + N * CW + 14} y={ROW_BEFORE + 60} fontSize="11.5" style={{ fill: 'var(--fail)' }} data-bad={badWrites}>red: lands in an</text>
-          <text x={AX + N * CW + 14} y={ROW_BEFORE + 75} fontSize="11.5" style={{ fill: 'var(--fail)' }}>earlier block's range</text>
+          <text x={AX + N * CW + 14} y={ROW_BEFORE + 60} fontSize="11.5" style={{ fill: 'var(--fail)' }} data-bad={badWrites}>{tr('red: lands in an', 'đỏ: rơi vào vùng')}</text>
+          <text x={AX + N * CW + 14} y={ROW_BEFORE + 75} fontSize="11.5" style={{ fill: 'var(--fail)' }}>{tr("earlier block's range", 'của một khối trước đó')}</text>
         </g>
       </Stage>
     ),
   },
   {
     clip: 'scan-chain-2',
-    label: 'Numbers from a counter',
+    get label() { return tr('Numbers from a counter', 'Số lấy từ một bộ đếm'); },
     draw: (p) => (
       <Running run={D} a={0} b={1} p={p}
-        headline={(f) => (f.step === 0 ? 'nothing has started' : 'the first block to start gets number 0, whatever its blockIdx')} />
+        headline={(f) => (f.step === 0 ? tr('nothing has started', 'chưa có gì bắt đầu') : tr('the first block to start gets number 0, whatever its blockIdx', 'khối bắt đầu đầu tiên nhận số 0, bất kể blockIdx của nó'))} />
     ),
   },
   {
     clip: 'scan-chain-3',
-    label: 'Publish and wait',
+    get label() { return tr('Publish and wait', 'Công bố và chờ'); },
     draw: (p) => (
       <Running run={D} a={2} b={4} p={p}
-        headline={(f) => (f.step < 4 ? 'both read their keys and count the kept ones' : '#0 publishes with a release; #1 waits with an acquire')} />
+        headline={(f) => (f.step < 4 ? tr('both read their keys and count the kept ones', 'cả hai đọc khóa của mình và đếm những khóa được giữ') : tr('#0 publishes with a release; #1 waits with an acquire', '#0 công bố bằng một release; #1 chờ bằng một acquire'))} />
     ),
   },
   {
     clip: 'scan-chain-4',
-    label: 'Write after the flag',
+    get label() { return tr('Write after the flag', 'Ghi sau cờ'); },
     draw: (p) => (
       <Running run={D} a={5} b={lastD} p={p}
-        headline={(f, k) => (k < lastD ? 'each block writes only after the flag of the block before it' : D.correct && D.hazards === 0 ? 'finished: the stable filter, and no key overwritten before it was read' : 'finished')} />
+        headline={(f, k) => (k < lastD ? tr('each block writes only after the flag of the block before it', 'mỗi khối chỉ ghi sau cờ của khối đứng trước nó') : D.correct && D.hazards === 0 ? tr('finished: the stable filter, and no key overwritten before it was read', 'hoàn tất: bộ lọc ổn định, và không khóa nào bị ghi đè trước khi được đọc') : tr('finished', 'hoàn tất'))} />
     ),
   },
   {
     clip: 'scan-chain-5',
-    label: 'Numbers from blockIdx',
+    get label() { return tr('Numbers from blockIdx', 'Số lấy từ blockIdx'); },
     draw: (p) => (
       <Running run={B} a={0} b={lastB} p={p}
-        headline={(f, k) => (k < lastB ? 'same start order, numbers from blockIdx' : 'starved: every resident block waits on one that cannot start')} />
+        headline={(f, k) => (k < lastB ? tr('same start order, numbers from blockIdx', 'cùng thứ tự bắt đầu, số lấy từ blockIdx') : tr('starved: every resident block waits on one that cannot start', 'bị bỏ đói: mọi khối thường trú đều chờ một khối không thể bắt đầu'))} />
     ),
   },
   {
     clip: 'scan-chain-6',
-    label: 'Each backend',
+    get label() { return tr('Each backend', 'Từng backend'); },
     draw: (p) => (
-      <Stage headline="the wait is safe only where a started block is promised to finish">
-        <Gantt run={D} upto={lastD} x0={150} y0={40} col={20} title="numbers from a counter" labels={false} compact />
-        <Gantt run={B} upto={lastB} x0={500} y0={40} col={20} title="numbers from blockIdx" labels={false} showFlags={false} compact />
+      <Stage headline={tr('the wait is safe only where a started block is promised to finish', 'việc chờ chỉ an toàn ở nơi một khối đã bắt đầu được hứa sẽ chạy xong')}>
+        <Gantt run={D} upto={lastD} x0={150} y0={40} col={20} title={tr('numbers from a counter', 'số lấy từ một bộ đếm')} labels={false} compact />
+        <Gantt run={B} upto={lastB} x0={500} y0={40} col={20} title={tr('numbers from blockIdx', 'số lấy từ blockIdx')} labels={false} showFlags={false} compact />
         <g opacity={ramp(p, 0.1, 0.3)} data-backend="cuda">
           <text x={AX} y={196} fontSize="12" fontWeight="600">CUDA</text>
-          <text x={AX + 70} y={196} fontSize="11.5">the counter makes the wait legal: started blocks are promised progress</text>
+          <text x={AX + 70} y={196} fontSize="11.5">{tr('the counter makes the wait legal: started blocks are promised progress', 'bộ đếm làm cho việc chờ hợp lệ: các khối đã bắt đầu được hứa sẽ tiến triển')}</text>
         </g>
         <g opacity={ramp(p, 0.35, 0.55)} data-backend="hip">
           <text x={AX} y={236} fontSize="12" fontWeight="600">HIP</text>
-          <text x={AX + 70} y={236} fontSize="11.5">the same code; unverified, because AMD documents no such promise</text>
+          <text x={AX + 70} y={236} fontSize="11.5">{tr('the same code; unverified, because AMD documents no such promise', 'cùng một mã; unverified, vì AMD không ghi nhận lời hứa nào như vậy trong tài liệu')}</text>
         </g>
         <g opacity={ramp(p, 0.6, 0.8)} data-backend="metal">
           <text x={AX} y={276} fontSize="12" fontWeight="600">Metal</text>
-          <text x={AX + 70} y={276} fontSize="11.5">one threadgroup walks its range in order, with threadgroup barriers only</text>
+          <text x={AX + 70} y={276} fontSize="11.5">{tr('one threadgroup walks its range in order, with threadgroup barriers only', 'một threadgroup đi qua vùng của nó theo thứ tự, chỉ dùng rào chắn threadgroup')}</text>
         </g>
       </Stage>
     ),
@@ -314,5 +321,5 @@ const beats: Beat[] = [
 ];
 
 export function ScanChainScene() {
-  return <Scene chapter="ch12" title="The scan chain orders the blocks" beats={beats} />;
+  return <Scene chapter="ch12" title={tr('The scan chain orders the blocks', 'Chuỗi scan sắp thứ tự các khối')} beats={beats} />;
 }

@@ -1,0 +1,1 @@
+Đây là 24 điểm ảnh, mỗi điểm đã được đổi thành một trong 8 số hiệu bin, và 3 khối, mỗi khối 8 luồng. Trong kernel cơ bản, mọi luồng cộng 1 vào một histogram công khai duy nhất trong bộ nhớ toàn cục. Hãy nhìn bin 7, bầu trời sáng. 14 luồng từ cả 3 khối nhắm vào đúng bộ đếm đó, và các phép toán nguyên tử của chúng phải lần lượt thay phiên nhau.

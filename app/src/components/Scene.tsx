@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useI18n, type Locale } from '../lib/i18n';
 
 // A narrated animation: a sequence of beats, each a narration clip plus a drawing
 // that is a pure function of how far through the beat we are. Picture and sound
@@ -9,6 +10,12 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 // viewer switches on (off by default, remembered in this browser). With no audio
 // for a beat the animation still runs, on a duration estimated from the script
 // length, and that beat's caption is shown regardless so nothing is lost.
+//
+// In Vietnamese the caption is the Vietnamese script, content/<chapter>/narration/vi/<clip>.txt
+// (the English one where it is missing). There is no Vietnamese recording: the audio is the
+// English narration, so in Vietnamese it starts off, behind an explicit "original audio
+// (English)" switch, and the caption shows while it is off. Timing always comes from the
+// English clip. In English the player behaves as it always has.
 export interface Beat {
   /** Clip id: content/<chapter>/narration/<clip>.txt and .mp3 */
   clip: string;
@@ -25,6 +32,8 @@ interface Manifest {
 }
 
 const stripTags = (s: string) => s.replace(/\[[^\]]*\]\s*/g, '').trim();
+/** Sound on or off per language: on for English, off for Vietnamese, whose only recording is English. */
+const SOUND_DEFAULT: Record<Locale, boolean> = { en: true, vi: false };
 const estimate = (script: string) => Math.max(4, stripTags(script).split(/\s+/).length / 2.6 + 1);
 
 export function Scene({
@@ -44,12 +53,16 @@ export function Scene({
   narrow?: boolean;
 }) {
   const base = `/content/${chapter}/narration/`;
+  const { t: { scene: m }, locale } = useI18n();
   const [manifest, setManifest] = useState<Manifest | null>(null);
   const [scripts, setScripts] = useState<Record<string, string>>({});
+  const [viScripts, setViScripts] = useState<Record<string, string>>({});
   const [i, setI] = useState(0);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [sound, setSound] = useState(true);
+  const [soundBy, setSoundBy] = useState<Record<Locale, boolean>>(SOUND_DEFAULT);
+  const sound = soundBy[locale];
+  const setSound = (on: boolean) => setSoundBy((s) => ({ ...s, [locale]: on }));
   const [captions, setCaptions] = useState<boolean>(() => {
     try {
       return localStorage.getItem('captions') === 'on';
@@ -84,12 +97,19 @@ export function Scene({
         .then((r) => (r.ok ? r.text() : ''))
         .then((text) => setScripts((s) => ({ ...s, [b.clip]: text })))
         .catch(() => undefined);
+    // The Vietnamese script may not exist yet; the caption then falls back to the English.
+    for (const b of beats)
+      fetch(base + 'vi/' + b.clip + '.txt')
+        .then((r) => (r.ok ? r.text() : ''))
+        .then((text) => setViScripts((s) => ({ ...s, [b.clip]: text })))
+        .catch(() => undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chapter]);
 
   const beat = beats[i];
   const entry = manifest?.clips[beat.clip];
   const script = scripts[beat.clip] ?? '';
+  const caption = (locale === 'vi' && stripTags(viScripts[beat.clip] ?? '')) || stripTags(script);
   const dur = entry?.duration ?? estimate(script);
   const hasAudio = !!entry && !broken[beat.clip];
   // With sound on and a clip available, the audio element is the clock.
@@ -160,21 +180,21 @@ export function Scene({
       <header>
         <h4>{title}</h4>
         <span className="task">
-          {beats.length} parts, about {Math.round(beats.reduce((s, b) => s + (manifest?.clips[b.clip]?.duration ?? estimate(scripts[b.clip] ?? '')), 0))} seconds
+          {m.summary(beats.length, Math.round(beats.reduce((s, b) => s + (manifest?.clips[b.clip]?.duration ?? estimate(scripts[b.clip] ?? '')), 0)))}
         </span>
       </header>
       <div className="body">
         <div className="stage" data-layout={narrow ? 'narrow' : undefined}>
           {beat.draw(p)}
         </div>
-        {captions || !hasAudio ? (
-          <p className="caption" aria-live="polite">{stripTags(script) || '…'}</p>
+        {captions || !hasAudio || (locale === 'vi' && !sound) ? (
+          <p className="caption" aria-live="polite">{caption || '…'}</p>
         ) : null}
         <div className="row">
           <button className="primary" onClick={() => { if (finished) go(0); setPlaying(!playing); }}>
-            {playing ? 'Pause' : finished ? 'Play again' : t > 0 || i > 0 ? 'Resume' : 'Play'}
+            {playing ? m.pause : finished ? m.playAgain : t > 0 || i > 0 ? m.resume : m.play}
           </button>
-          <span className="seg" role="group" aria-label="Parts">
+          <span className="seg" role="group" aria-label={m.parts}>
             {beats.map((b, k) => (
               <button key={b.clip} aria-pressed={k === i} onClick={() => go(k)} title={b.label}>
                 {k + 1}. {b.label}
@@ -182,14 +202,14 @@ export function Scene({
             ))}
           </span>
           <label className="check">
-            <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} /> sound
+            <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} /> {m.sound}
           </label>
           <label className="check">
-            <input type="checkbox" checked={captions} onChange={(e) => toggleCaptions(e.target.checked)} /> captions
+            <input type="checkbox" checked={captions} onChange={(e) => toggleCaptions(e.target.checked)} /> {m.captions}
           </label>
         </div>
         <input
-          type="range" min="0" max="1000" value={Math.round(p * 1000)} aria-label="Position in this part"
+          type="range" min="0" max="1000" value={Math.round(p * 1000)} aria-label={m.position}
           style={{ width: '100%', marginTop: '0.6rem' }}
           onChange={(e) => {
             const nt = (Number(e.target.value) / 1000) * dur;
@@ -213,10 +233,12 @@ export function Scene({
       </div>
       <footer>
         {manifest === null
-          ? 'No narration manifest found; running silently on estimated timings.'
+          ? m.noManifest
           : hasAudio
-            ? `Narration generated with ${manifest.model}. Turn on captions to read the script as it is spoken.`
-            : 'This part has no audio yet, so its script is shown as a caption and it runs on an estimated timing.'}
+            ? locale === 'vi' && !sound
+              ? m.audioOff(manifest.model)
+              : m.withAudio(manifest.model)
+            : m.noAudio}
       </footer>
     </section>
   );

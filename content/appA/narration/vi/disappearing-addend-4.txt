@@ -1,0 +1,1 @@
+Vòng lặp tiếp tục cộng 0.3. Dưới 1024, khoảng cách giữa hai số liền kề là một nửa, và 0.3 lớn hơn nửa bước, nên mỗi phép cộng đều làm tròn lên trọn một bước. Tổng đang chạy tăng nhanh hơn tổng thật. Tại 1024, số mũ tăng thêm một, và khoảng cách gấp đôi thành 1.

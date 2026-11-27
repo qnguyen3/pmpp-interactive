@@ -1,0 +1,1 @@
+Giờ hãy đi qua các ngăn từ cao nhất xuống, cộng dồn số đếm của chúng. Ngăn cao nhất chứa 6 khóa, quá ít. Ngăn kế tiếp chứa 13, và số đếm tích lũy vượt 12 bên trong nó. Vậy 6 khóa phía trên được chọn, mọi khóa phía dưới bị loại, và chỉ ngăn này còn chưa quyết định. Ta vẫn cần 6 trong 13 khóa của nó.

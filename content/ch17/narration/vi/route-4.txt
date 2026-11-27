@@ -1,0 +1,1 @@
+Giờ là phân tán. Mỗi cặp chuyển đến vị trí bắt đầu của expert của nó, cộng với thứ hạng của nó trong các cặp của expert đó. Thứ hạng lấy từ một bộ đếm nguyên tử sẽ ra theo bất kỳ thứ tự nào mà các luồng đến. Thay vào đó, llama.cpp tính mỗi thứ hạng bằng một ballot và một phép đếm bit, nên thứ tự token được giữ nguyên. Giờ các token của mỗi expert nằm cạnh nhau.

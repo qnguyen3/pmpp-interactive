@@ -33,6 +33,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- devices
 export type Vocabulary = 'cuda' | 'hip' | 'metal';
 
@@ -60,7 +62,9 @@ export interface Device {
 
 /** The book's example device, every number as the book states it (pp. 68, 76, 85). */
 export const BOOK_DEVICE: Device = {
-  name: "the book's example",
+  get name() {
+    return tr("the book's example", 'ví dụ của sách');
+  },
   source: 'book',
   vocabulary: 'cuda',
   units: 132,
@@ -141,7 +145,9 @@ export function deviceFromReport(backend: string, raw: Record<string, unknown>):
 
 /** A backend this machine has no device report for: the names are known, the counts are not. */
 export const noReport = (vocabulary: Vocabulary): Device => ({
-  name: 'no device report on this machine',
+  get name() {
+    return tr('no device report on this machine', 'không có báo cáo thiết bị trên máy này');
+  },
   source: 'none',
   vocabulary,
   units: null,
@@ -182,7 +188,7 @@ export interface Level {
 /** The software words of each backend: what it calls a block, a warp and the unit a block runs on. */
 export const TERMS: Record<Vocabulary, { block: string; warp: string; unit: string | null; api: string }> = {
   cuda: { block: 'block', warp: 'warp', unit: 'SM', api: 'CUDA' },
-  hip: { block: 'block', warp: 'warp', unit: 'CU', api: 'HIP on AMD' },
+  hip: { block: 'block', warp: 'warp', unit: 'CU', get api() { return tr('HIP on AMD', 'HIP trên AMD'); } },
   metal: { block: 'threadgroup', warp: 'SIMD-group', unit: null, api: 'Metal' },
 };
 
@@ -190,20 +196,20 @@ const NAMES: Record<Vocabulary, Record<LevelId, string | null>> = {
   cuda: {
     device: 'GPU',
     cluster: 'GPC',
-    unit: 'streaming multiprocessor (SM)',
-    group: 'processing block',
-    core: 'streaming processor',
-    onchip: 'on-chip memory of an SM',
-    global: 'global memory',
+    get unit() { return tr('streaming multiprocessor (SM)', 'streaming multiprocessor (SM)'); },
+    get group() { return tr('processing block', 'khối xử lý (processing block)'); },
+    get core() { return tr('streaming processor', 'bộ xử lý luồng (streaming processor)'); },
+    get onchip() { return tr('on-chip memory of an SM', 'bộ nhớ trên chip của một SM'); },
+    get global() { return tr('global memory', 'bộ nhớ toàn cục (global memory)'); },
   },
   hip: {
     device: 'GPU',
-    cluster: 'shader engine and shader array',
-    unit: 'compute unit (CU)',
+    get cluster() { return tr('shader engine and shader array', 'shader engine và shader array'); },
+    get unit() { return tr('compute unit (CU)', 'compute unit (CU)'); },
     group: 'SIMD',
-    core: 'ALU lane',
-    onchip: 'registers and LDS of a CU',
-    global: 'global memory',
+    get core() { return tr('ALU lane', 'lane ALU'); },
+    get onchip() { return tr('registers and LDS of a CU', 'thanh ghi (register) và LDS của một CU'); },
+    get global() { return tr('global memory', 'bộ nhớ toàn cục (global memory)'); },
   },
   metal: {
     device: 'MTLDevice',
@@ -211,8 +217,8 @@ const NAMES: Record<Vocabulary, Record<LevelId, string | null>> = {
     unit: null,
     group: null,
     core: null,
-    onchip: 'threadgroup memory',
-    global: 'device memory (buffers)',
+    get onchip() { return tr('threadgroup memory', 'bộ nhớ threadgroup'); },
+    get global() { return tr('device memory (buffers)', 'bộ nhớ device (các buffer)'); },
   },
 };
 
@@ -221,10 +227,10 @@ export const BOOK_NAMES: Record<LevelId, string> = {
   device: 'GPU',
   cluster: 'GPC',
   unit: 'SM',
-  group: 'processing block',
-  core: 'streaming processor',
-  onchip: 'on-chip memory',
-  global: 'global memory',
+  get group() { return tr('processing block', 'khối xử lý (processing block)'); },
+  get core() { return tr('streaming processor', 'bộ xử lý luồng (streaming processor)'); },
+  get onchip() { return tr('on-chip memory', 'bộ nhớ trên chip'); },
+  get global() { return tr('global memory', 'bộ nhớ toàn cục (global memory)'); },
 };
 
 /**
@@ -235,92 +241,102 @@ export function levels(d: Device): Level[] {
   const v = d.vocabulary;
   const t = TERMS[v];
   const from = (n: number | null): Provenance => (n == null ? 'none' : d.source === 'book' ? 'book' : 'reported');
-  const undocumented = 'Apple documents threadgroups and SIMD-groups, which are software, and no hardware unit under the device.';
+  const undocumented = tr(
+    'Apple documents threadgroups and SIMD-groups, which are software, and no hardware unit under the device.',
+    'Apple có tài liệu về threadgroup và SIMD-group, vốn là phần mềm, và không có tài liệu về đơn vị phần cứng nào bên dưới thiết bị.',
+  );
   const rows: Record<LevelId, Omit<Level, 'id' | 'name' | 'bookName'>> = {
     device: {
       count: d.source === 'none' ? null : 1,
-      per: 'selected',
+      per: tr('selected', 'đang chọn'),
       provenance: d.source === 'book' ? 'book' : d.source === 'report' ? 'reported' : 'none',
       ask:
         v === 'cuda' ? 'cudaGetDeviceCount'
         : v === 'hip' ? 'hipGetDeviceCount'
         : 'MTLCopyAllDevices',
-      holds: [{ what: `the grid: every ${t.block} that has not started waits here for room`, where: '4.2' }],
-      note: 'One device at a time: a kernel launch goes to one device.',
+      holds: [{ what: tr(`the grid: every ${t.block} that has not started waits here for room`, `lưới (grid): mọi ${v === 'metal' ? 'threadgroup' : 'khối'} chưa bắt đầu chờ ở đây cho đến khi có chỗ`), where: '4.2' }],
+      note: tr('One device at a time: a kernel launch goes to one device.', 'Mỗi lần một thiết bị: một lần khởi chạy kernel đi đến một thiết bị.'),
     },
     cluster: {
       count: d.clusters,
-      per: 'on the device',
+      per: tr('on the device', 'trên thiết bị'),
       provenance: from(d.clusters),
       ask: null,
-      holds: v === 'metal' ? [] : [{ what: 'the blocks of one thread block cluster, scheduled together', where: '4.2' }],
+      holds: v === 'metal' ? [] : [{ what: tr('the blocks of one thread block cluster, scheduled together', 'các khối của một thread block cluster, được lập lịch cùng nhau'), where: '4.2' }],
       note:
-        v === 'cuda' ? 'NVIDIA expands GPC as both "GPU processing cluster" and "graphics processing cluster".'
-        : v === 'hip' ? 'Two AMD levels above the CU. Setting them beside a GPC is our comparison, not AMD\'s.'
+        v === 'cuda' ? tr('NVIDIA expands GPC as both "GPU processing cluster" and "graphics processing cluster".', 'NVIDIA viết đầy đủ GPC là cả "GPU processing cluster" lẫn "graphics processing cluster".')
+        : v === 'hip' ? tr('Two AMD levels above the CU. Setting them beside a GPC is our comparison, not AMD\'s.', 'Hai tầng của AMD phía trên CU. Đặt chúng cạnh một GPC là phép so sánh của chúng tôi, không phải của AMD.')
         : undocumented,
     },
     unit: {
       count: d.units,
-      per: 'on the device',
+      per: tr('on the device', 'trên thiết bị'),
       provenance: from(d.units),
       ask: v === 'metal' ? null : 'multiProcessorCount',
       holds:
         v === 'metal'
           ? []
           : [
-              { what: `whole ${t.block}s, a few at a time`, where: '4.2' },
-              { what: `the ${t.warp}s of those ${t.block}s, more than can execute at once`, where: '4.6' },
-              { what: 'a register file shared out among the resident threads', where: '4.7' },
-              { what: `shared memory for each resident ${t.block}`, where: 'chapter 5' },
+              { what: tr(`whole ${t.block}s, a few at a time`, `trọn vẹn từng khối, mỗi lần vài cái`), where: '4.2' },
+              { what: tr(`the ${t.warp}s of those ${t.block}s, more than can execute at once`, `các ${t.warp} của những khối đó, nhiều hơn số có thể thực thi cùng lúc`), where: '4.6' },
+              { what: tr('a register file shared out among the resident threads', 'một tệp thanh ghi (register file) được chia cho các luồng đang thường trú'), where: '4.7' },
+              { what: tr(`shared memory for each resident ${t.block}`, `bộ nhớ chia sẻ (shared memory) cho mỗi khối đang thường trú`), where: 'chapter 5' }, // i18n-ignore: identifier also shown to the reader
             ],
       note:
-        v === 'cuda' ? 'The one size of this picture that every CUDA device reports.'
-        : v === 'hip' ? 'The field counts compute units, or half of them when the device runs in workgroup-processor mode.'
+        v === 'cuda' ? tr('The one size of this picture that every CUDA device reports.', 'Kích thước duy nhất trong bức tranh này mà mọi thiết bị CUDA đều báo cáo.')
+        : v === 'hip' ? tr('The field counts compute units, or half of them when the device runs in workgroup-processor mode.', 'Trường này đếm số compute unit, hoặc một nửa số đó khi thiết bị chạy ở chế độ workgroup-processor.')
         : undocumented,
     },
     group: {
       count: v === 'hip' ? AMD_CDNA_DOC.simdsPerCu : d.groupsPerUnit,
-      per: v === 'hip' ? 'in each CU' : 'in each SM',
+      per: v === 'hip' ? tr('in each CU', 'trong mỗi CU') : tr('in each SM', 'trong mỗi SM'),
       provenance: v === 'hip' ? 'vendor-doc' : from(d.groupsPerUnit),
       ask: null,
-      holds: v === 'metal' ? [] : [{ what: `one ${t.warp} at a time, every thread of it on the same instruction`, where: '4.4' }],
+      holds: v === 'metal' ? [] : [{ what: tr(`one ${t.warp} at a time, every thread of it on the same instruction`, `mỗi lần một ${t.warp}, mọi luồng của nó cùng ở một lệnh`), where: '4.4' }],
       note:
-        v === 'cuda' ? 'Only the book states this count for its example; NVIDIA\'s public text for that device does not.'
-        : v === 'hip' ? 'AMD\'s description of its CDNA family, not a property of your device.'
+        v === 'cuda' ? tr('Only the book states this count for its example; NVIDIA\'s public text for that device does not.', 'Chỉ sách nêu con số này cho ví dụ của nó; tài liệu công khai của NVIDIA về thiết bị đó thì không.')
+        : v === 'hip' ? tr('AMD\'s description of its CDNA family, not a property of your device.', 'Mô tả của AMD về dòng CDNA của họ, không phải một thuộc tính của thiết bị của bạn.')
         : undocumented,
     },
     core: {
       count: v === 'hip' ? AMD_CDNA_DOC.simdsPerCu * AMD_CDNA_DOC.lanesPerSimd : d.coresPerUnit,
-      per: v === 'hip' ? 'in each CU' : 'in each SM',
+      per: v === 'hip' ? tr('in each CU', 'trong mỗi CU') : tr('in each SM', 'trong mỗi SM'),
       provenance: v === 'hip' ? 'vendor-doc' : from(d.coresPerUnit),
       ask: null,
-      holds: v === 'metal' ? [] : [{ what: `one thread of that ${t.warp}, for one instruction`, where: '4.4' }],
+      holds: v === 'metal' ? [] : [{ what: tr(`one thread of that ${t.warp}, for one instruction`, `một luồng của ${t.warp} đó, cho một lệnh`), where: '4.4' }],
       note:
-        v === 'cuda' ? 'Also sold as "CUDA cores"; the pages of NVIDIA\'s current guide read for this course do not say "streaming processor". No property of a CUDA device reports how many an SM has.'
-        : v === 'hip' ? 'AMD\'s description of its CDNA family: 16 lanes in each SIMD. Not a property of your device.'
+        v === 'cuda'
+          ? tr(
+              'Also sold as "CUDA cores"; the pages of NVIDIA\'s current guide read for this course do not say "streaming processor". No property of a CUDA device reports how many an SM has.',
+              'Cũng được bán dưới tên "CUDA cores"; các trang trong hướng dẫn hiện hành của NVIDIA mà khóa học này đã đọc không nói "streaming processor". Không thuộc tính nào của thiết bị CUDA báo cáo một SM có bao nhiêu cái.',
+            )
+        : v === 'hip' ? tr('AMD\'s description of its CDNA family: 16 lanes in each SIMD. Not a property of your device.', 'Mô tả của AMD về dòng CDNA của họ: 16 lane trong mỗi SIMD. Không phải một thuộc tính của thiết bị của bạn.')
         : undocumented,
     },
     onchip: {
       count: null,
-      per: 'a size, not a count',
+      per: tr('a size, not a count', 'một kích thước, không phải một số đếm'),
       provenance: 'none',
-      ask: v === 'metal' ? 'maxThreadgroupMemoryLength' : 'sharedMemPerBlock, regsPerMultiprocessor',
+      ask: v === 'metal' ? 'maxThreadgroupMemoryLength' : 'sharedMemPerBlock, regsPerMultiprocessor', // i18n-ignore: API property names
       holds:
         v === 'metal'
-          ? [{ what: 'arrays declared threadgroup, one copy per threadgroup', where: 'chapter 5' }]
+          ? [{ what: tr('arrays declared threadgroup, one copy per threadgroup', 'các mảng khai báo threadgroup, mỗi threadgroup một bản'), where: 'chapter 5' }] // i18n-ignore: identifier also shown to the reader
           : [
-              { what: 'registers: the automatic variables of every resident thread', where: '4.7' },
-              { what: `shared memory: one copy per resident ${t.block}`, where: 'chapter 5' },
+              { what: tr('registers: the automatic variables of every resident thread', 'thanh ghi: các biến tự động của mọi luồng đang thường trú'), where: '4.7' },
+              { what: tr(`shared memory: one copy per resident ${t.block}`, `bộ nhớ chia sẻ: mỗi khối đang thường trú một bản`), where: 'chapter 5' }, // i18n-ignore: identifier also shown to the reader
             ],
-      note: 'Sizes belong to chapter 5. What matters here: it is inside the unit a block runs on, so only that block\'s threads can share it.',
+      note: tr(
+        'Sizes belong to chapter 5. What matters here: it is inside the unit a block runs on, so only that block\'s threads can share it.',
+        'Kích thước thuộc về chương 5. Điều quan trọng ở đây: nó nằm bên trong đơn vị mà một khối chạy trên đó, nên chỉ các luồng của khối đó mới chia sẻ được nó.',
+      ),
     },
     global: {
       count: null,
-      per: 'a size, not a count',
+      per: tr('a size, not a count', 'một kích thước, không phải một số đếm'),
       provenance: 'none',
       ask: v === 'metal' ? 'maxBufferLength' : 'totalGlobalMem',
-      holds: [{ what: 'the arrays behind a kernel\'s pointer arguments', where: '4.6' }],
-      note: 'Off the chip and shared by every thread of the grid. Every access to it is slow next to arithmetic.',
+      holds: [{ what: tr('the arrays behind a kernel\'s pointer arguments', 'các mảng đằng sau các đối số con trỏ của một kernel'), where: '4.6' }],
+      note: tr('Off the chip and shared by every thread of the grid. Every access to it is slow next to arithmetic.', 'Nằm ngoài chip và được mọi luồng của lưới chia sẻ. Mỗi lần truy cập nó đều chậm so với phép tính số học.'),
     },
   };
   return LEVEL_ORDER.map((id) => ({ id, name: NAMES[v][id], bookName: BOOK_NAMES[id], ...rows[id] }));

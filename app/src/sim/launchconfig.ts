@@ -37,6 +37,7 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
 import type { Limits } from './occupancy';
 
 /** What a device says about launches. null means "not reported": the rule that needs it is skipped. */
@@ -60,13 +61,13 @@ export type RuleKey = 'per-block' | 'dims' | 'warps' | 'divides' | 'block-slots'
 
 /** The rules in the order they are shown, with the names lab 4.1's tests print. */
 export const RULES: readonly { key: RuleKey; name: string }[] = [
-  { key: 'per-block', name: 'within maxThreadsPerBlock' },
-  { key: 'dims', name: 'within maxThreadsDim' },
-  { key: 'warps', name: 'whole number of warps' },
-  { key: 'divides', name: 'divides the thread slots' },
-  { key: 'block-slots', name: 'block slots do not run out first' },
-  { key: 'rows', name: 'no taller than the rows' },
-  { key: 'grid', name: 'within maxGridSize' },
+  { key: 'per-block', name: 'within maxThreadsPerBlock' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'dims', name: 'within maxThreadsDim' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'warps', name: 'whole number of warps' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'divides', name: 'divides the thread slots' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'block-slots', name: 'block slots do not run out first' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'rows', name: 'no taller than the rows' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
+  { key: 'grid', name: 'within maxGridSize' }, // i18n-ignore: identifier also shown to the reader (the name lab 4.1 prints)
 ];
 export const ruleName = (key: RuleKey): string => RULES.find((r) => r.key === key)!.name;
 
@@ -136,46 +137,46 @@ export function checkLaunch(limits: LaunchLimits, rowsIn: number, colsIn: number
   const add = (key: RuleKey, status: RuleStatus, detail: string) => out.push({ key, name: ruleName(key), status, detail });
   const verdict = (ok: boolean): RuleStatus => (ok ? 'pass' : 'fail');
 
-  if (perBlock == null) add('per-block', 'skipped', 'maxThreadsPerBlock not reported');
-  else add('per-block', verdict(threads <= perBlock), `${n(threads)} threads, the device allows ${n(perBlock)}`);
+  if (perBlock == null) add('per-block', 'skipped', tr('maxThreadsPerBlock not reported', 'maxThreadsPerBlock không được báo cáo'));
+  else add('per-block', verdict(threads <= perBlock), tr(`${n(threads)} threads, the device allows ${n(perBlock)}`, `${n(threads)} luồng, thiết bị cho phép ${n(perBlock)}`));
 
-  if (dimX == null || dimY == null) add('dims', 'skipped', 'maxThreadsDim not reported');
-  else add('dims', verdict(block.x <= dimX && block.y <= dimY), `${n(block.x)} x ${n(block.y)}, the device allows ${n(dimX)} x ${n(dimY)}`);
+  if (dimX == null || dimY == null) add('dims', 'skipped', tr('maxThreadsDim not reported', 'maxThreadsDim không được báo cáo'));
+  else add('dims', verdict(block.x <= dimX && block.y <= dimY), tr(`${n(block.x)} x ${n(block.y)}, the device allows ${n(dimX)} x ${n(dimY)}`, `${n(block.x)} x ${n(block.y)}, thiết bị cho phép ${n(dimX)} x ${n(dimY)}`));
 
-  if (width == null) add('warps', 'skipped', 'warpSize not reported');
+  if (width == null) add('warps', 'skipped', tr('warpSize not reported', 'warpSize không được báo cáo'));
   else {
     const over = threads % width;
     add(
       'warps',
       verdict(over === 0),
       over === 0
-        ? `${n(threads)} threads are ${n(threads / width)} ${threads / width === 1 ? 'warp' : 'warps'} of ${width}`
-        : `${n(threads)} threads, the width is ${width}: the last warp has ${width - over} padded lanes`,
+        ? tr(`${n(threads)} threads are ${n(threads / width)} ${threads / width === 1 ? 'warp' : 'warps'} of ${width}`, `${n(threads)} luồng là ${n(threads / width)} warp, mỗi warp rộng ${width}`)
+        : tr(`${n(threads)} threads, the width is ${width}: the last warp has ${width - over} padded lanes`, `${n(threads)} luồng, độ rộng là ${width}: warp cuối có ${width - over} lane đệm`),
     );
   }
 
-  if (threadSlots == null) add('divides', 'skipped', 'maxThreadsPerMultiProcessor not reported');
+  if (threadSlots == null) add('divides', 'skipped', tr('maxThreadsPerMultiProcessor not reported', 'maxThreadsPerMultiProcessor không được báo cáo'));
   else {
     const left = threadSlots % threads;
     add(
       'divides',
       verdict(left === 0),
       left === 0
-        ? `${n(threadSlots / threads)} blocks of ${n(threads)} threads are exactly ${n(threadSlots)} thread slots`
-        : `${n(threads)} threads per block leave ${n(left)} of ${n(threadSlots)} thread slots empty`,
+        ? tr(`${n(threadSlots / threads)} blocks of ${n(threads)} threads are exactly ${n(threadSlots)} thread slots`, `${n(threadSlots / threads)} khối ${n(threads)} luồng vừa đúng ${n(threadSlots)} chỗ luồng`)
+        : tr(`${n(threads)} threads per block leave ${n(left)} of ${n(threadSlots)} thread slots empty`, `${n(threads)} luồng mỗi khối để trống ${n(left)} trên ${n(threadSlots)} chỗ luồng`),
     );
   }
 
-  if (threadSlots == null) add('block-slots', 'skipped', 'maxThreadsPerMultiProcessor not reported');
-  else if (blockSlots == null) add('block-slots', 'skipped', 'maxBlocksPerMultiProcessor not reported');
+  if (threadSlots == null) add('block-slots', 'skipped', tr('maxThreadsPerMultiProcessor not reported', 'maxThreadsPerMultiProcessor không được báo cáo'));
+  else if (blockSlots == null) add('block-slots', 'skipped', tr('maxBlocksPerMultiProcessor not reported', 'maxBlocksPerMultiProcessor không được báo cáo'));
   else {
     const reach = threads * blockSlots;
     add(
       'block-slots',
       verdict(reach >= threadSlots),
       reach >= threadSlots
-        ? `${n(blockSlots)} block slots x ${n(threads)} threads reach ${n(threadSlots)} thread slots`
-        : `${n(blockSlots)} block slots x ${n(threads)} threads fill ${n(reach)} of ${n(threadSlots)} thread slots`,
+        ? tr(`${n(blockSlots)} block slots x ${n(threads)} threads reach ${n(threadSlots)} thread slots`, `${n(blockSlots)} chỗ khối x ${n(threads)} luồng đạt tới ${n(threadSlots)} chỗ luồng`)
+        : tr(`${n(blockSlots)} block slots x ${n(threads)} threads fill ${n(reach)} of ${n(threadSlots)} thread slots`, `${n(blockSlots)} chỗ khối x ${n(threads)} luồng lấp ${n(reach)} trên ${n(threadSlots)} chỗ luồng`),
     );
   }
 
@@ -183,12 +184,12 @@ export function checkLaunch(limits: LaunchLimits, rowsIn: number, colsIn: number
     'rows',
     verdict(block.y <= rows),
     block.y <= rows
-      ? `block.y is ${n(block.y)} for ${n(rows)} ${rows === 1 ? 'row' : 'rows'}`
-      : `block.y is ${n(block.y)} for ${n(rows)} ${rows === 1 ? 'row' : 'rows'}: ${n(block.y - rows)} of every ${n(block.y)} rows of threads own nothing`,
+      ? tr(`block.y is ${n(block.y)} for ${n(rows)} ${rows === 1 ? 'row' : 'rows'}`, `block.y là ${n(block.y)} cho ${n(rows)} hàng`)
+      : tr(`block.y is ${n(block.y)} for ${n(rows)} ${rows === 1 ? 'row' : 'rows'}: ${n(block.y - rows)} of every ${n(block.y)} rows of threads own nothing`, `block.y là ${n(block.y)} cho ${n(rows)} hàng: cứ ${n(block.y)} hàng luồng thì ${n(block.y - rows)} hàng không sở hữu phần tử nào`),
   );
 
-  if (gridX == null || gridY == null) add('grid', 'skipped', 'maxGridSize not reported');
-  else add('grid', verdict(grid.x <= gridX && grid.y <= gridY), `grid ${n(grid.x)} x ${n(grid.y)}, the device allows ${n(gridX)} x ${n(gridY)}`);
+  if (gridX == null || gridY == null) add('grid', 'skipped', tr('maxGridSize not reported', 'maxGridSize không được báo cáo'));
+  else add('grid', verdict(grid.x <= gridX && grid.y <= gridY), tr(`grid ${n(grid.x)} x ${n(grid.y)}, the device allows ${n(gridX)} x ${n(gridY)}`, `lưới ${n(grid.x)} x ${n(grid.y)}, thiết bị cho phép ${n(gridX)} x ${n(gridY)}`));
 
   const failed = out.filter((r) => r.status === 'fail').map((r) => r.key);
   const skipped = out.filter((r) => r.status === 'skipped').map((r) => r.key);

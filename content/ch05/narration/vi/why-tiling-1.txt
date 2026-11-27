@@ -1,0 +1,1 @@
+Bốn luồng, một khối. Mỗi luồng tính một phần tử của tích, nên mỗi luồng đi dọc một hàng của M, và xuống một cột của N. Mỗi bước như vậy là một lần nạp từ bộ nhớ toàn cục. Hãy xem chúng chạm vào những phần tử nào.

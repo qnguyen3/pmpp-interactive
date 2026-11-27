@@ -1,0 +1,1 @@
+Giờ các stream chạy. Stream bên trong đặt giá trị chuẩn về không và đến event có tên reset L2. Cả hai stream biên đang chờ event này, nên các kernel nhỏ của chúng bắt đầu ngay và xong vào khoảng 1. Kernel bên trong bắt đầu ngay sau đó, dùng chung GPU với chúng trong chốc lát, và chạy đến khoảng 7.

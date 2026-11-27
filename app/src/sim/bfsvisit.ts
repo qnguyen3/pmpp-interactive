@@ -43,22 +43,24 @@ export interface Form {
   appends: boolean;
 }
 
+import { tr } from '../lib/locale.ts';
+
 // The forms. Each is the body of a device function that expands one vertex of the previous
 // level: walk its out-edges and visit every neighbour.
 const HEAD = [
-  '__device__ void NAME(CSRGraph g, unsigned int vertex, unsigned int* level,',
-  '        unsigned int* currFrontier, unsigned int* numCurrFrontier, unsigned int currLevel) {',
+  '__device__ void NAME(CSRGraph g, unsigned int vertex, unsigned int* level,', // i18n-ignore: CUDA source shown as code
+  '        unsigned int* currFrontier, unsigned int* numCurrFrontier, unsigned int currLevel) {', // i18n-ignore: CUDA source shown as code
 ];
 const head = (name: string) => HEAD.map((l) => l.replace('NAME', name));
-const FOR = '    for (unsigned int edge = g.srcPtrs[vertex]; edge < g.srcPtrs[vertex + 1]; ++edge) {';
-const NB = '        unsigned int neighbor = g.dst[edge];';
+const FOR = '    for (unsigned int edge = g.srcPtrs[vertex]; edge < g.srcPtrs[vertex + 1]; ++edge) {'; // i18n-ignore: CUDA source shown as code
+const NB = '        unsigned int neighbor = g.dst[edge];'; // i18n-ignore: CUDA source shown as code
 const E = '        unsigned int e = UNVISITED;';
-const APPEND = 'append(currFrontier, numCurrFrontier, neighbor);';
+const APPEND = 'append(currFrontier, numCurrFrontier, neighbor);'; // i18n-ignore: CUDA source shown as code
 
 export const FORMS: Record<FormId, Form> = {
   plain: {
     id: 'plain',
-    label: 'plain check, then label (Fig. 18.6 lines 09–11)',
+    get label() { return tr('plain check, then label (Fig. 18.6 lines 09–11)', 'kiểm tra thường, rồi gán nhãn (Fig. 18.6 dòng 09–11)'); },
     region: 'visit_plain',
     code: [...head('visitPlain'), FOR, NB, '        if (level[neighbor] == UNVISITED) {', '            level[neighbor] = currLevel;', '        }', '    }', '}'],
     line: { next: 3, check: 4, store: 5, done: 2 },
@@ -67,7 +69,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   'plain-append': {
     id: 'plain-append',
-    label: 'plain check and label, with a frontier append',
+    get label() { return tr('plain check and label, with a frontier append', 'kiểm tra và gán nhãn thường, có nối thêm vào frontier'); },
     region: 'visit_plain_append',
     code: [...head('visitPlainAppend'), FOR, NB, '        if (level[neighbor] == UNVISITED) {', '            level[neighbor] = currLevel;', '            ' + APPEND, '        }', '    }', '}'],
     line: { next: 3, check: 4, store: 5, append: 6, done: 2 },
@@ -76,7 +78,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   cas: {
     id: 'cas',
-    label: 'compare-and-swap, e fresh for each neighbour (Fig. 18.14)',
+    get label() { return tr('compare-and-swap, e fresh for each neighbour (Fig. 18.14)', 'compare-and-swap, e đặt mới cho mỗi đỉnh kề (Fig. 18.14)'); },
     region: 'visit_cas',
     code: [...head('visitCAS'), FOR, NB, E, '        if (casStrong(&level[neighbor], e, currLevel)) {', '            ' + APPEND, '        }', '    }', '}'],
     line: { next: 3, cas: 5, append: 6, done: 2 },
@@ -85,7 +87,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   hoisted: {
     id: 'hoisted',
-    label: 'compare-and-swap, e declared once above the loop',
+    get label() { return tr('compare-and-swap, e declared once above the loop', 'compare-and-swap, e khai báo một lần phía trên vòng lặp'); },
     region: 'visit_hoisted',
     code: [...head('visitHoisted'), '    unsigned int e = UNVISITED;', FOR, NB, '        if (casStrong(&level[neighbor], e, currLevel)) {', '            ' + APPEND, '        }', '    }', '}'],
     line: { next: 4, cas: 5, append: 6, done: 3 },
@@ -94,7 +96,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   weak: {
     id: 'weak',
-    label: 'weak compare-and-swap, no loop',
+    get label() { return tr('weak compare-and-swap, no loop', 'compare-and-swap dạng weak, không có vòng lặp'); },
     region: 'visit_weak',
     code: [...head('visitWeak'), FOR, NB, E, '        if (casWeak(&level[neighbor], e, currLevel)) {', '            ' + APPEND, '        }', '    }', '}'],
     line: { next: 3, cas: 5, append: 6, done: 2 },
@@ -103,7 +105,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   'weak-loop': {
     id: 'weak-loop',
-    label: 'weak, while (!cas(e)) {}',
+    get label() { return tr('weak, while (!cas(e)) {}', 'dạng weak, while (!cas(e)) {}'); },
     region: 'visit_weak_loop',
     code: [...head('visitWeakLoop'), FOR, NB, E, '        while (!casWeak(&level[neighbor], e, currLevel)) {}', '        ' + APPEND, '    }', '}'],
     line: { next: 3, cas: 5, append: 6, done: 2 },
@@ -112,7 +114,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   'weak-reset': {
     id: 'weak-reset',
-    label: 'weak, while (!cas(e)) e = UNVISITED;',
+    get label() { return tr('weak, while (!cas(e)) e = UNVISITED;', 'dạng weak, while (!cas(e)) e = UNVISITED;'); },
     region: 'visit_weak_reset',
     code: [...head('visitWeakReset'), FOR, NB, E, '        while (!casWeak(&level[neighbor], e, currLevel)) e = UNVISITED;', '        ' + APPEND, '    }', '}'],
     line: { next: 3, cas: 5, reset: 5, append: 6, done: 2 },
@@ -121,7 +123,7 @@ export const FORMS: Record<FormId, Form> = {
   },
   'weak-correct': {
     id: 'weak-correct',
-    label: 'weak, while (!cas(e) && e == UNVISITED) {}',
+    get label() { return tr('weak, while (!cas(e) && e == UNVISITED) {}', 'dạng weak, while (!cas(e) && e == UNVISITED) {}'); },
     region: 'visit_weak_correct',
     code: [
       ...head('visitWeakCorrect'), FOR, NB, E, '        bool won;',
@@ -153,7 +155,7 @@ const U = UNVISITED;
 export const SCENARIOS: Record<Scenario['id'], Scenario> = {
   book: {
     id: 'book',
-    label: "the book's graph, root 0, level 3: threads on 3, 4 and 6 all point to 8",
+    get label() { return tr("the book's graph, root 0, level 3: threads on 3, 4 and 6 all point to 8", 'đồ thị của sách, gốc 0, mức 3: các luồng trên 3, 4 và 6 đều trỏ tới 8'); },
     edges: [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 8], [4, 5], [4, 8], [5, 6], [6, 8], [7, 0], [7, 6]],
     level0: [0, 1, 1, 2, 2, 2, 2, 2, U],
     currLevel: 3,
@@ -162,7 +164,7 @@ export const SCENARIOS: Record<Scenario['id'], Scenario> = {
   },
   trap: {
     id: 'trap',
-    label: '0 → {1, 2}, 1 → {3}, 2 → {3, 4}, level 2: threads on 1 and 2',
+    get label() { return tr('0 → {1, 2}, 1 → {3}, 2 → {3, 4}, level 2: threads on 1 and 2', '0 → {1, 2}, 1 → {3}, 2 → {3, 4}, mức 2: các luồng trên 1 và 2'); },
     edges: [[0, 1], [0, 2], [1, 3], [2, 3], [2, 4]],
     level0: [0, 1, 1, U, U],
     currLevel: 2,
@@ -234,7 +236,7 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
   };
   const t = s.threads[mv.thread];
   const me = sc.threads[mv.thread];
-  const who = `Thread on ${me.vertex}`;
+  const who = tr(`Thread on ${me.vertex}`, `Luồng trên ${me.vertex}`);
   const L = sc.currLevel;
   const nextNb = () => {
     t.k++;
@@ -247,18 +249,18 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
       if (t.k >= me.nbs.length) {
         t.pc = 'done';
         t.nb = null;
-        text = `${who} has no more out-edges and returns.`;
+        text = tr(`${who} has no more out-edges and returns.`, `${who} không còn cạnh ra nào và trả về.`);
         break;
       }
       t.nb = me.nbs[t.k];
       t.won = null;
       if (f.id === 'hoisted') {
-        text = `${who} takes neighbour ${t.nb}. Its e was set once, above the loop, and now holds ${show(t.e)}.`;
+        text = tr(`${who} takes neighbour ${t.nb}. Its e was set once, above the loop, and now holds ${show(t.e)}.`, `${who} lấy đỉnh kề ${t.nb}. Biến e của nó chỉ được đặt một lần, phía trên vòng lặp, và giờ giữ ${show(t.e)}.`);
       } else if (f.id === 'plain' || f.id === 'plain-append') {
-        text = `${who} takes neighbour ${t.nb}.`;
+        text = tr(`${who} takes neighbour ${t.nb}.`, `${who} lấy đỉnh kề ${t.nb}.`);
       } else {
         t.e = UNVISITED;
-        text = `${who} takes neighbour ${t.nb} and sets e = UNVISITED.`;
+        text = tr(`${who} takes neighbour ${t.nb} and sets e = UNVISITED.`, `${who} lấy đỉnh kề ${t.nb} và đặt e = UNVISITED.`);
       }
       t.pc = f.id === 'plain' || f.id === 'plain-append' ? 'check' : 'cas';
       break;
@@ -266,9 +268,9 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
       const v = s.level[t.nb!];
       if (v === UNVISITED) {
         t.pc = 'store';
-        text = `${who} loads level[${t.nb}] and sees UNVISITED.`;
+        text = tr(`${who} loads level[${t.nb}] and sees UNVISITED.`, `${who} load level[${t.nb}] và thấy UNVISITED.`);
       } else {
-        text = `${who} loads level[${t.nb}] = ${v}: already visited, nothing to do.`;
+        text = tr(`${who} loads level[${t.nb}] = ${v}: already visited, nothing to do.`, `${who} load level[${t.nb}] = ${v}: đã được thăm, không có gì để làm.`);
         nextNb();
       }
       break;
@@ -277,29 +279,29 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
       s.level[t.nb!] = L;
       s.writes[t.nb!]++;
       text = s.writes[t.nb!] > 1
-        ? `${who} stores level[${t.nb}] = ${L}: write number ${s.writes[t.nb!]} to that slot in this level.`
-        : `${who} stores level[${t.nb}] = ${L}.`;
+        ? tr(`${who} stores level[${t.nb}] = ${L}: write number ${s.writes[t.nb!]} to that slot in this level.`, `${who} store level[${t.nb}] = ${L}: lần ghi thứ ${s.writes[t.nb!]} vào ô đó trong mức này.`)
+        : tr(`${who} stores level[${t.nb}] = ${L}.`, `${who} store level[${t.nb}] = ${L}.`);
       if (f.id === 'plain-append') t.pc = 'append';
       else nextNb();
       break;
     case 'cas': {
       const cur = s.level[t.nb!];
       const equal = cur === t.e;
-      const kind = f.weak ? 'weak compare-and-swap' : 'compare-and-swap';
+      const kind = f.weak ? tr('weak compare-and-swap', 'compare-and-swap dạng weak') : 'compare-and-swap';
       if (equal && !mv.spurious) {
         s.level[t.nb!] = L;
         s.writes[t.nb!]++;
         t.won = true;
-        text = `${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, equal to e, and swaps in ${L}. It wins.`;
-        if (cur !== UNVISITED) text = `${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, equal to e = ${show(t.e)}, and swaps in ${L}. It "wins" a vertex someone else had already labelled.`;
+        text = tr(`${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, equal to e, and swaps in ${L}. It wins.`, `${who}: ${kind} trên level[${t.nb}] thấy ${show(cur)}, bằng e, và hoán đổi vào ${L}. Nó thắng.`);
+        if (cur !== UNVISITED) text = tr(`${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, equal to e = ${show(t.e)}, and swaps in ${L}. It "wins" a vertex someone else had already labelled.`, `${who}: ${kind} trên level[${t.nb}] thấy ${show(cur)}, bằng e = ${show(t.e)}, và hoán đổi vào ${L}. Nó "thắng" một đỉnh mà luồng khác đã gán nhãn rồi.`);
       } else if (equal) {
         s.spurious++;
         t.won = false;
-        text = `${who}: the weak compare-and-swap on level[${t.nb}] fails spuriously. The values were equal; e stays ${show(t.e)}.`;
+        text = tr(`${who}: the weak compare-and-swap on level[${t.nb}] fails spuriously. The values were equal; e stays ${show(t.e)}.`, `${who}: compare-and-swap dạng weak trên level[${t.nb}] thất bại giả (spurious). Hai giá trị bằng nhau; e vẫn là ${show(t.e)}.`);
       } else {
         t.e = cur;
         t.won = false;
-        text = `${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, not e. It fails and loads ${show(cur)} into e.`;
+        text = tr(`${who}: ${kind} on level[${t.nb}] finds ${show(cur)}, not e. It fails and loads ${show(cur)} into e.`, `${who}: ${kind} trên level[${t.nb}] thấy ${show(cur)}, không phải e. Nó thất bại và nạp ${show(cur)} vào e.`);
       }
       if (t.won) t.pc = 'append';
       else if (f.id === 'weak-loop') t.pc = 'cas';
@@ -311,26 +313,26 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
     case 'reset':
       t.e = UNVISITED;
       t.pc = 'cas';
-      text = `${who} resets e = UNVISITED and tries again.`;
+      text = tr(`${who} resets e = UNVISITED and tries again.`, `${who} đặt lại e = UNVISITED và thử lại.`);
       break;
     case 'test':
       if (t.e === UNVISITED) {
         t.pc = 'cas';
-        text = `${who}: e is still UNVISITED, so the failure was spurious. It tries again.`;
+        text = tr(`${who}: e is still UNVISITED, so the failure was spurious. It tries again.`, `${who}: e vẫn là UNVISITED, nên lần thất bại là giả. Nó thử lại.`);
       } else {
-        text = `${who}: e = ${show(t.e)}, so another thread labelled ${t.nb}. It stops and does not append.`;
+        text = tr(`${who}: e = ${show(t.e)}, so another thread labelled ${t.nb}. It stops and does not append.`, `${who}: e = ${show(t.e)}, nên một luồng khác đã gán nhãn ${t.nb}. Nó dừng và không nối thêm.`);
         nextNb();
       }
       break;
     case 'append': {
       const slot = s.counter++;
       s.frontier[slot] = t.nb!;
-      text = `${who} appends ${t.nb}: fetch_add returns slot ${slot}, and currFrontier[${slot}] = ${t.nb}.`;
+      text = tr(`${who} appends ${t.nb}: fetch_add returns slot ${slot}, and currFrontier[${slot}] = ${t.nb}.`, `${who} nối thêm ${t.nb}: fetch_add trả về ô ${slot}, và currFrontier[${slot}] = ${t.nb}.`);
       nextNb();
       break;
     }
     case 'done':
-      throw new Error('thread already finished');
+      throw new Error('thread already finished'); // i18n-ignore: developer error
   }
   t.steps++;
   const line = (t.pc === 'done' ? f.line.done : f.line[pc]) ?? 0;
@@ -340,12 +342,12 @@ export function step(f: Form, sc: Scenario, st: State, mv: Move): { state: State
 // ---------------------------------------------------------------- outcomes
 export type OutcomeKind = 'correct' | 'duplicate-label' | 'duplicate-entry' | 'missed' | 'wrong-level' | 'never-terminates';
 export const OUTCOME_NAME: Record<OutcomeKind, string> = {
-  correct: 'correct',
-  'duplicate-label': 'duplicate label',
-  'duplicate-entry': 'duplicate frontier entry',
-  missed: 'missed vertex',
-  'wrong-level': 'wrong level',
-  'never-terminates': 'never terminates',
+  get correct() { return tr('correct', 'đúng'); },
+  get 'duplicate-label'() { return tr('duplicate label', 'gán nhãn trùng'); },
+  get 'duplicate-entry'() { return tr('duplicate frontier entry', 'mục frontier trùng'); },
+  get missed() { return tr('missed vertex', 'sót đỉnh'); },
+  get 'wrong-level'() { return tr('wrong level', 'sai mức'); },
+  get 'never-terminates'() { return tr('never terminates', 'không bao giờ kết thúc'); },
 };
 /** Worst first. */
 export const OUTCOME_ORDER: OutcomeKind[] = ['never-terminates', 'wrong-level', 'missed', 'duplicate-entry', 'duplicate-label', 'correct'];
@@ -363,27 +365,27 @@ export function classify(sc: Scenario, st: State): Outcome {
   const wrong = sc.level0.flatMap((L, v) => (L !== UNVISITED && st.level[v] !== L ? [v] : []));
   if (wrong.length) {
     flags.push('wrong-level');
-    notes.push(wrong.map((v) => `vertex ${v} was at level ${sc.level0[v]} and now reads ${show(st.level[v])}`).join('; '));
+    notes.push(wrong.map((v) => tr(`vertex ${v} was at level ${sc.level0[v]} and now reads ${show(st.level[v])}`, `đỉnh ${v} trước đó ở mức ${sc.level0[v]} và giờ đọc ra ${show(st.level[v])}`)).join('; '));
   }
   const missed = sc.expectNew.filter((v) => st.level[v] === UNVISITED);
   if (missed.length) {
     flags.push('missed');
-    notes.push(`vertex ${missed.join(' and ')} is still UNVISITED`);
+    notes.push(tr(`vertex ${missed.join(' and ')} is still UNVISITED`, `đỉnh ${missed.join(' và ')} vẫn là UNVISITED`));
   }
   const seen = new Map<number, number>();
   for (const v of st.frontier) seen.set(v, (seen.get(v) ?? 0) + 1);
   const twice = [...seen].filter(([, c]) => c > 1).map(([v]) => v);
   if (twice.length) {
     flags.push('duplicate-entry');
-    notes.push(`vertex ${twice.join(' and ')} is in the frontier more than once`);
+    notes.push(tr(`vertex ${twice.join(' and ')} is in the frontier more than once`, `đỉnh ${twice.join(' và ')} có mặt trong frontier nhiều hơn một lần`));
   }
   const relabelled = st.writes.flatMap((w, v) => (w > 1 ? [v] : []));
   if (relabelled.length) {
     flags.push('duplicate-label');
-    notes.push(`level[${relabelled.join('] and level[')}] was written more than once`);
+    notes.push(tr(`level[${relabelled.join('] and level[')}] was written more than once`, `level[${relabelled.join('] và level[')}] bị ghi nhiều hơn một lần`));
   }
   const kind = flags[0] ?? 'correct';
-  return { kind, flags, detail: notes.join('; ') || 'every new vertex labelled once, nothing else touched' };
+  return { kind, flags, detail: notes.join('; ') || tr('every new vertex labelled once, nothing else touched', 'mỗi đỉnh mới được gán nhãn một lần, không gì khác bị động tới') };
 }
 
 /** Run the threads one after another, each to its end (the emulator's forward and reversed orders). */
@@ -396,7 +398,7 @@ export function runOrder(f: Form, sc: Scenario, order: 'forward' | 'reverse', bo
   for (const id of ids)
     while (st.threads[id].pc !== 'done') {
       if (st.threads[id].steps >= bound) {
-        return { states, events, outcome: { kind: 'never-terminates', flags: ['never-terminates'], detail: `thread on ${sc.threads[id].vertex} is still looping after ${bound} steps` } };
+        return { states, events, outcome: { kind: 'never-terminates', flags: ['never-terminates'], detail: tr(`thread on ${sc.threads[id].vertex} is still looping after ${bound} steps`, `luồng trên ${sc.threads[id].vertex} vẫn đang lặp sau ${bound} bước`) } };
       }
       const r = step(f, sc, st, { thread: id });
       st = r.state;
@@ -482,7 +484,7 @@ export function enumerate(f: Form, sc: Scenario, opts: { spurious?: number; maxS
       cyclic = true;
       if (!found.has('never-terminates')) {
         const t = sc.threads[mv.thread].vertex;
-        found.set('never-terminates', { example: [...path, mv], detail: `the thread on ${t} comes back to a state it was already in, and can go round for ever` });
+        found.set('never-terminates', { example: [...path, mv], detail: tr(`the thread on ${t} comes back to a state it was already in, and can go round for ever`, `luồng trên ${t} quay lại một trạng thái nó đã ở trước đó, và có thể lặp vòng mãi mãi`) });
       }
       continue;
     }

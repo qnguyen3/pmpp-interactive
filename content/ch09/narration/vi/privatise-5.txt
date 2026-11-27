@@ -1,0 +1,1 @@
+Giờ hãy đếm các phép toán nguyên tử toàn cục. Kernel cơ bản phát ra 24 phép, mỗi điểm ảnh một phép. Kernel đã riêng tư hóa phát ra 11 phép, mỗi khối một phép cho mỗi bin mà khối đó thực sự gặp. Đổi lại, mọi khối phải trả giá để đặt bản sao về 0 và để ghi nhận nó. Cái giá đó chỉ đến một lần cho mỗi khối, đó là lý do phần tiếp theo muốn ít khối hơn nhưng bận hơn.

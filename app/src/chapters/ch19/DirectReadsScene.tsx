@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { BOOK_F, BOOK_LAYER, BOOK_X, directTrace, readsAtStep, readsOfThread, type DirectRead } from '../../sim/cnnlayer';
 
 // "What the direct kernel reads": the book's example (Fig. 19.2) launched as Fig. 19.7 would
@@ -78,16 +79,16 @@ function Stage(f: Frame) {
     <svg
       viewBox="0 0 720 360"
       role="img"
-      aria-label="Animation of the reads made by the direct convolution kernel"
+      aria-label={tr('Animation of the reads made by the direct convolution kernel', 'Hoạt ảnh các lần đọc của kernel tích chập trực tiếp')}
       style={{ width: '100%', maxWidth: 720, display: 'block' }}
       data-xreads={xReads}
       data-freads={fReads}
       data-distinct={distinct}
-      {...Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}`, v]))}
+      {...Object.fromEntries(Object.entries(f.data ?? {}).map(([k, v]) => [`data-${k}`, v] /* i18n-ignore: data attribute name */))}
     >
       {/* the grid */}
-      <text x={GX} y={GY - 22} fontSize="12" fontWeight="600">the grid</text>
-      <text x={GX} y={GY - 8} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>x = output map, y = tile, z = sample</text>
+      <text x={GX} y={GY - 22} fontSize="12" fontWeight="600"><Translated vi="lưới (grid)">the grid</Translated></text>
+      <text x={GX} y={GY - 8} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="x = map đầu ra, y = ô, z = mẫu">x = output map, y = tile, z = sample</Translated></text>
       {[0, 1].map((b) => (
         <g key={b} opacity={op[b]}>
           <rect x={GX + b * (BW + 18)} y={GY} width={BW} height={BW} rx="4" fill="var(--page)"
@@ -103,8 +104,8 @@ function Stage(f: Frame) {
               </g>
             );
           })}
-          <text x={GX + b * (BW + 18) + BW / 2} y={GY + BW + 16} fontSize="11" textAnchor="middle">block ({b}, 0, 0)</text>
-          <text x={GX + b * (BW + 18) + BW / 2} y={GY + BW + 30} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>output map {b}</text>
+          <text x={GX + b * (BW + 18) + BW / 2} y={GY + BW + 16} fontSize="11" textAnchor="middle"><Translated vi={<>khối ({b}, 0, 0)</>}>block ({b}, 0, 0)</Translated></text>
+          <text x={GX + b * (BW + 18) + BW / 2} y={GY + BW + 30} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>map đầu ra {b}</>}>output map {b}</Translated></text>
         </g>
       ))}
 
@@ -112,13 +113,13 @@ function Stage(f: Frame) {
       {f.regs ? (
         <g>
           <text x={GX} y={YY - 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}>
-            registers of block {f.active ?? 0}
+            <Translated vi={<>thanh ghi của khối {f.active ?? 0}</>}>registers of block {f.active ?? 0}</Translated>
           </text>
           {f.regs.map((s, t) => (
             <g key={t}>
               <rect x={GX + (t % 2) * 100} y={YY + 6 + Math.floor(t / 2) * 34} width={92} height={28} rx="2" fill="var(--reg-wash)" stroke="var(--reg)" />
               <text x={GX + (t % 2) * 100 + 46} y={YY + 25 + Math.floor(t / 2) * 34} fontSize="12" textAnchor="middle">
-                acc {s == null ? '0' : s}
+                <Translated vi={<>acc {s == null ? '0' : s}</>}>acc {s == null ? '0' : s}</Translated>
               </text>
             </g>
           ))}
@@ -126,7 +127,7 @@ function Stage(f: Frame) {
       ) : null}
 
       {/* input maps with fetch counts */}
-      <text x={XX} y={XY - 22} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>X: three input maps (global memory)</text>
+      <text x={XX} y={XY - 22} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="X: ba map đầu vào (bộ nhớ toàn cục)">X: three input maps (global memory)</Translated></text>
       {[0, 1, 2].map((c) => (
         <g key={c}>
           {Array.from({ length: MAP }, (_, i) => {
@@ -156,7 +157,7 @@ function Stage(f: Frame) {
       {f.note ? <text x={XX} y={XY + 3 * XC + 30} fontSize="11.5">{f.note}</text> : null}
 
       {/* filters */}
-      <text x={FX} y={FY - 24} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>F: six filters</text>
+      <text x={FX} y={FY - 24} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="F: sáu bộ lọc">F: six filters</Translated></text>
       {[0, 1].map((m) =>
         [0, 1, 2].map((c) => (
           <g key={`${m}${c}`}>
@@ -176,11 +177,11 @@ function Stage(f: Frame) {
         )),
       )}
       {[0, 1].map((m) => (
-        <text key={m} x={FX} y={FY + m * (2 * FC + 22) - 5} fontSize="10" style={{ fill: 'var(--ink-2)' }}>for output map {m}</text>
+        <text key={m} x={FX} y={FY + m * (2 * FC + 22) - 5} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>cho map đầu ra {m}</>}>for output map {m}</Translated></text>
       ))}
 
       {/* outputs */}
-      <text x={YX} y={YY - 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>Y: stored once per thread</text>
+      <text x={YX} y={YY - 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="Y: mỗi luồng ghi một lần">Y: stored once per thread</Translated></text>
       {[0, 1].map((m) => (
         <g key={m}>
           {[0, 1, 2, 3].map((i) => {
@@ -202,17 +203,17 @@ function Stage(f: Frame) {
 
       {/* counters */}
       <g>
-        <text x={430} y={YY + 18} fontSize="12">input reads <tspan fontWeight="650">{xReads}</tspan></text>
-        <text x={430} y={YY + 38} fontSize="12">distinct input values <tspan fontWeight="650">{distinct}</tspan></text>
-        <text x={430} y={YY + 58} fontSize="12">filter reads <tspan fontWeight="650">{fReads}</tspan></text>
+        <text x={430} y={YY + 18} fontSize="12"><Translated vi="số lần đọc đầu vào">input reads</Translated> <tspan fontWeight="650">{xReads}</tspan></text>
+        <text x={430} y={YY + 38} fontSize="12"><Translated vi="số giá trị đầu vào khác nhau">distinct input values</Translated> <tspan fontWeight="650">{distinct}</tspan></text>
+        <text x={430} y={YY + 58} fontSize="12"><Translated vi="số lần đọc bộ lọc">filter reads</Translated> <tspan fontWeight="650">{fReads}</tspan></text>
       </g>
 
       {f.totals != null ? (
         <g opacity={f.totals}>
-          <text x={GX} y={300} fontSize="11.5">input values fetched</text>
+          <text x={GX} y={300} fontSize="11.5"><Translated vi="giá trị đầu vào đã nạp">input values fetched</Translated></text>
           <rect x={GX + 150} y={290} width={(TR.xReads / TR.xReads) * 380} height={13} fill="var(--global)" />
           <text x={GX + 536} y={301} fontSize="11.5">{TR.xReads}</text>
-          <text x={GX} y={322} fontSize="11.5">distinct input values</text>
+          <text x={GX} y={322} fontSize="11.5"><Translated vi="giá trị đầu vào khác nhau">distinct input values</Translated></text>
           <rect x={GX + 150} y={312} width={(TR.distinctX / TR.xReads) * 380} height={13} fill="var(--global-wash)" stroke="var(--global)" />
           <text x={GX + 150 + (TR.distinctX / TR.xReads) * 380 + 6} y={323} fontSize="11.5">{TR.distinctX}</text>
         </g>
@@ -237,16 +238,20 @@ const stepOrder = (b: typeof B0, threads: number[]) =>
 const beats: Beat[] = [
   {
     clip: 'direct-reads-1',
-    label: 'Two blocks',
+    get label() {
+      return tr('Two blocks', 'Hai khối');
+    },
     draw: (p) => (
       <Stage done={[]} blocks={[ramp(p, 0.05, 0.3), ramp(p, 0.3, 0.55)]}
-        headline={`gridDim (${TR.grid.x}, ${TR.grid.y}, ${TR.grid.z}): one block of ${TR.tile} × ${TR.tile} threads per output map`}
+        headline={tr(`gridDim (${TR.grid.x}, ${TR.grid.y}, ${TR.grid.z}): one block of ${TR.tile} × ${TR.tile} threads per output map`, `gridDim (${TR.grid.x}, ${TR.grid.y}, ${TR.grid.z}): mỗi map đầu ra một khối ${TR.tile} × ${TR.tile} luồng`)}
         data={{ beat: 1, blocks: TR.blocks.length }} />
     ),
   },
   {
     clip: 'direct-reads-2',
-    label: 'One thread',
+    get label() {
+      return tr('One thread', 'Một luồng');
+    },
     draw: (p) => {
       const k = Math.min(STEPS, Math.floor(ramp(p, 0.08, 0.92) * STEPS + (p >= 0.92 ? 1 : 0)));
       const done = thread0.slice(0, k);
@@ -254,14 +259,16 @@ const beats: Beat[] = [
       const sum = k ? thread0[k - 1].sum : 0;
       return (
         <Stage done={done} now={now} active={0} regs={[sum, null, null, null]}
-          headline={k ? `step ${k} of ${STEPS}: c = ${thread0[k - 1].c}, p = ${thread0[k - 1].p}, q = ${thread0[k - 1].q}, acc = ${sum}` : 'thread (0, 0) of block 0 computes Y0 (0, 0)'}
+          headline={k ? tr(`step ${k} of ${STEPS}: c = ${thread0[k - 1].c}, p = ${thread0[k - 1].p}, q = ${thread0[k - 1].q}, acc = ${sum}`, `bước ${k} trên ${STEPS}: c = ${thread0[k - 1].c}, p = ${thread0[k - 1].p}, q = ${thread0[k - 1].q}, acc = ${sum}`) : tr('thread (0, 0) of block 0 computes Y0 (0, 0)', 'luồng (0, 0) của khối 0 tính Y0 (0, 0)')}
           data={{ beat: 2, step: k, sum }} />
       );
     },
   },
   {
     clip: 'direct-reads-3',
-    label: 'Four threads',
+    get label() {
+      return tr('Four threads', 'Bốn luồng');
+    },
     draw: (p) => {
       const rest = stepOrder(B0, [1, 2, 3]);
       const k = Math.min(STEPS, Math.floor(ramp(p, 0.05, 0.85) * STEPS + (p >= 0.85 ? 1 : 0)));
@@ -269,30 +276,34 @@ const beats: Beat[] = [
       const now = k > 0 ? rest.slice(3 * (k - 1), 3 * k) : [];
       return (
         <Stage done={done} now={p < 0.85 ? now : []} active={0} regs={regsAfter(B0, done)}
-          note={p >= 0.85 ? `block 0: ${B0.xReads} reads of ${B0.distinctX} values. Centre ×4, edges ×2, corners ×1.` : undefined}
-          headline={p >= 0.85 ? 'neighbouring patches overlap, so the same inputs are fetched again' : `the other three threads, step ${k} of ${STEPS}`}
+          note={p >= 0.85 ? tr(`block 0: ${B0.xReads} reads of ${B0.distinctX} values. Centre ×4, edges ×2, corners ×1.`, `khối 0: ${B0.xReads} lần đọc cho ${B0.distinctX} giá trị. Ô giữa ×4, ô cạnh ×2, ô góc ×1.`) : undefined}
+          headline={p >= 0.85 ? tr('neighbouring patches overlap, so the same inputs are fetched again', 'các vùng lân cận chồng lên nhau, nên cùng những đầu vào bị nạp lại') : tr(`the other three threads, step ${k} of ${STEPS}`, `ba luồng còn lại, bước ${k} trên ${STEPS}`)}
           data={{ beat: 3, step: k }} />
       );
     },
   },
   {
     clip: 'direct-reads-4',
-    label: 'One weight',
+    get label() {
+      return tr('One weight', 'Một trọng số');
+    },
     draw: (p) => {
       const k = Math.min(STEPS - 1, Math.floor(p * STEPS));
       const now = readsAtStep(B0, k);
       const addresses = new Set(now.map((r) => r.fi)).size;
       return (
         <Stage done={B0.reads} now={now} active={0} regs={regsAfter(B0, B0.reads)}
-          note={`step ${k + 1}: ${now.length} threads, ${addresses} filter address`}
-          headline="every step: four input reads, one filter weight shared by all four threads"
+          note={tr(`step ${k + 1}: ${now.length} threads, ${addresses} filter address`, `bước ${k + 1}: ${now.length} luồng, ${addresses} địa chỉ bộ lọc`)}
+          headline={tr('every step: four input reads, one filter weight shared by all four threads', 'mỗi bước: bốn lần đọc đầu vào, một trọng số bộ lọc dùng chung cho cả bốn luồng')}
           data={{ beat: 4, step: k + 1, faddresses: addresses, fthreads: now.length }} />
       );
     },
   },
   {
     clip: 'direct-reads-5',
-    label: 'Block 1',
+    get label() {
+      return tr('Block 1', 'Khối 1');
+    },
     draw: (p) => {
       const order = stepOrder(B1, [0, 1, 2, 3]);
       const k = Math.min(STEPS, Math.floor(ramp(p, 0.05, 0.85) * STEPS + (p >= 0.85 ? 1 : 0)));
@@ -300,24 +311,26 @@ const beats: Beat[] = [
       const now = k > 0 && p < 0.85 ? order.slice(4 * (k - 1), 4 * k) : [];
       return (
         <Stage done={done} now={now} active={1} regs={regsAfter(B1, done)}
-          note={p >= 0.85 ? `block 1 fetched all ${B1.xReads} again: shared memory is private to a block` : undefined}
-          headline={p >= 0.85 ? 'every other output map repeats the whole input traffic' : `block 1, output map 1, step ${k} of ${STEPS}`}
+          note={p >= 0.85 ? tr(`block 1 fetched all ${B1.xReads} again: shared memory is private to a block`, `khối 1 nạp lại cả ${B1.xReads}: bộ nhớ chia sẻ (shared memory) là riêng của từng khối`) : undefined}
+          headline={p >= 0.85 ? tr('every other output map repeats the whole input traffic', 'mỗi map đầu ra khác lặp lại toàn bộ lưu lượng đầu vào') : tr(`block 1, output map 1, step ${k} of ${STEPS}`, `khối 1, map đầu ra 1, bước ${k} trên ${STEPS}`)}
           data={{ beat: 5, step: k }} />
       );
     },
   },
   {
     clip: 'direct-reads-6',
-    label: 'Totals',
+    get label() {
+      return tr('Totals', 'Tổng cộng');
+    },
     draw: (p) => (
       <Stage done={[...B0.reads, ...B1.reads]} totals={ramp(p, 0.05, 0.3)}
-        note={`${TR.xReads} input reads and ${TR.fReads} filter reads for ${TR.flops} operations`}
-        headline={p > 0.45 ? `requested: ${TR.flops} FLOP / ${TR.loadBytes} bytes = ${TR.ratio} FLOP per byte` : `${TR.xReads} input reads for ${TR.distinctX} distinct values`}
+        note={tr(`${TR.xReads} input reads and ${TR.fReads} filter reads for ${TR.flops} operations`, `${TR.xReads} lần đọc đầu vào và ${TR.fReads} lần đọc bộ lọc cho ${TR.flops} phép toán`)}
+        headline={p > 0.45 ? tr(`requested: ${TR.flops} FLOP / ${TR.loadBytes} bytes = ${TR.ratio} FLOP per byte`, `đã yêu cầu: ${TR.flops} FLOP / ${TR.loadBytes} byte = ${TR.ratio} FLOP mỗi byte`) : tr(`${TR.xReads} input reads for ${TR.distinctX} distinct values`, `${TR.xReads} lần đọc đầu vào cho ${TR.distinctX} giá trị khác nhau`)}
         data={{ beat: 6, ratio: TR.ratio }} />
     ),
   },
 ];
 
 export function DirectReadsScene() {
-  return <Scene chapter="ch19" title="What the direct kernel reads" beats={beats} />;
+  return <Scene chapter="ch19" title={tr('What the direct kernel reads', 'Kernel trực tiếp đọc những gì')} beats={beats} />;
 }

@@ -38,6 +38,7 @@
 //     with the bytes 0xCD instead.
 //
 // Erasable TypeScript only, and no imports: the browser checks import this file directly.
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- configuration
 export type Kind = 'single' | 'double';
@@ -61,11 +62,11 @@ export const FIG_11_5: Omit<Config, 'threads'> = { kind: 'double', barrier1: tru
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled' | 'book-race';
 export const SCHEDULES: Schedule[] = ['lockstep', 'in-order', 'reversed', 'shuffled', 'book-race'];
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
-  'book-race': "the book's race: thread 4 runs ahead in the stride-2 step",
+  get lockstep() { return tr('all threads in lockstep', 'mọi luồng chạy đồng bộ từng bước (lockstep)'); },
+  get 'in-order'() { return tr('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước'); },
+  get reversed() { return tr('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước'); },
+  get shuffled() { return tr('random interleaving', 'xen kẽ ngẫu nhiên'); },
+  get 'book-race'() { return tr("the book's race: thread 4 runs ahead in the stride-2 step", 'race condition của sách: luồng 4 chạy trước ở bước stride 2'); },
 };
 /** Pages 257-258: in the stride-2 iteration (iteration 1, counting from 0) thread 4 stores before thread 6 reads. */
 export const RACE = { thread: 4, iter: 1 };
@@ -102,7 +103,7 @@ export function windowCoef(s: number, done: number, B: number): number[] {
 
 /** "x3", "x0..x3", "0", "garbage", or "x0 + 2x1 + 2x2 + x3" for anything that is not a window. */
 export function rangeText(c: Coef, sigma = false): string {
-  if (!c) return 'garbage';
+  if (!c) return tr('garbage', 'rác');
   const on = c.flatMap((v, k) => (v ? [k] : []));
   if (!on.length) return '0';
   const contiguous = on.every((k, j) => j === 0 || k === on[j - 1] + 1) && on.every((k) => c[k] === 1);
@@ -180,9 +181,9 @@ export interface Read {
 
 export type ViolationKind = 'read-before-write' | 'overwritten-before-read' | 'missing-copy';
 export const KIND_LABEL: Record<ViolationKind, string> = {
-  'read-before-write': 'read before write',
-  'overwritten-before-read': 'overwritten before read',
-  'missing-copy': 'copy missing',
+  get 'read-before-write'() { return tr('read before write', 'đọc trước khi ghi'); },
+  get 'overwritten-before-read'() { return tr('overwritten before read', 'bị ghi đè trước khi đọc'); },
+  get 'missing-copy'() { return tr('copy missing', 'thiếu lần sao chép'); },
 };
 
 export interface Violation {
@@ -245,7 +246,7 @@ function mulberry(seed: number) {
   };
 }
 
-const bufName = (cfg: Config, b: number) => (cfg.kind === 'double' ? `buffer${b + 1}_s` : 'buffer_s');
+const bufName = (cfg: Config, b: number) => (cfg.kind === 'double' ? `buffer${b + 1}_s` : 'buffer_s'); // i18n-ignore: variable names in the kernel
 
 /** Iteration of the write a read of `slot` in iteration k should find (k = iterations for the final store). */
 export function expectedWrite(cfg: Config, slot: number, k: number): number {
@@ -254,7 +255,7 @@ export function expectedWrite(cfg: Config, slot: number, k: number): number {
   return Math.min(k - 1, Math.floor(Math.log2(slot)));
 }
 
-const writeName = (s: number, it: number) => (it < 0 ? `x${s} (the load)` : `its iteration-${it} value`);
+const writeName = (s: number, it: number) => (it < 0 ? tr(`x${s} (the load)`, `x${s} (lần nạp)`) : tr(`its iteration-${it} value`, `giá trị vòng lặp ${it} của nó`));
 
 /** Runs one block under one thread order and records every operation. */
 export function run(cfg: Config, values: number[], schedule: Schedule, seed = 1): Trace {
@@ -289,14 +290,14 @@ export function run(cfg: Config, values: number[], schedule: Schedule, seed = 1)
     else if (v.iter === null) kind = noCopy ? 'missing-copy' : 'read-before-write';
     else if (v.iter > expected) kind = 'overwritten-before-read';
     else kind = 'read-before-write';
-    const where = `slot ${slot} of ${bufName(cfg, buf)}`;
-    const foundText = v.iter === null ? 'a slot nobody had written yet' : rangeText(v.coef, true);
+    const where = tr(`slot ${slot} of ${bufName(cfg, buf)}`, `vị trí ${slot} của ${bufName(cfg, buf)}`);
+    const foundText = v.iter === null ? tr('a slot nobody had written yet', 'một vị trí chưa ai ghi') : rangeText(v.coef, true);
     const message =
       kind === 'overwritten-before-read'
-        ? `thread ${t} needed ${rangeText(windowCoef(slot, expected + 1, B), true)} from ${where}, but thread ${slot} had already overwritten it with ${foundText}`
+        ? tr(`thread ${t} needed ${rangeText(windowCoef(slot, expected + 1, B), true)} from ${where}, but thread ${slot} had already overwritten it with ${foundText}`, `luồng ${t} cần ${rangeText(windowCoef(slot, expected + 1, B), true)} từ ${where}, nhưng luồng ${slot} đã ghi đè nó bằng ${foundText}`)
         : kind === 'missing-copy'
-          ? `thread ${t} read ${where}: thread ${slot} was idle in iteration ${expected} and did not copy its value across, so it found ${v.iter === null ? 'a slot nobody ever wrote' : `${foundText}, left from iteration ${v.iter}`}`
-          : `thread ${t} read ${where} before thread ${slot} had written ${writeName(slot, expected)}: it found ${foundText}`;
+          ? tr(`thread ${t} read ${where}: thread ${slot} was idle in iteration ${expected} and did not copy its value across, so it found ${v.iter === null ? 'a slot nobody ever wrote' : `${foundText}, left from iteration ${v.iter}`}`, `luồng ${t} đọc ${where}: luồng ${slot} rảnh ở vòng lặp ${expected} và không sao chép giá trị của nó sang, nên nó thấy ${v.iter === null ? 'một vị trí chưa ai từng ghi' : `${foundText}, còn lại từ vòng lặp ${v.iter}`}`)
+          : tr(`thread ${t} read ${where} before thread ${slot} had written ${writeName(slot, expected)}: it found ${foundText}`, `luồng ${t} đọc ${where} trước khi luồng ${slot} ghi ${writeName(slot, expected)}: nó thấy ${foundText}`);
     const viol: Violation = { kind, step: s.index, thread: t, iter: k, buf, slot, message };
     if (!s.violation) {
       s.violation = viol;
@@ -614,18 +615,18 @@ export function kernelSource(cfg: Omit<Config, 'threads'>): Source {
   };
   const name = kernelName(cfg);
   if (cfg.kind === 'single') {
-    add(`__global__ void ${name}(float *input, float *output, unsigned int N) {`);
-    add('    __shared__ float buffer_s[SEG_SIZE];');
+    add(`__global__ void ${name}(float *input, float *output, unsigned int N) {`); // i18n-ignore: kernel source
+    add('    __shared__ float buffer_s[SEG_SIZE];'); // i18n-ignore: kernel source
     add('    unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;');
     add('    if(i < N) {');
     add('        buffer_s[threadIdx.x] = input[i];', 'load');
-    add('    } else {');
+    add('    } else {'); // i18n-ignore: kernel source
     add('        buffer_s[threadIdx.x] = 0.0f;', 'load');
     add('    }');
-    add('    for(unsigned int stride = 1; stride < blockDim.x; stride *= 2) {');
+    add('    for(unsigned int stride = 1; stride < blockDim.x; stride *= 2) {'); // i18n-ignore: kernel source
     if (cfg.barrier1) add('        __syncthreads();', 'barrier1');
     if (cfg.temp) {
-      add('        float temp;');
+      add('        float temp;'); // i18n-ignore: kernel source
       add('        if(threadIdx.x >= stride)');
       add('            temp = buffer_s[threadIdx.x] + buffer_s[threadIdx.x-stride];', 'read');
       if (cfg.barrier2) add('        __syncthreads();', 'barrier2');
@@ -643,20 +644,20 @@ export function kernelSource(cfg: Omit<Config, 'threads'>): Source {
     add('    }');
     add('}');
   } else {
-    add(`__global__ void ${name}(float* input, float* output, unsigned int N) {`);
+    add(`__global__ void ${name}(float* input, float* output, unsigned int N) {`); // i18n-ignore: kernel source
     add('    unsigned int i = blockIdx.x*blockDim.x + threadIdx.x;');
-    add('    __shared__ float buffer1_s[SEG_SIZE];');
-    add('    __shared__ float buffer2_s[SEG_SIZE];');
+    add('    __shared__ float buffer1_s[SEG_SIZE];'); // i18n-ignore: kernel source
+    add('    __shared__ float buffer2_s[SEG_SIZE];'); // i18n-ignore: kernel source
     add('    float* inBuffer_s = buffer1_s;');
     add('    float* outBuffer_s = buffer2_s;');
     add('    inBuffer_s[threadIdx.x] = (i < N)?input[i]:0.0f;', 'load');
-    add('    for(unsigned int stride = 1; stride < blockDim.x; stride *= 2) {');
+    add('    for(unsigned int stride = 1; stride < blockDim.x; stride *= 2) {'); // i18n-ignore: kernel source
     if (cfg.barrier1) add('        __syncthreads();', 'barrier1');
     add('        if(threadIdx.x >= stride) {');
     add('            outBuffer_s[threadIdx.x] = inBuffer_s[threadIdx.x]', 'add');
-    add('                                       + inBuffer_s[threadIdx.x - stride];', 'add');
+    add('                                       + inBuffer_s[threadIdx.x - stride];', 'add'); // i18n-ignore: kernel source
     if (cfg.copy) {
-      add('        } else {');
+      add('        } else {'); // i18n-ignore: kernel source
       add('            outBuffer_s[threadIdx.x] = inBuffer_s[threadIdx.x];', 'copy');
     }
     add('        }');

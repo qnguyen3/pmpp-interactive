@@ -1,0 +1,1 @@
+Metal có switch riêng của nó trên cùng các số hiệu op. Nhánh case cho RMS norm gọi hàm norm, hàm này báo rằng nó đã dùng 2 nút, norm và phép nhân. Rồi nó xin một pipeline theo một cái tên mà nó viết ra thành chuỗi: kernel, RMS norm, mul, F 32.

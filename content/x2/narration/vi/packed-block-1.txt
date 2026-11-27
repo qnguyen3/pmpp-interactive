@@ -1,0 +1,1 @@
+Ba mươi hai trọng số từ một hàng của ma trận trọng số, trên một trục số. Q4_0 tìm giá trị có độ lớn lớn nhất, và nó giữ lại dấu. Ở đây đó là trọng số 5, ở âm 0.8. Hệ số tỉ lệ là giá trị đó chia cho âm 8: đúng 0.1, mà FP16 lưu thành một số thấp hơn 0.1 một chút xíu.

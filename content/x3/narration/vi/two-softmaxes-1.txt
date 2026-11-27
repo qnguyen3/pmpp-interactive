@@ -1,0 +1,1 @@
+Đây là một hàng gồm 16 logits, và một khối luồng để xử lý nó. Softmax thông thường, theo cách lab 10.3 viết và theo thứ tự MLX dùng trên Metal, bắt đầu bằng một lượt quét chỉ để tìm giá trị lớn nhất. Với hàng này, giá trị lớn nhất là 4.

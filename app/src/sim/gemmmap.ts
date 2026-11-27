@@ -20,6 +20,8 @@
 // guarantees, infra-facts A6). The warp width is a parameter; WARP below is the book's
 // assumption (32 lanes, NVIDIA), not a fact about every GPU.
 
+import { tr } from '../lib/locale.ts';
+
 export interface TileConfig {
   /** Block-level output tile: bM rows by bN columns. */
   bM: number;
@@ -149,12 +151,12 @@ export interface LoadPlan {
 export function loadPlan(height: number, width: number, threads: number, mode: LoadMode = 'scalar'): LoadPlan {
   const vec = mode === 'float4' ? 4 : 1;
   const problems: string[] = [];
-  if (width % vec) problems.push(`the tile is ${width} wide, not a multiple of ${vec}`);
+  if (width % vec) problems.push(tr(`the tile is ${width} wide, not a multiple of ${vec}`, `ô (tile) rộng ${width}, không phải bội số của ${vec}`));
   const perRow = Math.max(1, Math.floor(width / vec));
-  if (threads % perRow) problems.push(`${perRow} accesses per row do not divide ${threads} threads`);
+  if (threads % perRow) problems.push(tr(`${perRow} accesses per row do not divide ${threads} threads`, `${threads} luồng không chia hết cho ${perRow} lần truy cập mỗi hàng`));
   const rowsPerSubTile = Math.max(1, Math.floor(threads / perRow));
   const numSubtiles = mode === 'scalar' ? Math.floor(height / rowsPerSubTile) : cdiv(height, rowsPerSubTile);
-  if (mode === 'scalar' && height % rowsPerSubTile) problems.push(`${rowsPerSubTile} rows per sub-tile do not divide ${height} rows`);
+  if (mode === 'scalar' && height % rowsPerSubTile) problems.push(tr(`${rowsPerSubTile} rows per sub-tile do not divide ${height} rows`, `${height} hàng không chia hết cho ${rowsPerSubTile} hàng mỗi ô con`));
   return { height, width, threads, mode, vec, perRow, rowsPerSubTile, numSubtiles, problems };
 }
 

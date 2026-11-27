@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Translated, tr } from '../../lib/i18n';
 import { attribution, linesText, permalink, shortCommit, type Excerpt as ExcerptData } from '../../sim/x3sources';
 
 // A short quotation from llama.cpp, MLX or PyTorch, as module X3 shows every one (x3-facts A4):
@@ -31,7 +32,7 @@ export function Excerpt({ x, caption, highlight }: { x: ExcerptData; caption?: R
           {lines.map((ln, i) =>
             ln.trim() === '...' ? (
               <span key={i} className="ln" data-n="" style={{ color: 'var(--ink-3)' }}>
-                {'    … lines left out …\n'}
+                {tr('    … lines left out …\n', '    … các dòng được lược bỏ …\n')}
               </span>
             ) : (
               <span key={i} className={'ln' + (hl.has(i + 1) ? ' hl' : '')} data-n={numbered ? String(span![0] + i) : ''}>
@@ -46,9 +47,20 @@ export function Excerpt({ x, caption, highlight }: { x: ExcerptData; caption?: R
         {caption ? <>{caption} </> : null}
         <span className="muted">
           <a href={link} target="_blank" rel="noreferrer" data-permalink>
-            {x.path.split('/').slice(-2).join('/')} at {shortCommit(x.project)}
+            <Translated vi={<>{x.path.split('/').slice(-2).join('/')} tại {shortCommit(x.project)}</>}>
+              {x.path.split('/').slice(-2).join('/')} at {shortCommit(x.project)}
+            </Translated>
           </a>
-          . {attribution(x.project)}. Quoted as read in the facts pass ({x.factsItem}); spacing may differ from the file.
+          <Translated
+            vi={
+              <>
+                . {attribution(x.project)}. Trích đúng như đã đọc trong lượt kiểm tra dữ kiện ({x.factsItem}); khoảng trắng có
+                thể khác với tệp gốc.
+              </>
+            }
+          >
+            . {attribution(x.project)}. Quoted as read in the facts pass ({x.factsItem}); spacing may differ from the file.
+          </Translated>
         </span>
       </figcaption>
     </figure>

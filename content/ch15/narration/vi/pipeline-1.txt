@@ -1,0 +1,1 @@
+Mục trước để lại một khối duy nhất trên mỗi SM. Hãy xem hai phần phần cứng của nó. Phía bộ nhớ nạp các ô A 0 và B 0 trong khi phía tính toán chờ. Sau đó phía tính toán làm việc trong khi bộ nhớ ngồi không. Không có khối thứ hai trên SM, không gì lấp được những khoảng trống đó. Mỗi làn chỉ bận một nửa thời gian.

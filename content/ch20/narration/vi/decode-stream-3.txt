@@ -1,0 +1,1 @@
+Giờ q phẩy gặp mọi khóa trong cache, mỗi hàng một tích vô hướng. Mỗi hàng khóa được đọc từ bộ nhớ một lần, dùng cho đúng một tích vô hướng đó, và không được chạm lại trong bước này. Số byte và số phép toán cùng tăng, vẫn là một phép nhân cộng cho mỗi phần tử được đọc.

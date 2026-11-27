@@ -1,0 +1,1 @@
+Mọi hàng khối khác cũng làm như vậy. Giờ hãy nhìn xuống cột đầu tiên. 4 khối ở đó, mỗi khối nạp cùng một dải B. Trên toàn bộ góc này, mọi dải A và mọi dải B đều được nạp 4 lần, nên số byte được yêu cầu tăng lên gấp 4 lần lượng dữ liệu thực cần.

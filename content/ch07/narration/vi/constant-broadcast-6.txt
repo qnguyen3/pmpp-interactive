@@ -1,0 +1,1 @@
+Đặt cạnh nhau, bộ lọc là trường hợp tốt nhất cho một bộ nhớ đệm hằng. Một địa chỉ cho mỗi điểm lọc, một câu trả lời cho cả warp. Bảng mã thì gần với trường hợp tệ nhất. Phần lớn các mục được xin cùng lúc, và được trả lời từng mục một. Có lẽ đó là lý do phần CUDA của llama.cpp giữ các bảng lượng tử hóa trong bộ nhớ thiết bị thông thường.

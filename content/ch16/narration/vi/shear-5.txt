@@ -1,0 +1,1 @@
+Thu nhỏ ra một bảng 9 nhân 9 gồm các ô 3 nhân 3. Ô vuông mất 5 lần khởi chạy, mỗi lần tối đa 3 ô. Ô đã trượt mất 8 lần, mỗi lần nhiều nhất 2 ô, với các ô không trọn ở cả hai rìa. Vậy bên trong một ô, phép trượt dồn nhiều việc hơn vào mỗi bước, còn bên ngoài thì nó tốn thêm lần khởi chạy.

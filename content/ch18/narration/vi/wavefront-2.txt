@@ -1,0 +1,1 @@
+Giờ hãy chạy nó với kernel push lấy đỉnh làm trung tâm. Mỗi lời gọi khởi chạy một luồng cho mỗi ô trống, tổng cộng 197 luồng. Chỉ các luồng trên làn sóng cuối cùng là có việc. Số còn lại kiểm tra ô của chính mình, thấy nó không nằm trên làn sóng, và dừng. Đến cuối, 31 lời gọi đã khởi chạy 6107 luồng.

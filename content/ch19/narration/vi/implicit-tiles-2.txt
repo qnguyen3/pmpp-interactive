@@ -1,0 +1,1 @@
+Giai đoạn 0. Ô F được nạp đúng như trong bất kỳ phép nhân ma trận phân ô nào. Ô B thì khác. Mỗi luồng tính ra, bằng phương trình 19.5, điểm ảnh đầu vào nào mà vị trí của nó chép, và đọc thẳng từ X. 3 điểm ảnh đầu vào lấp đầy 4 vị trí, và 1 trong số chúng nằm ở 2 vị trí.

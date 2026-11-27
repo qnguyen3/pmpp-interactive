@@ -1,0 +1,1 @@
+Giờ hãy đổi chỗ các vòng lặp, để bước dọc theo chiều trong được đặt lên trước. Ở bước 0, luồng sao chép cột 0 trong các hàng A của nó vào 8 thanh ghi, gọi là dải A, và hàng 0 trong các cột B của nó vào 8 thanh ghi nữa, gọi là dải B. Đó là 16 lần đọc từ bộ nhớ chia sẻ, và không thêm lần nào cho bước này.

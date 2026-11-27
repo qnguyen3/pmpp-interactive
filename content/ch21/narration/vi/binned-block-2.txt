@@ -1,0 +1,1 @@
+Khối lấy độ lệch đầu tiên. Cả 16 luồng cùng nhau nạp các nguyên tử của ngăn đó vào bộ nhớ chia sẻ. Mọi ngăn đều có cùng 4 vị trí, nên các vị trí trống chứa nguyên tử giả với điện tích bằng không. Rồi một rào chắn chờ cho đến khi cả ngăn đã vào chỗ.

@@ -1,0 +1,1 @@
+Half thậm chí không lưu được chính xác tích đầu tiên. Giữa 8,192 và 16,384, các bước của nó cách nhau 8, nên 16,129 thành 16,128. Tích thứ tư đưa tổng lên 64,512. Tích thứ năm vượt quá 65,504, giá trị half hữu hạn lớn nhất, và tổng trở thành vô cực. Nó cứ thế là vô cực.

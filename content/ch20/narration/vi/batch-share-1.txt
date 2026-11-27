@@ -1,0 +1,1 @@
+Một bước decode cho một yêu cầu. Trọng số của các phép chiếu được đọc từ bộ nhớ một lần, để tạo ra một hàng duy nhất. Rồi cache riêng của yêu cầu này được đọc một lần, cho attention của nó. Cả hai lượt đều làm khoảng một phép nhân cộng cho mỗi phần tử chúng đọc.

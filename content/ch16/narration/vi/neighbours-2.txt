@@ -1,0 +1,1 @@
+Trước hết, khởi chạy lại sau mỗi mặt sóng. Không ô nào được bắt đầu cho đến khi cả mặt sóng trước nó xong hẳn. Các mặt sóng chỉ có 1 ô hay 3 ô để một lane trống trong một bước, được viền đỏ. Hãy đếm số bước: 10, cho 16 ô trên 2 lane. Khởi chạy lại buộc mọi ô phải chờ cả mặt sóng trước đó.

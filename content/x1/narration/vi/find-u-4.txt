@@ -1,0 +1,1 @@
+Giờ các lane bỏ phiếu. Trong mỗi warp, một ballot gom các cờ lại, và lane bật cờ thấp nhất được tìm ra từ các bit của nó. Giữa các warp, warp bật cờ thấp nhất thắng. Chính lane đó ghi vị trí token còn lại của nó, và hàng có được token của mình.

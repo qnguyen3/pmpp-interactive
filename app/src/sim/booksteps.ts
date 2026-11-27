@@ -8,6 +8,7 @@
 // prefix of their id, so a chapter whose labs have never been run shows none.
 import { labStatus, type Reports } from '../lib/reports';
 import type { PlanRow } from '../chapters/types';
+import { tr } from '../lib/locale.ts';
 
 /**
  * Backends that are a GPU. Both emulators are left out: `emu` and its race-detection
@@ -18,10 +19,30 @@ export const gpuBackends = (r: Reports) => Object.keys(r).filter((b) => b !== 'e
 export type Step = 1 | 2 | 3 | 'outside';
 
 export const STEPS: { step: Step; name: string; chapters: string; what: string }[] = [
-  { step: 1, name: 'Step one', chapters: 'chapters 2 to 6', what: 'Kernels, thread-to-data mapping, the execution and memory model, the optimisation checklist.' },
-  { step: 2, name: 'Step two', chapters: 'chapters 7 to 15', what: 'Parallel patterns, each one a vehicle for the step-one optimisations.' },
-  { step: 3, name: 'Step three', chapters: 'chapters 16 to 23', what: 'Advanced patterns and applications: alternative decompositions and their data structures.' },
-  { step: 'outside', name: "Outside the book's steps", chapters: 'chapters 1 and 24, the appendices, our modules', what: 'Framing, reference material, and the three modules this course adds.' },
+  {
+    step: 1,
+    get name() { return tr('Step one', 'Bước một'); },
+    get chapters() { return tr('chapters 2 to 6', 'chương 2 đến 6'); },
+    get what() { return tr('Kernels, thread-to-data mapping, the execution and memory model, the optimisation checklist.', 'Kernel, ánh xạ luồng tới dữ liệu, mô hình thực thi và mô hình bộ nhớ, danh sách kiểm tra tối ưu hóa.'); },
+  },
+  {
+    step: 2,
+    get name() { return tr('Step two', 'Bước hai'); },
+    get chapters() { return tr('chapters 7 to 15', 'chương 7 đến 15'); },
+    get what() { return tr('Parallel patterns, each one a vehicle for the step-one optimisations.', 'Các mẫu song song, mỗi mẫu là một phương tiện để áp dụng các tối ưu hóa của bước một.'); },
+  },
+  {
+    step: 3,
+    get name() { return tr('Step three', 'Bước ba'); },
+    get chapters() { return tr('chapters 16 to 23', 'chương 16 đến 23'); },
+    get what() { return tr('Advanced patterns and applications: alternative decompositions and their data structures.', 'Các mẫu và ứng dụng nâng cao: những cách phân rã khác và cấu trúc dữ liệu của chúng.'); },
+  },
+  {
+    step: 'outside',
+    get name() { return tr("Outside the book's steps", 'Ngoài các bước của sách'); },
+    get chapters() { return tr('chapters 1 and 24, the appendices, our modules', 'chương 1 và 24, các phụ lục, các module của khóa học này'); },
+    get what() { return tr('Framing, reference material, and the three modules this course adds.', 'Phần định hướng, tài liệu tham khảo và ba module mà khóa học này bổ sung.'); },
+  },
 ];
 
 /** The step the book assigns a chapter to on pp. 577–578; 'outside' for everything it does not place. */
@@ -45,12 +66,12 @@ export interface Goal {
   everyLab?: boolean;
 }
 export const GOALS: Goal[] = [
-  { id: 'matmul', label: 'matmul', chapters: ['ch03', 'ch04', 'ch05', 'ch06', 'ch15', 'ch19'] },
-  { id: 'attention', label: 'attention', chapters: ['ch10', 'ch20', 'ch22'] },
-  { id: 'sampling', label: 'sampling', chapters: ['ch09', 'ch10', 'ch11', 'ch12', 'ch14', 'x1'] },
-  { id: 'quantised', label: 'quantised ops', chapters: ['appA', 'ch15', 'x2'] },
-  { id: 'backends', label: 'other backends', chapters: ['appC', 'x3'], everyLab: true },
-  { id: 'reading', label: 'reading real code', chapters: ['ch19', 'x3'] },
+  { id: 'matmul', get label() { return tr('matmul', 'matmul'); }, chapters: ['ch03', 'ch04', 'ch05', 'ch06', 'ch15', 'ch19'] },
+  { id: 'attention', get label() { return tr('attention', 'attention'); }, chapters: ['ch10', 'ch20', 'ch22'] },
+  { id: 'sampling', get label() { return tr('sampling', 'lấy mẫu'); }, chapters: ['ch09', 'ch10', 'ch11', 'ch12', 'ch14', 'x1'] },
+  { id: 'quantised', get label() { return tr('quantised ops', 'phép toán lượng tử hóa'); }, chapters: ['appA', 'ch15', 'x2'] },
+  { id: 'backends', get label() { return tr('other backends', 'các backend khác'); }, chapters: ['appC', 'x3'], everyLab: true },
+  { id: 'reading', get label() { return tr('reading real code', 'đọc mã thật'); }, chapters: ['ch19', 'x3'] },
 ];
 export const goal = (id: GoalId) => GOALS.find((g) => g.id === id)!;
 

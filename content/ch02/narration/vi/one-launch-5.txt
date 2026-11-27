@@ -1,0 +1,1 @@
+Giờ đến điều kiện chặn. Trong khối 2, các luồng có i bằng 22 và 23 dừng lại. Mọi luồng khác nạp từ A và B, và lưu vào C. [short pause] C được lấp đầy từng mảng cỡ một khối, và không theo thứ tự chỉ số. Rồi khối 1 chạy.

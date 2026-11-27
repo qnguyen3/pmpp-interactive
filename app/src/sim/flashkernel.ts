@@ -37,6 +37,8 @@
 // double precision, so only structural errors show), and uninitialised shared memory is
 // NaN (the worst case).
 
+import { tr } from '../lib/locale.ts';
+
 export type InitMax = 'sentinel' | 'neg-inf';
 export type TileOrder = 'ltr' | 'rtl';
 
@@ -62,12 +64,20 @@ export type LaneSchedule = 'lockstep' | 'apart';
 export type WarpSchedule = 'together' | 'ahead';
 
 export const LANE_LABEL: Record<LaneSchedule, string> = {
-  lockstep: 'lanes in lockstep',
-  apart: 'lanes run apart between warp barriers',
+  get lockstep() {
+    return tr('lanes in lockstep', 'các lane chạy đồng bộ từng bước (lockstep)');
+  },
+  get apart() {
+    return tr('lanes run apart between warp barriers', 'các lane chạy lệch nhau giữa các rào chắn warp');
+  },
 };
 export const WARP_LABEL: Record<WarpSchedule, string> = {
-  together: 'warps take turns',
-  ahead: 'warp 0 runs ahead',
+  get together() {
+    return tr('warps take turns', 'các warp chạy lần lượt');
+  },
+  get ahead() {
+    return tr('warp 0 runs ahead', 'warp 0 chạy trước');
+  },
 };
 
 /** The corrected kernel at the toy size: 12 rows, d = 8, 2 warps of 4 lanes, 2 rows each, B_c = 4. */
@@ -87,10 +97,10 @@ export const TOY: KConfig = {
 
 export type DefectId = 'noSyncwarp' | 'newMax' | 'noBarrierAfter' | 'negInfRtl';
 export const DEFECTS: { id: DefectId; label: string; apply: Partial<KConfig> }[] = [
-  { id: 'noSyncwarp', label: 'no __syncwarp before compute_O', apply: { syncwarp: false } },
-  { id: 'newMax', label: 'update_m_and_D returns the new max', apply: { returnsNewMax: true } },
-  { id: 'noBarrierAfter', label: 'no barrier after the warp loop', apply: { barrierAfter: false } },
-  { id: 'negInfRtl', label: 'start m at minus infinity and go right to left', apply: { init: 'neg-inf', order: 'rtl' } },
+  { id: 'noSyncwarp', get label() { return tr('no __syncwarp before compute_O', 'không có __syncwarp trước compute_O'); }, apply: { syncwarp: false } },
+  { id: 'newMax', get label() { return tr('update_m_and_D returns the new max', 'update_m_and_D trả về max mới'); }, apply: { returnsNewMax: true } },
+  { id: 'noBarrierAfter', get label() { return tr('no barrier after the warp loop', 'không có rào chắn sau vòng lặp warp'); }, apply: { barrierAfter: false } },
+  { id: 'negInfRtl', get label() { return tr('start m at minus infinity and go right to left', 'khởi đầu m bằng âm vô cùng và đi từ phải sang trái'); }, apply: { init: 'neg-inf', order: 'rtl' } },
 ];
 export function withDefects(base: KConfig, on: DefectId[]): KConfig {
   return DEFECTS.filter((x) => on.includes(x.id)).reduce((c, x) => ({ ...c, ...x.apply }), base);
@@ -299,7 +309,7 @@ export function fmtv(x: number): string {
   const r = Math.round(x * 1000) / 1000;
   return (Object.is(r, -0) ? 0 : r).toString().replace('-', '−');
 }
-const span = (xs: number[]) => (xs.length === 1 ? String(xs[0]) : xs.length === 2 ? `${xs[0]} and ${xs[1]}` : `${xs[0]} to ${xs[xs.length - 1]}`);
+const span = (xs: number[]) => (xs.length === 1 ? String(xs[0]) : xs.length === 2 ? tr(`${xs[0]} and ${xs[1]}`, `${xs[0]} và ${xs[1]}`) : tr(`${xs[0]} to ${xs[xs.length - 1]}`, `${xs[0]} đến ${xs[xs.length - 1]}`));
 
 /** Runs one block (Q panel `panel`) under the given schedules and records every event. */
 export function runBlock(
@@ -391,7 +401,7 @@ export function runBlock(
     const s: KStep = { index: steps.length, warp: w, lanes: lanes.slice(), op: p.op, tile, ii, text: '', touch: [] };
     if (p.op === 'syncthreads') s.barrier = p.barrier;
     steps.push(s);
-    const who = lanes.length === W ? `Warp ${w}` : `Lane ${lanes[0]} of warp ${w}`;
+    const who = lanes.length === W ? tr(`Warp ${w}`, `Warp ${w}`) : tr(`Lane ${lanes[0]} of warp ${w}`, `Lane ${lanes[0]} của warp ${w}`);
     const lr = ii == null ? 0 : w * c.brWarp + ii;
     const row = ii == null ? 0 : rowOf(w, ii);
 
@@ -412,8 +422,14 @@ export function runBlock(
         s.touch.push({ array: 'Q', cells, write: false });
         s.text =
           lanes.length === W
-            ? `${who} loads its rows of Q (${rows.length ? 'rows ' + span(rows) : 'none: past N, zero-filled'}) into registers. Lane L takes columns L and L + ${W}${DS > 2 ? ', ...' : ''} of each row, so the ${W} lanes read ${W} neighbouring elements at a time.`
-            : `${who} loads Q columns ${laneElementsList(lanes[0], c)} of rows ${span(Array.from({ length: c.brWarp }, (_, i2) => rowOf(w, i2)))} into its registers${rows.length < c.brWarp ? ' (rows past N are zero-filled)' : ''}.`;
+            ? tr(
+                `${who} loads its rows of Q (${rows.length ? 'rows ' + span(rows) : 'none: past N, zero-filled'}) into registers. Lane L takes columns L and L + ${W}${DS > 2 ? ', ...' : ''} of each row, so the ${W} lanes read ${W} neighbouring elements at a time.`,
+                `${who} nạp các hàng Q của nó (${rows.length ? 'hàng ' + span(rows) : 'không có: đã quá N, điền số 0'}) vào thanh ghi. Lane L lấy các cột L và L + ${W}${DS > 2 ? ', ...' : ''} của mỗi hàng, nên ${W} lane đọc ${W} phần tử liền kề mỗi lần.`,
+              )
+            : tr(
+                `${who} loads Q columns ${laneElementsList(lanes[0], c)} of rows ${span(Array.from({ length: c.brWarp }, (_, i2) => rowOf(w, i2)))} into its registers${rows.length < c.brWarp ? ' (rows past N are zero-filled)' : ''}.`,
+                `${who} nạp các cột Q ${laneElementsList(lanes[0], c)} của các hàng ${span(Array.from({ length: c.brWarp }, (_, i2) => rowOf(w, i2)))} vào thanh ghi của nó${rows.length < c.brWarp ? ' (các hàng quá N được điền số 0)' : ''}.`,
+              );
         break;
       }
       case 'load_KT_and_V': {
@@ -441,8 +457,11 @@ export function runBlock(
         const dds = ts.filter((t) => t < c.d);
         const k0 = p.tile * c.bc;
         s.text = dds.length
-          ? `${lanes.length === W ? `${who} (threads ${span(ts)})` : `Thread ${ts[0]}`} copies column${dds.length > 1 ? 's' : ''} ${span(dds)} of K rows ${span(range(k0, Math.min(k0 + c.bc, c.n)))} into KT_j, transposed (K row jj becomes column jj), and the same part of V into V_j: tile ${p.tile}.${k0 + c.bc > c.n ? ' Rows past N are zero-filled.' : ''}`
-          : `${who}: no thread here has a column to load (d = ${c.d}).`;
+          ? tr(
+              `${lanes.length === W ? `${who} (threads ${span(ts)})` : `Thread ${ts[0]}`} copies column${dds.length > 1 ? 's' : ''} ${span(dds)} of K rows ${span(range(k0, Math.min(k0 + c.bc, c.n)))} into KT_j, transposed (K row jj becomes column jj), and the same part of V into V_j: tile ${p.tile}.${k0 + c.bc > c.n ? ' Rows past N are zero-filled.' : ''}`,
+              `${lanes.length === W ? `${who} (các luồng ${span(ts)})` : `Luồng ${ts[0]}`} sao chép ${dds.length > 1 ? 'các cột' : 'cột'} ${span(dds)} của các hàng K ${span(range(k0, Math.min(k0 + c.bc, c.n)))} vào KT_j, có chuyển vị (hàng jj của K thành cột jj), và phần tương ứng của V vào V_j: ô ${p.tile}.${k0 + c.bc > c.n ? ' Các hàng quá N được điền số 0.' : ''}`,
+            )
+          : tr(`${who}: no thread here has a column to load (d = ${c.d}).`, `${who}: không luồng nào ở đây có cột để nạp (d = ${c.d}).`);
         break;
       }
       case 'syncthreads':
@@ -450,8 +469,11 @@ export function runBlock(
         for (const L of lanes) waiting[w * W + L] = p.op;
         s.text =
           p.op === 'syncwarp'
-            ? `${who} reaches __syncwarp() and waits for the other lanes of its warp.`
-            : `${who} reaches the block barrier ${s.barrier === 'load' ? 'after the loads' : 'after the warp loop'} and waits.`;
+            ? tr(`${who} reaches __syncwarp() and waits for the other lanes of its warp.`, `${who} đến __syncwarp() và chờ các lane khác của warp mình.`)
+            : tr(
+                `${who} reaches the block barrier ${s.barrier === 'load' ? 'after the loads' : 'after the warp loop'} and waits.`,
+                `${who} đến rào chắn của khối ${s.barrier === 'load' ? 'sau các lần nạp' : 'sau vòng lặp warp'} và chờ.`,
+              );
         return; // the pc moves when the barrier opens
       }
       case 'compute_S_and_max': {
@@ -482,12 +504,15 @@ export function runBlock(
                 if (KTtile[at] !== p.tile)
                   flag(s, {
                     kind: 'kt-tile',
-                    message: `lane ${L} read KT_j[${dd}][${jj}] for tile ${p.tile}, but it holds ${KTtile[at] < 0 ? 'nothing yet' : `tile ${KTtile[at]}'s value: another warp had already loaded the next tile over it`}`,
+                    message: tr(
+                      `lane ${L} read KT_j[${dd}][${jj}] for tile ${p.tile}, but it holds ${KTtile[at] < 0 ? 'nothing yet' : `tile ${KTtile[at]}'s value: another warp had already loaded the next tile over it`}`,
+                      `lane ${L} đọc KT_j[${dd}][${jj}] cho ô ${p.tile}, nhưng nó đang chứa ${KTtile[at] < 0 ? 'chưa có gì' : `giá trị của ô ${KTtile[at]}: một warp khác đã nạp ô kế tiếp đè lên nó`}`,
+                    ),
                   });
                 acc += regs[w * W + (dd % W)].Q[p.ii][Math.floor(dd / W)] * KT[at];
               }
               v = prob.scaling * acc;
-              shown.push(`col ${col}: ${fmtv(v)}`);
+              shown.push(tr(`col ${col}: ${fmtv(v)}`, `cột ${col}: ${fmtv(v)}`));
             }
             S[lr * c.bc + jj] = v;
             Skind[lr * c.bc + jj] = 'S';
@@ -500,13 +525,21 @@ export function runBlock(
         s.touch.push({ array: 'KT', cells: ktCells, write: false }, { array: 'S', cells: written, write: true });
         const noCol = lanes.filter((L) => !laneCols(c, L).length);
         s.text =
-          `${who}, row ${row}, tile ${p.tile}: ` +
+          tr(`${who}, row ${row}, tile ${p.tile}: `, `${who}, hàng ${row}, ô ${p.tile}: `) +
           (written.length
-            ? `${lanes.length === W ? 'each lane' : 'it'} builds ${lanes.length === W ? 'its column’s' : 'its'} score from ${c.d} Q elements, each broadcast by its owner lane with a shuffle, then scales it. ` +
-              (shown.length ? `Scores ${shown.join(', ')}. ` : '') +
-              (maskedCols.length ? `Column${maskedCols.length > 1 ? 's' : ''} ${span(maskedCols)} ${maskedCols.length > 1 ? 'are' : 'is'} masked by index. ` : '')
-            : `${noCol.length ? 'no column of this tile belongs to it; it brings the identity to the reduction. ' : ''}`) +
-          `Warp max ${fmtv(co.max)}, now in every lane.`;
+            ? tr(
+                `${lanes.length === W ? 'each lane' : 'it'} builds ${lanes.length === W ? 'its column’s' : 'its'} score from ${c.d} Q elements, each broadcast by its owner lane with a shuffle, then scales it. `,
+                `${lanes.length === W ? 'mỗi lane' : 'nó'} tạo điểm số ${lanes.length === W ? 'của cột mình' : 'của nó'} từ ${c.d} phần tử Q, mỗi phần tử do lane sở hữu nó broadcast bằng một shuffle, rồi nhân tỉ lệ. `,
+              ) +
+              (shown.length ? tr(`Scores ${shown.join(', ')}. `, `Điểm số ${shown.join(', ')}. `) : '') +
+              (maskedCols.length
+                ? tr(
+                    `Column${maskedCols.length > 1 ? 's' : ''} ${span(maskedCols)} ${maskedCols.length > 1 ? 'are' : 'is'} masked by index. `,
+                    `${maskedCols.length > 1 ? 'Các cột' : 'Cột'} ${span(maskedCols)} bị che (mask) theo chỉ số. `,
+                  )
+                : '')
+            : `${noCol.length ? tr('no column of this tile belongs to it; it brings the identity to the reduction. ', 'không cột nào của ô này thuộc về nó; nó mang phần tử đơn vị (identity) vào phép rút gọn. ') : ''}`) +
+          tr(`Warp max ${fmtv(co.max)}, now in every lane.`, `Giá trị max của warp ${fmtv(co.max)}, nay có ở mọi lane.`);
         break;
       }
       case 'update_m_and_D': {
@@ -529,11 +562,16 @@ export function runBlock(
         }
         const r0 = regs[w * W + lanes[0]];
         s.text =
-          `${who}, row ${row}: ` +
+          tr(`${who}, row ${row}: `, `${who}, hàng ${row}: `) +
           (rose
-            ? `the max rises from ${fmtv(mOld)} to ${fmtv(r0.m[p.ii])}, so D is multiplied by e^(${fmtv(mOld)} − ${fmtv(r0.m[p.ii])}) = ${fmtv(factor)}: ${fmtv(before)} → ${fmtv(r0.D[p.ii])}. `
-            : `the max stays ${fmtv(r0.m[p.ii])}; D stays ${fmtv(r0.D[p.ii])}. `) +
-          (c.returnsNewMax ? `It returns the new max ${fmtv(r0.m[p.ii])} (the defect).` : `It returns the old max ${fmtv(mOld)} for compute_O.`);
+            ? tr(
+                `the max rises from ${fmtv(mOld)} to ${fmtv(r0.m[p.ii])}, so D is multiplied by e^(${fmtv(mOld)} − ${fmtv(r0.m[p.ii])}) = ${fmtv(factor)}: ${fmtv(before)} → ${fmtv(r0.D[p.ii])}. `,
+                `max tăng từ ${fmtv(mOld)} lên ${fmtv(r0.m[p.ii])}, nên D được nhân với e^(${fmtv(mOld)} − ${fmtv(r0.m[p.ii])}) = ${fmtv(factor)}: ${fmtv(before)} → ${fmtv(r0.D[p.ii])}. `,
+              )
+            : tr(`the max stays ${fmtv(r0.m[p.ii])}; D stays ${fmtv(r0.D[p.ii])}. `, `max giữ nguyên ${fmtv(r0.m[p.ii])}; D giữ nguyên ${fmtv(r0.D[p.ii])}. `)) +
+          (c.returnsNewMax
+            ? tr(`It returns the new max ${fmtv(r0.m[p.ii])} (the defect).`, `Nó trả về max mới ${fmtv(r0.m[p.ii])} (lỗi cài sẵn).`)
+            : tr(`It returns the old max ${fmtv(mOld)} for compute_O.`, `Nó trả về max cũ ${fmtv(mOld)} cho compute_O.`));
         break;
       }
       case 'compute_P_and_update_D': {
@@ -560,9 +598,14 @@ export function runBlock(
         }
         s.touch.push({ array: 'S', cells: written, write: true });
         s.text =
-          `${who}, row ${row}: ` +
-          (written.length ? `overwrites ${written.length > 1 ? 'the scores' : 'its score'} in place with e^(s − m) = ${ps.length > 1 ? '[' + ps.join(', ') + ']' : ps[0]}; masked columns get 0. ` : '') +
-          `Warp sum ${fmtv(co.sum)} joins D: ${fmtv(regs[w * W + lanes[0]].D[p.ii])}.`;
+          tr(`${who}, row ${row}: `, `${who}, hàng ${row}: `) +
+          (written.length
+            ? tr(
+                `overwrites ${written.length > 1 ? 'the scores' : 'its score'} in place with e^(s − m) = ${ps.length > 1 ? '[' + ps.join(', ') + ']' : ps[0]}; masked columns get 0. `,
+                `ghi đè ${written.length > 1 ? 'các điểm số' : 'điểm số của nó'} tại chỗ bằng e^(s − m) = ${ps.length > 1 ? '[' + ps.join(', ') + ']' : ps[0]}; các cột bị che nhận 0. `,
+              )
+            : '') +
+          tr(`Warp sum ${fmtv(co.sum)} joins D: ${fmtv(regs[w * W + lanes[0]].D[p.ii])}.`, `Tổng của warp ${fmtv(co.sum)} được cộng vào D: ${fmtv(regs[w * W + lanes[0]].D[p.ii])}.`);
         break;
       }
       case 'compute_O': {
@@ -587,16 +630,28 @@ export function runBlock(
                   kind: 'stale-P',
                   message:
                     Skind[at] === 'none'
-                      ? `lane ${L} read P[${row}][col ${p.tile * c.bc + jj}] before lane ${owner} had written anything there: the slot is uninitialised`
+                      ? tr(
+                          `lane ${L} read P[${row}][col ${p.tile * c.bc + jj}] before lane ${owner} had written anything there: the slot is uninitialised`,
+                          `lane ${L} đọc P[${row}][cột ${p.tile * c.bc + jj}] trước khi lane ${owner} ghi bất cứ gì vào đó: vị trí này chưa được khởi tạo`,
+                        )
                       : Skind[at] === 'S' && Stile[at] === p.tile
-                        ? `lane ${L} read slot ${jj} of row ${row} while it still held lane ${owner}'s raw score, not yet exponentiated`
-                        : `lane ${L} read slot ${jj} of row ${row} before lane ${owner} had written this tile's P: it found ${Stile[at] === p.tile ? 'a score' : `tile ${Stile[at]}'s leftover`}`,
+                        ? tr(
+                            `lane ${L} read slot ${jj} of row ${row} while it still held lane ${owner}'s raw score, not yet exponentiated`,
+                            `lane ${L} đọc vị trí ${jj} của hàng ${row} khi nó vẫn chứa điểm số thô của lane ${owner}, chưa lấy mũ`,
+                          )
+                        : tr(
+                            `lane ${L} read slot ${jj} of row ${row} before lane ${owner} had written this tile's P: it found ${Stile[at] === p.tile ? 'a score' : `tile ${Stile[at]}'s leftover`}`,
+                            `lane ${L} đọc vị trí ${jj} của hàng ${row} trước khi lane ${owner} ghi P của ô này: nó gặp ${Stile[at] === p.tile ? 'một điểm số' : `phần còn sót của ô ${Stile[at]}`}`,
+                          ),
                 });
               }
               if (Vtile[va] !== p.tile)
                 flag(s, {
                   kind: 'v-tile',
-                  message: `lane ${L} read V_j[${jj}][${dd}] for tile ${p.tile}, but it holds ${Vtile[va] < 0 ? 'nothing yet' : `tile ${Vtile[va]}'s value: another warp had already loaded the next tile over it`}`,
+                  message: tr(
+                    `lane ${L} read V_j[${jj}][${dd}] for tile ${p.tile}, but it holds ${Vtile[va] < 0 ? 'nothing yet' : `tile ${Vtile[va]}'s value: another warp had already loaded the next tile over it`}`,
+                    `lane ${L} đọc V_j[${jj}][${dd}] cho ô ${p.tile}, nhưng nó đang chứa ${Vtile[va] < 0 ? 'chưa có gì' : `giá trị của ô ${Vtile[va]}: một warp khác đã nạp ô kế tiếp đè lên nó`}`,
+                  ),
                 });
               acc += S[at] * Vj[va];
             }
@@ -606,8 +661,11 @@ export function runBlock(
         }
         s.touch.push({ array: 'S', cells: sCells, write: false }, { array: 'Vj', cells: vCells, write: false });
         s.text =
-          `${who}, row ${row}: ` +
-          `${lanes.length === W ? 'each lane multiplies its O elements' : 'it multiplies its O elements'} by e^(old max − new max) = ${fmtv(factor)}${factor === 1 ? ' (the max did not rise' + (c.returnsNewMax ? ', or so the defect says' : '') + ')' : ''}, then adds the P row times its column${DS > 1 ? 's' : ''} of V_j, reading P elements ${lanes.length === W ? 'other lanes wrote' : 'written by every lane'}.`;
+          tr(`${who}, row ${row}: `, `${who}, hàng ${row}: `) +
+          tr(
+            `${lanes.length === W ? 'each lane multiplies its O elements' : 'it multiplies its O elements'} by e^(old max − new max) = ${fmtv(factor)}${factor === 1 ? ' (the max did not rise' + (c.returnsNewMax ? ', or so the defect says' : '') + ')' : ''}, then adds the P row times its column${DS > 1 ? 's' : ''} of V_j, reading P elements ${lanes.length === W ? 'other lanes wrote' : 'written by every lane'}.`,
+            `${lanes.length === W ? 'mỗi lane nhân các phần tử O của mình' : 'nó nhân các phần tử O của mình'} với e^(max cũ − max mới) = ${fmtv(factor)}${factor === 1 ? ' (max không tăng' + (c.returnsNewMax ? ', hoặc lỗi cài sẵn báo như vậy' : '') + ')' : ''}, rồi cộng thêm hàng P nhân với ${DS > 1 ? 'các cột' : 'cột'} V_j của mình, đọc các phần tử P ${lanes.length === W ? 'do các lane khác ghi' : 'do mọi lane ghi'}.`,
+          );
         break;
       }
       case 'store_O': {
@@ -631,8 +689,11 @@ export function runBlock(
         }
         s.touch.push({ array: 'O', cells, write: true });
         s.text = rows.length
-          ? `${who} divides O by D once and writes ${rows.length > 1 ? 'rows' : 'row'} ${span(rows)} of O${lanes.includes(0) ? `, and L = m + log D for each (${rows.map((g) => fmtv(stored[g].L)).join(', ')})` : ''}.`
-          : `${who}: its rows are past N, so nothing is stored.`;
+          ? tr(
+              `${who} divides O by D once and writes ${rows.length > 1 ? 'rows' : 'row'} ${span(rows)} of O${lanes.includes(0) ? `, and L = m + log D for each (${rows.map((g) => fmtv(stored[g].L)).join(', ')})` : ''}.`,
+              `${who} chia O cho D một lần và ghi ${rows.length > 1 ? 'các hàng' : 'hàng'} ${span(rows)} của O${lanes.includes(0) ? `, cùng L = m + log D cho mỗi hàng (${rows.map((g) => fmtv(stored[g].L)).join(', ')})` : ''}.`,
+            )
+          : tr(`${who}: its rows are past N, so nothing is stored.`, `${who}: các hàng của nó đã quá N, nên không lưu gì.`);
         break;
       }
     }
@@ -666,7 +727,10 @@ export function runBlock(
           op: 'release_syncwarp',
           tile: 'tile' in p ? p.tile : null,
           ii: 'ii' in p ? p.ii : null,
-          text: `Warp ${w}'s __syncwarp() opens: every lane's P element is now visible to the whole warp.`,
+          text: tr(
+            `Warp ${w}'s __syncwarp() opens: every lane's P element is now visible to the whole warp.`,
+            `__syncwarp() của warp ${w} mở: phần tử P của mọi lane nay đã hiển thị với cả warp.`,
+          ),
           touch: [],
         });
         for (const t of ts) {
@@ -690,8 +754,14 @@ export function runBlock(
         ii: null,
         text:
           p.barrier === 'load'
-            ? `The block barrier opens: tile ${p.tile} of K^T and V is complete in shared memory, so every warp may read it.`
-            : `The block barrier opens: every warp has finished with tile ${p.tile}, so the next tile may overwrite it.`,
+            ? tr(
+                `The block barrier opens: tile ${p.tile} of K^T and V is complete in shared memory, so every warp may read it.`,
+                `Rào chắn của khối mở: ô ${p.tile} của K^T và V đã đầy đủ trong bộ nhớ chia sẻ, nên mọi warp có thể đọc nó.`,
+              )
+            : tr(
+                `The block barrier opens: every warp has finished with tile ${p.tile}, so the next tile may overwrite it.`,
+                `Rào chắn của khối mở: mọi warp đã dùng xong ô ${p.tile}, nên ô kế tiếp có thể ghi đè lên nó.`,
+              ),
         touch: [],
       });
       for (const t of all)
@@ -741,7 +811,7 @@ function range(a: number, b: number): number[] {
 function laneElementsList(L: number, c: KConfig): string {
   const out: number[] = [];
   for (let dd = L; dd < c.d; dd += c.lanes) out.push(dd);
-  return out.length === 2 ? `${out[0]} and ${out[1]}` : out.join(', ');
+  return out.length === 2 ? tr(`${out[0]} and ${out[1]}`, `${out[0]} và ${out[1]}`) : out.join(', ');
 }
 
 // ---------------------------------------------------------------- whole kernel
@@ -794,12 +864,12 @@ export function rowOk(prob: KProblem, row: number, v: { O: number[]; L: number }
 export const OUTLINE: { op: Op; text: string; depth: number }[] = [
   { op: 'load_Q', text: 'load_Q(Q, Q_i, i)', depth: 0 },
   { op: 'load_KT_and_V', text: 'load_KT_and_V(K, V, KT_j, V_j, j)', depth: 1 },
-  { op: 'syncthreads', text: '__syncthreads()   // tiles complete', depth: 1 },
+  { op: 'syncthreads', text: '__syncthreads()   // tiles complete', depth: 1 }, // i18n-ignore: code shown as written
   { op: 'compute_S_and_max', text: 'compute_S_and_max(...)', depth: 2 },
   { op: 'update_m_and_D', text: 'last_m = update_m_and_D(...)', depth: 2 },
   { op: 'compute_P_and_update_D', text: 'compute_P_and_update_D(...)', depth: 2 },
-  { op: 'syncwarp', text: '__syncwarp()      // P row visible to the warp', depth: 2 },
+  { op: 'syncwarp', text: '__syncwarp()      // P row visible to the warp', depth: 2 }, // i18n-ignore: code shown as written
   { op: 'compute_O', text: 'compute_O(..., last_m, ...)', depth: 2 },
-  { op: 'syncthreads', text: '__syncthreads()   // tiles free again', depth: 1 },
+  { op: 'syncthreads', text: '__syncthreads()   // tiles free again', depth: 1 }, // i18n-ignore: code shown as written
   { op: 'store_O', text: 'store_O(O, L, O_i, m_i, D_i, i, N)', depth: 0 },
 ];

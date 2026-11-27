@@ -1,0 +1,1 @@
+Cho cả khối, cộng tất cả các tích của mã với activation, nhân với hệ số tỉ lệ, rồi trừ đi 8 lần hệ số tỉ lệ nhân với tổng các activation. Kết quả là 0.716, bằng với tích vô hướng dùng các trọng số đã giải lượng tử hóa, sai khác chỉ ở làm tròn. Các trọng số float32 cho 0.605. Khác biệt đó là sai số lượng tử hóa.

@@ -1,0 +1,1 @@
+Cho các luồng chạy xong theo thứ tự. Mỗi luồng đọc một số giá trị đã là trung bình rồi, và lại lấy trung bình chúng lần nữa. Điểm sáng bị kéo nhòe về phía dưới bên phải. So với bản tham chiếu: 24 trên 36 điểm ảnh bị sai. Và không có gì bị sập. Mọi phép đọc và mọi phép ghi đều nằm trong buffer.

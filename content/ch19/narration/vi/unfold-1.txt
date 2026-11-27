@@ -1,0 +1,1 @@
+Đây là 3 bản đồ đầu vào của sách, mỗi bản đồ 3 nhân 3, và 6 bộ lọc của nó, mỗi bộ lọc 2 nhân 2. Điểm ảnh đầu ra 0, 0 của bản đồ 0 là một tổng trên cả 3 bản đồ đầu vào. Mỗi bản đồ cộng thêm một mảng vùng nhân với một bộ lọc: 7, rồi 5, rồi 2. Cộng lại được 14.

@@ -18,6 +18,8 @@ export interface Section {
   lede: string;
   /** Book pages this section draws on, or null when it is ours. */
   pages: string | null;
+  /** Vietnamese title and lede; the English fields stay the source of truth. */
+  vi?: { title: string; lede: string };
   /**
    * Loads the section's code on demand. Sections are separate modules so that a
    * page only pulls in (and only reloads for) the section being read.
@@ -31,6 +33,8 @@ export interface Chapter {
   num: string;
   title: string;
   pages: string;
+  /** Vietnamese title; the English field stays the source of truth. */
+  vi?: { title: string };
   /** Empty while the chapter is still planned. */
   sections: Section[];
 }
@@ -46,4 +50,6 @@ export interface PlanRow {
   why: string;
   milestone?: string;
   ours?: boolean;
+  /** Vietnamese title, reason and milestone; the English fields stay the source of truth. */
+  vi?: { title: string; why: string; milestone?: string };
 }

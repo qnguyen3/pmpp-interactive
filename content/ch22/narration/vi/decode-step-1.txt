@@ -1,0 +1,1 @@
+Một yêu cầu, batch 1. Một bước decode đọc mọi trọng số trong mô hình một lần để tạo ra một token duy nhất. Thanh dài là các trọng số đang được truyền vào từ bộ nhớ. Làn bên dưới nó là phần tính toán số học. Với chỉ một hàng gặp mỗi trọng số, phần tính toán xong gần như ngay lập tức, rồi ngồi không. Một token được tạo ra.

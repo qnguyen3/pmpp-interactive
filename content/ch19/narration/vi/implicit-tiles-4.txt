@@ -1,0 +1,1 @@
+Giai đoạn 1. Ô F tiếp theo, và một ô B được gom từ hàng giữa của bản đồ đầu vào thứ nhất. Các giá trị mới đi vào chính những vị trí chia sẻ như trước. Đó là lý do rào chắn thứ hai đến trước: không luồng nào được ghi đè một vị trí mà luồng bên cạnh vẫn đang đọc.

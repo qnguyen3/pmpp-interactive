@@ -1,0 +1,1 @@
+Cứ tiếp tục nhân đôi batch. Có những công việc thuộc về từng hàng, không thuộc về trọng số: các phép cộng bias và residual, softmax trên toàn bộ từ vựng, và argmax chọn ra token. Dải đó lớn dần theo batch ngay từ đầu. Lúc đầu nó mỏng, và không có gì trong đó được chia sẻ.

@@ -1,0 +1,1 @@
+Rồi nó xoay hình chữ nhật. Đọc xuống theo cột 0, rồi cột 1, rồi cột 2, và trải phẳng các ô theo đúng thứ tự đó. 1, 5, 2, 6. Rồi 7, 3, 8 và một ô đệm. Rồi một ô đệm, 9 và thêm hai ô đệm. Giờ vị trí của một ô chính là địa chỉ của nó: t nhân bước nhảy, cộng với hàng.

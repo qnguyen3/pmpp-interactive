@@ -1,0 +1,1 @@
+Giờ hãy xem ai đọc gì. Giá trị trước và giá trị kế tiếp của một luồng chỉ do chính luồng đó đọc. Chỉ mặt phẳng hiện tại là được chia sẻ với các luồng láng giềng. Vậy giá trị trước và kế tiếp chuyển vào thanh ghi của từng luồng, và bộ nhớ chia sẻ thu lại còn một mặt phẳng. Bộ nhớ toàn cục không thấy khác biệt gì: khối nạp đúng những điểm như cũ.

@@ -1,0 +1,1 @@
+Khi chạy tự do, mỗi lần chạy đưa chính token của nó vào lại. Từ bước hai mươi, GPU bắt đầu từ một token khác với bản tham chiếu, nên logits của nó mô tả một văn bản khác, và mọi token sau đó đều khác. Một phép kiểm tra khớp chính xác sẽ báo lỗi ở bước mười chín, và ở mọi bước sau đó.

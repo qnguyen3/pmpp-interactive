@@ -1,0 +1,1 @@
+Max cũng hoạt động theo cách đó. Hãy nghĩ đến một giải đấu loại trực tiếp, trong đó mỗi trận giữ lại giá trị lớn hơn và chỉ số của nó. 2 người chơi hòa nhau ở vị trí cao nhất. Nếu khi hòa ta giữ người bên trái, người thắng phụ thuộc vào cách xếp nhánh đấu. Nếu khi hòa phần thắng thuộc về chỉ số nhỏ hơn, mọi cách xếp nhánh đều cho ra cùng một người thắng. Đó là điều argmax cần.

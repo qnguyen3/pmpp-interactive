@@ -1,0 +1,1 @@
+Rồi token tiếp theo đến. Cache dài thêm một hàng, và toàn bộ nó lại chảy qua lần nữa. Vì vậy số byte trên mỗi token tăng theo N, trong khi lượng việc trên mỗi byte vẫn ở gần một phép toán với độ chính xác 16 bit, và một nửa số đó với 32 bit. Đó là lý do decode bị giới hạn bởi băng thông.

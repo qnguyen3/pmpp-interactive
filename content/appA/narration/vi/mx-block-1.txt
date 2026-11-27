@@ -1,0 +1,1 @@
+Đây là 32 trọng số từ một hàng của một lớp, vẽ thành các chấm trên trục số. Phần lớn nằm gần không, trong khoảng nửa đơn vị. Có một chấm thì không. Phần tử 7 bằng 12, nằm tách biệt ở rất xa. [short pause] Giờ cả 32 phải dùng chung một hệ số tỉ lệ.

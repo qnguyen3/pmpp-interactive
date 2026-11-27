@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
  * switch to a second geometry below this width, so that their text stays
  * legible instead of being scaled down with the whole drawing.
  */
-export function useNarrow(query = '(max-width: 44rem)'): boolean {
+export function useNarrow(query = '(max-width: 44rem)'): boolean { // i18n-ignore: CSS media query
   const [narrow, setNarrow] = useState(() => typeof window !== 'undefined' && !!window.matchMedia?.(query).matches);
   useEffect(() => {
     const m = window.matchMedia?.(query);

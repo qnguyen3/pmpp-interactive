@@ -37,6 +37,7 @@
 // beyond "in the order given".
 //
 // Erasable TypeScript only, and no imports: the browser checks import this file directly.
+import { tr } from '../lib/locale.ts';
 
 export type Width = 8 | 32 | 64;
 export const WIDTHS: readonly Width[] = [8, 32, 64];
@@ -44,12 +45,12 @@ export const WIDTHS: readonly Width[] = [8, 32, 64];
 export type Form = 'book' | 'ballot' | 'metal' | 'hip-naive' | 'bug-ffs' | 'bug-below';
 export const FORMS: readonly Form[] = ['book', 'ballot', 'metal', 'hip-naive', 'bug-ffs', 'bug-below'];
 export const FORM_LABEL: Record<Form, string> = {
-  book: 'Fig. 12.3 as printed',
-  ballot: 'ballot in uniform control flow (lab 12.1)',
-  metal: 'Metal SIMD-group functions (lab 12.1)',
-  'hip-naive': 'naive HIP port: only the shuffle mask widened',
-  'bug-ffs': 'planted bug: no - 1 after __ffs',
-  'bug-below': 'planted bug: lanes-below mask includes the lane',
+  get book() { return tr('Fig. 12.3 as printed', 'Fig. 12.3 như in trong sách'); },
+  get ballot() { return tr('ballot in uniform control flow (lab 12.1)', 'ballot trong dòng điều khiển đồng nhất (lab 12.1)'); },
+  get metal() { return tr('Metal SIMD-group functions (lab 12.1)', 'các hàm SIMD group của Metal (lab 12.1)'); },
+  get 'hip-naive'() { return tr('naive HIP port: only the shuffle mask widened', 'bản port HIP ngây thơ: chỉ mở rộng mask của shuffle'); },
+  get 'bug-ffs'() { return tr('planted bug: no - 1 after __ffs', 'lỗi cài sẵn: thiếu - 1 sau __ffs'); },
+  get 'bug-below'() { return tr('planted bug: lanes-below mask includes the lane', 'lỗi cài sẵn: mask các lane phía dưới bao gồm cả chính lane đó'); },
 };
 /** Forms that run Fig. 12.3's code inside the branch: only passing lanes take part. */
 export const IN_BRANCH: Record<Form, boolean> = {
@@ -134,15 +135,15 @@ export type Flag =
 /** Flags that mean the output is wrong. 'zero-add' only wastes an atomic. */
 export const FAILURES: readonly Flag[] = ['compile-error', 'lane-dropped', 'leader-invalid', 'shuffle-outside', 'slot-undefined', 'overlap', 'out-of-range', 'gap'];
 export const FLAG_TEXT: Record<Flag, string> = {
-  'compile-error': 'does not compile',
-  'lane-dropped': 'a passing lane is missing from the count',
-  'leader-invalid': 'the leader is not a lane that runs this code, so nobody does the atomic',
-  'shuffle-outside': 'the broadcast reads a lane outside the mask: undefined',
-  'slot-undefined': 'a lane writes at an undefined slot',
-  overlap: 'two lanes write the same slot',
-  'out-of-range': 'a lane writes outside the reserved range',
-  gap: 'a reserved slot is never written',
-  'zero-add': 'an atomic adds 0',
+  get 'compile-error'() { return tr('does not compile', 'không biên dịch được'); },
+  get 'lane-dropped'() { return tr('a passing lane is missing from the count', 'một lane đạt điều kiện bị thiếu trong số đếm'); },
+  get 'leader-invalid'() { return tr('the leader is not a lane that runs this code, so nobody does the atomic', 'leader không phải một lane chạy đoạn mã này, nên không ai thực hiện phép atomic'); },
+  get 'shuffle-outside'() { return tr('the broadcast reads a lane outside the mask: undefined', 'phép broadcast đọc một lane nằm ngoài mask: không xác định'); },
+  get 'slot-undefined'() { return tr('a lane writes at an undefined slot', 'một lane ghi vào một vị trí không xác định'); },
+  get overlap() { return tr('two lanes write the same slot', 'hai lane ghi cùng một vị trí'); },
+  get 'out-of-range'() { return tr('a lane writes outside the reserved range', 'một lane ghi ra ngoài vùng đã đặt trước'); },
+  get gap() { return tr('a reserved slot is never written', 'một vị trí đã đặt trước không bao giờ được ghi'); },
+  get 'zero-add'() { return tr('an atomic adds 0', 'một phép atomic cộng 0'); },
 };
 
 export interface VoteResult {
@@ -222,7 +223,7 @@ export function vote(input: VoteInput): VoteResult {
       input, passing, groups, lanes, counterBefore: counter, counterAfter: counter, atomics: 0, expected,
       flags: ['compile-error'], correct: false,
       compileError:
-        'A 64-wide wavefront means HIP, and HIP rejects the 32-bit mask in __shfl_sync: "The mask must be a 64-bit integer" (static_assert, ch12-facts B1). Try the naive HIP port.',
+        tr('A 64-wide wavefront means HIP, and HIP rejects the 32-bit mask in __shfl_sync: "The mask must be a 64-bit integer" (static_assert, ch12-facts B1). Try the naive HIP port.', 'Wavefront rộng 64 nghĩa là HIP, và HIP từ chối mask 32 bit trong __shfl_sync: "The mask must be a 64-bit integer" (static_assert, ch12-facts B1). Hãy thử bản port HIP ngây thơ.'),
     };
   }
 
@@ -373,12 +374,12 @@ export function passFrom(width: number, lanes: readonly number[]): boolean[] {
 // ---------------------------------------------------------------- presets
 export type Preset = 'book' | 'none' | 'all' | 'lane31' | 'upper' | 'alternate';
 export const PRESET_LABEL: Record<Preset, string> = {
-  book: "the book's lanes 1, 2, 4, 5",
-  none: 'none',
-  all: 'all',
-  lane31: 'only lane 31',
-  upper: 'only lanes 32 to 63',
-  alternate: 'alternating',
+  get book() { return tr("the book's lanes 1, 2, 4, 5", 'các lane 1, 2, 4, 5 của sách'); },
+  get none() { return tr('none', 'không lane nào'); },
+  get all() { return tr('all', 'tất cả'); },
+  get lane31() { return tr('only lane 31', 'chỉ lane 31'); },
+  get upper() { return tr('only lanes 32 to 63', 'chỉ các lane 32 đến 63'); },
+  get alternate() { return tr('alternating', 'xen kẽ'); },
 };
 /** Presets that make sense at this width. */
 export const presetsFor = (width: Width): Preset[] =>
@@ -420,9 +421,9 @@ export interface LinePair {
   step: string;
 }
 export const LINE_PAIRS: readonly LinePair[] = [
-  { id: 'mask', fig3: [7], fig3Text: '__activemask()', fig4: 7, fig4Text: 'coalesced_threads()', step: 'Which lanes are here: a 32-bit mask, or a group handle that holds it.' },
-  { id: 'leader', fig3: [10, 11], fig3Text: '__ffs(activeThreads) - 1', fig4: 10, fig4Text: 'thread_rank() == 0', step: 'The leader: the lowest active lane, which is the member of rank 0.' },
-  { id: 'count', fig3: [13], fig3Text: '__popc(activeThreads)', fig4: 12, fig4Text: 'num_threads()', step: 'How many lanes are here: a population count, or the size of the group (the book writes size(), now a legacy alias).' },
-  { id: 'broadcast', fig3: [20], fig3Text: '__shfl_sync(activeThreads, j, leader)', fig4: 19, fig4Text: 'shfl(j, 0)', step: 'The leader hands j to the others: by lane number with a mask, or by rank within the group.' },
-  { id: 'rank', fig3: [22, 23, 24], fig3Text: '(1 << laneIdx()) - 1', fig4: 21, fig4Text: 'thread_rank()', step: 'A lane\'s offset: the active lanes below it, counted from the mask, or simply its rank in the group.' },
+  { id: 'mask', fig3: [7], fig3Text: '__activemask()', fig4: 7, fig4Text: 'coalesced_threads()', get step() { return tr('Which lanes are here: a 32-bit mask, or a group handle that holds it.', 'Những lane nào đang có mặt: một mask 32 bit, hoặc một handle của nhóm chứa mask đó.'); } },
+  { id: 'leader', fig3: [10, 11], fig3Text: '__ffs(activeThreads) - 1', fig4: 10, fig4Text: 'thread_rank() == 0', get step() { return tr('The leader: the lowest active lane, which is the member of rank 0.', 'Leader: lane đang hoạt động thấp nhất, cũng là thành viên có rank 0.'); } }, // i18n-ignore: fig3Text is code
+  { id: 'count', fig3: [13], fig3Text: '__popc(activeThreads)', fig4: 12, fig4Text: 'num_threads()', get step() { return tr('How many lanes are here: a population count, or the size of the group (the book writes size(), now a legacy alias).', 'Có bao nhiêu lane đang có mặt: một phép đếm bit (population count), hoặc kích thước của nhóm (sách viết size(), nay là một bí danh cũ).'); } },
+  { id: 'broadcast', fig3: [20], fig3Text: '__shfl_sync(activeThreads, j, leader)', fig4: 19, fig4Text: 'shfl(j, 0)', get step() { return tr('The leader hands j to the others: by lane number with a mask, or by rank within the group.', 'Leader chuyển j cho các lane khác: theo số lane cùng một mask, hoặc theo rank trong nhóm.'); } },
+  { id: 'rank', fig3: [22, 23, 24], fig3Text: '(1 << laneIdx()) - 1', fig4: 21, fig4Text: 'thread_rank()', get step() { return tr('A lane\'s offset: the active lanes below it, counted from the mask, or simply its rank in the group.', 'Độ lệch của một lane: số lane đang hoạt động phía dưới nó, đếm từ mask, hoặc đơn giản là rank của nó trong nhóm.'); } },
 ];

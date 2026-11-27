@@ -1,0 +1,1 @@
+Hình 12.2 phát vị trí bằng một phép toán nguyên tử cho mỗi khóa được giữ. Bốn yêu cầu đến cùng một bộ đếm, đang ở mức 40. Bộ đếm chỉ phục vụ được từng yêu cầu một, nên chúng xếp hàng, theo một thứ tự không ai chọn. Ở đây lane 2 nhận 40, rồi lane 5 nhận 41, lane 1 nhận 42, và lane 4 nhận 43.

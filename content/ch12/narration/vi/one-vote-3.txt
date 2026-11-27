@@ -1,0 +1,1 @@
+Chạy lại cùng warp đó. Cùng các khóa, cùng bộ đếm, nhưng lần này các yêu cầu được phục vụ theo thứ tự lane 4, lane 5, lane 2, rồi lane 1. Cùng bốn khóa đó rơi vào một thứ tự khác. Không ổn định ở đây chỉ có nghĩa như vậy: tập các khóa được giữ là cố định, còn thứ tự của chúng thì không.

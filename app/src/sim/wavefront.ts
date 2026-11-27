@@ -16,6 +16,11 @@
 // above, above-left and two to the left, above) is our best reading of the figure
 // (notes/ch16.md, "Unclear in the PDF"). PyTorch's CTC alpha recurrence reads the same
 // three cells of the previous time step (ch16-facts D2).
+//
+// The one import is lib/locale.ts (itself import-free), so the browser checks can still import
+// this file directly in Node.
+
+import { tr } from '../lib/locale.ts';
 
 export interface Offset {
   dr: number;
@@ -26,12 +31,54 @@ export type NeighbourId = 'N' | 'W' | 'NW' | 'NE' | 'NWW' | 'WW';
 
 /** The six earlier neighbours the explorer offers. */
 export const NEIGHBOURS: { id: NeighbourId; label: string; dr: number; dc: number }[] = [
-  { id: 'N', label: 'above', dr: -1, dc: 0 },
-  { id: 'W', label: 'left', dr: 0, dc: -1 },
-  { id: 'NW', label: 'above-left', dr: -1, dc: -1 },
-  { id: 'NE', label: 'above-right', dr: -1, dc: 1 },
-  { id: 'NWW', label: 'above, two left', dr: -1, dc: -2 },
-  { id: 'WW', label: 'two left', dr: 0, dc: -2 },
+  {
+    id: 'N',
+    get label() {
+      return tr('above', 'trên');
+    },
+    dr: -1,
+    dc: 0,
+  },
+  {
+    id: 'W',
+    get label() {
+      return tr('left', 'trái');
+    },
+    dr: 0,
+    dc: -1,
+  },
+  {
+    id: 'NW',
+    get label() {
+      return tr('above-left', 'chéo trên trái');
+    },
+    dr: -1,
+    dc: -1,
+  },
+  {
+    id: 'NE',
+    get label() {
+      return tr('above-right', 'chéo trên phải');
+    },
+    dr: -1,
+    dc: 1,
+  },
+  {
+    id: 'NWW',
+    get label() {
+      return tr('above, two left', 'trên, lùi hai cột trái');
+    },
+    dr: -1,
+    dc: -2,
+  },
+  {
+    id: 'WW',
+    get label() {
+      return tr('two left', 'lùi hai cột trái');
+    },
+    dr: 0,
+    dc: -2,
+  },
 ];
 
 export const isEarlier = (o: Offset) => o.dr < 0 || (o.dr === 0 && o.dc < 0);
@@ -53,11 +100,66 @@ export interface Preset {
 }
 
 export const PRESETS: Preset[] = [
-  { id: 'smith-waterman', label: 'Smith-Waterman', figure: 'Fig. 16.2(c)', neighbours: ['N', 'W', 'NW'], rows: 8, cols: 8 },
-  { id: 'checkerboard', label: 'Checkerboard', figure: 'Fig. 16.2(a)', neighbours: ['NW', 'N', 'NE'], rows: 8, cols: 8 },
-  { id: 'financial', label: 'Financial; also CTC', figure: 'Fig. 16.2(b), our reading', neighbours: ['N', 'NW', 'NWW'], rows: 8, cols: 8 },
-  { id: 'h264', label: 'H.264', figure: 'Fig. 16.2(d)', neighbours: ['W', 'NE'], rows: 8, cols: 8 },
-  { id: 'fibonacci', label: 'Fibonacci', figure: 'Eq. 16.1, p. 374', neighbours: ['W', 'WW'], rows: 1, cols: 12 },
+  {
+    id: 'smith-waterman',
+    get label() {
+      return tr('Smith-Waterman', 'Smith-Waterman');
+    },
+    get figure() {
+      return tr('Fig. 16.2(c)', 'Hình 16.2(c)');
+    },
+    neighbours: ['N', 'W', 'NW'],
+    rows: 8,
+    cols: 8,
+  },
+  {
+    id: 'checkerboard',
+    get label() {
+      return tr('Checkerboard', 'Bàn cờ');
+    },
+    get figure() {
+      return tr('Fig. 16.2(a)', 'Hình 16.2(a)');
+    },
+    neighbours: ['NW', 'N', 'NE'],
+    rows: 8,
+    cols: 8,
+  },
+  {
+    id: 'financial',
+    get label() {
+      return tr('Financial; also CTC', 'Tài chính; cả CTC');
+    },
+    get figure() {
+      return tr('Fig. 16.2(b), our reading', 'Hình 16.2(b), theo cách đọc của chúng tôi');
+    },
+    neighbours: ['N', 'NW', 'NWW'],
+    rows: 8,
+    cols: 8,
+  },
+  {
+    id: 'h264',
+    get label() {
+      return tr('H.264', 'H.264');
+    },
+    get figure() {
+      return tr('Fig. 16.2(d)', 'Hình 16.2(d)');
+    },
+    neighbours: ['W', 'NE'],
+    rows: 8,
+    cols: 8,
+  },
+  {
+    id: 'fibonacci',
+    get label() {
+      return tr('Fibonacci', 'Fibonacci');
+    },
+    get figure() {
+      return tr('Eq. 16.1, p. 374', 'Phương trình 16.1, p. 374');
+    },
+    neighbours: ['W', 'WW'],
+    rows: 1,
+    cols: 12,
+  },
 ];
 
 export interface Fronts {

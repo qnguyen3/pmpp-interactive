@@ -1,0 +1,1 @@
+Đặt cạnh nhau: một từ, hai cơ chế. Unified Memory của CUDA là một vùng nhớ chung, được quản lý bằng phần mềm, chuyển trang qua lại giữa hai bộ nhớ. Unified memory của Apple là một bộ nhớ vật lý duy nhất. 16 trang đã đi qua lại ở cả hai chế độ của CUDA, và không trang nào trên Mac. Điều mà cả ba vẫn đòi hỏi ở bạn là thứ tự.

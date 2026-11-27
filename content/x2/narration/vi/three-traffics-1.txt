@@ -1,0 +1,1 @@
+Đây là một phép nhân ma trận với vector, loại mà mọi bước decode đều chạy. Các trọng số nằm trong bộ nhớ toàn cục dưới dạng float32, mỗi trọng số 4 byte. Để tới được kernel, chúng phải đi qua một đường ống có độ rộng cố định, và một đồng hồ chạy trong lúc chúng đi qua. Khi byte cuối cùng tới nơi, phép nhân xong. Gọi thời gian đó là 1.

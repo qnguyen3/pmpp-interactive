@@ -1,0 +1,1 @@
+Các điểm số trở thành hàm mũ ngay tại chỗ, trong cùng mảng chia sẻ, và tổng của chúng được cộng vào D. Một rào chắn warp làm cho phần tử của mỗi lane hiển thị với các lane khác. Rồi mỗi lane thu nhỏ phần đầu ra của mình theo hệ số co giãn lại, và cộng thêm xác suất của ô này nhân với các cột V của nó.

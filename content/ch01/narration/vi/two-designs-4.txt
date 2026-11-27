@@ -1,0 +1,1 @@
+Hãy quét số chuỗi từ 1 đến 64. Dưới khoảng 16 chuỗi độc lập, các đơn vị nhanh dẫn trước. Trên mức đó, nhiều đơn vị dẫn trước. [short pause] Giờ hãy làm mỗi chuỗi dài gấp đôi. Cả hai đường cùng đi lên, và điểm giao vẫn nằm nguyên chỗ cũ. Độ dài không chọn ra bên thắng. Tính độc lập mới chọn.

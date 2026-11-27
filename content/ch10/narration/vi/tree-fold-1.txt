@@ -1,0 +1,1 @@
+Bắt đầu với vòng lặp, trên 8 giá trị: 4, 7, 2, 3, 8, 5, 9 và 6. Một bộ cộng duy nhất làm hết mọi việc. Tổng đang chạy lần lượt là 4, rồi 11, 13, 16, 24, 29, 38, và cuối cùng là 44. Đó là 7 phép cộng, trong 7 bước, mỗi bước 1 phép.

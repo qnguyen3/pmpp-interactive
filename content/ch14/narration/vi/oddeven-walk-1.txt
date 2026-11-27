@@ -1,0 +1,1 @@
+Đây là 8 giá trị từ hình của sách. Ở một bước chẵn, 4 luồng mỗi luồng nhận một cặp: vị trí 0 và 1, rồi 2 và 3, cứ thế tiếp. Không có hai cặp nào chung một giá trị, nên không có hai luồng nào chạm vào cùng một phần tử. Hai trong số các cặp bị sai thứ tự, và chúng hoán đổi.

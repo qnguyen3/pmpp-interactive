@@ -1,0 +1,1 @@
+Trên CUDA, một lượt gộp đọc đồ thị trước khi lệnh switch dispatch làm việc đó. Nó tìm thấy RMS norm theo sau là phép nhân, và thay cặp đó bằng một lời gọi gộp. Vì vậy hàm RMS norm thông thường, hàm mà bạn sẽ thấy đầu tiên trong switch, không bao giờ chạy. Một biến môi trường tắt việc gộp.

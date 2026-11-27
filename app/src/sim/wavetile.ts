@@ -19,6 +19,8 @@
 // (no SM count, no occupancy), memory costs nothing, and "lockstep" is an idealised
 // single warp in which every lane reads before any lane writes.
 
+import { tr } from '../lib/locale.ts';
+
 export const MATCH = 3;
 export const MISMATCH = -3;
 /** The gap penalty as the kernel adds it: both INSERTION and DELETION. */
@@ -379,15 +381,15 @@ export function fill(g: Geometry, a: string, b: string): Fill {
               const at = sr * W + sc;
               const same = p && p.tile.row === tile.row && p.tile.col === tile.col && p.slot[0] === sr && p.slot[1] === sc;
               if (same) {
-                if (!(p.dTile < k) || writtenAt[at] < 0) problems.push(`${where}: slot read before its producer ran`);
+                if (!(p.dTile < k) || writtenAt[at] < 0) problems.push(`${where}: slot read before its producer ran`); // i18n-ignore: developer diagnostic, checked by tests, not shown to the reader
               } else if (!(p === null && g.scheme === 'sheared' && writtenAt[at] < 0)) {
-                problems.push(`${where}: tile slot does not hold this cell`);
+                problems.push(`${where}: tile slot does not hold this cell`); // i18n-ignore: developer diagnostic, checked by tests, not shown to the reader
               }
               vals[ld.name] = slots[at];
             } else {
               if (p && (p.d >= d || launchOf[ld.r * L + ld.q] === -2) && tileRuns(g, p.tile))
-                problems.push(`${where}: global read of a cell not yet written`);
-              if (p && p.tile.row === tile.row && p.tile.col === tile.col) problems.push(`${where}: own-tile cell read from global memory`);
+                problems.push(`${where}: global read of a cell not yet written`); // i18n-ignore: developer diagnostic, checked by tests, not shown to the reader
+              if (p && p.tile.row === tile.row && p.tile.col === tile.col) problems.push(`${where}: own-tile cell read from global memory`); // i18n-ignore: developer diagnostic, checked by tests, not shown to the reader
               vals[ld.name] = H[ld.r * L + ld.q];
             }
           }
@@ -445,9 +447,15 @@ export function summary(g: Geometry) {
 
 export type Order = 'lockstep' | 'first' | 'last';
 export const ORDER_LABEL: Record<Order, string> = {
-  lockstep: 'lockstep (one idealised warp)',
-  first: 'thread 0 first',
-  last: 'last thread first',
+  get lockstep() {
+    return tr('lockstep (one idealised warp)', 'lockstep (một warp lý tưởng hóa)');
+  },
+  get first() {
+    return tr('thread 0 first', 'luồng 0 trước');
+  },
+  get last() {
+    return tr('last thread first', 'luồng cuối trước');
+  },
 };
 
 export interface RunOptions {

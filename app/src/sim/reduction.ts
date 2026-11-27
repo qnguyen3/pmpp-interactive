@@ -46,6 +46,7 @@
 //    may carry on and compute something wrong.
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
+import { tr } from '../lib/locale.ts';
 import type { Schedule } from './tiled';
 import type { WarpState } from './warps';
 
@@ -79,9 +80,9 @@ function checkWidth(width: number): void {
 export type InPlaceKind = 'simple' | 'convergent';
 export type Kind = InPlaceKind | 'shared';
 export const KIND_LABEL: Record<Kind, string> = {
-  simple: 'simple (Fig. 10.5)',
-  convergent: 'convergent (Fig. 10.8)',
-  shared: 'shared memory (Fig. 10.10)',
+  get simple() { return tr('simple (Fig. 10.5)', 'đơn giản (Fig. 10.5)'); },
+  get convergent() { return tr('convergent (Fig. 10.8)', 'hội tụ (Fig. 10.8)'); },
+  get shared() { return tr('shared memory (Fig. 10.10)', 'bộ nhớ chia sẻ (Fig. 10.10)'); },
 };
 
 /**
@@ -232,12 +233,12 @@ export const bookFormula = {
 // ---------------------------------------------------------------- 2. global-memory requests
 export type AccessName = 'own' | 'partner' | 'write' | 'load-lo' | 'load-hi' | 'store';
 export const ACCESS_LABEL: Record<AccessName, string> = {
-  own: 'read own element',
-  partner: 'read partner',
-  write: 'write own element',
-  'load-lo': 'load input[t]',
-  'load-hi': 'load input[t + blockDim.x]',
-  store: 'write *output',
+  get own() { return tr('read own element', 'đọc phần tử của mình'); },
+  get partner() { return tr('read partner', 'đọc phần tử đối tác'); },
+  get write() { return tr('write own element', 'ghi phần tử của mình'); },
+  get 'load-lo'() { return tr('load input[t]', 'nạp input[t]'); },
+  get 'load-hi'() { return tr('load input[t + blockDim.x]', 'nạp input[t + blockDim.x]'); },
+  get store() { return tr('write *output', 'ghi *output'); },
 };
 export interface WarpAccess {
   name: AccessName;
@@ -308,10 +309,10 @@ export function requests(kind: Kind, N: number, width: number, segment = 32): Re
       const accesses = [acc('load-lo', 'input', ts), acc('load-hi', 'input', ts.map((t) => t + T))];
       warps.push({ warp: w, accesses, requests: sum(accesses.map((a) => a.segments.length)) });
     }
-    steps.push(finish('load and first addition', 'load', 0, null, warps));
-    strides('shared', T).forEach((s, k) => steps.push(finish(`iteration ${k + 1}, stride ${s}`, 'iteration', k + 1, s, [])));
+    steps.push(finish(tr('load and first addition', 'nạp và phép cộng đầu tiên'), 'load', 0, null, warps));
+    strides('shared', T).forEach((s, k) => steps.push(finish(tr(`iteration ${k + 1}, stride ${s}`, `vòng lặp ${k + 1}, bước nhảy ${s}`), 'iteration', k + 1, s, [])));
     const store = acc('store', 'output', [0]);
-    steps.push(finish('thread 0 writes the total', 'store', 0, null, [{ warp: 0, accesses: [store], requests: 1 }]));
+    steps.push(finish(tr('thread 0 writes the total', 'luồng 0 ghi tổng'), 'store', 0, null, [{ warp: 0, accesses: [store], requests: 1 }]));
   } else {
     strides(kind, T).forEach((s, k) => {
       const warps: RequestWarp[] = [];
@@ -322,7 +323,7 @@ export function requests(kind: Kind, N: number, width: number, segment = 32): Re
         const accesses = [acc('own', 'input', own), acc('partner', 'input', own.map((c) => c + s)), acc('write', 'input', own)];
         warps.push({ warp: w, accesses, requests: sum(accesses.map((a) => a.segments.length)) });
       }
-      steps.push(finish(`iteration ${k + 1}, stride ${s}`, 'iteration', k + 1, s, warps));
+      steps.push(finish(tr(`iteration ${k + 1}, stride ${s}`, `vòng lặp ${k + 1}, bước nhảy ${s}`), 'iteration', k + 1, s, warps));
     });
   }
   return { kind, N, width, segment, steps, total: sum(steps.map((s) => s.requests)) };
@@ -491,10 +492,10 @@ export interface TStep {
 }
 export type Outcome = 'correct' | 'wrong' | 'deadlock' | 'oob';
 export const OUTCOME_LABEL: Record<Outcome, string> = {
-  correct: 'correct',
-  wrong: 'wrong answer',
-  deadlock: 'stuck at a barrier',
-  oob: 'out of bounds',
+  get correct() { return tr('correct', 'đúng'); },
+  get wrong() { return tr('wrong answer', 'sai kết quả'); },
+  get deadlock() { return tr('stuck at a barrier', 'kẹt tại rào chắn'); },
+  get oob() { return tr('out of bounds', 'vượt biên'); },
 };
 export interface ThreadRun {
   /** The function in labs/ch10/snippets that this run models. */
@@ -549,32 +550,32 @@ interface VariantDef {
 }
 export const VARIANT: Record<Variant, VariantDef> = {
   book: {
-    kernel: 'SharedMemorySumReductionKernel', label: 'as in the book (barrier at the top of the loop)',
+    kernel: 'SharedMemorySumReductionKernel', get label() { return tr('as in the book (barrier at the top of the loop)', 'như trong sách (rào chắn ở đầu vòng lặp)'); },
     barrier: 'top', le: false, two: null, lines: { load: [4], barrier: 6, test: 7, add: 8, store: 12 },
   },
   bottom: {
-    kernel: 'BarrierAtBottomKernel', label: 'barrier at the bottom of the loop only',
+    kernel: 'BarrierAtBottomKernel', get label() { return tr('barrier at the bottom of the loop only', 'chỉ có rào chắn ở cuối vòng lặp'); },
     barrier: 'bottom', le: false, two: null, lines: { load: [4], test: 6, add: 7, barrier: 9, store: 12 },
   },
   none: {
-    kernel: 'NoBarrierKernel', label: 'no barrier',
+    kernel: 'NoBarrierKernel', get label() { return tr('no barrier', 'không có rào chắn'); },
     barrier: 'none', le: false, two: null, lines: { load: [4], test: 6, add: 7, store: 11 },
   },
   'inside-if': {
-    kernel: 'BarrierInsideIfKernel', label: 'barrier inside the if',
+    kernel: 'BarrierInsideIfKernel', get label() { return tr('barrier inside the if', 'rào chắn bên trong if'); },
     barrier: 'if', le: false, two: null, lines: { load: [4], test: 6, barrier: 7, add: 8, store: 12 },
   },
   le: {
-    kernel: 'LessOrEqualKernel', label: 'active test <= instead of <',
+    kernel: 'LessOrEqualKernel', get label() { return tr('active test <= instead of <', 'phép kiểm tra luồng còn hoạt động dùng <= thay vì <'); },
     barrier: 'top', le: true, two: null, lines: { load: [4], barrier: 6, test: 7, add: 8, store: 12 },
   },
   two: {
-    kernel: 'MaxThenSumKernel', label: 'max, then sum, one scratch array, barrier after the read',
+    kernel: 'MaxThenSumKernel', get label() { return tr('max, then sum, one scratch array, barrier after the read', 'max, rồi tổng, một mảng nháp, có rào chắn sau lần đọc'); },
     barrier: 'top', le: false, two: { barrierAfterRead: true },
     lines: { load: [4, 5], barrier: 7, test: 8, add: 9, afterLoop: 12, readMax: 13, afterRead: 14, load2: [15], barrier2: 17, test2: 18, add2: 19, store: 23 },
   },
   'two-race': {
-    kernel: 'MaxThenSumNoBarrierKernel', label: 'max, then sum, one scratch array, no barrier after the read',
+    kernel: 'MaxThenSumNoBarrierKernel', get label() { return tr('max, then sum, one scratch array, no barrier after the read', 'max, rồi tổng, một mảng nháp, không có rào chắn sau lần đọc'); },
     barrier: 'top', le: false, two: { barrierAfterRead: false },
     lines: { load: [4, 5], barrier: 7, test: 8, add: 9, afterLoop: 12, readMax: 13, load2: [14], barrier2: 16, test2: 17, add2: 18, store: 22 },
   },
@@ -694,12 +695,12 @@ const arrName = (arr: Arr, kernel: string): string =>
 const cellName = (arr: Arr, index: number, kernel: string): string =>
   arr === 'output' ? '*output' : `${arrName(arr, kernel)}[${index}]`;
 export const threadList = (ts: readonly number[]): string => {
-  if (!ts.length) return 'no thread';
+  if (!ts.length) return tr('no thread', 'không luồng nào');
   const sorted = [...ts].sort((a, b) => a - b);
   const contiguous = sorted.every((t, i) => i === 0 || t === sorted[i - 1] + 1);
-  if (sorted.length === 1) return `thread ${sorted[0]}`;
-  if (contiguous && sorted.length > 2) return `threads ${sorted[0]} to ${sorted[sorted.length - 1]}`;
-  return `threads ${sorted.slice(0, -1).join(', ')} and ${sorted[sorted.length - 1]}`;
+  if (sorted.length === 1) return tr(`thread ${sorted[0]}`, `luồng ${sorted[0]}`);
+  if (contiguous && sorted.length > 2) return tr(`threads ${sorted[0]} to ${sorted[sorted.length - 1]}`, `các luồng ${sorted[0]} đến ${sorted[sorted.length - 1]}`);
+  return tr(`threads ${sorted.slice(0, -1).join(', ')} and ${sorted[sorted.length - 1]}`, `các luồng ${sorted.slice(0, -1).join(', ')} và ${sorted[sorted.length - 1]}`);
 };
 
 interface Machine {
@@ -753,15 +754,18 @@ function execute(
       const where = cellName(r.arr, r.index, kernel);
       if (!inside) {
         sr.issue = 'oob';
-        flag(step, 'oob', `thread ${t} read ${where}, past the end of the ${arr.length}-element array`);
+        flag(step, 'oob', tr(`thread ${t} read ${where}, past the end of the ${arr.length}-element array`, `luồng ${t} đọc ${where}, vượt quá cuối mảng ${arr.length} phần tử`));
       } else if (r.expect) {
         if (!found || cmpVersion(found, r.expect) < 0) {
           sr.issue = 'stale';
-          flag(step, 'stale', `thread ${t} read ${where} before ${describeVersion(r.expect, r.arr, r.index)} was there` +
-            (found ? `; it found ${describeVersion(found, r.arr, r.index)}` : '; nobody had written it yet'));
+          flag(step, 'stale', tr(`thread ${t} read ${where} before ${describeVersion(r.expect, r.arr, r.index)} was there`, `luồng ${t} đọc ${where} trước khi ${describeVersion(r.expect, r.arr, r.index)} có ở đó`) +
+            (found ? tr(`; it found ${describeVersion(found, r.arr, r.index)}`, `; nó thấy ${describeVersion(found, r.arr, r.index)}`) : tr('; nobody had written it yet', '; chưa ai ghi vào đó')));
         } else if (cmpVersion(found, r.expect) > 0) {
           sr.issue = 'overwritten';
-          flag(step, 'overwritten', `thread ${t} needed ${describeVersion(r.expect, r.arr, r.index)} in ${where}, but it had already been overwritten with ${describeVersion(found, r.arr, r.index)}`);
+          flag(step, 'overwritten', tr(
+            `thread ${t} needed ${describeVersion(r.expect, r.arr, r.index)} in ${where}, but it had already been overwritten with ${describeVersion(found, r.arr, r.index)}`,
+            `luồng ${t} cần ${describeVersion(r.expect, r.arr, r.index)} trong ${where}, nhưng ô đó đã bị ghi đè bằng ${describeVersion(found, r.arr, r.index)}`,
+          ));
         }
       }
     }
@@ -840,12 +844,12 @@ function execute(
         bySite.set(line, [...(bySite.get(line) ?? []), t]);
       }
       const ended = order.filter((t) => !live(t));
-      const parts = [...bySite.entries()].map(([line, ts]) => `${threadList(ts)} ${ts.length === 1 ? 'waits' : 'wait'} at the barrier on line ${line}`);
+      const parts = [...bySite.entries()].map(([line, ts]) => tr(`${threadList(ts)} ${ts.length === 1 ? 'waits' : 'wait'} at the barrier on line ${line}`, `${threadList(ts)} chờ tại rào chắn ở dòng ${line}`));
       const step: TStep = { index: steps.length, thread: -2, reads: [] };
       steps.push(step);
       flag(step, 'deadlock',
-        parts.join('; ') + (ended.length ? `; ${threadList(ended)} ended without reaching it` : '') +
-          '. Every thread of the block must reach the same barrier, so the waiting threads can never leave it');
+        parts.join('; ') + (ended.length ? tr(`; ${threadList(ended)} ended without reaching it`, `; ${threadList(ended)} kết thúc mà không đến được đó`) : '') +
+          tr('. Every thread of the block must reach the same barrier, so the waiting threads can never leave it', '. Mọi luồng của khối phải đến cùng một rào chắn, nên các luồng đang chờ không bao giờ rời khỏi được'));
       break;
     }
   }
@@ -880,8 +884,8 @@ export function runInPlace(kind: InPlaceKind, values: readonly number[], opts: I
   };
   const describe = (v: Version, _arr: Arr, index: number) => {
     const owner = ownerOf(kind, index, T);
-    if (v.level === 0) return 'the original value';
-    return `thread ${owner}'s partial from iteration ${v.level} (stride ${ss[v.level - 1]})`;
+    if (v.level === 0) return tr('the original value', 'giá trị ban đầu');
+    return tr(`thread ${owner}'s partial from iteration ${v.level} (stride ${ss[v.level - 1]})`, `tổng riêng phần của luồng ${owner} từ vòng lặp ${v.level} (bước nhảy ${ss[v.level - 1]})`);
   };
   const kernel = INPLACE_KERNEL[kind];
   const { steps, issues } = execute(program, machine, opts.schedule, opts.seed ?? 1, kernel, describe);
@@ -915,9 +919,9 @@ export function runShared(v: Variant, values: readonly number[], schedule: Sched
   };
   const what = (phase: number) => (d.two ? (phase === 0 ? 'max' : 'sum') : 'sum');
   const describe = (ver: Version, _arr: Arr, index: number) => {
-    if (d.two && ver.phase === 0 && ver.level === ss.length && index === 0) return 'the max';
-    if (ver.level === 0) return `thread ${index}'s first value of the ${what(ver.phase)}`;
-    return `thread ${index}'s ${what(ver.phase)} partial from iteration ${ver.level} (stride ${ss[ver.level - 1]})`;
+    if (d.two && ver.phase === 0 && ver.level === ss.length && index === 0) return tr('the max', 'giá trị max');
+    if (ver.level === 0) return tr(`thread ${index}'s first value of the ${what(ver.phase)}`, `giá trị đầu tiên của luồng ${index} cho ${what(ver.phase) === 'max' ? 'max' : 'tổng'}`);
+    return tr(`thread ${index}'s ${what(ver.phase)} partial from iteration ${ver.level} (stride ${ss[ver.level - 1]})`, `${what(ver.phase) === 'max' ? 'max' : 'tổng'} riêng phần của luồng ${index} từ vòng lặp ${ver.level} (bước nhảy ${ss[ver.level - 1]})`);
   };
   const { steps, issues } = execute(program, machine, schedule, seed, d.kernel, describe);
   const output = machine.output[0];
@@ -967,7 +971,7 @@ export function stateAt(run: ThreadRun, n: number): RunState {
     }
   }
   const status: ThreadStatus[] = range(T).map((t) =>
-    done[t] === 0 ? 'not started' : done[t] >= run.program[t].length ? 'finished' : waiting[t] ? 'waiting' : 'running',
+    done[t] === 0 ? 'not started' : done[t] >= run.program[t].length ? 'finished' : waiting[t] ? 'waiting' : 'running', // i18n-ignore: identifier also shown to the reader
   );
   return { input, shared, output, last, status, done };
 }

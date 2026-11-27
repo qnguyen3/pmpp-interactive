@@ -165,11 +165,11 @@ export function rowKind(ny: number, r: number): RowKind {
 export function pointerExpr(ny: number, r: number): string {
   rowKind(ny, r); // validates
   if (r === 0) return 'output';
-  if (r === 1) return 'output + nx';
-  if (r === ny - 1) return 'output + (ny - 1)*nx';
-  if (r === ny - 2) return 'output + (ny - 2)*nx';
-  if (r === ny - 3) return 'output + (ny - 3)*nx';
-  return `output + ${r}*nx`;
+  if (r === 1) return 'output + nx'; // i18n-ignore: C pointer expression
+  if (r === ny - 1) return 'output + (ny - 1)*nx'; // i18n-ignore: C pointer expression
+  if (r === ny - 2) return 'output + (ny - 2)*nx'; // i18n-ignore: C pointer expression
+  if (r === ny - 3) return 'output + (ny - 3)*nx'; // i18n-ignore: C pointer expression
+  return `output + ${r}*nx`; // i18n-ignore: C pointer expression
 }
 
 export interface RowPointer {
@@ -259,8 +259,8 @@ export function launches(ny: number, nx: number): Launch[] {
   });
   return [
     make('top', 'topStream', 'output', 0, '3', 3),
-    make('bottom', 'bottomStream', 'output + (ny - 3)*nx', ny - 3, '3', 3),
-    make('internal', 'internalStream', 'output + nx', 1, 'ny - 2', ny - 2),
+    make('bottom', 'bottomStream', 'output + (ny - 3)*nx', ny - 3, '3', 3), // i18n-ignore: C pointer expression
+    make('internal', 'internalStream', 'output + nx', 1, 'ny - 2', ny - 2), // i18n-ignore: C pointer expression
   ];
 }
 

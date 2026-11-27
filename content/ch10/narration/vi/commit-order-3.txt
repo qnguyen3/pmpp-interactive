@@ -1,0 +1,1 @@
+Giờ chạy lại lần nữa. 8 tổng của các khối giống hệt như trước. Chỉ thứ tự thay đổi, vì các khối xong theo cách khác. Việc làm tròn rơi vào những chỗ khác, nên hai tổng chung lệch nhau vài bước ở những bit cuối. Cả hai đều là tổng tốt. Nhưng một bài kiểm thử so sánh từng bit giữa các lần chạy sẽ thất bại.

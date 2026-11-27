@@ -20,16 +20,26 @@
 //     in the corrected kernel, which initialises them.
 //   - No timing, no caches, no memory bandwidth.
 
+import { tr as trText } from '../lib/locale.ts';
+
 export type Kernel = 'planes' | 'registers';
 /** Which coefficient multiplies which y neighbour: Figs. 8.6 and 8.8, or as printed in Figs. 8.10 and 8.12. */
 export type Pairing = 'book-8.6' | 'as-printed-8.10';
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled';
 
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
+  get lockstep() {
+    return trText('all threads in lockstep', 'mọi luồng đi đồng bộ từng bước (lockstep)');
+  },
+  get 'in-order'() {
+    return trText('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước');
+  },
+  get reversed() {
+    return trText('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước');
+  },
+  get shuffled() {
+    return trText('random interleaving', 'xen kẽ ngẫu nhiên');
+  },
 };
 
 export interface ZConfig {
@@ -257,7 +267,8 @@ function mulberry(seed: number) {
   };
 }
 
-export const threadName = (cfg: ZConfig, t: number) => `thread (tx ${t % cfg.inTile}, ty ${Math.floor(t / cfg.inTile)})`;
+export const threadName = (cfg: ZConfig, t: number) =>
+  trText(`thread (tx ${t % cfg.inTile}, ty ${Math.floor(t / cfg.inTile)})`, `luồng (tx ${t % cfg.inTile}, ty ${Math.floor(t / cfg.inTile)})`);
 
 /** Where thread (tx, ty) of block (bx, by) sits in the grid's x-y plane: the book's j and k. */
 export const position = (cfg: ZConfig, bx: number, by: number, tx: number, ty: number) => ({
@@ -369,11 +380,11 @@ export function runBlock(cfg: ZConfig, prob: ZProblem, bx: number, by: number, b
           const owner = name(rd.r * T + rd.c);
           if (rd.z === null || rd.z < rd.need)
             flag(s, 'read-before-write',
-              `${name(t)} read ${at} for plane ${rd.need} before ${owner} had put plane ${rd.need} there` +
-                (rd.z === null ? ' (the slot was never written)' : ` (it still held plane ${rd.z})`));
+              trText(`${name(t)} read ${at} for plane ${rd.need} before ${owner} had put plane ${rd.need} there`, `${name(t)} đọc ${at} để lấy mặt phẳng ${rd.need} trước khi ${owner} đặt mặt phẳng ${rd.need} vào đó`) +
+                (rd.z === null ? trText(' (the slot was never written)', ' (ô này chưa từng được ghi)') : trText(` (it still held plane ${rd.z})`, ` (ô vẫn còn giữ mặt phẳng ${rd.z})`)));
           else
             flag(s, 'overwritten-before-read',
-              `${name(t)} still needed plane ${rd.need} from ${at}, but ${owner} had already replaced it with plane ${rd.z}`);
+              trText(`${name(t)} still needed plane ${rd.need} from ${at}, but ${owner} had already replaced it with plane ${rd.z}`, `${name(t)} vẫn cần mặt phẳng ${rd.need} từ ${at}, nhưng ${owner} đã thay nó bằng mặt phẳng ${rd.z}`));
         }
         // Figs. 8.6 and 8.8 pair c3 with y-1 and c4 with y+1; Figs. 8.10 and 8.12 print the reverse.
         const coeffOf = (role: Role) => {

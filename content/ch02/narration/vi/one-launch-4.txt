@@ -1,0 +1,1 @@
+Device này chạy 2 khối cùng lúc, và nó tự chọn khối nào. Ở đây nó lấy khối 2 và khối 0 trước. Khối 1 chờ trong hàng đợi. [short pause] Trong mỗi khối đang chạy, mọi luồng tính i của riêng nó, và giữ nó trong một thanh ghi riêng.

@@ -1,0 +1,1 @@
+Giờ mỗi warp xử lý lần lượt các hàng của nó. Với một hàng, mỗi lane tính điểm số của một cột, lấy từng phần tử của Q từ lane đang giữ nó, bằng một lệnh shuffle. Các điểm số được co giãn, những cột nằm quá hàng bị che theo chỉ số, và giá trị lớn nhất của warp cập nhật m rồi co giãn lại D.

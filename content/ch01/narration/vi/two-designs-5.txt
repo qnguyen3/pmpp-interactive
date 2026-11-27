@@ -1,0 +1,1 @@
+GPU là thiết kế bên phải. Ở đây, 64 đơn vị của nó mỗi đơn vị nhận một phần tử của một phép nhân ma trận 8 nhân 8, và mọi ô được lấp đầy cùng lúc. Vậy GPU chỉ có lợi khi công việc của bạn đến dưới dạng nhiều phần độc lập. Viết các kernel cung cấp những phần đó, rồi giữ cho chúng luôn được cấp dữ liệu từ bộ nhớ, là phần còn lại của khóa học này.

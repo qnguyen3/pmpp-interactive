@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { fmt } from '../../lib/reports';
 import { BOOK_BLOCK_LIMIT, cubeAI, sharedBytes, slabAI, threadsCube, threadsSlab } from '../../sim/stencilslab';
 import { CORRECT, localZ, makeProblem, planeTimeline, type PlaneFrame, type ZConfig } from '../../sim/zmarch';
@@ -94,12 +95,12 @@ function Plane({ x, y, fill, stroke, wash, hot, dots, n = T, cell = C }: {
 function Stage(f: Frame) {
   const halo = (r: number, c: number) => r === 0 || c === 0 || r === T - 1 || c === T - 1;
   return (
-    <svg viewBox="0 0 720 372" role="img" aria-label="Animation of a block of threads marching through z" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+    <svg viewBox="0 0 720 372" role="img" aria-label={tr('Animation of a block of threads marching through z', 'Hoạt cảnh một khối luồng tiến dọc theo z')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       {/* input tile, plane by plane */}
-      <text x={SX(0)} y={14} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>input tile in global memory, one x-y plane per square (z increases to the right)</text>
+      <text x={SX(0)} y={14} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="ô đầu vào trong bộ nhớ toàn cục, mỗi ô vuông là một mặt phẳng x-y (z tăng dần sang phải)">input tile in global memory, one x-y plane per square (z increases to the right)</Translated></text>
       {Array.from({ length: T }, (_, n) => (
         <g key={n}>
-          <text x={SX(n) + 33} y={IY - 6} fontSize="10.5" textAnchor="middle">plane {n}</text>
+          <text x={SX(n) + 33} y={IY - 6} fontSize="10.5" textAnchor="middle"><Translated vi={<>mặt phẳng {n}</>}>plane {n}</Translated></text>
           <Plane x={SX(n)} y={IY} fill="var(--global-wash)" stroke="var(--global)" wash={(r, c) => !halo(r, c)} dots={f.dots} />
           {f.inShared?.includes(n) ? <rect x={SX(n) - 3} y={IY - 3} width={T * C + 4.5} height={T * C + 4.5} fill="none" stroke="var(--shared)" strokeWidth="2" /> : null}
         </g>
@@ -109,8 +110,8 @@ function Stage(f: Frame) {
       {f.bars != null ? (
         <g>
           {[
-            ['this tile, one thread per point', threadsCube(T)],
-            ['a 32-wide cube', threadsCube(32)],
+            [tr('this tile, one thread per point', 'ô này, một luồng cho mỗi điểm'), threadsCube(T)],
+            [tr('a 32-wide cube', 'một khối lập phương rộng 32'), threadsCube(32)],
           ].map(([label, v], n) => {
             // To scale, BAR_SCALE units per 1,024 threads. A bar that would run past BAR_CAP is
             // cut short and drawn with a break, and its label says it is not to scale.
@@ -122,7 +123,9 @@ function Stage(f: Frame) {
             return (
               <g key={n} data-bar={Number(v)} data-broken={broken ? 1 : 0}>
                 <text x={SX(0)} y={y} fontSize="11.5">
-                  {label}: {Number(v).toLocaleString('en-US')} threads{broken ? ' (not to scale)' : ''}
+                  <Translated vi={<>{label}: {Number(v).toLocaleString('en-US')} luồng{broken ? ' (không theo tỉ lệ)' : ''}</>}>
+                    {label}: {Number(v).toLocaleString('en-US')} threads{broken ? ' (not to scale)' : ''}
+                  </Translated>
                 </text>
                 <rect x={SX(0)} y={y + 7} width={w} height={14} fill={Number(v) > BOOK_BLOCK_LIMIT ? 'var(--fail)' : 'var(--ink-2)'} />
                 {broken && SX(0) + w > cut + 10 ? (
@@ -133,21 +136,21 @@ function Stage(f: Frame) {
                   </g>
                 ) : null}
                 {Number(v) > BOOK_BLOCK_LIMIT && f.bars! > 0.9 ? (
-                  <text x={SX(0) + w + 6} y={y + 19} fontSize="11" style={{ fill: 'var(--fail)' }}>{Number(v) / BOOK_BLOCK_LIMIT} times the limit</text>
+                  <text x={SX(0) + w + 6} y={y + 19} fontSize="11" style={{ fill: 'var(--fail)' }}><Translated vi={<>gấp {Number(v) / BOOK_BLOCK_LIMIT} lần giới hạn</>}>{Number(v) / BOOK_BLOCK_LIMIT} times the limit</Translated></text>
                 ) : null}
               </g>
             );
           })}
           <line x1={SX(0) + BAR_SCALE} x2={SX(0) + BAR_SCALE} y1={BY - 8} y2={BY + 82} stroke="var(--ink)" strokeDasharray="3 3" />
-          <text x={SX(0) + BAR_SCALE + 4} y={BY - 10} fontSize="11">at most {BOOK_BLOCK_LIMIT.toLocaleString('en-US')} threads in a block</text>
+          <text x={SX(0) + BAR_SCALE + 4} y={BY - 10} fontSize="11"><Translated vi={<>tối đa {BOOK_BLOCK_LIMIT.toLocaleString('en-US')} luồng trong một khối</>}>at most {BOOK_BLOCK_LIMIT.toLocaleString('en-US')} threads in a block</Translated></text>
         </g>
       ) : null}
 
       {/* the block: one plane of threads */}
       {f.block ? (
         <g opacity={f.block}>
-          <text x={12} y={BY - 22} fontSize="11.5" fontWeight="600">the block</text>
-          <text x={12} y={BY - 8} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>{threadsSlab(T)} threads</text>
+          <text x={12} y={BY - 22} fontSize="11.5" fontWeight="600"><Translated vi="khối">the block</Translated></text>
+          <text x={12} y={BY - 8} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>{threadsSlab(T)} luồng</>}>{threadsSlab(T)} threads</Translated></text>
           {Array.from({ length: T * T }, (_, t) => {
             const r = Math.floor(t / T), c = t % T;
             const on = f.active ? f.active[t] : !halo(r, c);
@@ -164,14 +167,14 @@ function Stage(f: Frame) {
           })}
           {f.regs && f.regs > 0.5 ? (
             <>
-              <text x={12} y={BY + 92} fontSize="10" style={{ fill: 'var(--reg)' }}>each thread keeps</text>
-              <text x={12} y={BY + 105} fontSize="10" style={{ fill: 'var(--reg)' }}>inPrev, inCurr, inNext</text>
-              <text x={12} y={BY + 118} fontSize="10" style={{ fill: 'var(--reg)' }}>in registers</text>
+              <text x={12} y={BY + 92} fontSize="10" style={{ fill: 'var(--reg)' }}><Translated vi="mỗi luồng giữ">each thread keeps</Translated></text>
+              <text x={12} y={BY + 105} fontSize="10" style={{ fill: 'var(--reg)' }}>inPrev, inCurr, inNext{/* i18n-ignore: identifiers */}</text>
+              <text x={12} y={BY + 118} fontSize="10" style={{ fill: 'var(--reg)' }}><Translated vi="trong thanh ghi">in registers</Translated></text>
             </>
           ) : (
             <>
-              <text x={12} y={BY + 92} fontSize="10" style={{ fill: 'var(--ink-2)' }}>filled: computes</text>
-              <text x={12} y={BY + 105} fontSize="10" style={{ fill: 'var(--ink-2)' }}>hollow: only loads</text>
+              <text x={12} y={BY + 92} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="đặc: tính toán">filled: computes</Translated></text>
+              <text x={12} y={BY + 105} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="rỗng: chỉ nạp">hollow: only loads</Translated></text>
             </>
           )}
           {f.barrier ? (
@@ -195,12 +198,12 @@ function Stage(f: Frame) {
             {b.noLink ? null : <line x1={x + 33} x2={x + 33} y1={IY + T * C + 4} y2={y - 4} stroke={col} strokeWidth="1.2" strokeDasharray={b.stale ? '2 3' : undefined} />}
             <Plane x={x} y={y} fill={wash} stroke={col} wash={(r, c) => r * T + c < filled} hot={b.hot} />
             <text x={x + 33} y={y + T * C + 13} fontSize="10.5" textAnchor="middle" fontWeight="600" style={{ fill: col }}>{b.name}</text>
-            {b.stale ? <text x={x + 33} y={y + T * C + 25} fontSize="9.5" textAnchor="middle">free for the next load</text> : null}
+            {b.stale ? <text x={x + 33} y={y + T * C + 25} fontSize="9.5" textAnchor="middle"><Translated vi="trống cho lần nạp tới">free for the next load</Translated></text> : null}
           </g>
         );
       })}
       {f.arrows ? (
-        <text x={SX(0)} y={BY - 31} fontSize="11" opacity={f.arrows} style={{ paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: 5 }}>each thread copies its own point: current → previous, next → current</text>
+        <text x={SX(0)} y={BY - 31} fontSize="11" opacity={f.arrows} style={{ paintOrder: 'stroke', stroke: 'var(--page)', strokeWidth: 5 }}><Translated vi="mỗi luồng chép điểm của chính nó: hiện tại → trước, kế tiếp → hiện tại">each thread copies its own point: current → previous, next → current</Translated></text>
       ) : null}
       {f.barrier ? (
         <g>
@@ -212,13 +215,13 @@ function Stage(f: Frame) {
       {/* outputs */}
       {f.outputs ? (
         <g>
-          <text x={12} y={OY + 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--ok)' }}>output</text>
+          <text x={12} y={OY + 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--ok)' }}><Translated vi="đầu ra">output</Translated></text>
           {[1, 2, 3, 4].map((n) => {
             const frac = f.outputs![n] ?? 0;
             const done = Math.round(frac * activeCount);
             return (
               <g key={n} data-output={n} data-done={done}>
-                <text x={SX(n) + 33} y={OY - 5} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>output plane {n}</text>
+                <text x={SX(n) + 33} y={OY - 5} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>mặt phẳng đầu ra {n}</>}>output plane {n}</Translated></text>
                 {Array.from({ length: (T - 2) * (T - 2) }, (_, q) => {
                   const r = Math.floor(q / (T - 2)), c = q % (T - 2);
                   return (
@@ -248,9 +251,9 @@ function Stage(f: Frame) {
       {f.compare ? (
         <g opacity={f.compare}>
           <rect x={SX(0) - 6} y={BY - 4} width={322} height={74} rx="4" fill="var(--page)" stroke="var(--ink)" />
-          <text x={SX(0) + 4} y={BY + 15} fontSize="12" fontWeight="650">march at width 32: {threadsSlab(32).toLocaleString('en-US')} threads, {fmt(slabAI(32, 30))} FLOP/B</text>
-          <text x={SX(0) + 4} y={BY + 36} fontSize="12">8-wide cube: {threadsCube(8)} threads, {fmt(cubeAI(8), 2)} FLOP/B</text>
-          <text x={SX(0) + 4} y={BY + 56} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>both by the book's count of loads and stores (p. 192)</text>
+          <text x={SX(0) + 4} y={BY + 15} fontSize="12" fontWeight="650"><Translated vi={<>tiến theo z ở độ rộng 32: {threadsSlab(32).toLocaleString('en-US')} luồng, {fmt(slabAI(32, 30))} FLOP/B</>}>march at width 32: {threadsSlab(32).toLocaleString('en-US')} threads, {fmt(slabAI(32, 30))} FLOP/B</Translated></text>
+          <text x={SX(0) + 4} y={BY + 36} fontSize="12"><Translated vi={<>khối lập phương rộng 8: {threadsCube(8)} luồng, {fmt(cubeAI(8), 2)} FLOP/B</>}>8-wide cube: {threadsCube(8)} threads, {fmt(cubeAI(8), 2)} FLOP/B</Translated></text>
+          <text x={SX(0) + 4} y={BY + 56} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="cả hai theo cách đếm số lần nạp và lưu của sách (p. 192)">both by the book's count of loads and stores (p. 192)</Translated></text>
         </g>
       ) : null}
 
@@ -261,9 +264,9 @@ function Stage(f: Frame) {
 
 // ---------------------------------------------------------------- frames from the model
 const counters = (fr: PlaneFrame, partStores?: number): [string, string][] => [
-  ['planes loaded', String(fr.planesLoaded)],
-  ['elements loaded', String(fr.loads)],
-  ['outputs stored', String(partStores ?? fr.stores)],
+  [tr('planes loaded', 'mặt phẳng đã nạp'), String(fr.planesLoaded)],
+  [tr('elements loaded', 'phần tử đã nạp'), String(fr.loads)],
+  [tr('outputs stored', 'đầu ra đã lưu'), String(partStores ?? fr.stores)],
 ];
 const outputsOf = (fr: PlaneFrame) => Object.fromEntries(fr.outputPlanes.map((z) => [L(z)!, 1]));
 // Where each part of the window sits, by frame index. After a shift, inNext_s still holds
@@ -274,13 +277,13 @@ const windowOf = (k: number, before = k, t = 1): Box[] => {
   const fr = F[k];
   const pos = (now: number | null, then: number | null) => lerp(then ?? now ?? 0, now ?? then ?? 0, t);
   const boxes: Box[] = [
-    { name: 'inPrev_s', at: pos(L(fr.hold.prev), L(F[before].hold.prev)), tone: 'shared' },
-    { name: 'inCurr_s', at: pos(L(fr.hold.curr), L(F[before].hold.curr)), tone: 'shared' },
+    { name: 'inPrev_s', at: pos(L(fr.hold.prev), L(F[before].hold.prev)), tone: 'shared' }, // i18n-ignore: identifier
+    { name: 'inCurr_s', at: pos(L(fr.hold.curr), L(F[before].hold.curr)), tone: 'shared' }, // i18n-ignore: identifier
   ];
   const nx = nextAt(k);
   if (nx !== null) {
     const stale = fr.label === 'shifted';
-    boxes.push({ name: 'inNext_s', at: pos(nx, nextAt(before) ?? nx), tone: 'shared', stale, fill: stale ? 0 : 1 });
+    boxes.push({ name: 'inNext_s', at: pos(nx, nextAt(before) ?? nx), tone: 'shared', stale, fill: stale ? 0 : 1 }); // i18n-ignore: identifier
   }
   return boxes;
 };
@@ -297,7 +300,7 @@ function marchFrame(n: number, t: number): Frame {
     const u = t * 3;
     return {
       block: 1, active: computed.active, inShared: onChip(F[kl]), boxes: windowOf(kl, kb, Math.min(1, u * 2)),
-      outputs: outputsOf(F[kb]), counters: counters(u > 0.5 ? F[kl] : F[kb]), barrier: u > 0.6 ? 'barrier 1' : null,
+      outputs: outputsOf(F[kb]), counters: counters(u > 0.5 ? F[kl] : F[kb]), barrier: u > 0.6 ? tr('barrier 1', 'rào chắn 1') : null,
     };
   }
   if (t < 2 / 3)
@@ -305,7 +308,7 @@ function marchFrame(n: number, t: number): Frame {
   const u = (t - 2 / 3) * 3;
   return {
     block: 1, active: computed.active, inShared: onChip(u < 0.3 ? computed : F[ks]), boxes: u < 0.3 ? windowOf(kc) : windowOf(ks, kc, ramp(u, 0.3, 0.9)),
-    outputs: outputsOf(computed), counters: counters(F[ks]), barrier: u < 0.3 ? 'barrier 2' : null,
+    outputs: outputsOf(computed), counters: counters(F[ks]), barrier: u < 0.3 ? tr('barrier 2', 'rào chắn 2') : null,
   };
 }
 
@@ -317,33 +320,33 @@ const crossOf = (t: number) => {
 const beats: Beat[] = [
   {
     clip: 'z-march-1',
-    label: 'Too many threads',
+    get label() { return tr('Too many threads', 'Quá nhiều luồng'); },
     draw: (p) => (
       <Stage dots={ramp(p, 0.05, 0.3)} bars={ramp(p, 0.3, 0.75)}
-        headline={p < 0.5 ? `one thread per point: ${threadsCube(T)} threads for this tile` : `a 32-wide cube would need ${threadsCube(32).toLocaleString('en-US')}`} />
+        headline={p < 0.5 ? tr(`one thread per point: ${threadsCube(T)} threads for this tile`, `một luồng cho mỗi điểm: ${threadsCube(T)} luồng cho ô này`) : tr(`a 32-wide cube would need ${threadsCube(32).toLocaleString('en-US')}`, `một khối lập phương rộng 32 sẽ cần ${threadsCube(32).toLocaleString('en-US')}`)} />
     ),
   },
   {
     clip: 'z-march-2',
-    label: 'One plane',
+    get label() { return tr('One plane', 'Một mặt phẳng'); },
     draw: (p) => {
       const f0 = F[0];
       const prevFill = ramp(p, 0.35, 0.6);
       const currFill = ramp(p, 0.65, 0.9);
       const boxes: Box[] = [];
-      if (p >= 0.35) boxes.push({ name: 'inPrev_s', at: L(f0.hold.prev)!, tone: 'shared', fill: prevFill });
-      if (p >= 0.65) boxes.push({ name: 'inCurr_s', at: L(f0.hold.curr)!, tone: 'shared', fill: currFill });
+      if (p >= 0.35) boxes.push({ name: 'inPrev_s', at: L(f0.hold.prev)!, tone: 'shared', fill: prevFill }); // i18n-ignore: identifier
+      if (p >= 0.65) boxes.push({ name: 'inCurr_s', at: L(f0.hold.curr)!, tone: 'shared', fill: currFill }); // i18n-ignore: identifier
       const loadedSoFar = Math.min(f0.planesLoaded, (prevFill >= 1 ? 1 : 0) + (currFill >= 1 ? 1 : 0));
       return (
         <Stage block={ramp(p, 0.02, 0.3)} boxes={boxes} inShared={boxes.filter((b) => (b.fill ?? 0) >= 1).map((b) => b.at)}
-          counters={[['planes loaded', String(loadedSoFar)], ['threads', String(threadsSlab(T))], ['of which compute', String(activeCount)]]}
-          headline={p < 0.35 ? `${threadsSlab(T)} threads: one x-y plane of the tile` : 'before the loop: two planes loaded'} />
+          counters={[[tr('planes loaded', 'mặt phẳng đã nạp'), String(loadedSoFar)], [tr('threads', 'luồng'), String(threadsSlab(T))], [tr('of which compute', 'trong đó tính toán'), String(activeCount)]]}
+          headline={p < 0.35 ? tr(`${threadsSlab(T)} threads: one x-y plane of the tile`, `${threadsSlab(T)} luồng: một mặt phẳng x-y của ô`) : tr('before the loop: two planes loaded', 'trước vòng lặp: đã nạp hai mặt phẳng')} />
       );
     },
   },
   {
     clip: 'z-march-3',
-    label: 'Load and compute',
+    get label() { return tr('Load and compute', 'Nạp và tính'); },
     draw: (p) => {
       const loaded = F[1];
       const computed = F[2];
@@ -359,73 +362,73 @@ const beats: Beat[] = [
       const stores = computing ? Math.round(progress * computed.stores) : p >= 0.97 ? computed.stores : 0;
       return (
         <Stage block={1} active={computed.active} hotThread={computing ? thread : null} boxes={boxes}
-          inShared={onChip(loaded)} barrier={p >= 0.26 && p < 0.42 ? 'barrier 1: wait until the whole plane is in' : null}
+          inShared={onChip(loaded)} barrier={p >= 0.26 && p < 0.42 ? tr('barrier 1: wait until the whole plane is in', 'rào chắn 1: chờ đến khi cả mặt phẳng đã vào') : null}
           outputs={{ [L(computed.outputPlanes[0])!]: stores / computed.stores }}
           counters={counters(nextFill >= 1 ? loaded : F[0], stores)}
-          headline={p < 0.42 ? 'load one new plane, then wait' : `${activeCount} threads: five values from the current plane, one before, one after`} />
+          headline={p < 0.42 ? tr('load one new plane, then wait', 'nạp một mặt phẳng mới, rồi chờ') : tr(`${activeCount} threads: five values from the current plane, one before, one after`, `${activeCount} luồng: năm giá trị từ mặt phẳng hiện tại, một từ mặt phẳng trước, một từ mặt phẳng sau`)} />
       );
     },
   },
   {
     clip: 'z-march-4',
-    label: 'Roll',
+    get label() { return tr('Roll', 'Cuộn'); },
     draw: (p) => {
       const computed = F[2];
       const shifted = F[3];
       const slide = ramp(p, 0.3, 0.7);
       return (
         <Stage block={1} active={computed.active} boxes={slide > 0 ? windowOf(3, 2, slide) : windowOf(2)} inShared={onChip(slide >= 1 ? shifted : computed)}
-          barrier={p < 0.3 ? 'barrier 2: no overwriting until everyone has read' : null} arrows={ramp(p, 0.3, 0.4) * (1 - ramp(p, 0.75, 0.85))}
+          barrier={p < 0.3 ? tr('barrier 2: no overwriting until everyone has read', 'rào chắn 2: không ghi đè cho đến khi mọi luồng đã đọc') : null} arrows={ramp(p, 0.3, 0.4) * (1 - ramp(p, 0.75, 0.85))}
           outputs={outputsOf(computed)} counters={counters(shifted)}
-          headline={p < 0.62 ? 'barrier 2, then shift the window by one plane' : 'barrier 1: true dependence. barrier 2: false dependence'} />
+          headline={p < 0.62 ? tr('barrier 2, then shift the window by one plane', 'rào chắn 2, rồi dịch cửa sổ đi một mặt phẳng') : tr('barrier 1: true dependence. barrier 2: false dependence', 'rào chắn 1: phụ thuộc thật. rào chắn 2: phụ thuộc giả')} />
       );
     },
   },
   {
     clip: 'z-march-5',
-    label: 'March on',
+    get label() { return tr('March on', 'Tiến tiếp'); },
     draw: (p) => {
       const rest = (F.length - 4) / 3; // iterations after the first
       if (p < 0.72) {
         const x = (p / 0.72) * rest;
         const n = Math.min(rest - 1, Math.floor(x));
-        return <Stage {...marchFrame(n + 1, x - n)} headline={`iteration ${n + 2}: output plane ${L(F[2 + 3 * (n + 1)].i)}`} />;
+        return <Stage {...marchFrame(n + 1, x - n)} headline={tr(`iteration ${n + 2}: output plane ${L(F[2 + 3 * (n + 1)].i)}`, `vòng lặp ${n + 2}: mặt phẳng đầu ra ${L(F[2 + 3 * (n + 1)].i)}`)} />;
       }
       return (
         <Stage block={1} active={last.active} boxes={windowOf(F.length - 1)} inShared={onChip(last)} outputs={outputsOf(last)}
           counters={counters(last)} compare={ramp(p, 0.76, 0.86)}
-          headline={`${last.planesLoaded} input planes loaded for ${last.outputPlanes.length} output planes`} />
+          headline={tr(`${last.planesLoaded} input planes loaded for ${last.outputPlanes.length} output planes`, `đã nạp ${last.planesLoaded} mặt phẳng đầu vào cho ${last.outputPlanes.length} mặt phẳng đầu ra`)} />
       );
     },
   },
   {
     clip: 'z-march-6',
-    label: 'Registers',
+    get label() { return tr('Registers', 'Thanh ghi'); },
     draw: (p) => {
       const at = TLR.frames[5]; // registers kernel, iteration 1, after the compute
       const same = F[5]; // the planes kernel at the same point
       const peel = ramp(p, 0.3, 0.75);
       const away = (z: number | null): Box['at'] => lerp(L(z)!, -1.1, peel);
       const boxes: Box[] = [
-        { name: 'inPrev_s', at: away(at.hold.prev), tone: 'shared', opacity: 1 - peel, noLink: peel > 0 },
-        { name: 'inCurr_s', at: L(at.sharedCurr)!, tone: 'shared' },
-        { name: 'inNext_s', at: away(at.hold.next), tone: 'shared', opacity: 1 - peel, noLink: peel > 0 },
+        { name: 'inPrev_s', at: away(at.hold.prev), tone: 'shared', opacity: 1 - peel, noLink: peel > 0 }, // i18n-ignore: identifier
+        { name: 'inCurr_s', at: L(at.sharedCurr)!, tone: 'shared' }, // i18n-ignore: identifier
+        { name: 'inNext_s', at: away(at.hold.next), tone: 'shared', opacity: 1 - peel, noLink: peel > 0 }, // i18n-ignore: identifier
       ];
       return (
         <Stage block={1} active={at.active} boxes={boxes} regs={ramp(p, 0.55, 0.8)}
           inShared={peel >= 1 ? [L(at.sharedCurr)!] : onChip(same)} outputs={outputsOf(at)}
           counters={[
-            ['loaded, registers', String(at.loads)],
-            ['loaded, 3 planes', String(same.loads)],
-            ['shared planes', peel >= 1 ? '1' : '3'],
-            ['bytes at t = 32', sharedBytes(peel >= 1 ? 'registers' : 'planes', 32).toLocaleString('en-US')],
+            [tr('loaded, registers', 'đã nạp, thanh ghi'), String(at.loads)],
+            [tr('loaded, 3 planes', 'đã nạp, 3 mặt phẳng'), String(same.loads)],
+            [tr('shared planes', 'mặt phẳng chia sẻ'), peel >= 1 ? '1' : '3'],
+            [tr('bytes at t = 32', 'số byte ở t = 32'), sharedBytes(peel >= 1 ? 'registers' : 'planes', 32).toLocaleString('en-US')],
           ]}
-          headline={p < 0.3 ? 'previous and next are read by one thread only' : 'into registers: shared memory keeps only the current plane'} />
+          headline={p < 0.3 ? tr('previous and next are read by one thread only', 'giá trị trước và kế tiếp chỉ do một luồng đọc') : tr('into registers: shared memory keeps only the current plane', 'vào thanh ghi: bộ nhớ chia sẻ chỉ giữ mặt phẳng hiện tại')} />
       );
     },
   },
 ];
 
 export function ZMarchScene() {
-  return <Scene chapter="ch08" title="Marching through z" beats={beats} />;
+  return <Scene chapter="ch08" title={tr('Marching through z', 'Tiến dọc theo z')} beats={beats} />;
 }

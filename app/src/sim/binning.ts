@@ -35,6 +35,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export const GRID = 16;
 export const BINS = GRID * GRID;
 /** Grid points per bin: one block of 8 x 8 threads per bin. */
@@ -44,9 +46,15 @@ export const SEED = 22;
 export type Distribution = 'uniform' | 'clustered' | 'pocket';
 export const DISTRIBUTIONS: Distribution[] = ['uniform', 'clustered', 'pocket'];
 export const DIST_LABEL: Record<Distribution, string> = {
-  uniform: 'uniform',
-  clustered: 'clustered',
-  pocket: 'one dense pocket',
+  get uniform() {
+    return tr('uniform', 'đều');
+  },
+  get clustered() {
+    return tr('clustered', 'theo cụm');
+  },
+  get pocket() {
+    return tr('one dense pocket', 'một túi dày đặc');
+  },
 };
 
 // ---------------------------------------------------------------- the generator

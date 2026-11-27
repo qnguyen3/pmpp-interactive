@@ -1,0 +1,1 @@
+Đây là một bức ảnh 6 nhân 6 với một điểm ảnh sáng, và một buffer thứ hai cho kết quả. Mỗi luồng đọc vùng lân cận của nó từ đầu vào, thứ không ai thay đổi, và lưu một giá trị trung bình vào đầu ra. Kết quả là một vệt nhòe đều quanh điểm sáng. Nó khớp với bản tham chiếu.

@@ -1,0 +1,1 @@
+Chạy lại cùng kernel đó, với các luồng theo thứ tự ngược lại. Giờ vệt nhòe đi theo hướng khác, về phía trên bên trái. Đó là một bức ảnh sai khác, từ cùng mã và cùng đầu vào. Trên GPU, bạn không được chọn thứ tự, nên bạn không thể đoán trước mình sẽ nhận được bức nào.

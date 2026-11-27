@@ -1,0 +1,1 @@
+Một kênh bộ nhớ, với một bank phía sau. Một yêu cầu đến, và bank mất một thời gian dài để với vào mảng ô nhớ của nó. Đó là thanh màu sáng. Rồi một loạt dữ liệu ngắn đi qua bus, thanh màu tối. Chỉ khi đó bank mới nhận được yêu cầu tiếp theo. Hãy xem bus. Phần lớn thời gian, nó không chở gì cả.

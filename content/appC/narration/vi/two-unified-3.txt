@@ -1,0 +1,1 @@
+Giờ là chế độ đầy đủ: Linux, với compute capability 6 trở lên. Kernel bắt đầu, và chưa có gì di chuyển. Mỗi khi nó chạm vào một trang lần đầu, GPU gặp một lỗi trang, và trình điều khiển chỉ chuyển đúng trang đó. Một trang mà kernel không bao giờ chạm vào thì cứ nằm yên tại chỗ.

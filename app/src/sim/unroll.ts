@@ -31,8 +31,10 @@
 //    (arrays too large for registers, and spilling when a kernel runs out of
 //    registers): the snippets are small enough that only indexing decides.
 //
-// Erasable TypeScript only, and no imports: the browser checks import this file
-// directly in Node.
+// Erasable TypeScript only, and the one import is lib/locale.ts (itself import-free): the
+// browser checks import this file directly in Node.
+
+import { tr } from '../lib/locale.ts';
 
 export type CellKind = 'issueA' | 'issueB' | 'branch' | 'stallDep' | 'stallBranch';
 
@@ -156,34 +158,54 @@ export interface WhereSnippet {
 
 /** The book's rule (pp. 145 to 146) with NVIDIA's list (ch06-facts A13): where x is likely to be placed, and why. */
 export function whereLives(s: WhereSnippet): { place: Place; rule: string } {
-  if (!s.array) return { place: 'registers', rule: 'A scalar local variable lives in a register (chapter 5).' };
+  if (!s.array) return { place: 'registers', rule: tr('A scalar local variable lives in a register (chapter 5).', 'Một biến cục bộ vô hướng nằm trong thanh ghi (chương 5).') };
   if (s.index === 'constant')
-    return { place: 'registers', rule: 'Every index is a compile-time constant, so each element can be given its own register (pp. 145–146).' };
+    return {
+      place: 'registers',
+      rule: tr(
+        'Every index is a compile-time constant, so each element can be given its own register (pp. 145–146).',
+        'Mọi chỉ số đều là hằng số lúc biên dịch, nên mỗi phần tử có thể được cấp một thanh ghi riêng (pp. 145–146).',
+      ),
+    };
   if (s.index === 'run-time value')
     return {
-      place: 'local memory',
-      rule: 'The compiler cannot tell which element is meant, so the array must sit somewhere it can be indexed: memory, not registers. NVIDIA lists exactly this case (A13).',
+      place: 'local memory', // i18n-ignore: Place identity compared with ===; S66 shows it through its own tr()
+      rule: tr(
+        'The compiler cannot tell which element is meant, so the array must sit somewhere it can be indexed: memory, not registers. NVIDIA lists exactly this case (A13).',
+        'Trình biên dịch không biết phần tử nào được chọn, nên mảng phải nằm ở nơi có thể đánh chỉ số: bộ nhớ, không phải thanh ghi. NVIDIA liệt kê đúng trường hợp này (A13).',
+      ),
     };
   if (s.loop === 'constant bound')
     return {
       place: 'registers',
-      rule: 'A small loop with a constant trip count is fully unrolled by default (p. 145; NVIDIA A7). After that every index is a constant.',
+      rule: tr(
+        'A small loop with a constant trip count is fully unrolled by default (p. 145; NVIDIA A7). After that every index is a constant.',
+        'Một vòng lặp nhỏ có số lần lặp là hằng số được trải hết theo mặc định (p. 145; NVIDIA A7). Sau đó mọi chỉ số đều là hằng số.',
+      ),
     };
   if (s.loop === 'unroll 1')
     return {
-      place: 'local memory',
-      rule: '#pragma unroll 1 forbids unrolling, so the index stays the loop counter, which is not a constant (p. 145; A7).',
+      place: 'local memory', // i18n-ignore: Place identity compared with ===; S66 shows it through its own tr()
+      rule: tr(
+        '#pragma unroll 1 forbids unrolling, so the index stays the loop counter, which is not a constant (p. 145; A7).',
+        '#pragma unroll 1 cấm trải vòng lặp, nên chỉ số vẫn là biến đếm vòng lặp, vốn không phải hằng số (p. 145; A7).',
+      ),
     };
   return {
-    place: 'local memory',
-    rule: 'With a trip count known only at run time the loop cannot be fully unrolled, so the index stays a variable (A7, A13).',
+    place: 'local memory', // i18n-ignore: Place identity compared with ===; S66 shows it through its own tr()
+    rule: tr(
+      'With a trip count known only at run time the loop cannot be fully unrolled, so the index stays a variable (A7, A13).',
+      'Khi số lần lặp chỉ biết được lúc chạy, vòng lặp không thể được trải hết, nên chỉ số vẫn là một biến (A7, A13).',
+    ),
   };
 }
 
 export const WHERE_SNIPPETS: WhereSnippet[] = [
   {
     id: 'scalar',
-    label: 'one element per thread',
+    get label() {
+      return tr('one element per thread', 'một phần tử mỗi luồng');
+    },
     array: false,
     index: 'none',
     code: `__global__ void scalar(const float* in, float* out) {
@@ -194,10 +216,12 @@ export const WHERE_SNIPPETS: WhereSnippet[] = [
   },
   {
     id: 'runtime-bound',
-    label: 'coarsened, loop bound known at run time',
+    get label() {
+      return tr('coarsened, loop bound known at run time', 'đã gộp việc, cận vòng lặp chỉ biết lúc chạy');
+    },
     array: true,
-    index: 'loop counter',
-    loop: 'run-time bound',
+    index: 'loop counter', // i18n-ignore: union member compared in code, not shown
+    loop: 'run-time bound', // i18n-ignore: union member compared in code, not shown
     code: `__global__ void runtimeBound(const float* in, float* out, unsigned int count) {
     unsigned int iStart = COARSEN*(blockIdx.x*blockDim.x + threadIdx.x);
     float x[COARSEN];
@@ -207,7 +231,9 @@ export const WHERE_SNIPPETS: WhereSnippet[] = [
   },
   {
     id: 'by-hand',
-    label: 'coarsened, unrolled by hand',
+    get label() {
+      return tr('coarsened, unrolled by hand', 'đã gộp việc, trải vòng lặp bằng tay');
+    },
     array: true,
     index: 'constant',
     code: `__global__ void unrolledByHand(const float* in, float* out) {
@@ -221,10 +247,12 @@ export const WHERE_SNIPPETS: WhereSnippet[] = [
   },
   {
     id: 'unroll-1',
-    label: 'coarsened, #pragma unroll 1',
+    get label() {
+      return tr('coarsened, #pragma unroll 1', 'đã gộp việc, #pragma unroll 1');
+    },
     array: true,
-    index: 'loop counter',
-    loop: 'unroll 1',
+    index: 'loop counter', // i18n-ignore: union member compared in code, not shown
+    loop: 'unroll 1', // i18n-ignore: union member compared in code, not shown
     code: `__global__ void notUnrolled(const float* in, float* out) {
     unsigned int iStart = COARSEN*(blockIdx.x*blockDim.x + threadIdx.x);
     float x[COARSEN];
@@ -236,9 +264,11 @@ export const WHERE_SNIPPETS: WhereSnippet[] = [
   },
   {
     id: 'runtime-index',
-    label: 'one element picked at run time',
+    get label() {
+      return tr('one element picked at run time', 'một phần tử được chọn lúc chạy');
+    },
     array: true,
-    index: 'run-time value',
+    index: 'run-time value', // i18n-ignore: union member compared in code, not shown
     code: `__global__ void runtimeIndex(const float* in, float* out, const int* pick) {
     unsigned int t = blockIdx.x*blockDim.x + threadIdx.x;
     float x[COARSEN];

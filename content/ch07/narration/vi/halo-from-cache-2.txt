@@ -1,0 +1,1 @@
+Khối B chạy ngay bên cạnh. Vùng biên bên trái của nó là 2 cột cuối trong ô của A, và mô hình thấy mọi dòng đó vẫn còn trong L2. Không có lưu lượng DRAM mới. Ngay cả ô của chính B cũng đã có sẵn ở đó, vì việc nạp vùng biên của A kéo vào nguyên các dòng. Đây là trường hợp mà sách đang trông cậy vào.

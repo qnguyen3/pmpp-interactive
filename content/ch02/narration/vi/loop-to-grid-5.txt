@@ -1,0 +1,1 @@
+Giờ hãy xem phần đầu vòng lặp còn lại gì. Giá trị khởi đầu và bước tăng đã biến mất, được thay bằng 2 con số có sẵn kia. Phép kiểm tra thì còn. Nó chuyển vào trong kernel, thành một điều kiện chặn: i có nhỏ hơn n không? Luồng 10 và 11 không qua được, và không làm gì cả.

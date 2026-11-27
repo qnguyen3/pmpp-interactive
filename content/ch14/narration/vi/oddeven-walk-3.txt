@@ -1,0 +1,1 @@
+Giờ là trường hợp xấu nhất: giá trị lớn nhất bắt đầu ở đầu danh sách. Mỗi bước chỉ có thể di chuyển nó đúng một vị trí, vì mỗi lần nó chỉ gặp một hàng xóm. Nên số 8 cần 7 bước để tới cuối. Với N giá trị, đó là khoảng N bước, dù bạn có bao nhiêu luồng.

@@ -1,0 +1,1 @@
+Vòng 2 ghi vào chính x. Khi luồng 0 chạy trước, mỗi luồng đọc phần tử mà luồng lân cận bên trái vừa ghi. Các tổng cộng dồn dọc theo mảng: 3, 4, 11, và tăng dần đến 25. Đây là một tổng lũy kế. Mỗi bước cần kết quả của bước trước.

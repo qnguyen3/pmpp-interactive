@@ -1,0 +1,1 @@
+Đây là một warp gồm 32 lane, và một bộ lọc nhỏ nằm trong bộ nhớ hằng. Mọi lane sắp đọc cùng một trọng số, góc trên bên trái của bộ lọc. Một địa chỉ sáng lên. Bộ nhớ đệm trả lời một lần, và câu trả lời duy nhất đó tỏa ra cho cả 32 lane cùng lúc.

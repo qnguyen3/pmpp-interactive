@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { DEMO_SEED, amdScalarEligible, distinctCount, filterTrace, replaySchedule, warpAddresses } from '../../sim/constcache';
 
 // "One address, one warp" (section 7.4): six beats, one narration clip each
@@ -105,7 +106,7 @@ const tapName = (t: number) => `F[${TAPS[t].fRow}][${TAPS[t].fCol}]`;
 function Stage({ children, data, headline }: { children: ReactNode; data: Record<string, string | number>; headline?: ReactNode }) {
   const attrs = Object.fromEntries(Object.entries(data).map(([k, v]) => ['data-' + k, String(v)]));
   return (
-    <svg viewBox="0 0 720 380" role="img" aria-label="One warp reading a table in constant memory" style={{ width: '100%', maxWidth: 900, minWidth: 520, display: 'block' }} {...attrs}>
+    <svg viewBox="0 0 720 380" role="img" aria-label={tr('One warp reading a table in constant memory', 'Một warp đọc một bảng trong bộ nhớ hằng (constant memory)')} style={{ width: '100%', maxWidth: 900, minWidth: 520, display: 'block' }} {...attrs}>
       {children}
       {headline ? <text x={20} y={368} fontSize="13" fontWeight="600" data-headline>{headline}</text> : null}
     </svg>
@@ -117,7 +118,7 @@ function Counter({ x, y, label, value, of }: { x: number; y: number; label: stri
     <g data-counter={label}>
       <text x={x} y={y} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>{label}</text>
       <text x={x} y={y + 24} fontSize="20" fontWeight="650" data-value>{value}</text>
-      {of != null ? <text x={x + 14 + String(value).length * 11} y={y + 24} fontSize="12" style={{ fill: 'var(--ink-2)' }}>of {of}</text> : null}
+      {of != null ? <text x={x + 14 + String(value).length * 11} y={y + 24} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('of', 'trên')} {of}</text> : null}
     </g>
   );
 }
@@ -153,36 +154,40 @@ function Mini({ x, y, addresses, tableSize, title, verdict, ok }: {
 const beats: Beat[] = [
   {
     clip: 'constant-broadcast-1',
-    label: 'One address',
+    get label() {
+      return tr('One address', 'Một địa chỉ');
+    },
     draw: (p) => {
       const lit = p >= 0.3;
       const served = p >= 0.55;
       return (
         <Stage data={{ beat: 1, distinct: distinctCount(UNIFORM), answers: served ? 1 : 0 }}
-          headline={served ? 'one address, one answer, all 32 lanes served' : 'every lane asks for F[0][0]'}>
+          headline={served ? tr('one address, one answer, all 32 lanes served', 'một địa chỉ, một câu trả lời, cả 32 lane được phục vụ') : tr('every lane asks for F[0][0]', 'mọi lane đều hỏi F[0][0]')}>
           <WarpTable addresses={UNIFORM} tableSize={M * M} lines={ramp(p, 0.05, 0.25)} hotLines={served ? new Set([0]) : undefined}
             lane={() => (served ? 'served' : 'asking')} entry={(e) => (e === 0 && lit ? 'hot' : 'idle')}
-            laneLabel="one warp: 32 lanes" tableLabel="F: the 5 × 5 filter in constant memory, row by row" entryLabel={(e) => String(e)} />
-          <Counter x={20} y={250} label="answers fetched" value={served ? 1 : 0} />
-          <Counter x={200} y={250} label="distinct addresses" value={lit ? 1 : 0} />
+            laneLabel={tr('one warp: 32 lanes', 'một warp: 32 lane')} tableLabel={tr('F: the 5 × 5 filter in constant memory, row by row', 'F: bộ lọc 5 × 5 trong bộ nhớ hằng, từng hàng một')} entryLabel={(e) => String(e)} />
+          <Counter x={20} y={250} label={tr('answers fetched', 'câu trả lời đã nạp')} value={served ? 1 : 0} />
+          <Counter x={200} y={250} label={tr('distinct addresses', 'địa chỉ khác nhau')} value={lit ? 1 : 0} />
         </Stage>
       );
     },
   },
   {
     clip: 'constant-broadcast-2',
-    label: 'Every tap',
+    get label() {
+      return tr('Every tap', 'Mọi tap');
+    },
     draw: (p) => {
       const k = Math.min(TAPS.length - 1, Math.floor(ramp(p, 0.04, 0.9) * TAPS.length));
       const addr = UNIFORM.map(() => TAPS[k].address);
       return (
         <Stage data={{ beat: 2, tap: k, distinct: distinctCount(addr), answers: k + 1 }}
-          headline={k < TAPS.length - 1 ? `tap ${k + 1} of ${TAPS.length}: ${tapName(k)}, still one address` : `${TAPS.length} taps, ${TAPS.length} answers, whatever the warp's width`}>
+          headline={k < TAPS.length - 1 ? tr(`tap ${k + 1} of ${TAPS.length}: ${tapName(k)}, still one address`, `tap ${k + 1} trên ${TAPS.length}: ${tapName(k)}, vẫn một địa chỉ`) : tr(`${TAPS.length} taps, ${TAPS.length} answers, whatever the warp's width`, `${TAPS.length} tap, ${TAPS.length} câu trả lời, dù warp rộng bao nhiêu`)}>
           <WarpTable addresses={addr} tableSize={M * M} hotLines={new Set([TAPS[k].address])}
             lane={() => 'served'} entry={(e) => (e === TAPS[k].address ? 'hot' : e < TAPS[k].address ? 'done' : 'idle')}
-            laneLabel="one warp: 32 lanes" tableLabel="F: the 5 × 5 filter in constant memory, row by row" entryLabel={(e) => String(e)} />
-          <Counter x={20} y={250} label="answers fetched" value={k + 1} of={TAPS.length} />
-          <Counter x={200} y={250} label="distinct addresses this tap" value={1} />
+            laneLabel={tr('one warp: 32 lanes', 'một warp: 32 lane')} tableLabel={tr('F: the 5 × 5 filter in constant memory, row by row', 'F: bộ lọc 5 × 5 trong bộ nhớ hằng, từng hàng một')} entryLabel={(e) => String(e)} />
+          <Counter x={20} y={250} label={tr('answers fetched', 'câu trả lời đã nạp')} value={k + 1} of={TAPS.length} />
+          <Counter x={200} y={250} label={tr('distinct addresses this tap', 'địa chỉ khác nhau ở tap này')} value={1} />
           <RoundStrip x={20} y={310} total={TAPS.length} done={k + 1} width={640} />
         </Stage>
       );
@@ -190,7 +195,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'constant-broadcast-3',
-    label: 'A codebook',
+    get label() {
+      return tr('A codebook', 'Một codebook');
+    },
     draw: (p) => {
       const asked = true; // the codes are there from the start; the rounds are what unfolds
       const done = Math.floor(ramp(p, 0.25, 0.95) * ROUNDS.length + 1e-9);
@@ -202,18 +209,18 @@ const beats: Beat[] = [
         <Stage data={{ beat: 3, distinct: DISTINCT, rounds: done }}
           headline={
             done >= ROUNDS.length
-              ? `${DISTINCT} different entries: ${DISTINCT} rounds, one after another`
+              ? tr(`${DISTINCT} different entries: ${DISTINCT} rounds, one after another`, `${DISTINCT} mục khác nhau: ${DISTINCT} lượt, lần lượt từng lượt`)
               : current
-                ? `round ${done + 1}: entry ${current.address} for lane${current.lanes.length > 1 ? 's' : ''} ${current.lanes.join(', ')}`
-                : 'each lane asks for the entry its own code names'
+                ? tr(`round ${done + 1}: entry ${current.address} for lane${current.lanes.length > 1 ? 's' : ''} ${current.lanes.join(', ')}`, `lượt ${done + 1}: mục ${current.address} cho lane ${current.lanes.join(', ')}`)
+                : tr('each lane asks for the entry its own code names', 'mỗi lane hỏi mục mà mã của chính nó chỉ tới')
           }>
           <WarpTable addresses={CODES} tableSize={CODEBOOK} lines={1} hotLines={current ? new Set([current.address]) : undefined}
             lane={(i) => (servedLanes.has(i) ? 'served' : current?.lanes.includes(i) ? 'asking' : p >= 0.25 ? 'waiting' : 'asking')}
             entry={(e) => (current?.address === e ? 'hot' : doneEntries.has(e) ? 'done' : order.has(e) && asked ? 'asked' : 'idle')}
             rounds={asked ? order : undefined}
-            laneLabel="one warp: 32 lanes, each with its own 4-bit weight code" tableLabel="a 16-entry codebook in constant memory" entryLabel={(e) => String(e)} />
-          <Counter x={20} y={250} label="rounds answered" value={done} of={DISTINCT} />
-          <Counter x={200} y={250} label="distinct addresses" value={asked ? DISTINCT : 0} />
+            laneLabel={tr('one warp: 32 lanes, each with its own 4-bit weight code', 'một warp: 32 lane, mỗi lane có mã trọng số 4-bit riêng')} tableLabel={tr('a 16-entry codebook in constant memory', 'một codebook 16 mục trong bộ nhớ hằng')} entryLabel={(e) => String(e)} />
+          <Counter x={20} y={250} label={tr('rounds answered', 'lượt đã trả lời')} value={done} of={DISTINCT} />
+          <Counter x={200} y={250} label={tr('distinct addresses', 'địa chỉ khác nhau')} value={asked ? DISTINCT : 0} />
           <RoundStrip x={20} y={310} total={DISTINCT} done={done} />
         </Stage>
       );
@@ -221,58 +228,64 @@ const beats: Beat[] = [
   },
   {
     clip: 'constant-broadcast-4',
-    label: 'AMD',
+    get label() {
+      return tr('AMD', 'AMD');
+    },
     draw: (p) => (
       <Stage data={{ beat: 4, 'amd-filter': amdScalarEligible(UNIFORM) ? 'yes' : 'no', 'amd-codebook': amdScalarEligible(CODES) ? 'yes' : 'no' }}
-        headline="AMD: the scalar cache serves uniform reads only, and AMD gives no size">
+        headline={tr('AMD: the scalar cache serves uniform reads only, and AMD gives no size', 'AMD: bộ nhớ đệm vô hướng chỉ phục vụ các lần đọc đồng nhất, và AMD không cho biết kích thước')}>
         <g>
-          <Mini x={20} y={30} addresses={UNIFORM} tableSize={M * M} title="filter tap: 1 address"
-            verdict={amdScalarEligible(UNIFORM) ? 'uniform: served by the scalar cache (sL1D)' : 'not uniform'} ok={amdScalarEligible(UNIFORM)} />
+          <Mini x={20} y={30} addresses={UNIFORM} tableSize={M * M} title={tr('filter tap: 1 address', 'tap của bộ lọc: 1 địa chỉ')}
+            verdict={amdScalarEligible(UNIFORM) ? tr('uniform: served by the scalar cache (sL1D)', 'đồng nhất: được bộ nhớ đệm vô hướng (sL1D) phục vụ') : tr('not uniform', 'không đồng nhất')} ok={amdScalarEligible(UNIFORM)} />
         </g>
         <g opacity={ramp(p, 0.5, 0.62)}>
-          <Mini x={380} y={30} addresses={CODES} tableSize={CODEBOOK} title={`codebook lookup: ${DISTINCT} addresses`}
-            verdict={amdScalarEligible(CODES) ? 'uniform' : 'not uniform: the accesses are serialised'} ok={amdScalarEligible(CODES)} />
+          <Mini x={380} y={30} addresses={CODES} tableSize={CODEBOOK} title={tr(`codebook lookup: ${DISTINCT} addresses`, `tra codebook: ${DISTINCT} địa chỉ`)}
+            verdict={amdScalarEligible(CODES) ? tr('uniform', 'đồng nhất') : tr('not uniform: the accesses are serialised', 'không đồng nhất: các truy cập bị tuần tự hóa')} ok={amdScalarEligible(CODES)} />
         </g>
         <g opacity={ramp(p, 0.8, 0.9)}>
-          <text x={20} y={250} fontSize="12">Size of __constant__ memory on AMD: not documented.</text>
-          <text x={20} y={270} fontSize="12" style={{ fill: 'var(--ink-2)' }}>totalConstMem reports the largest allocation instead (CLR source).</text>
+          <text x={20} y={250} fontSize="12"><Translated vi="Kích thước bộ nhớ __constant__ trên AMD: không được ghi trong tài liệu.">Size of __constant__ memory on AMD: not documented.</Translated></text>
+          <text x={20} y={270} fontSize="12" style={{ fill: 'var(--ink-2)' }}><Translated vi="totalConstMem thay vào đó báo cáo lần cấp phát lớn nhất (mã nguồn CLR).">totalConstMem reports the largest allocation instead (CLR source).</Translated></text>
         </g>
       </Stage>
     ),
   },
   {
     clip: 'constant-broadcast-5',
-    label: 'Apple',
+    get label() {
+      return tr('Apple', 'Apple');
+    },
     draw: (p) => (
-      <Stage data={{ beat: 5 }} headline="Apple: no documented rule to model, so the lab measures">
+      <Stage data={{ beat: 5 }} headline={tr('Apple: no documented rule to model, so the lab measures', 'Apple: không có quy tắc nào được ghi trong tài liệu để mô hình hóa, nên lab sẽ đo')}>
         <g>
           <rect x={20} y={24} width={680} height={196} rx="4" fill="var(--page)" stroke="var(--rule)" />
-          <text x={36} y={50} fontSize="12.5" fontWeight="600">What Apple documents about the constant address space</text>
-          <text x={36} y={78} fontSize="12">MSL specification: read-only buffer memory from the device memory pool.</text>
-          <text x={36} y={102} fontSize="12" opacity={ramp(p, 0.15, 0.3)}>WWDC 2016 talk: &ldquo;optimized for cases with a lot of data reuse&rdquo;;</text>
-          <text x={36} y={120} fontSize="12" opacity={ramp(p, 0.15, 0.3)}>statically bounded data passed by reference can be preloaded into registers.</text>
-          <text x={36} y={150} fontSize="12" opacity={ramp(p, 0.4, 0.55)} style={{ fill: 'var(--ink-2)' }}>Not documented: a constant cache, its size, a rule about lanes reading one address.</text>
-          <text x={36} y={190} fontSize="12" opacity={ramp(p, 0.7, 0.85)}>Lab 7.1 times constant float* against a setBytes struct on your Mac.</text>
+          <text x={36} y={50} fontSize="12.5" fontWeight="600"><Translated vi="Những gì Apple ghi trong tài liệu về không gian địa chỉ constant">What Apple documents about the constant address space</Translated></text>
+          <text x={36} y={78} fontSize="12"><Translated vi="Đặc tả MSL: bộ nhớ buffer chỉ-đọc lấy từ vùng bộ nhớ của thiết bị.">MSL specification: read-only buffer memory from the device memory pool.</Translated></text>
+          <text x={36} y={102} fontSize="12" opacity={ramp(p, 0.15, 0.3)}><Translated vi={<>Bài nói WWDC 2016: &ldquo;tối ưu cho các trường hợp có nhiều tái sử dụng dữ liệu&rdquo;;</>}>WWDC 2016 talk: &ldquo;optimized for cases with a lot of data reuse&rdquo;;</Translated></text>
+          <text x={36} y={120} fontSize="12" opacity={ramp(p, 0.15, 0.3)}><Translated vi="dữ liệu có giới hạn tĩnh được truyền theo tham chiếu có thể được nạp sẵn vào thanh ghi.">statically bounded data passed by reference can be preloaded into registers.</Translated></text>
+          <text x={36} y={150} fontSize="12" opacity={ramp(p, 0.4, 0.55)} style={{ fill: 'var(--ink-2)' }}><Translated vi="Không có trong tài liệu: một bộ nhớ đệm hằng, kích thước của nó, một quy tắc về các lane cùng đọc một địa chỉ.">Not documented: a constant cache, its size, a rule about lanes reading one address.</Translated></text>
+          <text x={36} y={190} fontSize="12" opacity={ramp(p, 0.7, 0.85)}><Translated vi="Lab 7.1 đo thời gian constant float* so với một struct setBytes trên máy Mac của bạn.">Lab 7.1 times constant float* against a setBytes struct on your Mac.</Translated></text>
         </g>
       </Stage>
     ),
   },
   {
     clip: 'constant-broadcast-6',
-    label: 'Side by side',
+    get label() {
+      return tr('Side by side', 'Đặt cạnh nhau');
+    },
     draw: (p) => {
       const g = ramp(p, 0.1, 0.5);
       return (
         <Stage data={{ beat: 6, 'filter-rounds': distinctCount(UNIFORM), 'codebook-rounds': DISTINCT }}
-          headline="best case and near-worst case for the same cache">
-          <Mini x={20} y={30} addresses={UNIFORM} tableSize={M * M} title="filter tap (every lane, one address)" verdict="1 round per read" ok={null} />
-          <Mini x={380} y={30} addresses={CODES} tableSize={CODEBOOK} title="codebook lookup (one code per lane)" verdict={`${DISTINCT} rounds per read`} ok={null} />
-          <text x={20} y={232} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>serialised reads, NVIDIA's documented rule</text>
+          headline={tr('best case and near-worst case for the same cache', 'trường hợp tốt nhất và gần tệ nhất cho cùng một bộ nhớ đệm')}>
+          <Mini x={20} y={30} addresses={UNIFORM} tableSize={M * M} title={tr('filter tap (every lane, one address)', 'tap của bộ lọc (mọi lane, một địa chỉ)')} verdict={tr('1 round per read', '1 lượt mỗi lần đọc')} ok={null} />
+          <Mini x={380} y={30} addresses={CODES} tableSize={CODEBOOK} title={tr('codebook lookup (one code per lane)', 'tra codebook (mỗi lane một mã)')} verdict={tr(`${DISTINCT} rounds per read`, `${DISTINCT} lượt mỗi lần đọc`)} ok={null} />
+          <text x={20} y={232} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="số lần đọc bị tuần tự hóa, theo quy tắc NVIDIA ghi trong tài liệu">serialised reads, NVIDIA's documented rule</Translated></text>
           <rect x={20} y={242} width={Math.max(2, 20 * g)} height={16} fill="var(--const)" />
-          <text x={28 + 20 * g} y={255} fontSize="11.5">filter: 1</text>
+          <text x={28 + 20 * g} y={255} fontSize="11.5"><Translated vi="bộ lọc: 1">filter: 1</Translated></text>
           <rect x={20} y={266} width={Math.max(2, 20 * DISTINCT * g)} height={16} fill="var(--const)" />
-          <text x={28 + 20 * DISTINCT * g} y={279} fontSize="11.5">codebook: {DISTINCT}</text>
-          <text x={20} y={320} fontSize="12" opacity={ramp(p, 0.6, 0.8)}>llama.cpp on CUDA and HIP: quantisation tables as static const __device__ arrays.</text>
+          <text x={28 + 20 * DISTINCT * g} y={279} fontSize="11.5"><Translated vi={<>codebook: {DISTINCT}</>}>codebook: {DISTINCT}</Translated></text>
+          <text x={20} y={320} fontSize="12" opacity={ramp(p, 0.6, 0.8)}><Translated vi="llama.cpp trên CUDA và HIP: các bảng lượng tử hóa là mảng static const __device__.">llama.cpp on CUDA and HIP: quantisation tables as static const __device__ arrays.</Translated></text>
         </Stage>
       );
     },
@@ -280,5 +293,5 @@ const beats: Beat[] = [
 ];
 
 export function ConstantBroadcastScene() {
-  return <Scene chapter="ch07" title="One address, one warp" beats={beats} />;
+  return <Scene chapter="ch07" title={tr('One address, one warp', 'Một địa chỉ, một warp')} beats={beats} />;
 }

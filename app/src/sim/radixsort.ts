@@ -26,6 +26,8 @@
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
 /** The book's sixteen 4-bit keys (Figs. 14.4 to 14.6 and 14.8 to 14.13). */
+import { tr } from '../lib/locale.ts';
+
 export const BOOK_KEYS: number[] = [
   0b1100, 0b0011, 0b0110, 0b1001, 0b1111, 0b1000, 0b0101, 0b1010,
   0b1001, 0b0110, 0b1011, 0b1101, 0b0100, 0b1010, 0b0111, 0b0000,
@@ -189,15 +191,15 @@ export function randomKeys(n: number, bits: number, seed: number): number[] {
 /** Parse up to `count` keys of `bits` bits, written in binary ("0101") or decimal ("5"). */
 export function parseKeys(text: string, bits: number, count: number): { keys: number[] } | { error: string } {
   const parts = text.trim().split(/[\s,]+/).filter(Boolean);
-  if (parts.length !== count) return { error: `type exactly ${count} keys (you typed ${parts.length})` };
+  if (parts.length !== count) return { error: tr(`type exactly ${count} keys (you typed ${parts.length})`, `hãy nhập đúng ${count} khóa (bạn đã nhập ${parts.length})`) };
   const max = (1 << bits) - 1;
   const keys: number[] = [];
   for (const p of parts) {
     let v: number;
     if (/^[01]+$/.test(p) && p.length === bits) v = parseInt(p, 2);
     else if (/^\d+$/.test(p)) v = Number(p);
-    else return { error: `"${p}" is not a ${bits}-bit key` };
-    if (v > max) return { error: `${p} does not fit in ${bits} bits` };
+    else return { error: tr(`"${p}" is not a ${bits}-bit key`, `"${p}" không phải là khóa ${bits} bit`) };
+    if (v > max) return { error: tr(`${p} does not fit in ${bits} bits`, `${p} không vừa trong ${bits} bit`) };
     keys.push(v);
   }
   return { keys };
@@ -206,11 +208,21 @@ export function parseKeys(text: string, bits: number, count: number): { keys: nu
 // ---------------------------------------------------------------- one parallel pass (14.5)
 export type Defect = 'none' | 'zero-formula' | 'scan-n' | 'last-as-total' | 'inclusive';
 export const DEFECT_LABEL: Record<Defect, string> = {
-  none: 'as corrected',
-  'zero-formula': 'ones use the zero formula',
-  'scan-n': 'scan of n entries',
-  'last-as-total': 'total from the last of n entries',
-  inclusive: 'inclusive instead of exclusive scan',
+  get none() {
+    return tr('as corrected', 'bản đã sửa');
+  },
+  get 'zero-formula'() {
+    return tr('ones use the zero formula', 'phần tử có bit 1 dùng công thức của bit 0');
+  },
+  get 'scan-n'() {
+    return tr('scan of n entries', 'scan trên n phần tử');
+  },
+  get 'last-as-total'() {
+    return tr('total from the last of n entries', 'lấy tổng từ phần tử cuối trong n phần tử');
+  },
+  get inclusive() {
+    return tr('inclusive instead of exclusive scan', 'scan bao gồm thay vì loại trừ');
+  },
 };
 
 export interface ThreadRow {

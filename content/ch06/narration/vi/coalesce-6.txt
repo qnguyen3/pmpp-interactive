@@ -1,0 +1,1 @@
+Có một cách sửa mà vẫn giữ bố cục theo cột. Nó được gọi là rẽ góc. Warp nạp ô của mình dọc theo mép trái thay vì mép trên. Theo thứ tự cột, một cột là liên tiếp, nên các lane liên tiếp chạm vào các địa chỉ liên tiếp, và 4 sector được trả về. Ô được xoay lại trong bộ nhớ chia sẻ. Phần 6.4 cho thấy điều đó tốn gì.

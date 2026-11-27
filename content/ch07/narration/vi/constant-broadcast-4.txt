@@ -1,0 +1,1 @@
+Trên GPU AMD, dữ liệu hằng đi qua một bộ nhớ đệm vô hướng, nhưng chỉ khi mọi lane của wavefront đọc cùng một địa chỉ. Điểm lọc thỏa điều kiện, nên nó được phục vụ ở đó. Phép tra bảng mã thì không, nên các lần đọc của nó bị tuần tự hóa. Và AMD hoàn toàn không công bố kích thước của bộ nhớ này.

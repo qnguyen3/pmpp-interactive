@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { flagsAfter, numbering, schedule, slotAt, type Schedule, type SlotCell } from '../../sim/wavesched';
 
 // "Waiting for everyone, or only for your neighbours" (section 16.3): Fig. 16.21's 4 x 4
@@ -30,7 +31,7 @@ const ramp = (p: number, a: number, b: number) => clamp((p - a) / (b - a));
 function Defs() {
   return (
     <defs>
-      <marker id="nb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <marker id="nb-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute */}
         <path d="M0,0 L10,5 L0,10 z" fill="var(--ink)" />
       </marker>
     </defs>
@@ -48,7 +49,7 @@ function Grid({ flags, front, arrowsTo, spin }: {
   const cy = (r: number) => GY + r * GC + GC / 2;
   return (
     <g data-grid>
-      <text x={GX} y={GY - 12} fontSize="12" fontWeight="600">tiles, in front order</text>
+      <text x={GX} y={GY - 12} fontSize="12" fontWeight="600"><Translated vi="các ô, theo thứ tự front">tiles, in front order</Translated></text>
       {NUM.flatMap((row, r) =>
         row.map((n, c) => {
           const done = flags.has(n);
@@ -78,8 +79,8 @@ function Grid({ flags, front, arrowsTo, spin }: {
         );
       })() : null}
       <text x={GX} y={GY + T * GC + 20} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-        <tspan x={GX} dy="0">small square: the tile's flag,</tspan>
-        <tspan x={GX} dy="14">set when the tile is done</tspan>
+        <tspan x={GX} dy="0"><Translated vi="ô vuông nhỏ: cờ của ô,">small square: the tile's flag,</Translated></tspan>
+        <tspan x={GX} dy="14"><Translated vi="được bật khi ô xong">set when the tile is done</Translated></tspan>
       </text>
     </g>
   );
@@ -99,7 +100,7 @@ function SlotBox({ cell, t, s, x, y, h, mark }: { cell: SlotCell; t: number; s: 
     <g {...common}>
       <rect x={x} y={y} width={w} height={h} rx="2" fill={cell.state === 'spin' ? 'var(--fail-wash)' : 'none'} stroke="var(--fail)" strokeDasharray="4 3" />
       <text x={x + w / 2} y={y + h / 2 + 4} fontSize="9.5" textAnchor="middle" style={{ fill: 'var(--fail)' }}>
-        {cell.state === 'spin' ? `wait ${cell.tile}` : 'empty'}
+        {cell.state === 'spin' ? tr(`wait ${cell.tile}`, `chờ ${cell.tile}`) : tr('empty', 'trống')}
       </text>
     </g>
   );
@@ -141,7 +142,7 @@ function Lanes({ sch, shown, y, label, rh = 32, total, mark }: {
 
 function Stage({ beat, headline, children, counter }: { beat: number; headline: string; children: ReactNode; counter?: ReactNode }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Tiles of a wavefront scheduled on a few SMs" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Tiles of a wavefront scheduled on a few SMs', 'Các ô của một wavefront được lập lịch trên vài SM')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <Defs />
       <g data-beat={beat}>
         <text data-headline x={GX} y={22} fontSize="13.5" fontWeight="600">{headline}</text>
@@ -162,40 +163,46 @@ const play = (p: number, n: number, a = 0.06, b = 0.82) => Math.round(ramp(p, a,
 const beats: Beat[] = [
   {
     clip: 'neighbours-1',
-    label: 'Sixteen tiles',
+    get label() {
+      return tr('Sixteen tiles', 'Mười sáu ô');
+    },
     draw: (p) => {
       const front = p >= 0.55 ? [3, 4, 5] : undefined;
       return (
-        <Stage beat={1} headline={p < 0.55 ? 'each tile needs the tile above and the tile to its left' : 'one front: tiles 3, 4 and 5 need nothing from each other'}>
+        <Stage beat={1} headline={p < 0.55 ? tr('each tile needs the tile above and the tile to its left', 'mỗi ô cần ô phía trên và ô bên trái nó') : tr('one front: tiles 3, 4 and 5 need nothing from each other', 'một front: các ô 3, 4 và 5 không cần gì từ nhau')}>
           <Grid flags={new Set()} arrowsTo={p >= 0.25 ? [1, 1] : undefined} front={front} />
-          <Lanes sch={SCENE.front2} shown={0} y={78} label="2 SMs, as in the book's example" total={10} />
+          <Lanes sch={SCENE.front2} shown={0} y={78} label={tr("2 SMs, as in the book's example", '2 SM, như ví dụ của sách')} total={10} />
         </Stage>
       );
     },
   },
   {
     clip: 'neighbours-2',
-    label: 'A relaunch per front',
+    get label() {
+      return tr('A relaunch per front', 'Khởi chạy lại mỗi front');
+    },
     draw: (p) => {
       const sch = SCENE.front2;
       const shown = play(p, sch.makespan!);
       const idle = sch.timeline.slice(0, shown).flat().filter((c) => c.state !== 'run').length;
       return (
-        <Stage beat={2} headline="a relaunch after every front: wait for the whole front" counter={
+        <Stage beat={2} headline={tr('a relaunch after every front: wait for the whole front', 'khởi chạy lại sau mỗi front: chờ cả front')} counter={
           <>
-            <Counter x={CX} y={196} text={shown >= sch.makespan! ? `${sch.makespan} steps` : `step ${shown}`} value={shown} />
-            <text data-idle={idle} x={CX + 120} y={196} fontSize="12" style={{ fill: 'var(--fail)' }}>{idle} empty lane-steps</text>
+            <Counter x={CX} y={196} text={shown >= sch.makespan! ? tr(`${sch.makespan} steps`, `${sch.makespan} bước`) : tr(`step ${shown}`, `bước ${shown}`)} value={shown} />
+            <text data-idle={idle} x={CX + 120} y={196} fontSize="12" style={{ fill: 'var(--fail)' }}><Translated vi={<>{idle} lane-bước trống</>}>{idle} empty lane-steps</Translated></text>
           </>
         }>
           <Grid flags={flagsAfter(sch, shown)} />
-          <Lanes sch={sch} shown={shown} y={78} label="relaunch per front, 2 SMs" total={10} />
+          <Lanes sch={sch} shown={shown} y={78} label={tr('relaunch per front, 2 SMs', 'khởi chạy lại mỗi front, 2 SM')} total={10} />
         </Stage>
       );
     },
   },
   {
     clip: 'neighbours-3',
-    label: 'Flags',
+    get label() {
+      return tr('Flags', 'Cờ');
+    },
     draw: (p) => {
       const sch = SCENE.counter2;
       const shown = play(p, sch.makespan!);
@@ -203,53 +210,57 @@ const beats: Beat[] = [
       const sixSlot = sch.timeline[six].findIndex((c) => c.state === 'run' && c.tile === 6);
       const markSix = shown > six && p >= 0.4;
       return (
-        <Stage beat={3} headline="flags: a tile waits only for its own neighbours" counter={
+        <Stage beat={3} headline={tr('flags: a tile waits only for its own neighbours', 'cờ: một ô chỉ chờ các ô láng giềng của chính nó')} counter={
           <>
-            <Counter x={CX} y={196} text={shown >= sch.makespan! ? `${sch.makespan} steps` : `step ${shown}`} value={shown} />
-            <text x={CX + 120} y={196} fontSize="12" style={{ fill: 'var(--ink-2)' }}>a relaunch per front took {SCENE.front2.makespan}</text>
-            {markSix ? <text data-mark="six" x={CX + six * CW - 30} y={166} fontSize="11.5">tile 6 fills the empty lane of step {six + 1}</text> : null}
+            <Counter x={CX} y={196} text={shown >= sch.makespan! ? tr(`${sch.makespan} steps`, `${sch.makespan} bước`) : tr(`step ${shown}`, `bước ${shown}`)} value={shown} />
+            <text x={CX + 120} y={196} fontSize="12" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>khởi chạy lại mỗi front thì mất {SCENE.front2.makespan}</>}>a relaunch per front took {SCENE.front2.makespan}</Translated></text>
+            {markSix ? <text data-mark="six" x={CX + six * CW - 30} y={166} fontSize="11.5"><Translated vi={<>ô 6 lấp lane trống của bước {six + 1}</>}>tile 6 fills the empty lane of step {six + 1}</Translated></text> : null}
           </>
         }>
           <Grid flags={flagsAfter(sch, shown)} />
-          <Lanes sch={sch} shown={shown} y={78} label="tiles from a counter, 2 SMs" total={10} mark={markSix ? [six, sixSlot] : undefined} />
+          <Lanes sch={sch} shown={shown} y={78} label={tr('tiles from a counter, 2 SMs', 'lấy ô từ một bộ đếm, 2 SM')} total={10} mark={markSix ? [six, sixSlot] : undefined} />
         </Stage>
       );
     },
   },
   {
     clip: 'neighbours-4',
-    label: 'Four SMs',
+    get label() {
+      return tr('Four SMs', 'Bốn SM');
+    },
     draw: (p) => {
       const a = SCENE.front4;
       const b = SCENE.counter4;
       const shown = play(p, a.makespan!);
       return (
-        <Stage beat={4} headline="as many SMs as the widest front: nothing to gain" counter={
-          <Counter x={CX + 7 * CW + 16} y={190} text={shown >= a.makespan! ? `both ${a.makespan} steps` : `step ${shown}`} value={shown} />
+        <Stage beat={4} headline={tr('as many SMs as the widest front: nothing to gain', 'số SM bằng front rộng nhất: không được lợi gì')} counter={
+          <Counter x={CX + 7 * CW + 16} y={190} text={shown >= a.makespan! ? tr(`both ${a.makespan} steps`, `cả hai ${a.makespan} bước`) : tr(`step ${shown}`, `bước ${shown}`)} value={shown} />
         }>
           <Grid flags={flagsAfter(b, shown)} />
-          <Lanes sch={a} shown={shown} y={72} rh={28} label="relaunch per front, 4 SMs" total={7} />
-          <Lanes sch={b} shown={shown} y={222} rh={28} label="tiles from a counter, 4 SMs" total={7} />
+          <Lanes sch={a} shown={shown} y={72} rh={28} label={tr('relaunch per front, 4 SMs', 'khởi chạy lại mỗi front, 4 SM')} total={7} />
+          <Lanes sch={b} shown={shown} y={222} rh={28} label={tr('tiles from a counter, 4 SMs', 'lấy ô từ một bộ đếm, 4 SM')} total={7} />
         </Stage>
       );
     },
   },
   {
     clip: 'neighbours-5',
-    label: 'Fixed rows',
+    get label() {
+      return tr('Fixed rows', 'Hàng cố định');
+    },
     draw: (p) => {
       if (p < 0.5) {
         const sch = SCENE.rowsReversed;
         const shown = 1 + Math.floor(ramp(p, 0.08, 0.42) * 3);
         const waiting = sch.timeline[0].map((c) => c.tile as number);
         return (
-          <Stage beat={5} headline="row owners started in reverse: every lane waits, nothing moves" counter={
-            <Counter x={CX} y={196} text="0 tiles done" value="stuck" />
+          <Stage beat={5} headline={tr('row owners started in reverse: every lane waits, nothing moves', 'các khối giữ hàng khởi động theo thứ tự ngược: mọi lane đều chờ, không gì nhúc nhích')} counter={
+            <Counter x={CX} y={196} text={tr('0 tiles done', '0 ô xong')} value="stuck" />
           }>
             <Grid flags={new Set()} spin={waiting} />
-            <Lanes sch={sch} shown={shown} y={78} label="one block per tile row, rows 3 and 2 first" total={10} />
+            <Lanes sch={sch} shown={shown} y={78} label={tr('one block per tile row, rows 3 and 2 first', 'một khối (block) cho mỗi hàng ô, hàng 3 và 2 trước')} total={10} />
             <g data-notes>
-              {['row 3 waits for row 2', 'row 2 waits for row 1', 'row 1 has no lane, and never will'].map((t, i) => (
+              {[tr('row 3 waits for row 2', 'hàng 3 chờ hàng 2'), tr('row 2 waits for row 1', 'hàng 2 chờ hàng 1'), tr('row 1 has no lane, and never will', 'hàng 1 không có lane, và sẽ không bao giờ có')].map((t, i) => (
                 <text key={t} x={CX} y={228 + i * 18} fontSize="12" style={{ fill: i === 2 ? 'var(--fail)' : 'var(--ink-2)' }}>{t}</text>
               ))}
             </g>
@@ -259,11 +270,11 @@ const beats: Beat[] = [
       const sch = SCENE.counter2;
       const shown = play(p, sch.makespan!, 0.55, 0.92);
       return (
-        <Stage beat={5} headline="tiles from a counter in front order: waits only on started work" counter={
-          <Counter x={CX} y={196} text={shown >= sch.makespan! ? `${sch.makespan} steps` : `step ${shown}`} value={shown} />
+        <Stage beat={5} headline={tr('tiles from a counter in front order: waits only on started work', 'lấy ô từ bộ đếm theo thứ tự front: chỉ chờ việc đã bắt đầu')} counter={
+          <Counter x={CX} y={196} text={shown >= sch.makespan! ? tr(`${sch.makespan} steps`, `${sch.makespan} bước`) : tr(`step ${shown}`, `bước ${shown}`)} value={shown} />
         }>
           <Grid flags={flagsAfter(sch, shown)} />
-          <Lanes sch={sch} shown={shown} y={78} label="tiles from a counter, 2 SMs" total={10} />
+          <Lanes sch={sch} shown={shown} y={78} label={tr('tiles from a counter, 2 SMs', 'lấy ô từ một bộ đếm, 2 SM')} total={10} />
         </Stage>
       );
     },
@@ -271,5 +282,5 @@ const beats: Beat[] = [
 ];
 
 export function NeighboursScene() {
-  return <Scene chapter="ch16" title="Waiting for everyone, or only for your neighbours" beats={beats} />;
+  return <Scene chapter="ch16" title={tr('Waiting for everyone, or only for your neighbours', 'Chờ tất cả, hay chỉ chờ các láng giềng')} beats={beats} />;
 }

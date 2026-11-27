@@ -28,6 +28,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 /** The sixteen 4-bit keys of Figs. 14.4 to 14.13. */
 export const BOOK_KEYS: readonly number[] = [
   0b1100, 0b0011, 0b0110, 0b1001, 0b1111, 0b1000, 0b0101, 0b1010, 0b1001, 0b0110, 0b1011, 0b1101, 0b0100, 0b1010,
@@ -270,11 +272,51 @@ export interface UnitChoice {
 }
 
 export const UNITS: UnitChoice[] = [
-  { id: 'nv-sector', label: 'NVIDIA: 32-byte sectors', bytes: 32, noun: 'sector', source: 'ch06-facts A2' },
-  { id: 'nv-line', label: "NVIDIA: 128-byte lines (the book's cache lines)", bytes: 128, noun: 'line', source: 'ch06-facts A4' },
-  { id: 'amd-64', label: 'AMD: 64-byte lines', bytes: 64, noun: 'line', source: 'ch06-facts B1' },
-  { id: 'amd-128', label: 'AMD: 128-byte lines', bytes: 128, noun: 'line', source: 'ch06-facts B1' },
-  { id: 'metal', label: 'Metal: not documented, pick a size', bytes: null, noun: 'segment', source: 'ch06-facts C1' },
+  {
+    id: 'nv-sector',
+    get label() {
+      return tr('NVIDIA: 32-byte sectors', 'NVIDIA: sector 32 byte');
+    },
+    bytes: 32,
+    noun: 'sector',
+    source: 'ch06-facts A2',
+  },
+  {
+    id: 'nv-line',
+    get label() {
+      return tr("NVIDIA: 128-byte lines (the book's cache lines)", 'NVIDIA: line 128 byte (cache line của sách)');
+    },
+    bytes: 128,
+    noun: 'line',
+    source: 'ch06-facts A4',
+  },
+  {
+    id: 'amd-64',
+    get label() {
+      return tr('AMD: 64-byte lines', 'AMD: line 64 byte');
+    },
+    bytes: 64,
+    noun: 'line',
+    source: 'ch06-facts B1',
+  },
+  {
+    id: 'amd-128',
+    get label() {
+      return tr('AMD: 128-byte lines', 'AMD: line 128 byte');
+    },
+    bytes: 128,
+    noun: 'line',
+    source: 'ch06-facts B1',
+  },
+  {
+    id: 'metal',
+    get label() {
+      return tr('Metal: not documented, pick a size', 'Metal: không có tài liệu, hãy chọn một kích thước');
+    },
+    bytes: null,
+    noun: 'segment',
+    source: 'ch06-facts C1',
+  },
 ];
 
 /** Separate runs of consecutive element addresses (lane order does not matter). */

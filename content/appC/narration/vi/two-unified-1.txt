@@ -1,0 +1,1 @@
+Đây là Hình C 1 trên một máy tính có card đồ họa rời. CUDA malloc managed trả về một con trỏ, nhưng chưa có trang nào được đặt ở đâu cả. Rồi fread ghi tệp trên CPU, và mỗi trang trong 8 trang nằm lại trong bộ nhớ CPU, nơi nó được chạm vào lần đầu.

@@ -1,0 +1,1 @@
+Đây là một khối của kernel phân ô, đặt trên góc trên bên trái của một ảnh 10 nhân 10. 64 luồng của nó tạo thành một hình vuông 8 nhân 8, mỗi luồng ứng với một phần tử của ô đầu vào. Ô bắt đầu cao hơn ảnh một hàng và lệch trái một cột, nên hàng trên cùng và cột bên trái của nó chìa ra ngoài mép.

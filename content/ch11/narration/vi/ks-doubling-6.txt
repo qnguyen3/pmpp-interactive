@@ -1,0 +1,1 @@
+Giờ đến race condition. Chạy lại bước có bước nhảy 2, nhưng để luồng 4 ghi giá trị mới trước khi luồng 6 đọc nó. Luồng 6 lấy x1 đến x4 thay vì x3 và x4, và bước tiếp theo lại cộng x1 và x2 thêm lần nữa. [short pause] Vì thế mới có biến temp riêng, và một rào chắn thứ hai trước mỗi lần ghi.

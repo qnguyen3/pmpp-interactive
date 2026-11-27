@@ -1,0 +1,1 @@
+Giờ mỗi luồng cộng 1 vào một bin trong bản sao của khối mình. Nó vẫn cần một phép toán nguyên tử, vì 2 luồng trong cùng một khối có thể chọn cùng một bin. Nhưng đám đông nhỏ hơn. Bin bận nhất của bất kỳ bản sao nào có 5 luồng tranh chấp, tất cả từ một khối, thay vì 14 luồng từ khắp nơi.

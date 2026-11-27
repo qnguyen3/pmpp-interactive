@@ -1,0 +1,1 @@
+Đoạn thứ hai vượt qua mục tiêu, nên khối scan nó. Mỗi lane giữ tổng bao gồm của các token còn lại của chính nó, cộng phần mang sang từ các lane và các warp trước nó, cộng tổng gộp. Một lane bật cờ ở nơi tổng đó lớn hơn mục tiêu.

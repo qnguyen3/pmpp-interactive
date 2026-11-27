@@ -1,0 +1,1 @@
+Đây là một ô 32 nhân 32 của N, lưu theo từng cột, được nạp bằng cách ánh xạ của chương 5. Một warp là một hàng luồng, và nó đọc dọc theo mép trên của ô. Theo thứ tự cột, các phần tử đó cách nhau cả một cột. Vì vậy warp cần 32 sector, mỗi lane một sector.

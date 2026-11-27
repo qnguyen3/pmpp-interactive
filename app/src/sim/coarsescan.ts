@@ -29,6 +29,7 @@
 
 import { warpAccess, runs as byteRuns, type WarpAccess } from './coalesce';
 import { FIG_11_6, inclusiveScan } from './warpscan';
+import { tr } from '../lib/locale.ts';
 
 export const log2 = (n: number) => Math.log2(n);
 const isPow2 = (n: number) => n >= 1 && (n & (n - 1)) === 0;
@@ -90,9 +91,9 @@ export function coarsenedWork(N: number, P: number): Count {
   return {
     total: seq + scan + add,
     parts: [
-      { label: 'sequential run scans, P·(N/P − 1)', value: seq },
-      { label: 'block scan of the run totals, P·log2P', value: scan },
-      { label: 'adding the predecessor\'s total, (P − 1)·N/P', value: add },
+      { label: tr('sequential run scans, P·(N/P − 1)', 'scan tuần tự từng đoạn, P·(N/P − 1)'), value: seq },
+      { label: tr('block scan of the run totals, P·log2P', 'scan cấp khối trên tổng của các đoạn, P·log2P'), value: scan },
+      { label: tr('adding the predecessor\'s total, (P − 1)·N/P', 'cộng tổng của đoạn đứng trước, (P − 1)·N/P'), value: add },
     ],
   };
 }
@@ -105,9 +106,9 @@ export function coarsenedSteps(N: number, P: number): Count {
   return {
     total: seq + scan + add,
     parts: [
-      { label: 'sequential run scan', value: seq },
-      { label: 'block scan of the totals', value: scan },
-      { label: 'add', value: add },
+      { label: tr('sequential run scan', 'scan tuần tự từng đoạn'), value: seq },
+      { label: tr('block scan of the totals', 'scan cấp khối trên các tổng'), value: scan },
+      { label: tr('add', 'cộng'), value: add },
     ],
   };
 }
@@ -123,8 +124,12 @@ export const sequentialWork = (N: number) => N - 1;
 
 export type LoadMode = 'staged' | 'direct';
 export const LOAD_MODE_LABEL: Record<LoadMode, string> = {
-  staged: 'chunk at a time, through shared memory (Fig. 11.12)',
-  direct: 'each thread loads its own run',
+  get staged() {
+    return tr('chunk at a time, through shared memory (Fig. 11.12)', 'từng chunk một, qua bộ nhớ chia sẻ (Hình 11.12)');
+  },
+  get direct() {
+    return tr('each thread loads its own run', 'mỗi luồng tự tải đoạn của mình');
+  },
 };
 
 /** The element thread t moves in load iteration c. */

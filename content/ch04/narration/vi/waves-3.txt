@@ -1,0 +1,1 @@
+Giờ là một thiết bị lớn hơn, với 4 chỗ. Cùng danh sách đó được xử lý mỗi lần 4 khối, trong 2 đợt thay vì 4. [short pause] Không một dòng nào của kernel thay đổi. Lần khởi chạy cũng không đổi. Lưới chưa bao giờ nói bao nhiêu khối phải chạy cùng lúc. Thiết bị quyết định điều đó.

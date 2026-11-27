@@ -41,6 +41,8 @@
 // No imports and only erasable TypeScript, so browser checks can load this file
 // directly with Node.
 
+import { tr } from '../lib/locale.ts';
+
 export const MiB = 1024 * 1024;
 
 // ================================================================ part 1: the stepper
@@ -161,7 +163,7 @@ function cutGrants(grants: Grant[], a: number, size: number): Grant[] {
 /** A human-readable size in granules, e.g. "2 granules", "1.5 granules". */
 export const granules = (bytes: number, gran: number) => {
   const n = bytes / gran;
-  return `${Number(n.toFixed(2))} granule${n === 1 ? '' : 's'}`;
+  return tr(`${Number(n.toFixed(2))} granule${n === 1 ? '' : 's'}`, `${Number(n.toFixed(2))} granule`);
 };
 
 /** Applies one operation. Never throws; refused operations leave the state unchanged. */
@@ -175,61 +177,61 @@ export function apply(s: VmmState, op: Op): { state: VmmState; outcome: Outcome 
 
   switch (op.op) {
     case 'reserve': {
-      if (s.reserved != null) return out('error', 'twice', 'This model keeps one reserved range; it is already reserved.');
-      if (!(op.size > 0)) return out('error', 'size', 'A range needs a positive size.');
-      return out('ok', 'ok', `Reserved ${g(op.size)} of addresses. Nothing is behind them yet: reserving costs addresses, not memory.`, {
+      if (s.reserved != null) return out('error', 'twice', tr('This model keeps one reserved range; it is already reserved.', 'Mô hình này chỉ giữ một vùng địa chỉ đã đặt trước; vùng đó đã được đặt trước rồi.'));
+      if (!(op.size > 0)) return out('error', 'size', tr('A range needs a positive size.', 'Một vùng cần kích thước dương.'));
+      return out('ok', 'ok', tr(`Reserved ${g(op.size)} of addresses. Nothing is behind them yet: reserving costs addresses, not memory.`, `Đã đặt trước ${g(op.size)} địa chỉ. Chưa có gì phía sau chúng: đặt trước chỉ tốn địa chỉ, không tốn bộ nhớ.`), {
         ...s,
         reserved: op.size,
         freed: false,
       });
     }
     case 'create': {
-      if (!(op.size > 0)) return out('error', 'size', 'A chunk needs a positive size.');
+      if (!(op.size > 0)) return out('error', 'size', tr('A chunk needs a positive size.', 'Một chunk cần kích thước dương.'));
       if (op.size % s.gran !== 0)
         return out(
           'error',
           'misaligned',
-          `Refused: ${g(op.size)} is not a whole number of granules. HIP documents an out-of-memory error from hipMemCreate for this (B7); CUDA's rule is not in our checked sources.`,
+          tr(`Refused: ${g(op.size)} is not a whole number of granules. HIP documents an out-of-memory error from hipMemCreate for this (B7); CUDA's rule is not in our checked sources.`, `Bị từ chối: ${g(op.size)} không phải là một số nguyên granule. HIP ghi trong tài liệu rằng hipMemCreate trả lỗi hết bộ nhớ (out-of-memory) cho trường hợp này (B7); quy tắc của CUDA không có trong các nguồn chúng tôi đã kiểm tra.`),
         );
       const chunk: Chunk = { id: s.nextId, device: op.device, size: op.size, released: false };
-      return out('ok', 'ok', `Created chunk h${chunk.id}: ${g(op.size)} of physical memory on GPU ${op.device}. It has no address yet.`, {
+      return out('ok', 'ok', tr(`Created chunk h${chunk.id}: ${g(op.size)} of physical memory on GPU ${op.device}. It has no address yet.`, `Đã tạo chunk h${chunk.id}: ${g(op.size)} bộ nhớ vật lý trên GPU ${op.device}. Nó chưa có địa chỉ.`), {
         ...s,
         chunks: [...s.chunks, chunk],
         nextId: s.nextId + 1,
       });
     }
     case 'map': {
-      if (s.reserved == null) return out('error', 'no-range', 'There is no reserved range to map into.');
+      if (s.reserved == null) return out('error', 'no-range', tr('There is no reserved range to map into.', 'Không có vùng đã đặt trước nào để ánh xạ vào.'));
       const c = s.chunks.find((x) => x.id === op.chunk);
-      if (!c) return out('error', 'no-chunk', `There is no chunk h${op.chunk}.`);
-      if (c.released) return out('error', 'released', `Chunk h${c.id} has been released.`);
-      if (s.maps.some((m) => m.chunk === c.id)) return out('error', 'mapped', `Chunk h${c.id} is already mapped (this model maps a chunk at one place only).`);
+      if (!c) return out('error', 'no-chunk', tr(`There is no chunk h${op.chunk}.`, `Không có chunk h${op.chunk}.`));
+      if (c.released) return out('error', 'released', tr(`Chunk h${c.id} has been released.`, `Chunk h${c.id} đã được giải phóng.`));
+      if (s.maps.some((m) => m.chunk === c.id)) return out('error', 'mapped', tr(`Chunk h${c.id} is already mapped (this model maps a chunk at one place only).`, `Chunk h${c.id} đã được ánh xạ rồi (mô hình này chỉ ánh xạ một chunk ở một chỗ).`));
       if (op.offset < 0 || op.offset + c.size > s.reserved)
-        return out('error', 'outside', `Refused: h${c.id} at granule ${op.offset / s.gran} would run past the end of the reserved range.`);
+        return out('error', 'outside', tr(`Refused: h${c.id} at granule ${op.offset / s.gran} would run past the end of the reserved range.`, `Bị từ chối: h${c.id} tại granule ${op.offset / s.gran} sẽ vượt quá cuối vùng đã đặt trước.`));
       const hit = s.maps.find((m) => overlaps(m.offset, m.size, op.offset, c.size));
-      if (hit) return out('error', 'overlap', `Refused by the model: those addresses already have chunk h${hit.chunk} behind them.`);
+      if (hit) return out('error', 'overlap', tr(`Refused by the model: those addresses already have chunk h${hit.chunk} behind them.`, `Mô hình từ chối: các địa chỉ đó đã có chunk h${hit.chunk} phía sau.`));
       return out(
         'ok',
         'ok',
-        `Mapped h${c.id} (GPU ${c.device}) at granule ${op.offset / s.gran}. The addresses now have memory behind them, but no device may access it yet.`,
+        tr(`Mapped h${c.id} (GPU ${c.device}) at granule ${op.offset / s.gran}. The addresses now have memory behind them, but no device may access it yet.`, `Đã ánh xạ h${c.id} (GPU ${c.device}) tại granule ${op.offset / s.gran}. Giờ các địa chỉ đã có bộ nhớ phía sau, nhưng chưa thiết bị nào được phép truy cập nó.`),
         { ...s, maps: [...s.maps, { chunk: c.id, offset: op.offset, size: c.size }] },
       );
     }
     case 'setAccess': {
-      if (s.reserved == null) return out('error', 'no-range', 'There is no reserved range.');
-      if (op.offset < 0 || op.size <= 0 || op.offset + op.size > s.reserved) return out('error', 'outside', 'That range is not inside the reservation.');
+      if (s.reserved == null) return out('error', 'no-range', tr('There is no reserved range.', 'Không có vùng đã đặt trước nào.'));
+      if (op.offset < 0 || op.size <= 0 || op.offset + op.size > s.reserved) return out('error', 'outside', tr('That range is not inside the reservation.', 'Vùng đó không nằm trong vùng đã đặt trước.'));
       const gaps = uncovered(s.maps, op.offset, op.size);
       if (gaps.length)
-        return out('error', 'unmapped', `Refused by the model: granule ${gaps[0].offset / s.gran} has nothing mapped. Grant access over mapped memory.`);
+        return out('error', 'unmapped', tr(`Refused by the model: granule ${gaps[0].offset / s.gran} has nothing mapped. Grant access over mapped memory.`, `Mô hình từ chối: granule ${gaps[0].offset / s.gran} chưa có gì được ánh xạ. Hãy cấp quyền truy cập trên bộ nhớ đã ánh xạ.`));
       const grants = [...cutGrants(s.grants.filter((x) => x.device === op.device), op.offset, op.size), { offset: op.offset, size: op.size, device: op.device }];
-      return out('ok', 'ok', `GPU ${op.device} may now read and write granules ${op.offset / s.gran} to ${(op.offset + op.size) / s.gran - 1}.`, {
+      return out('ok', 'ok', tr(`GPU ${op.device} may now read and write granules ${op.offset / s.gran} to ${(op.offset + op.size) / s.gran - 1}.`, `Giờ GPU ${op.device} được đọc và ghi các granule từ ${op.offset / s.gran} đến ${(op.offset + op.size) / s.gran - 1}.`), {
         ...s,
         grants: [...s.grants.filter((x) => x.device !== op.device), ...grants],
       });
     }
     case 'read': {
       if (s.reserved == null || op.offset < 0 || op.offset + op.size > s.reserved)
-        return out('crash', 'unreserved', `The kernel on GPU ${op.device} crashes: those addresses are not in a reserved range.`);
+        return out('crash', 'unreserved', tr(`The kernel on GPU ${op.device} crashes: those addresses are not in a reserved range.`, `Kernel trên GPU ${op.device} bị crash: các địa chỉ đó không nằm trong vùng đã đặt trước.`));
       const pieces: ReadPiece[] = [];
       for (const gap of uncovered(s.maps, op.offset, op.size)) pieces.push({ ...gap, status: 'unmapped' });
       for (const m of s.maps) {
@@ -250,12 +252,12 @@ export function apply(s: VmmState, op: Op): { state: VmmState; outcome: Outcome 
       pieces.sort((x, y) => x.offset - y.offset);
       const bad = pieces.find((p) => p.status === 'unmapped' || p.status === 'no-access');
       if (bad?.status === 'unmapped')
-        return out('crash', 'unmapped', `The kernel on GPU ${op.device} crashes at granule ${bad.offset / s.gran}: nothing is mapped there.`, s, pieces);
+        return out('crash', 'unmapped', tr(`The kernel on GPU ${op.device} crashes at granule ${bad.offset / s.gran}: nothing is mapped there.`, `Kernel trên GPU ${op.device} bị crash tại granule ${bad.offset / s.gran}: ở đó chưa có gì được ánh xạ.`), s, pieces);
       if (bad)
         return out(
           'crash',
           'no-access',
-          `The kernel on GPU ${op.device} crashes at granule ${bad.offset / s.gran}: memory is mapped there, but GPU ${op.device} was never granted access. cuMemMap does not make an address accessible; cuMemSetAccess does (A15).`,
+          tr(`The kernel on GPU ${op.device} crashes at granule ${bad.offset / s.gran}: memory is mapped there, but GPU ${op.device} was never granted access. cuMemMap does not make an address accessible; cuMemSetAccess does (A15).`, `Kernel trên GPU ${op.device} bị crash tại granule ${bad.offset / s.gran}: ở đó đã có bộ nhớ được ánh xạ, nhưng GPU ${op.device} chưa bao giờ được cấp quyền truy cập. cuMemMap không làm cho một địa chỉ truy cập được; cuMemSetAccess mới làm điều đó (A15).`),
           s,
           pieces,
         );
@@ -264,16 +266,16 @@ export function apply(s: VmmState, op: Op): { state: VmmState; outcome: Outcome 
         'ok',
         'ok',
         remote
-          ? `The kernel on GPU ${op.device} reads ${g(op.size)} through one pointer: ${g(op.size - remote)} from its own memory and ${g(remote)} from the other GPU's.`
-          : `The kernel on GPU ${op.device} reads ${g(op.size)}, all from its own memory.`,
+          ? tr(`The kernel on GPU ${op.device} reads ${g(op.size)} through one pointer: ${g(op.size - remote)} from its own memory and ${g(remote)} from the other GPU's.`, `Kernel trên GPU ${op.device} đọc ${g(op.size)} qua một con trỏ: ${g(op.size - remote)} từ bộ nhớ của chính nó và ${g(remote)} từ bộ nhớ của GPU kia.`)
+          : tr(`The kernel on GPU ${op.device} reads ${g(op.size)}, all from its own memory.`, `Kernel trên GPU ${op.device} đọc ${g(op.size)}, tất cả từ bộ nhớ của chính nó.`),
         s,
         pieces,
       );
     }
     case 'unmap': {
       const m = s.maps.find((x) => x.chunk === op.chunk);
-      if (!m) return out('error', 'not-mapped', `Chunk h${op.chunk} is not mapped.`);
-      return out('ok', 'ok', `Unmapped h${op.chunk}. Its addresses are still reserved, and its memory still exists.`, {
+      if (!m) return out('error', 'not-mapped', tr(`Chunk h${op.chunk} is not mapped.`, `Chunk h${op.chunk} chưa được ánh xạ.`));
+      return out('ok', 'ok', tr(`Unmapped h${op.chunk}. Its addresses are still reserved, and its memory still exists.`, `Đã bỏ ánh xạ h${op.chunk}. Các địa chỉ của nó vẫn được đặt trước, và bộ nhớ của nó vẫn còn.`), {
         ...s,
         maps: s.maps.filter((x) => x !== m),
         grants: cutGrants(s.grants, m.offset, m.size),
@@ -281,20 +283,20 @@ export function apply(s: VmmState, op: Op): { state: VmmState; outcome: Outcome 
     }
     case 'release': {
       const c = s.chunks.find((x) => x.id === op.chunk);
-      if (!c) return out('error', 'no-chunk', `There is no chunk h${op.chunk}.`);
-      if (c.released) return out('error', 'released', `Chunk h${c.id} is already released.`);
+      if (!c) return out('error', 'no-chunk', tr(`There is no chunk h${op.chunk}.`, `Không có chunk h${op.chunk}.`));
+      if (c.released) return out('error', 'released', tr(`Chunk h${c.id} is already released.`, `Chunk h${c.id} đã được giải phóng rồi.`));
       if (s.maps.some((m) => m.chunk === c.id))
-        return out('order', 'order', `Outside the documented order: h${c.id} is still mapped. Unmap it first (cuMemUnmap, then cuMemRelease, then cuMemAddressFree). Not applied.`);
-      return out('ok', 'ok', `Released h${c.id}: its memory on GPU ${c.device} is given back.`, {
+        return out('order', 'order', tr(`Outside the documented order: h${c.id} is still mapped. Unmap it first (cuMemUnmap, then cuMemRelease, then cuMemAddressFree). Not applied.`, `Ngoài thứ tự được ghi trong tài liệu: h${c.id} vẫn đang được ánh xạ. Hãy bỏ ánh xạ nó trước (cuMemUnmap, rồi cuMemRelease, rồi cuMemAddressFree). Không được áp dụng.`));
+      return out('ok', 'ok', tr(`Released h${c.id}: its memory on GPU ${c.device} is given back.`, `Đã giải phóng h${c.id}: bộ nhớ của nó trên GPU ${c.device} được trả lại.`), {
         ...s,
         chunks: s.chunks.map((x) => (x.id === c.id ? { ...x, released: true } : x)),
       });
     }
     case 'free': {
-      if (s.reserved == null) return out('error', 'no-range', 'There is no reserved range to free.');
+      if (s.reserved == null) return out('error', 'no-range', tr('There is no reserved range to free.', 'Không có vùng đã đặt trước nào để giải phóng.'));
       if (s.maps.length)
-        return out('order', 'order', 'Outside the documented order: chunks are still mapped in the range. Unmap and release them first. Not applied.');
-      return out('ok', 'ok', 'Freed the reserved addresses.', { ...s, reserved: null, freed: true, grants: [] });
+        return out('order', 'order', tr('Outside the documented order: chunks are still mapped in the range. Unmap and release them first. Not applied.', 'Ngoài thứ tự được ghi trong tài liệu: vẫn còn chunk được ánh xạ trong vùng. Hãy bỏ ánh xạ và giải phóng chúng trước. Không được áp dụng.'));
+      return out('ok', 'ok', tr('Freed the reserved addresses.', 'Đã giải phóng các địa chỉ đã đặt trước.'), { ...s, reserved: null, freed: true, grants: [] });
     }
   }
 }
@@ -358,9 +360,24 @@ export function bookThreeCalls(gran: number): Op[] {
 export type Strategy = 'double' | 'exact' | 'vmm';
 
 export const STRATEGIES: { key: Strategy; label: string }[] = [
-  { key: 'double', label: 'Allocate twice as much and copy' },
-  { key: 'exact', label: 'Reallocate exactly, every token' },
-  { key: 'vmm', label: 'Reserve once, map chunks' },
+  {
+    key: 'double',
+    get label() {
+      return tr('Allocate twice as much and copy', 'Cấp phát gấp đôi rồi sao chép');
+    },
+  },
+  {
+    key: 'exact',
+    get label() {
+      return tr('Reallocate exactly, every token', 'Cấp phát lại vừa đủ, mỗi token');
+    },
+  },
+  {
+    key: 'vmm',
+    get label() {
+      return tr('Reserve once, map chunks', 'Đặt trước một lần, ánh xạ các chunk');
+    },
+  },
 ];
 
 export interface GrowOpts {

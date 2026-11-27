@@ -1,0 +1,1 @@
+Rồi một rào chắn, để không luồng nào đọc một ô trước khi mọi luồng đã ghi vị trí của mình. Giờ mỗi luồng nhân 2 cặp từ bộ nhớ chia sẻ, và cộng chúng vào tổng đang chạy của mình, nằm trong một thanh ghi. Không gì trong bước này chạm tới bộ nhớ toàn cục.

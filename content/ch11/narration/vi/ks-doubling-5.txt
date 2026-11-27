@@ -1,0 +1,1 @@
+Giờ hãy đếm khối lượng công việc. Ba bước đã làm 7, rồi 6, rồi 4 phép cộng: tổng cộng 17. Vòng lặp thông thường chỉ cần 7. Kogge-Stone đổi khối lượng công việc nhiều hơn lấy ít bước hơn, và khoảng cách đó lớn dần theo độ dài mảng. Mục 11.5 sẽ quay lại sự đánh đổi này.

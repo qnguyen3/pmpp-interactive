@@ -1,0 +1,1 @@
+Giờ là ví dụ của sách. 660 khối, trên một thiết bị chạy được 264 khối cùng lúc. Đợt đầu lấp đầy mọi chỗ. Đợt thứ hai cũng vậy. Chỉ còn lại 132 khối cho đợt thứ ba. Một nửa số chỗ bỏ trống trong khi đợt cuối chạy. Sách gọi đây là hiệu ứng đuôi.

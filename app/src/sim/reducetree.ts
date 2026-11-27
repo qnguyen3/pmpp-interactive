@@ -15,6 +15,8 @@
 //     p. 225, and the library policies in notes/today/ch10-facts.md A10, A13, B5, D2-D4);
 //   - seeded data generators and a knockout tournament with V venues (pp. 226-227).
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- float32 helpers
 export const f32 = Math.fround;
 /** Largest finite float32, C's FLT_MAX: (2 - 2^-23) x 2^127. */
@@ -77,16 +79,37 @@ export interface FoldOpInfo {
   identityLabel: string;
 }
 export const FOLD_OPS: Record<FoldOpId, FoldOpInfo> = {
-  sum: { id: 'sum', label: 'sum', identity: 0, identityLabel: '0' },
-  product: { id: 'product', label: 'product', identity: 1, identityLabel: '1' },
+  sum: {
+    id: 'sum',
+    get label() {
+      return tr('sum', 'tổng');
+    },
+    identity: 0, identityLabel: '0',
+  },
+  product: {
+    id: 'product',
+    get label() {
+      return tr('product', 'tích');
+    },
+    identity: 1, identityLabel: '1',
+  },
   max: { id: 'max', label: 'max', identity: -Infinity, identityLabel: '−∞' },
   min: { id: 'min', label: 'min', identity: Infinity, identityLabel: '+∞' },
-  argmax: { id: 'argmax', label: 'argmax', identity: -Infinity, identityLabel: '(−∞, none)' },
+  argmax: {
+    id: 'argmax', label: 'argmax', identity: -Infinity, // i18n-ignore: operator name
+    get identityLabel() {
+      return tr('(−∞, none)', '(−∞, không có)');
+    },
+  },
 };
 export const START_LABEL: Record<StartId, string> = {
-  identity: "the operator's identity",
+  get identity() {
+    return tr("the operator's identity", 'phần tử đơn vị của toán tử');
+  },
   zero: '0',
-  first: 'element 0',
+  get first() {
+    return tr('element 0', 'phần tử 0');
+  },
   negmax: '−FLT_MAX',
 };
 
@@ -249,9 +272,15 @@ export function randomRowTest(op: FoldOpId, start: StartId, rows = 1000, n = 8, 
 
 export type Dist = 'uniform' | 'softmax' | 'wide';
 export const DIST_LABEL: Record<Dist, string> = {
-  uniform: 'uniform in [−1, 1]',
-  softmax: 'softmax terms, one large logit',
-  wide: 'wide-range mix',
+  get uniform() {
+    return tr('uniform in [−1, 1]', 'phân phối đều trong [−1, 1]');
+  },
+  get softmax() {
+    return tr('softmax terms, one large logit', 'các số hạng softmax, một logit lớn');
+  },
+  get wide() {
+    return tr('wide-range mix', 'hỗn hợp trải rộng');
+  },
 };
 /**
  * n float32 values from a seeded generator.
@@ -274,9 +303,15 @@ export function generate(n: number, dist: Dist, seed: number): number[] {
 export type Shape = 'loop' | 'neighbours' | 'halves';
 export const SHAPES: Shape[] = ['loop', 'neighbours', 'halves'];
 export const SHAPE_LABEL: Record<Shape, string> = {
-  loop: 'the loop',
-  neighbours: 'neighbours',
-  halves: 'halves',
+  get loop() {
+    return tr('the loop', 'vòng lặp');
+  },
+  get neighbours() {
+    return tr('neighbours', 'lân cận');
+  },
+  get halves() {
+    return tr('halves', 'chia đôi');
+  },
 };
 
 export interface TreeNode<T> {
@@ -422,11 +457,29 @@ export interface IntOp {
 }
 /** Exact integer arithmetic (BigInt), so nothing overflows or rounds. */
 export const INT_OPS: Record<IntOpId, IntOp> = {
-  sum: { id: 'sum', label: 'sum', sym: '+', fn: (a, b) => a + b },
+  sum: {
+    id: 'sum',
+    get label() {
+      return tr('sum', 'tổng');
+    },
+    sym: '+', fn: (a, b) => a + b,
+  },
   max: { id: 'max', label: 'max', sym: 'max', fn: (a, b) => (a > b ? a : b) },
   min: { id: 'min', label: 'min', sym: 'min', fn: (a, b) => (a < b ? a : b) },
-  product: { id: 'product', label: 'product', sym: '×', fn: (a, b) => a * b },
-  sub: { id: 'sub', label: 'subtraction', sym: '−', fn: (a, b) => a - b },
+  product: {
+    id: 'product',
+    get label() {
+      return tr('product', 'tích');
+    },
+    sym: '×', fn: (a, b) => a * b,
+  },
+  sub: {
+    id: 'sub',
+    get label() {
+      return tr('subtraction', 'phép trừ');
+    },
+    sym: '−', fn: (a, b) => a - b,
+  },
 };
 /** Fig. 10.3: (a) the max tree, (b) the sum tree. */
 export const FIG103A = [3, 1, 7, 0, 4, 1, 6, 3];
@@ -460,12 +513,32 @@ export function joinTree(values: number[], shape: Shape): Tree<string> {
 /** Every operator of the tree builder, numeric or not, as display strings. */
 export type BuilderOpId = IntOpId | 'join';
 export const BUILDER_OPS: { id: BuilderOpId; label: string }[] = [
-  { id: 'sum', label: 'sum' },
-  { id: 'max', label: 'max' },
-  { id: 'min', label: 'min' },
-  { id: 'product', label: 'product' },
-  { id: 'sub', label: 'subtraction' },
-  { id: 'join', label: 'join' },
+  {
+    id: 'sum',
+    get label() {
+      return tr('sum', 'tổng');
+    },
+  },
+  { id: 'max', label: 'max' }, // i18n-ignore: operator name
+  { id: 'min', label: 'min' }, // i18n-ignore: operator name
+  {
+    id: 'product',
+    get label() {
+      return tr('product', 'tích');
+    },
+  },
+  {
+    id: 'sub',
+    get label() {
+      return tr('subtraction', 'phép trừ');
+    },
+  },
+  {
+    id: 'join',
+    get label() {
+      return tr('join', 'ghép');
+    },
+  },
 ];
 /** The tree builder's tree, with every node's value as text (exact integers, or the joined string). */
 export function builderTree(values: number[], op: BuilderOpId, shape: Shape): Tree<string> {
@@ -595,30 +668,60 @@ export interface PairRuleInfo {
 export const PAIR_RULES: Record<PairRule, PairRuleInfo> = {
   lower: {
     id: 'lower',
-    label: 'larger value; ties to the lower index',
+    get label() {
+      return tr('larger value; ties to the lower index', 'giá trị lớn hơn; khi bằng nhau thì lấy chỉ số thấp hơn');
+    },
     argmax: true,
-    note: "hipCUB's ArgMax functor, written with comparisons (ch10 facts B5)",
+    get note() {
+      return tr("hipCUB's ArgMax functor, written with comparisons (ch10 facts B5)", 'functor ArgMax của hipCUB, viết bằng các phép so sánh (ch10 facts B5)');
+    },
   },
   left: {
     id: 'left',
-    label: 'larger value; keep the left operand on ties',
+    get label() {
+      return tr('larger value; keep the left operand on ties', 'giá trị lớn hơn; khi bằng nhau thì giữ toán hạng bên trái');
+    },
     argmax: true,
-    note: 'a "replace only if strictly greater" step, used inside a tree',
+    get note() {
+      return tr('a "replace only if strictly greater" step, used inside a tree', 'một bước "chỉ thay khi lớn hơn hẳn", dùng bên trong một cây');
+    },
   },
   higher: {
     id: 'higher',
-    label: 'larger value; ties to the higher index',
+    get label() {
+      return tr('larger value; ties to the higher index', 'giá trị lớn hơn; khi bằng nhau thì lấy chỉ số cao hơn');
+    },
     argmax: true,
-    note: 'consistent, but not the index PyTorch documents',
+    get note() {
+      return tr('consistent, but not the index PyTorch documents', 'nhất quán, nhưng không phải chỉ số mà PyTorch ghi trong tài liệu');
+    },
   },
   nanfirst: {
     id: 'nanfirst',
-    label: 'NaN wins, then larger value; ties to the lower index',
+    get label() {
+      return tr('NaN wins, then larger value; ties to the lower index', 'NaN thắng, rồi đến giá trị lớn hơn; khi bằng nhau thì lấy chỉ số thấp hơn');
+    },
     argmax: true,
-    note: "PyTorch's GreaterOrNan and MLX's ArgMax (ch10 facts D3, D4)",
+    get note() {
+      return tr("PyTorch's GreaterOrNan and MLX's ArgMax (ch10 facts D3, D4)", 'GreaterOrNan của PyTorch và ArgMax của MLX (ch10 facts D3, D4)');
+    },
   },
-  fmax: { id: 'fmax', label: 'fmaxf (NaN as missing)', argmax: false, note: "CUDA's fmaxf and max(float, float) (A10)" },
-  cmp: { id: 'cmp', label: 'a > b ? a : b', argmax: false, note: 'a comparison, as many hand-written kernels do (A10)' },
+  fmax: {
+    id: 'fmax',
+    get label() {
+      return tr('fmaxf (NaN as missing)', 'fmaxf (NaN coi như thiếu)');
+    },
+    argmax: false,
+    get note() {
+      return tr("CUDA's fmaxf and max(float, float) (A10)", 'fmaxf và max(float, float) của CUDA (A10)');
+    },
+  },
+  cmp: {
+    id: 'cmp', label: 'a > b ? a : b', argmax: false,
+    get note() {
+      return tr('a comparison, as many hand-written kernels do (A10)', 'một phép so sánh, như nhiều kernel viết tay vẫn làm (A10)');
+    },
+  },
 };
 
 const isNaN_ = Number.isNaN;

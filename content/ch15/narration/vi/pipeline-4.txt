@@ -1,0 +1,1 @@
+Giờ hãy xoay vòng lặp. Một phần mở đầu nạp ô 0. Sau đó mỗi vòng lặp tính toán với ô nó đã có, trong khi nạp ô tiếp theo vào buffer còn lại. Trình biên dịch có thể xen kẽ các lệnh đó, và hai làn chạy song song bên nhau. Một lần tính toán cuối cùng đi sau vòng lặp. Bốn ô mất 5 đơn vị thay vì 8.

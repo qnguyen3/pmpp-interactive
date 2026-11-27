@@ -25,6 +25,7 @@
 //     counts the paths.
 //   - No timing, no occupancy, no latency hiding. Arrays start on a segment boundary.
 
+import { tr } from '../lib/locale.ts';
 import { coRankTrace, mergeStable, rng, type Read, type Tagged } from './corank';
 import { warpAccess, type WarpAccess } from './coalesce';
 
@@ -209,10 +210,30 @@ export function layoutCorrect(layout: BasicLayout): boolean {
 export type DataId = 'distinct' | 'duplicates' | 'a-before-b' | 'interleaved';
 
 export const DATA: { id: DataId; label: string }[] = [
-  { id: 'distinct', label: 'Distinct keys, random interleaving' },
-  { id: 'duplicates', label: 'Many duplicates (keys 0 to 7)' },
-  { id: 'a-before-b', label: 'All of A before all of B' },
-  { id: 'interleaved', label: 'Perfectly interleaved (A even, B odd)' },
+  {
+    id: 'distinct',
+    get label() {
+      return tr('Distinct keys, random interleaving', 'Khóa khác nhau, xen kẽ ngẫu nhiên');
+    },
+  },
+  {
+    id: 'duplicates',
+    get label() {
+      return tr('Many duplicates (keys 0 to 7)', 'Nhiều khóa trùng (khóa 0 đến 7)');
+    },
+  },
+  {
+    id: 'a-before-b',
+    get label() {
+      return tr('All of A before all of B', 'Toàn bộ A trước toàn bộ B');
+    },
+  },
+  {
+    id: 'interleaved',
+    get label() {
+      return tr('Perfectly interleaved (A even, B odd)', 'Xen kẽ hoàn hảo (A chẵn, B lẻ)');
+    },
+  },
 ];
 
 /** Two sorted inputs with m = floor(total / 2) and n = total - m. */

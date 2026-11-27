@@ -1,0 +1,1 @@
+Đây là CSR trên ví dụ xuyên suốt, mỗi hàng một luồng, vậy là bốn luồng. Ở vòng lặp đầu tiên, các luồng 0 đến 3 đọc các phần tử 0, 2, 5 và 7 của mảng giá trị. Các luồng cạnh nhau đọc những địa chỉ nằm cách xa nhau, nên một lần nạp phải hỏi bộ nhớ ở bốn chỗ riêng biệt.

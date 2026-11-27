@@ -1,0 +1,1 @@
+Batching tĩnh, với 4 chỗ. 4 yêu cầu đầu tiên bắt đầu cùng nhau. 2 yêu cầu ngắn xong sớm, và chỗ của chúng bị bỏ trống. Các yêu cầu mới đến phải chờ trong hàng đợi, vì một batch tĩnh chỉ kết thúc khi yêu cầu dài nhất của nó xong. Hãy để ý các chỗ trống, và số token tạo ra mỗi bước.

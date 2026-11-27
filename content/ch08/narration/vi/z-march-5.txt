@@ -1,0 +1,1 @@
+Các bước giống nhau lặp lại: nạp một mặt phẳng, chờ, tính, chờ, dịch. Mỗi bước thêm một mặt phẳng đầu vào và một mặt phẳng đầu ra đã hoàn tất. Cuối cùng, khối đã nạp 6 mặt phẳng để tạo ra 4. Ở độ rộng 32, cùng cách đi này chỉ cần 1,024 luồng và đạt khoảng 1.47 phép toán mỗi byte, so với 0.96 của khối lập phương rộng 8.

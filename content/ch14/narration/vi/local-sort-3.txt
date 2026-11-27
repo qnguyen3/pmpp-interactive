@@ -1,0 +1,1 @@
+Cách sửa gồm hai giai đoạn. Ở giai đoạn một, mỗi khối sắp xếp các khóa của chính nó theo chữ số, trong bộ nhớ chia sẻ, bằng một phép scan chỉ bao trùm khối đó. Mỗi khóa di chuyển nhiều nhất vài vị trí, và không bao giờ rời khỏi khối của nó. Chưa có gì được ghi vào bộ nhớ toàn cục.

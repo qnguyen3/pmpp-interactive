@@ -1,0 +1,1 @@
+Giá trị tiếp theo đến, và việc trừ c cộng phần bị mất trở lại, nên y lớn gấp đôi. Đó là trường hợp hòa, t vẫn làm tròn về 1, và c tăng lên. Với giá trị thứ ba, y bằng ba phần tư khoảng cách, nên t tăng lên một bước. Như vậy là vượt quá một chút, và c ghi lại phần vượt đó.

@@ -1,13 +1,15 @@
 import type { ReactNode } from 'react';
+import { getMessages, getLocale, useI18n } from '../lib/i18n';
 
 // Margin notes. On wide screens they sit beside the paragraph that precedes them.
 
 /** Where in the book this comes from, so you can go back to the source. */
 export function Source({ section, pages, figs }: { section?: string; pages: string; figs?: string }) {
+  const { t } = useI18n();
   return (
     <aside className="note">
-      <b>Book</b> {section ? `§${section}, ` : ''}
-      {pages.includes('–') || pages.includes(',') ? 'pp.' : 'p.'} {pages}
+      <b>{t.notes.book}</b> {section ? `§${section}, ` : ''}
+      {pages.includes('–') || pages.includes(',') ? t.notes.pages : t.notes.page} {pages}
       {figs ? <>; {figs}</> : null}
     </aside>
   );
@@ -15,23 +17,25 @@ export function Source({ section, pages, figs }: { section?: string; pages: stri
 
 /** Where the book is dated or device-specific, checked against current docs. */
 export function Today({ children, checked }: { children: ReactNode; checked: string }) {
+  const { t } = useI18n();
   return (
     <aside className="note today">
       <p>
-        <b>Today</b>
+        <b>{t.notes.today}</b>
       </p>
       {children}
-      <p className="muted">Checked {checked}.</p>
+      <p className="muted">{t.notes.checked(checked)}</p>
     </aside>
   );
 }
 
 /** What a simulation leaves out compared with real hardware. */
 export function Simplification({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   return (
     <aside className="note caveat">
       <p>
-        <b>What this model leaves out</b>
+        <b>{t.notes.leavesOut}</b>
       </p>
       {children}
     </aside>
@@ -39,11 +43,12 @@ export function Simplification({ children }: { children: ReactNode }) {
 }
 
 /** Material that is ours, not the book's. */
-export function Beyond({ children, title = 'Not in the book' }: { children: ReactNode; title?: string }) {
+export function Beyond({ children, title }: { children: ReactNode; title?: string }) {
+  const { t } = useI18n();
   return (
     <aside className="note beyond">
       <p>
-        <b>{title}</b>
+        <b>{title ?? t.notes.notInBook}</b>
       </p>
       {children}
     </aside>
@@ -95,20 +100,30 @@ export function Bench({
 }
 
 export type Tier = 'reg' | 'shared' | 'global' | 'const';
+/** The name of each memory tier, in the reader's language at the moment it is read. */
 export const TIER_NAME: Record<Tier, string> = {
-  reg: 'register',
-  shared: 'shared memory',
-  global: 'global memory',
-  const: 'constant memory',
+  get reg() {
+    return getMessages(getLocale()).notes.tiers.reg;
+  },
+  get shared() {
+    return getMessages(getLocale()).notes.tiers.shared;
+  },
+  get global() {
+    return getMessages(getLocale()).notes.tiers.global;
+  },
+  get const() {
+    return getMessages(getLocale()).notes.tiers.const;
+  },
 };
 
 export function TierLegend({ tiers = ['reg', 'shared', 'global'] as Tier[] }: { tiers?: Tier[] }) {
+  const { t } = useI18n();
   return (
     <span className="legend">
-      {tiers.map((t) => (
-        <span key={t}>
-          <i style={{ background: `var(--${t})` }} />
-          {TIER_NAME[t]}
+      {tiers.map((tier) => (
+        <span key={tier}>
+          <i style={{ background: `var(--${tier})` }} />
+          {t.notes.tiers[tier]}
         </span>
       ))}
     </span>

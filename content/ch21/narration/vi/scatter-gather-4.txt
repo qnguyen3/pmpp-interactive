@@ -1,0 +1,1 @@
+Giờ là thu gom. Có 6 luồng, mỗi điểm một luồng. Ở bước đầu tiên, mọi lane đọc cùng một nguyên tử: một địa chỉ bộ nhớ hằng, được phát tới cả nhóm. Mỗi luồng cộng phần đóng góp vào thanh ghi của riêng mình. Không có hai luồng nào chung đích ghi, nên không có gì phải xếp hàng.

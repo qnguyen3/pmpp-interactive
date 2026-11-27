@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   SCENE_K,
   SCENE_ROW,
@@ -22,7 +23,7 @@ const R = Math.ceil(TR.n / T);
 
 const W = 720;
 const H = 372;
-const MONO = { fontVariationSettings: "'MONO' 1" } as const;
+const MONO = { fontVariationSettings: "'MONO' 1" } as const; // i18n-ignore: CSS font variation value
 const GX = 14; // grid origin
 const GY = 44;
 const LW = 44; // thread label column
@@ -68,13 +69,13 @@ function Grid({ f }: { f: Frame }) {
   return (
     <g>
       <text x={GX} y={GY - 22} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>
-        the row, as one block of 16 threads reads it
+        <Translated vi="hàng, theo cách một khối 16 luồng đọc nó">the row, as one block of 16 threads reads it</Translated>
       </text>
-      <text x={GX} y={GY - 7} fontSize="10" style={{ fill: 'var(--ink-2)' }}>thread</text>
+      <text x={GX} y={GY - 7} fontSize="10" style={{ fill: 'var(--ink-2)' }}>{tr('thread', 'luồng')}</text>
       {Array.from({ length: R }, (_, r) => (
         <text key={r} x={GX + LW + r * CW + CW / 2} y={GY - 7} fontSize="10" textAnchor="middle"
           fontWeight={f.round === r ? 700 : 400} style={{ fill: f.round === r ? 'var(--ink)' : 'var(--ink-2)' }}>
-          {r === 0 ? 'column t' : `t + ${r * T}`}
+          {r === 0 ? tr('column t', 'cột t') : `t + ${r * T}`}
         </text>
       ))}
       {f.round != null ? (
@@ -103,7 +104,7 @@ function Grid({ f }: { f: Frame }) {
               <text x={x + 5} y={y + 11.5} fontSize="10" style={{ ...MONO, fill: ink }}>
                 c{c}
                 {cell.slot != null ? <tspan fontWeight="700" style={{ fill: 'var(--ok)' }} dx="5">→ {cell.slot}</tspan> : null}
-                {st === 'dropped' ? <tspan dx="5">tie cut</tspan> : null}
+                {st === 'dropped' ? <tspan dx="5">{tr('tie cut', 'hòa, bị cắt')}</tspan> : null}
               </text>
             ) : (
               <text x={x + 4} y={y + 11.5} fontSize="10" style={{ ...MONO, fill: ink }}>
@@ -131,24 +132,26 @@ function Hist({ f }: { f: Frame }) {
   const walkDone = crossAt >= 0;
   return (
     <g>
-      <text x={RX} y={HY - 24} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>{f.histLabel ?? 'histogram, 256 bins in shared memory'}</text>
-      <text x={RX} y={HY - 10} fontSize="9.5" style={{ fill: 'var(--ink-2)' }}>nonempty bins only, highest first</text>
-      {rows.length === 0 ? <text x={RX} y={HY + 10} fontSize="10.5" style={{ fill: 'var(--ink-3)' }}>all 256 bins at 0</text> : null}
+      <text x={RX} y={HY - 24} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>{f.histLabel ?? tr('histogram, 256 bins in shared memory', 'histogram, 256 bin trong bộ nhớ chia sẻ')}</text>
+      <text x={RX} y={HY - 10} fontSize="9.5" style={{ fill: 'var(--ink-2)' }}>{tr('nonempty bins only, highest first', 'chỉ các bin khác rỗng, cao nhất trước')}</text>
+      {rows.length === 0 ? <text x={RX} y={HY + 10} fontSize="10.5" style={{ fill: 'var(--ink-3)' }}>{tr('all 256 bins at 0', 'cả 256 bin đều bằng 0')}</text> : null}
       {rows.map(([b, c], i) => {
         const y = HY + i * BH;
         const w = f.walk?.find((x) => x.bin === b);
         const below = walkDone && !w;
         return (
           <g key={b} data-bin={b} data-count={c} opacity={below ? 0.4 : 1}>
-            <text x={RX} y={y + 10} fontSize="10" style={MONO}>bin {binHex(b)}</text>
+            <text x={RX} y={y + 10} fontSize="10" style={MONO}><Translated vi={<>bin {binHex(b)}</>}>bin {binHex(b)}</Translated></text>
             <rect x={RX + 52} y={y + 2} width={(c / max) * HW} height={BH - 5} fill={f.mark === b ? 'var(--ink)' : 'var(--shared)'} />
             <text x={RX + 56 + (c / max) * HW} y={y + 10} fontSize="10">{c}</text>
             {w ? (
               <text x={RX + 82 + HW} y={y + 10} fontSize="10" fontWeight={w.cross ? 700 : 400} data-walk={`${w.bin}:${w.count}:${w.running}`}>
-                running {w.running}{w.cross ? ' ← the k-th key is here' : ': all in'}
+                <Translated vi={<>tích lũy {w.running}{w.cross ? ' ← key thứ k nằm ở đây' : ': giữ tất cả'}</>}>
+                  running {w.running}{w.cross ? ' ← the k-th key is here' : ': all in'}
+                </Translated>
               </text>
             ) : below ? (
-              <text x={RX + 82 + HW} y={y + 10} fontSize="10">all out</text>
+              <text x={RX + 82 + HW} y={y + 10} fontSize="10">{tr('all out', 'loại tất cả')}</text>
             ) : null}
           </g>
         );
@@ -172,7 +175,7 @@ function Right({ f }: { f: Frame }) {
       ) : null}
       {f.slots ? (
         <g>
-          <text x={RX} y={HY - 24} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>output: {SCENE_K} (column, logit) pairs, column order</text>
+          <text x={RX} y={HY - 24} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi={<>đầu ra: {SCENE_K} cặp (cột, logit), theo thứ tự cột</>}>output: {SCENE_K} (column, logit) pairs, column order</Translated></text>
           {f.slots.map((c, i) => (
             <g key={i} data-out={i} data-out-col={c ?? ''}>
               <rect x={RX + i * 26} y={HY - 8} width={23} height={20} rx="2" fill={c == null ? 'none' : 'var(--ok-wash)'}
@@ -184,9 +187,9 @@ function Right({ f }: { f: Frame }) {
       ) : null}
       {f.bars != null ? (
         <g data-bars="">
-          <text x={RX} y={HY + 46} fontSize="11">radix select: {SELECT_PER_KEY} bytes per key (5 reads of the key)</text>
+          <text x={RX} y={HY + 46} fontSize="11"><Translated vi={<>radix select: {SELECT_PER_KEY} byte mỗi key (5 lần đọc key)</>}>radix select: {SELECT_PER_KEY} bytes per key (5 reads of the key)</Translated></text>
           <rect x={RX} y={HY + 52} width={(SELECT_PER_KEY / SORT_PER_KEY) * 300 * f.bars} height={12} fill="var(--global)" />
-          <text x={RX} y={HY + 84} fontSize="11">LSD radix sort: {SORT_PER_KEY} bytes per key (4 passes)</text>
+          <text x={RX} y={HY + 84} fontSize="11"><Translated vi={<>LSD radix sort: {SORT_PER_KEY} byte mỗi key (4 lượt)</>}>LSD radix sort: {SORT_PER_KEY} bytes per key (4 passes)</Translated></text>
           <rect x={RX} y={HY + 90} width={300 * f.bars} height={12} fill="var(--global)" />
         </g>
       ) : null}
@@ -196,7 +199,7 @@ function Right({ f }: { f: Frame }) {
 
 function Stage({ f, beat }: { f: Frame; beat: number }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Radix select narrowing in on the k-th key"
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Radix select narrowing in on the k-th key', 'Radix select thu hẹp dần về key thứ k')}
       data-beat={beat} style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <Grid f={f} />
       <Right f={f} />
@@ -219,10 +222,10 @@ function counting(pass: number, p: number): Frame {
   const active = ps.rounds[r].lanes.filter((l) => l.match).length;
   return {
     mode: 'key', byte: pass, round: done ? null : r, cells, hist,
-    histLabel: `pass ${pass + 1}: histogram of byte ${pass + 1}, 256 bins in shared memory`,
+    histLabel: tr(`pass ${pass + 1}: histogram of byte ${pass + 1}, 256 bins in shared memory`, `lượt ${pass + 1}: histogram của byte ${pass + 1}, 256 bin trong bộ nhớ chia sẻ`),
     headline: done
-      ? `pass ${pass + 1} done: ${ps.candidates} keys counted in one read of the row`
-      : `round ${r + 1}: thread t reads column t + ${r * T}; ${active} of ${T} lanes do the atomic`,
+      ? tr(`pass ${pass + 1} done: ${ps.candidates} keys counted in one read of the row`, `lượt ${pass + 1} xong: ${ps.candidates} key được đếm trong một lần đọc hàng`)
+      : tr(`round ${r + 1}: thread t reads column t + ${r * T}; ${active} of ${T} lanes do the atomic`, `vòng ${r + 1}: luồng t đọc cột t + ${r * T}; ${active} trên ${T} lane thực hiện atomic`),
   };
 }
 
@@ -232,12 +235,12 @@ function walked(pass: number, p: number): Frame {
   const show = p > 0.72;
   return {
     mode: 'key', byte: pass, round: null, cells: decided(show ? pass + 1 : pass), hist: ps.hist,
-    histLabel: `pass ${pass + 1}: histogram of byte ${pass + 1}`, mark: shown.length === ps.walk.steps.length ? ps.bin : undefined,
+    histLabel: tr(`pass ${pass + 1}: histogram of byte ${pass + 1}`, `lượt ${pass + 1}: histogram của byte ${pass + 1}`), mark: shown.length === ps.walk.steps.length ? ps.bin : undefined,
     walk: shown.map((w) => ({ bin: w.bin, count: w.count, running: w.running, cross: w.bin === ps.bin })),
-    lines: show ? [`in: ${ps.above}, out: ${ps.below}, undecided: ${ps.inBin}`, `still needed from bin ${binHex(ps.bin)}: ${ps.needOut}`] : undefined,
+    lines: show ? [tr(`in: ${ps.above}, out: ${ps.below}, undecided: ${ps.inBin}`, `giữ: ${ps.above}, loại: ${ps.below}, chưa quyết: ${ps.inBin}`), tr(`still needed from bin ${binHex(ps.bin)}: ${ps.needOut}`, `vẫn cần từ bin ${binHex(ps.bin)}: ${ps.needOut}`)] : undefined,
     headline: show
-      ? `${ps.above} in, ${ps.below} out, ${ps.inBin} undecided in bin ${binHex(ps.bin)}: ${ps.needOut} still needed`
-      : 'walk the bins from the top until the running count reaches k',
+      ? tr(`${ps.above} in, ${ps.below} out, ${ps.inBin} undecided in bin ${binHex(ps.bin)}: ${ps.needOut} still needed`, `${ps.above} giữ, ${ps.below} loại, ${ps.inBin} chưa quyết trong bin ${binHex(ps.bin)}: vẫn cần ${ps.needOut}`)
+      : tr('walk the bins from the top until the running count reaches k', 'đi qua các bin từ trên xuống cho đến khi số đếm tích lũy đạt k'),
   };
 }
 
@@ -258,61 +261,61 @@ function gathered(p: number): Frame {
   return {
     mode: 'gather', byte: null, round: done ? null : r, cells, slots, bars: done ? ramp(p, 0.62, 0.9) : undefined,
     headline: done
-      ? `${SCENE_K} pairs in column order; the select read ${SELECT_PER_KEY} bytes per key, a sort moves ${SORT_PER_KEY}`
-      : `gather, round ${r + 1}: keys above K* kept, ties kept lowest column first`,
+      ? tr(`${SCENE_K} pairs in column order; the select read ${SELECT_PER_KEY} bytes per key, a sort moves ${SORT_PER_KEY}`, `${SCENE_K} cặp theo thứ tự cột; phép chọn đọc ${SELECT_PER_KEY} byte mỗi key, một phép sắp xếp di chuyển ${SORT_PER_KEY}`)
+      : tr(`gather, round ${r + 1}: keys above K* kept, ties kept lowest column first`, `gom, vòng ${r + 1}: các key trên K* được giữ, các key hòa được giữ theo cột thấp nhất trước`),
   };
 }
 
 const beats: Beat[] = [
   {
     clip: 'radix-select-1',
-    label: 'Keys',
+    get label() { return tr('Keys', 'Các key'); },
     draw: (p) => {
       const keys = p >= 0.45;
       return (
         <Stage beat={1} f={{
           mode: keys ? 'key' : 'value', byte: keys ? 0 : null, round: null, cells: decided(0),
           hist: keys ? new Array(256).fill(0) : undefined,
-          headline: keys ? 'each logit becomes a 32-bit key; the top byte is in bold' : `${TR.n} logits; we want the ${SCENE_K} largest`,
+          headline: keys ? tr('each logit becomes a 32-bit key; the top byte is in bold', 'mỗi logit trở thành một key 32-bit; byte cao nhất được in đậm') : tr(`${TR.n} logits; we want the ${SCENE_K} largest`, `${TR.n} logits; ta muốn ${SCENE_K} giá trị lớn nhất`),
         }} />
       );
     },
   },
-  { clip: 'radix-select-2', label: 'Top-byte histogram', draw: (p) => <Stage beat={2} f={counting(0, p)} /> },
-  { clip: 'radix-select-3', label: 'Walk the bins', draw: (p) => <Stage beat={3} f={walked(0, p)} /> },
+  { clip: 'radix-select-2', get label() { return tr('Top-byte histogram', 'Histogram của byte cao nhất'); }, draw: (p) => <Stage beat={2} f={counting(0, p)} /> },
+  { clip: 'radix-select-3', get label() { return tr('Walk the bins', 'Đi qua các bin'); }, draw: (p) => <Stage beat={3} f={walked(0, p)} /> },
   {
     clip: 'radix-select-4',
-    label: 'Only the prefix works',
+    get label() { return tr('Only the prefix works', 'Chỉ key khớp tiền tố làm việc'); },
     draw: (p) => {
       const f = p < 0.8 ? counting(1, p / 0.8 * 0.95) : walked(1, 1);
       if (p < 0.8)
         f.headline = p / 0.8 * 0.95 >= 0.88
-          ? `pass 2: only ${P[1].candidates} keys match prefix ${binHex(P[0].bin)}; every round split the warp`
-          : f.headline + '; grey lanes skip the branch';
+          ? tr(`pass 2: only ${P[1].candidates} keys match prefix ${binHex(P[0].bin)}; every round split the warp`, `lượt 2: chỉ ${P[1].candidates} key khớp tiền tố ${binHex(P[0].bin)}; mỗi vòng đều chia tách warp`)
+          : f.headline + tr('; grey lanes skip the branch', '; các lane xám bỏ qua nhánh');
       return <Stage beat={4} f={f} />;
     },
   },
   {
     clip: 'radix-select-5',
-    label: 'The k-th key',
+    get label() { return tr('The k-th key', 'Key thứ k'); },
     draw: (p) => {
       const n = p < 0.5 ? 3 : 4;
       const last = P[n - 1];
-      const lines = P.slice(0, n).map((ps) => `pass ${ps.index + 1}: bin ${binHex(ps.bin)}, ${ps.above} more in, ${ps.needOut} still needed`);
+      const lines = P.slice(0, n).map((ps) => tr(`pass ${ps.index + 1}: bin ${binHex(ps.bin)}, ${ps.above} more in, ${ps.needOut} still needed`, `lượt ${ps.index + 1}: bin ${binHex(ps.bin)}, thêm ${ps.above} được giữ, vẫn cần ${ps.needOut}`));
       return (
         <Stage beat={5} f={{
           mode: 'key', byte: n - 1, round: null, cells: decided(n), hist: last.hist, mark: last.bin,
-          histLabel: `pass ${n}: histogram of byte ${n}`, lines,
+          histLabel: tr(`pass ${n}: histogram of byte ${n}`, `lượt ${n}: histogram của byte ${n}`), lines,
           headline: n === 4
-            ? `K* = ${hex(TR.prefix)}: ${TR.greater} keys above it, ${TR.need} of its ${TR.equal} ties needed`
-            : `pass 3: ${last.inBin} keys left in bin ${binHex(last.bin)}, ${last.needOut} still needed`,
+            ? tr(`K* = ${hex(TR.prefix)}: ${TR.greater} keys above it, ${TR.need} of its ${TR.equal} ties needed`, `K* = ${hex(TR.prefix)}: ${TR.greater} key trên nó, cần ${TR.need} trong ${TR.equal} key hòa với nó`)
+            : tr(`pass 3: ${last.inBin} keys left in bin ${binHex(last.bin)}, ${last.needOut} still needed`, `lượt 3: còn ${last.inBin} key trong bin ${binHex(last.bin)}, vẫn cần ${last.needOut}`),
         }} />
       );
     },
   },
-  { clip: 'radix-select-6', label: 'The gather', draw: (p) => <Stage beat={6} f={gathered(p)} /> },
+  { clip: 'radix-select-6', get label() { return tr('The gather', 'Bước gom'); }, draw: (p) => <Stage beat={6} f={gathered(p)} /> },
 ];
 
 export function RadixSelectScene() {
-  return <Scene chapter="x1" title="Narrowing in on the k-th key" beats={beats} />;
+  return <Scene chapter="x1" title={tr('Narrowing in on the k-th key', 'Thu hẹp dần về key thứ k')} beats={beats} />;
 }

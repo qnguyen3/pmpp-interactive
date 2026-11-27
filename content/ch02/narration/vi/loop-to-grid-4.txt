@@ -1,0 +1,1 @@
+Không ai trao cho luồng giá trị i của nó. Thay vào đó, mỗi luồng được cho 2 con số: chỉ số khối của nó, và chỉ số của chính nó trong khối đó. Chỉ số khối nhân 4, cộng chỉ số luồng. Khối 0, luồng 1 cho ra 1. Khối 1, luồng 2 cho ra 6. Khối 2, luồng 3 cho ra 11.

@@ -1,0 +1,1 @@
+Giờ luồng đi qua 25 điểm lọc của nó, từng điểm một. Mỗi điểm lọc đọc một đầu vào và một trọng số, nhân chúng với nhau, rồi cộng tích vào một tổng đang tích lũy. Tổng đó nằm trong một thanh ghi, nên nó không tốn lưu lượng bộ nhớ nào. Chỉ đến cuối cùng, luồng mới ghi kết quả duy nhất của mình vào P.

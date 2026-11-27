@@ -1,0 +1,1 @@
+Runtime kiểm tra cấu hình, và đưa lưới vào hàng đợi. Rồi câu lệnh trả về. [short pause] Host đã sang dòng tiếp theo, và chưa luồng nào chạy cả. Một lần kiểm tra trạng thái lỗi, ngay tại đây, sẽ bắt được một cấu hình mà device không đáp ứng được.

@@ -1,0 +1,1 @@
+Giờ hãy nhìn phía bộ lọc. Ở mỗi bước, cả 4 luồng của khối đọc cùng một trọng số bộ lọc. Đó là một địa chỉ, được cả khối dùng chung. Đó là kiểu đọc lặp lại rẻ: một yêu cầu có thể phục vụ mọi luồng cần nó.

@@ -34,6 +34,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export interface Dim3 {
   x: number;
   y: number;
@@ -140,19 +142,19 @@ export function checkLaunch(grid: Dim3, block: Dim3, limits: Limits): Verdict {
 
   if (limits.maxThreadsPerBlock == null) unchecked.push('block-threads');
   else if (volume(block) > BigInt(limits.maxThreadsPerBlock))
-    violations.push({ clause: 'block-threads', field: 'threads per block', value: volume(block), limit: limits.maxThreadsPerBlock });
+    violations.push({ clause: 'block-threads', field: tr('threads per block', 'số luồng mỗi khối'), value: volume(block), limit: limits.maxThreadsPerBlock });
 
   if (!limits.maxBlockDim) unchecked.push('block-dim');
   else
     for (const a of AXES)
       if (block[a] > limits.maxBlockDim[a])
-        violations.push({ clause: 'block-dim', field: `blockDim.${a}`, value: BigInt(block[a]), limit: limits.maxBlockDim[a] });
+        violations.push({ clause: 'block-dim', field: `blockDim.${a}`, value: BigInt(block[a]), limit: limits.maxBlockDim[a] }); // i18n-ignore: code identifier
 
   if (!limits.maxGridDim) unchecked.push('grid-dim');
   else
     for (const a of AXES)
       if (grid[a] > limits.maxGridDim[a])
-        violations.push({ clause: 'grid-dim', field: `gridDim.${a}`, value: BigInt(grid[a]), limit: limits.maxGridDim[a] });
+        violations.push({ clause: 'grid-dim', field: `gridDim.${a}`, value: BigInt(grid[a]), limit: limits.maxGridDim[a] }); // i18n-ignore: code identifier
 
   return { legal: violations.length === 0, violations, unchecked };
 }
@@ -163,13 +165,13 @@ const big = (v: bigint | number) => v.toLocaleString('en-US');
 export function describeViolation(v: Violation): string {
   switch (v.clause) {
     case 'zero':
-      return `${v.field} is ${big(v.value)}. Every dimension must be at least 1.`;
+      return tr(`${v.field} is ${big(v.value)}. Every dimension must be at least 1.`, `${v.field} là ${big(v.value)}. Mọi chiều phải ít nhất là 1.`);
     case 'block-threads':
-      return `A block would hold ${big(v.value)} threads. The limit is ${big(v.limit)}.`;
+      return tr(`A block would hold ${big(v.value)} threads. The limit is ${big(v.limit)}.`, `Một khối sẽ chứa ${big(v.value)} luồng. Giới hạn là ${big(v.limit)}.`);
     case 'block-dim':
-      return `${v.field} is ${big(v.value)}. The cap for that dimension of a block is ${big(v.limit)}.`;
+      return tr(`${v.field} is ${big(v.value)}. The cap for that dimension of a block is ${big(v.limit)}.`, `${v.field} là ${big(v.value)}. Giới hạn cho chiều đó của một khối là ${big(v.limit)}.`);
     case 'grid-dim':
-      return `${v.field} is ${big(v.value)}. The cap for that dimension of a grid is ${big(v.limit)}.`;
+      return tr(`${v.field} is ${big(v.value)}. The cap for that dimension of a grid is ${big(v.limit)}.`, `${v.field} là ${big(v.value)}. Giới hạn cho chiều đó của một lưới là ${big(v.limit)}.`);
   }
 }
 
@@ -191,14 +193,14 @@ export const blockLabel = (b: Dim3): [number, number] => [b.y, b.x];
 export const threadFromLabel = ([z, y, x]: readonly [number, number, number]): Dim3 => ({ x, y, z });
 export const blockFromLabel = ([y, x]: readonly [number, number]): Dim3 => ({ x, y, z: 0 });
 
-export const formatThreadLabel = (t: Dim3): string => `Thread (${threadLabel(t).join(',')})`;
+export const formatThreadLabel = (t: Dim3): string => `Thread (${threadLabel(t).join(',')})`; // i18n-ignore: identifier also shown to the reader
 /**
  * "Block (y,x)" as the book writes it. The book only labels 2D grids; for a grid
  * with more than one layer in z the same highest-first rule gives (z,y,x), which is
  * our extension.
  */
 export const formatBlockLabel = (b: Dim3, grid: Dim3 = dim3()): string =>
-  grid.z > 1 ? `Block (${b.z},${b.y},${b.x})` : `Block (${blockLabel(b).join(',')})`;
+  grid.z > 1 ? `Block (${b.z},${b.y},${b.x})` : `Block (${blockLabel(b).join(',')})`; // i18n-ignore: identifier also shown to the reader
 /** The same index in the order of the dim3 constructor. */
 export const formatDim3 = (d: Dim3): string => `(${d.x}, ${d.y}, ${d.z})`;
 

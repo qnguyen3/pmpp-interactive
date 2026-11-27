@@ -20,7 +20,10 @@
 //
 // Used by section 6.1, the "One instruction, thirty-two addresses" and "Turn the
 // corner, then pad" scenes, and (read-only) section 6.5. The `warpAccess` contract
-// below is fixed: other sections rely on it.
+// below is fixed: other sections rely on it. It imports only lib/locale.ts, so the browser
+// checks can still import it directly.
+
+import { tr } from '../lib/locale.ts';
 
 export interface WarpAccess {
   /** Distinct aligned segments touched, as segment indices (byte address ÷ segmentBytes), ascending. */
@@ -101,35 +104,43 @@ export interface SegmentModel {
 export const SEGMENT_MODELS: Record<SegmentModelId, SegmentModel> = {
   nvidia: {
     id: 'nvidia',
-    label: 'NVIDIA: 32-byte sectors in 128-byte lines',
+    get label() {
+      return tr('NVIDIA: 32-byte sectors in 128-byte lines', 'NVIDIA: sector 32 byte trong dòng 128 byte');
+    },
     segmentBytes: 32,
     lineBytes: 128,
-    unit: 'sector',
-    facts: 'notes/today/ch06-facts.md A2, A3, A4',
+    unit: 'sector', // i18n-ignore: identifier also shown to the reader (unit key)
+    facts: 'notes/today/ch06-facts.md A2, A3, A4', // i18n-ignore: file path
   },
   amd64: {
     id: 'amd64',
-    label: 'AMD: 64-byte cache lines',
+    get label() {
+      return tr('AMD: 64-byte cache lines', 'AMD: dòng bộ nhớ đệm (cache) 64 byte');
+    },
     segmentBytes: 64,
     lineBytes: 64,
-    unit: 'line',
-    facts: 'notes/today/ch06-facts.md B1',
+    unit: 'line', // i18n-ignore: identifier also shown to the reader (unit key)
+    facts: 'notes/today/ch06-facts.md B1', // i18n-ignore: file path
   },
   amd128: {
     id: 'amd128',
-    label: 'AMD: 128-byte cache lines',
+    get label() {
+      return tr('AMD: 128-byte cache lines', 'AMD: dòng bộ nhớ đệm (cache) 128 byte');
+    },
     segmentBytes: 128,
     lineBytes: 128,
-    unit: 'line',
-    facts: 'notes/today/ch06-facts.md B1',
+    unit: 'line', // i18n-ignore: identifier also shown to the reader (unit key)
+    facts: 'notes/today/ch06-facts.md B1', // i18n-ignore: file path
   },
   metal: {
     id: 'metal',
-    label: 'Apple: not documented',
+    get label() {
+      return tr('Apple: not documented', 'Apple: không có tài liệu');
+    },
     segmentBytes: null,
     lineBytes: null,
-    unit: 'segment',
-    facts: 'notes/today/ch06-facts.md C1',
+    unit: 'segment', // i18n-ignore: identifier also shown to the reader (unit key)
+    facts: 'notes/today/ch06-facts.md C1', // i18n-ignore: file path
   },
 };
 
@@ -365,7 +376,7 @@ const EX1: { id: Ex1Access['id']; line: number; code: string; expr?: ExprId; sha
  */
 export function exercise1(warpWidth = 32, segmentBytes = 32, j = 0, lane0 = 0, gridThreads = 1024): Ex1Access[] {
   return EX1.map((x) => {
-    if (!x.expr) return { id: x.id, line: x.line, code: x.code, space: 'shared', verdict: 'not applicable', sharedStride: x.sharedStride };
+    if (!x.expr) return { id: x.id, line: x.line, code: x.code, space: 'shared', verdict: 'not applicable', sharedStride: x.sharedStride }; // i18n-ignore: Ex1Verdict union member; S61 translates it
     const p: AccessParams = { Width: 0, k: 0, row: 0, stride: 1, offset: 0, warpWidth, lane0, j, gridThreads };
     const a = exprAccess(x.expr, p, segmentBytes);
     return {

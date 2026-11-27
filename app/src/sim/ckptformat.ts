@@ -10,6 +10,8 @@
 //   E1  the file-size formula; E2  head sizes against M7's HEAD_DIM 128.
 //   appA A2  bfloat16 is the top 16 bits of a float32 (1 sign, 8 exponent, 7 mantissa).
 
+import { tr } from '../lib/locale.ts';
+
 // ------------------------------------------------------------------ llama2.c header (D1)
 
 /** The seven int32 of llama2.c's Config, in file order. vocab_size is as stored (its sign is a flag). */
@@ -76,10 +78,10 @@ export interface Shape {
 /** Head size and grouping implied by a header; problems listed rather than thrown. */
 export function shapeOf(h: Pick<Llama2cHeader, 'dim' | 'n_heads' | 'n_kv_heads'>): Shape {
   const problems: string[] = [];
-  if (!(h.dim > 0) || !(h.n_heads > 0) || !(h.n_kv_heads > 0)) problems.push('dim and both head counts must be positive');
+  if (!(h.dim > 0) || !(h.n_heads > 0) || !(h.n_kv_heads > 0)) problems.push(tr('dim and both head counts must be positive', 'dim và cả hai số head phải dương'));
   else {
-    if (h.dim % h.n_heads) problems.push(`dim ${h.dim} is not a multiple of n_heads ${h.n_heads}`);
-    if (h.n_heads % h.n_kv_heads) problems.push(`n_heads ${h.n_heads} is not a multiple of n_kv_heads ${h.n_kv_heads}`);
+    if (h.dim % h.n_heads) problems.push(tr(`dim ${h.dim} is not a multiple of n_heads ${h.n_heads}`, `dim ${h.dim} không phải bội của n_heads ${h.n_heads}`));
+    if (h.n_heads % h.n_kv_heads) problems.push(tr(`n_heads ${h.n_heads} is not a multiple of n_kv_heads ${h.n_kv_heads}`, `n_heads ${h.n_heads} không phải bội của n_kv_heads ${h.n_kv_heads}`));
   }
   const headSize = h.dim / h.n_heads;
   return { headSize, kvDim: (h.dim * h.n_kv_heads) / h.n_heads, qPerKv: h.n_heads / h.n_kv_heads, problems };
@@ -95,21 +97,21 @@ export function layout(h: Llama2cHeader): Block[] {
   const L = h.n_layers;
   const { headSize, kvDim } = shapeOf(h);
   const blocks: Block[] = [
-    { name: 'token_embedding_table', what: 'vocab × dim', floats: V * d },
-    { name: 'rms_att_weight', what: 'layers × dim', floats: L * d },
-    { name: 'wq', what: 'layers × dim × dim', floats: L * d * d },
-    { name: 'wk', what: 'layers × kv_dim × dim', floats: L * kvDim * d },
-    { name: 'wv', what: 'layers × kv_dim × dim', floats: L * kvDim * d },
-    { name: 'wo', what: 'layers × dim × dim', floats: L * d * d },
-    { name: 'rms_ffn_weight', what: 'layers × dim', floats: L * d },
-    { name: 'w1', what: 'layers × dim × hidden', floats: L * d * h.hidden_dim },
-    { name: 'w2', what: 'layers × dim × hidden', floats: L * d * h.hidden_dim },
-    { name: 'w3', what: 'layers × dim × hidden', floats: L * d * h.hidden_dim },
-    { name: 'rms_final_weight', what: 'dim', floats: d },
-    { name: 'freq_cis_real', what: 'seq_len × head_size / 2', floats: (h.seq_len * headSize) / 2, skipped: true },
-    { name: 'freq_cis_imag', what: 'seq_len × head_size / 2', floats: (h.seq_len * headSize) / 2, skipped: true },
+    { name: 'token_embedding_table', what: 'vocab × dim', floats: V * d }, // i18n-ignore: tensor name and shape
+    { name: 'rms_att_weight', what: tr('layers × dim', 'số lớp × dim'), floats: L * d }, // i18n-ignore: tensor name and shape
+    { name: 'wq', what: tr('layers × dim × dim', 'số lớp × dim × dim'), floats: L * d * d }, // i18n-ignore: tensor name and shape
+    { name: 'wk', what: tr('layers × kv_dim × dim', 'số lớp × kv_dim × dim'), floats: L * kvDim * d }, // i18n-ignore: tensor name and shape
+    { name: 'wv', what: tr('layers × kv_dim × dim', 'số lớp × kv_dim × dim'), floats: L * kvDim * d }, // i18n-ignore: tensor name and shape
+    { name: 'wo', what: tr('layers × dim × dim', 'số lớp × dim × dim'), floats: L * d * d }, // i18n-ignore: tensor name and shape
+    { name: 'rms_ffn_weight', what: tr('layers × dim', 'số lớp × dim'), floats: L * d }, // i18n-ignore: tensor name and shape
+    { name: 'w1', what: tr('layers × dim × hidden', 'số lớp × dim × hidden'), floats: L * d * h.hidden_dim }, // i18n-ignore: tensor name and shape
+    { name: 'w2', what: tr('layers × dim × hidden', 'số lớp × dim × hidden'), floats: L * d * h.hidden_dim }, // i18n-ignore: tensor name and shape
+    { name: 'w3', what: tr('layers × dim × hidden', 'số lớp × dim × hidden'), floats: L * d * h.hidden_dim }, // i18n-ignore: tensor name and shape
+    { name: 'rms_final_weight', what: 'dim', floats: d }, // i18n-ignore: tensor name and shape
+    { name: 'freq_cis_real', what: 'seq_len × head_size / 2', floats: (h.seq_len * headSize) / 2, skipped: true }, // i18n-ignore: tensor name and shape
+    { name: 'freq_cis_imag', what: 'seq_len × head_size / 2', floats: (h.seq_len * headSize) / 2, skipped: true }, // i18n-ignore: tensor name and shape
   ];
-  if (!sharedClassifier(h)) blocks.push({ name: 'wcls', what: 'vocab × dim', floats: V * d });
+  if (!sharedClassifier(h)) blocks.push({ name: 'wcls', what: 'vocab × dim', floats: V * d }); // i18n-ignore: tensor name and shape
   return blocks;
 }
 
@@ -134,11 +136,24 @@ export function checkSize(h: Llama2cHeader, actual: number): SizeCheck {
   let hint: string;
   if (actual === flipped)
     hint = sharedClassifier(h)
-      ? 'The size fits an unshared classifier: the header should carry a negative vocab_size.'
-      : 'The size fits a shared classifier: the header should carry a positive vocab_size.';
+      ? tr(
+          'The size fits an unshared classifier: the header should carry a negative vocab_size.',
+          'Kích thước khớp với một bộ phân loại riêng: header phải mang vocab_size âm.',
+        )
+      : tr(
+          'The size fits a shared classifier: the header should carry a positive vocab_size.',
+          'Kích thước khớp với một bộ phân loại dùng chung: header phải mang vocab_size dương.',
+        );
   else if (actual < expected)
-    hint = `${(expected - actual).toLocaleString('en-US')} bytes short: an interrupted download, or not a version 0 file.`;
-  else hint = `${(actual - expected).toLocaleString('en-US')} bytes too many: not a version 0 file, or a different header.`;
+    hint = tr(
+      `${(expected - actual).toLocaleString('en-US')} bytes short: an interrupted download, or not a version 0 file.`,
+      `thiếu ${(expected - actual).toLocaleString('en-US')} byte: tải xuống bị ngắt, hoặc không phải file phiên bản 0.`,
+    );
+  else
+    hint = tr(
+      `${(actual - expected).toLocaleString('en-US')} bytes too many: not a version 0 file, or a different header.`,
+      `thừa ${(actual - expected).toLocaleString('en-US')} byte: không phải file phiên bản 0, hoặc một header khác.`,
+    );
   return { expected, actual, ok: false, hint };
 }
 
@@ -321,7 +336,7 @@ export function archFromHeader(h: Llama2cHeader): Arch {
     classifier: sharedClassifier(h) ? 'shared' : 'unshared',
     dtype: 'F32',
     pairing: 'consecutive',
-    constantsFrom: 'hard-coded in run.c',
+    constantsFrom: 'hard-coded in run.c', // i18n-ignore: identifier compared with ===, not shown
   };
 }
 
@@ -354,7 +369,7 @@ export function smolTensors(): TensorSpec[] {
   const t = (name: string, shape: number[]): TensorSpec => ({ name, dtype: 'BF16', shape });
   const out = [t('model.embed_tokens.weight', [c.vocab_size, d])];
   for (let i = 0; i < c.num_hidden_layers; i++) {
-    const p = `model.layers.${i}.`;
+    const p = `model.layers.${i}.`; // i18n-ignore: tensor name
     out.push(
       t(p + 'input_layernorm.weight', [d]),
       t(p + 'self_attn.q_proj.weight', [d, d]),
@@ -378,24 +393,30 @@ export function smolTensors(): TensorSpec[] {
 export const LAB_EMU: Llama2cHeader = { dim: 256, hidden_dim: 352, n_layers: 2, n_heads: 2, n_kv_heads: 1, vocab_size: 300, seq_len: 16 };
 export const LAB_GPU: Llama2cHeader = { dim: 512, hidden_dim: 1376, n_layers: 4, n_heads: 4, n_kv_heads: 2, vocab_size: 4099, seq_len: 128 };
 
-const labModel = (id: string, label: string, h: Llama2cHeader): Checkpoint => ({
+const labModel = (id: string, label: () => string, h: Llama2cHeader): Checkpoint => ({
   id,
-  label,
+  get label() {
+    return label();
+  },
   format: 'llama2c',
   header: h,
-  arch: { ...archFromHeader(h), constantsFrom: 'hard-coded in run.c' },
+  arch: { ...archFromHeader(h), constantsFrom: 'hard-coded in run.c' }, // i18n-ignore: identifier compared with ===, not shown
   hubBytes: null,
-  file: 'generated by labs/x3/lab2_tinyllama/provided/make_model.py',
-  licence: 'ours',
+  get file() {
+    return tr('generated by labs/x3/lab2_tinyllama/provided/make_model.py', 'sinh bởi labs/x3/lab2_tinyllama/provided/make_model.py');
+  },
+  get licence() {
+    return tr('ours', 'của khóa học này');
+  },
   facts: 'D1, E1',
 });
 
 export const CHECKPOINTS: Checkpoint[] = [
-  labModel('lab-emu', 'M10, emulator model', LAB_EMU),
-  labModel('lab-gpu', 'M10, GPU model', LAB_GPU),
+  labModel('lab-emu', () => tr('M10, emulator model', 'M10, mô hình cho trình giả lập'), LAB_EMU),
+  labModel('lab-gpu', () => tr('M10, GPU model', 'M10, mô hình cho GPU'), LAB_GPU),
   {
     id: 'stories260K',
-    label: 'stories260K',
+    label: 'stories260K', // i18n-ignore: model name
     format: 'llama2c',
     header: STORIES_260K,
     arch: archFromHeader(STORIES_260K),
@@ -406,7 +427,7 @@ export const CHECKPOINTS: Checkpoint[] = [
   },
   {
     id: 'stories15M',
-    label: 'stories15M',
+    label: 'stories15M', // i18n-ignore: model name
     format: 'llama2c',
     header: STORIES_15M,
     arch: archFromHeader(STORIES_15M),
@@ -417,7 +438,7 @@ export const CHECKPOINTS: Checkpoint[] = [
   },
   {
     id: 'smollm2',
-    label: 'SmolLM2-135M',
+    label: 'SmolLM2-135M', // i18n-ignore: model name
     format: 'safetensors',
     st: { headerLen: SMOL_HEADER_LEN, tensors: smolTensors() },
     arch: {
@@ -481,64 +502,100 @@ export function checklist(a: Arch): CheckItem[] {
   const items: CheckItem[] = [];
   items.push(
     a.dtype === 'F32'
-      ? { id: 'dtype', label: 'Weights are float32', todo: false, detail: 'Read them as they are.' }
+      ? { id: 'dtype', label: tr('Weights are float32', 'Trọng số là float32'), todo: false, detail: tr('Read them as they are.', 'Đọc nguyên như vậy.') }
       : {
           id: 'dtype',
-          label: 'bf16 to float32',
+          label: tr('bf16 to float32', 'bf16 sang float32'),
           todo: true,
-          detail: `Put each stored 16 bits in the top half of a 32-bit word: ${hex16(0x3f80)} becomes ${hex32(bf16ToF32Bits(0x3f80))} = ${bf16ToF32(0x3f80)}. Exact, no rounding.`,
+          detail: tr(
+            `Put each stored 16 bits in the top half of a 32-bit word: ${hex16(0x3f80)} becomes ${hex32(bf16ToF32Bits(0x3f80))} = ${bf16ToF32(0x3f80)}. Exact, no rounding.`,
+            `Đặt mỗi 16 bit đã lưu vào nửa trên của một word 32 bit: ${hex16(0x3f80)} thành ${hex32(bf16ToF32Bits(0x3f80))} = ${bf16ToF32(0x3f80)}. Chính xác, không làm tròn.`,
+          ),
         },
   );
   items.push(
     a.pairing === 'consecutive'
-      ? { id: 'rope', label: 'RoPE on consecutive pairs', todo: false, detail: 'run.c rotates (0, 1), (2, 3), ...: your RoPE kernel must pair the same way.' }
+      ? {
+          id: 'rope',
+          label: tr('RoPE on consecutive pairs', 'RoPE trên các cặp liên tiếp'),
+          todo: false,
+          detail: tr('run.c rotates (0, 1), (2, 3), ...: your RoPE kernel must pair the same way.', 'run.c xoay (0, 1), (2, 3), ...: kernel RoPE của bạn phải ghép cặp theo cùng cách đó.'),
+        }
       : {
           id: 'rope',
-          label: 'RoPE on half-split pairs',
+          label: tr('RoPE on half-split pairs', 'RoPE trên các cặp chia đôi'),
           todo: true,
-          detail:
+          detail: tr(
             'Hugging Face rotates element i with i + head_size / 2. Use that pairing, or permute the rows of Q and K as llama.cpp’s converter does, with the KV head count for K.',
+            'Hugging Face xoay phần tử i cùng với i + head_size / 2. Hãy dùng cách ghép cặp đó, hoặc hoán vị các hàng của Q và K như bộ chuyển đổi của llama.cpp làm, với số head KV cho K.',
+          ),
         },
   );
   items.push(
     f.qPerKv === 1
-      ? { id: 'gqa', label: 'One KV head per query head', todo: false, detail: `${a.heads} heads, ${a.kvHeads} KV heads.` }
+      ? {
+          id: 'gqa',
+          label: tr('One KV head per query head', 'Mỗi head query một head KV'),
+          todo: false,
+          detail: tr(`${a.heads} heads, ${a.kvHeads} KV heads.`, `${a.heads} head, ${a.kvHeads} head KV.`),
+        }
       : {
           id: 'gqa',
-          label: `Grouped-query attention, ${a.heads} over ${a.kvHeads}`,
+          label: tr(`Grouped-query attention, ${a.heads} over ${a.kvHeads}`, `Grouped-query attention, ${a.heads} trên ${a.kvHeads}`),
           todo: true,
-          detail: `Query head h reads KV head h / ${f.qPerKv}. K and V projections have ${a.kvHeads} × ${f.headSize} = ${a.kvHeads * f.headSize} rows, not ${a.dim}.`,
+          detail: tr(
+            `Query head h reads KV head h / ${f.qPerKv}. K and V projections have ${a.kvHeads} × ${f.headSize} = ${a.kvHeads * f.headSize} rows, not ${a.dim}.`,
+            `Head query h đọc head KV h / ${f.qPerKv}. Các phép chiếu K và V có ${a.kvHeads} × ${f.headSize} = ${a.kvHeads * f.headSize} hàng, không phải ${a.dim}.`,
+          ),
         },
   );
   items.push({
     id: 'constants',
-    label: `RoPE base ${a.ropeTheta.toLocaleString("en-US")}, epsilon ${a.eps.toExponential(0)}`,
-    todo: a.constantsFrom !== 'hard-coded in run.c',
+    label: tr(
+      `RoPE base ${a.ropeTheta.toLocaleString("en-US")}, epsilon ${a.eps.toExponential(0)}`,
+      `Cơ số RoPE ${a.ropeTheta.toLocaleString("en-US")}, epsilon ${a.eps.toExponential(0)}`,
+    ),
+    todo: a.constantsFrom !== 'hard-coded in run.c', // i18n-ignore: identifier compared with ===
     detail:
-      a.constantsFrom === 'hard-coded in run.c'
-        ? 'Not in the file: run.c hard-codes them.'
-        : 'From config.json, not llama2.c’s 10,000. transformers moves an old top-level rope_theta into rope_parameters.',
+      a.constantsFrom === 'hard-coded in run.c' // i18n-ignore: identifier compared with ===
+        ? tr('Not in the file: run.c hard-codes them.', 'Không có trong file: run.c viết cứng chúng.')
+        : tr(
+            'From config.json, not llama2.c’s 10,000. transformers moves an old top-level rope_theta into rope_parameters.',
+            'Lấy từ config.json, không phải 10,000 của llama2.c. transformers chuyển rope_theta cũ ở cấp cao nhất vào rope_parameters.',
+          ),
   });
   items.push({
     id: 'classifier',
-    label: a.classifier === 'unshared' ? 'Separate classifier' : 'Classifier is the embedding',
+    label: a.classifier === 'unshared' ? tr('Separate classifier', 'Bộ phân loại riêng') : tr('Classifier is the embedding', 'Bộ phân loại chính là embedding'),
     todo: a.classifier === 'tied',
     detail:
       a.classifier === 'shared'
-        ? 'vocab_size is positive: the LM head reuses token_embedding_table.'
+        ? tr('vocab_size is positive: the LM head reuses token_embedding_table.', 'vocab_size dương: LM head dùng lại token_embedding_table.')
         : a.classifier === 'unshared'
-          ? 'vocab_size is negative: wcls (vocab × dim) follows the two skipped RoPE tables.'
-          : 'tie_word_embeddings is true and there is no lm_head.weight: use model.embed_tokens.weight.',
+          ? tr('vocab_size is negative: wcls (vocab × dim) follows the two skipped RoPE tables.', 'vocab_size âm: wcls (vocab × dim) nằm sau hai bảng RoPE bị bỏ qua.')
+          : tr(
+              'tie_word_embeddings is true and there is no lm_head.weight: use model.embed_tokens.weight.',
+              'tie_word_embeddings là true và không có lm_head.weight: hãy dùng model.embed_tokens.weight.',
+            ),
   });
   items.push({
     id: 'head',
-    label: `Head size ${Number.isInteger(f.headSize) ? f.headSize : f.headSize.toFixed(2)}`,
+    label: tr(
+      `Head size ${Number.isInteger(f.headSize) ? f.headSize : f.headSize.toFixed(2)}`,
+      `Kích thước head ${Number.isInteger(f.headSize) ? f.headSize : f.headSize.toFixed(2)}`,
+    ),
     todo: !f.m7,
     detail: f.m7
-      ? 'M7’s HEAD_DIM 128 fits as written.'
+      ? tr('M7’s HEAD_DIM 128 fits as written.', 'HEAD_DIM 128 của M7 khớp như đã viết.')
       : f.perLane != null
-        ? `Not M7’s 128. Lab 20.4’s layout works with HEAD_DIM ${f.headSize}: ${f.perLane} value${f.perLane > 1 ? 's' : ''} per lane.`
-        : `Not M7’s 128, and not a multiple of 32: lab 20.4’s lane layout cannot hold it without a change to the kernel.`,
+        ? tr(
+            `Not M7’s 128. Lab 20.4’s layout works with HEAD_DIM ${f.headSize}: ${f.perLane} value${f.perLane > 1 ? 's' : ''} per lane.`,
+            `Không phải 128 của M7. Bố cục của lab 20.4 chạy được với HEAD_DIM ${f.headSize}: ${f.perLane} giá trị mỗi lane.`,
+          )
+        : tr(
+            `Not M7’s 128, and not a multiple of 32: lab 20.4’s lane layout cannot hold it without a change to the kernel.`,
+            `Không phải 128 của M7, và không phải bội của 32: bố cục lane của lab 20.4 không chứa được nó nếu không sửa kernel.`,
+          ),
   });
   return items;
 }

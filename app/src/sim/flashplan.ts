@@ -14,6 +14,7 @@
 
 import { warpBanks, type BankResult } from './banks';
 import { sourceOf } from './shuffle';
+import { tr as trText } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- the book's constants
 /** Fig. 20.9 lines 1–7. */
@@ -65,14 +66,17 @@ export function plan(p: PlanInput): Plan {
   const rw = whole ? brWarp : 0;
   const ds = Number.isInteger(dSize) ? dSize : 0;
   const problems: string[] = [];
-  if (!Number.isInteger(nWarps)) problems.push(`${p.threads} threads are not a whole number of ${p.warp}-lane warps`);
+  if (!Number.isInteger(nWarps)) problems.push(trText(`${p.threads} threads are not a whole number of ${p.warp}-lane warps`, `${p.threads} luồng không chia hết thành các warp ${p.warp} lane`));
   else if (!whole)
     problems.push(
-      `B_r_warp = B_r / N_WARPS = ${p.br} / ${nWarps} = ${fmtFrac(brWarp)}: every warp must own a whole number of rows (at least 1)`,
+      trText(
+        `B_r_warp = B_r / N_WARPS = ${p.br} / ${nWarps} = ${fmtFrac(brWarp)}: every warp must own a whole number of rows (at least 1)`,
+        `B_r_warp = B_r / N_WARPS = ${p.br} / ${nWarps} = ${fmtFrac(brWarp)}: mỗi warp phải giữ một số nguyên hàng (ít nhất 1)`,
+      ),
     );
-  if (p.d % p.warp !== 0 && p.d > p.warp) problems.push(`d = ${p.d} is not a multiple of the warp width ${p.warp} (the book assumes it is, p. 498)`);
-  if (p.threads > 1024) problems.push(`${p.threads} threads per block exceeds the 1024 that CUDA allows (ch05 A5)`);
-  if (p.banks && !isPow2(p.banks)) problems.push('the bank count must be a power of two for the shift in addr()');
+  if (p.d % p.warp !== 0 && p.d > p.warp) problems.push(trText(`d = ${p.d} is not a multiple of the warp width ${p.warp} (the book assumes it is, p. 498)`, `d = ${p.d} không phải bội số của độ rộng warp ${p.warp} (sách giả định là có, p. 498)`));
+  if (p.threads > 1024) problems.push(trText(`${p.threads} threads per block exceeds the 1024 that CUDA allows (ch05 A5)`, `${p.threads} luồng mỗi khối vượt quá 1024 mà CUDA cho phép (ch05 A5)`));
+  if (p.banks && !isPow2(p.banks)) problems.push(trText('the bank count must be a power of two for the shift in addr()', 'số bank phải là lũy thừa của hai để phép dịch trong addr() đúng'));
   return {
     nWarps,
     brWarp,
@@ -106,13 +110,13 @@ export const METAL_DOCUMENTED = 32 * 1024;
 
 export function limits(metalBytes?: number, metalSource?: string): Limit[] {
   return [
-    { id: 'cuda', label: 'CUDA, static shared memory', bytes: CUDA_STATIC, source: 'ch05 facts A3' },
-    { id: 'amd', label: 'AMD LDS (smallest in AMD’s table)', bytes: AMD_LDS_MIN, source: 'ch20 facts B3' },
+    { id: 'cuda', label: trText('CUDA, static shared memory', 'CUDA, bộ nhớ chia sẻ (shared memory) tĩnh'), bytes: CUDA_STATIC, source: 'ch05 facts A3' }, // i18n-ignore: citation
+    { id: 'amd', label: trText('AMD LDS (smallest in AMD’s table)', 'AMD LDS (nhỏ nhất trong bảng của AMD)'), bytes: AMD_LDS_MIN, source: 'ch20 facts B3' }, // i18n-ignore: citation
     {
       id: 'metal',
-      label: metalSource ? `Metal, ${metalSource}` : 'Metal, documented (Apple4 to Apple11)',
+      label: metalSource ? trText(`Metal, ${metalSource}`, `Metal, ${metalSource}`) : trText('Metal, documented (Apple4 to Apple11)', 'Metal, theo tài liệu (Apple4 đến Apple11)'),
       bytes: metalBytes ?? METAL_DOCUMENTED,
-      source: metalSource ? 'your report (maxThreadgroupMemoryLength)' : 'ch05 facts C1',
+      source: metalSource ? trText('your report (maxThreadgroupMemoryLength)', 'báo cáo của bạn (maxThreadgroupMemoryLength)') : 'ch05 facts C1', // i18n-ignore: citation
     },
   ];
 }

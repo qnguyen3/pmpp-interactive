@@ -1,0 +1,1 @@
+Dịch đi 1. j giảm xuống 1, và i tăng lên 2. Cả hai phép kiểm tra đều qua: 7 không lớn hơn 10, và 7 nhỏ hơn 8. Vậy luồng 1 bắt đầu ở A 2 và B 1. [short pause] 4 ứng viên thu lại còn 1 sau 3 vòng lặp. Việc chia đôi đó là lý do chi phí tăng theo logarit của độ dài.

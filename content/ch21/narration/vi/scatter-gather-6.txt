@@ -1,0 +1,1 @@
+Tổng kết. Phân tán thực hiện 24 lần cập nhật nguyên tử vào 6 địa chỉ, mỗi địa chỉ 4 lần, và đọc 4 địa chỉ hằng khác nhau ở mỗi bước. Thu gom thực hiện 24 phép cộng trong thanh ghi và 6 lần ghi thông thường, và đọc 1 địa chỉ mỗi bước. Đó là lý do thu gom thắng khi mọi đầu vào đều chạm tới mọi đầu ra.

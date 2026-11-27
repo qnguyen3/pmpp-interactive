@@ -1,0 +1,1 @@
+Giờ GPU có được một ánh xạ. Lần nạp bị lỗi được chạy lại, và lần này nó hoàn tất. Những lần nạp sau từ cùng trang đó, trong kernel này hay kernel tiếp theo, đều là cục bộ và rẻ. Cái giá chỉ phải trả một lần, ở lần chạm đầu tiên.

@@ -1,0 +1,1 @@
+Giờ hãy đếm xem một bus đầy cần gì. Mỗi bank đang bận giữ một yêu cầu, nên 21 yêu cầu phải cùng đang bay tại một thời điểm, mọi lúc. Trên GPU, những yêu cầu đó là các lần nạp do warp phát ra. Thêm warp thường trú, hoặc thêm byte trong mỗi lần nạp, là thứ giữ cho chúng đến đều.

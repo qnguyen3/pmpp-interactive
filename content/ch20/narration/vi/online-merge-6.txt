@@ -1,0 +1,1 @@
+Đó là lý do điều này quan trọng. Toàn bộ hàng điểm số chưa bao giờ tồn tại ở đâu cả. Và hai con số cho mỗi hàng, giá trị lớn nhất và tổng, là tất cả những gì cần để trộn các kết quả từng phần. Hai khối có thể mỗi khối nhận một nửa số cột, và thêm một bước nữa kết hợp chúng theo đúng cùng quy tắc đó.

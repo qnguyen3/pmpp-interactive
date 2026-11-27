@@ -18,6 +18,7 @@ import {
   type Trace,
   type TreeNode,
 } from '../../sim/ksblock';
+import { Translated, tr } from '../../lib/i18n';
 
 // Chapter 11's drawing of a Kogge-Stone scan as rows of the shared buffer: the load on
 // top, then what each iteration wrote, the way Figs. 11.2 and 11.4 draw it. Sections 11.2
@@ -244,7 +245,7 @@ export function fromLevels(
     }
   }
   const marks: GridMark[] = (opts.tree?.nodes ?? []).filter((n) => n.level > 0 && n.level <= upto).map((n) => ({ row: n.level, pos: n.pos, tone: 'tree' as const }));
-  const labels: [string, string?][] = lv.slice(0, upto + 1).map((l) => (l.stride === null ? ['input'] : [`stride ${l.stride}`, `${B - l.stride} additions`]));
+  const labels: [string, string?][] = lv.slice(0, upto + 1).map((l) => (l.stride === null ? [tr('input', 'đầu vào')] : [tr(`stride ${l.stride}`, `stride ${l.stride}`), tr(`${B - l.stride} additions`, `${B - l.stride} phép cộng`)]));
   return { rows, labels, arrows, marks };
 }
 
@@ -314,72 +315,79 @@ export function fromTrace(trace: Trace, n: number): { rows: (GridCell | null)[][
     if (cur.write) marks.push({ row: cur.write.iter + 1, pos: cur.write.slot, tone: 'write' });
   }
   const labels: [string, string?][] = Array.from({ length: L + 1 }, (_, r) => {
-    if (!dbl) return r === 0 ? ['buffer_s', 'after the load'] : ['buffer_s', `after stride ${2 ** (r - 1)}`];
-    if (r === 0) return ['buffer1_s', 'the load'];
-    return [`buffer${(r % 2) + 1}_s`, `iteration ${r - 1} wrote`];
+    if (!dbl) return r === 0 ? ['buffer_s', tr('after the load', 'sau khi nạp')] : ['buffer_s', tr(`after stride ${2 ** (r - 1)}`, `sau stride ${2 ** (r - 1)}`)];
+    if (r === 0) return ['buffer1_s', tr('the load', 'lần nạp')];
+    return [`buffer${(r % 2) + 1}_s`, tr(`iteration ${r - 1} wrote`, `lần lặp ${r - 1} đã ghi`)]; // i18n-ignore: buffer variable name
   });
   return { rows, labels, arrows, marks };
 }
 
 // ---------------------------------------------------------------- a thread-level stepper
-const val = (v: number) => (Number.isNaN(v) ? 'garbage' : String(v));
-const carried = (r: Read) => `${val(r.value)} (${r.coef ? rangeText(r.coef, true) : 'garbage'})`;
+const val = (v: number) => (Number.isNaN(v) ? tr('garbage', 'rác') : String(v));
+const carried = (r: Read) => `${val(r.value)} (${r.coef ? rangeText(r.coef, true) : tr('garbage', 'rác')})`;
 
 /** One sentence saying what a step did. */
 export function describeStep(s: Step, trace: Trace): string {
   const { cfg } = trace;
-  const buf = (b: number) => (cfg.kind === 'double' ? `buffer${b + 1}_s` : 'buffer_s');
+  const buf = (b: number) => (cfg.kind === 'double' ? `buffer${b + 1}_s` : 'buffer_s'); // i18n-ignore: buffer variable name
   const stride = 2 ** s.iter;
   if (s.thread < 0) {
     if (cfg.kind === 'double')
       return s.iter === 0
-        ? 'The barrier opens: every thread has loaded its element into buffer1_s, so iteration 0 may read them.'
-        : `The barrier opens: every thread has written its iteration-${s.iter - 1} value, so iteration ${s.iter} may read them.`;
+        ? tr('The barrier opens: every thread has loaded its element into buffer1_s, so iteration 0 may read them.', 'Rào chắn mở: mọi luồng đã nạp phần tử của mình vào buffer1_s, nên lần lặp 0 được phép đọc chúng.')
+        : tr(`The barrier opens: every thread has written its iteration-${s.iter - 1} value, so iteration ${s.iter} may read them.`, `Rào chắn mở: mọi luồng đã ghi giá trị của lần lặp ${s.iter - 1}, nên lần lặp ${s.iter} được phép đọc chúng.`);
     return s.barrier === 1
-      ? `Barrier 1 opens: every thread has arrived, so every write before it is done and iteration ${s.iter} (stride ${stride}) may read.`
-      : `Barrier 2 opens: every read of iteration ${s.iter} is done, so it is now safe to overwrite buffer_s.`;
+      ? tr(`Barrier 1 opens: every thread has arrived, so every write before it is done and iteration ${s.iter} (stride ${stride}) may read.`, `Rào chắn 1 mở: mọi luồng đã tới, nên mọi lần ghi trước nó đã xong và lần lặp ${s.iter} (stride ${stride}) được phép đọc.`)
+      : tr(`Barrier 2 opens: every read of iteration ${s.iter} is done, so it is now safe to overwrite buffer_s.`, `Rào chắn 2 mở: mọi lần đọc của lần lặp ${s.iter} đã xong, nên giờ có thể ghi đè buffer_s an toàn.`);
   }
-  const t = `Thread ${s.thread}`;
+  const t = tr(`Thread ${s.thread}`, `Luồng ${s.thread}`);
   switch (s.op) {
     case 'load':
-      return `${t} loads ${s.write!.coef!.some(Boolean) ? `x${s.thread} = ${s.write!.value}` : 'the identity 0'} into ${buf(0)}[${s.thread}].`;
+      return tr(`${t} loads ${s.write!.coef!.some(Boolean) ? `x${s.thread} = ${s.write!.value}` : 'the identity 0'} into ${buf(0)}[${s.thread}].`, `${t} nạp ${s.write!.coef!.some(Boolean) ? `x${s.thread} = ${s.write!.value}` : 'phần tử đơn vị 0'} vào ${buf(0)}[${s.thread}].`);
     case 'barrier1':
       return cfg.kind === 'double'
-        ? `${t} reaches the barrier of iteration ${s.iter} and waits for the whole block.`
-        : `${t} reaches barrier 1 of iteration ${s.iter} (stride ${stride}) and waits.`;
+        ? tr(`${t} reaches the barrier of iteration ${s.iter} and waits for the whole block.`, `${t} tới rào chắn của lần lặp ${s.iter} và chờ cả khối.`)
+        : tr(`${t} reaches barrier 1 of iteration ${s.iter} (stride ${stride}) and waits.`, `${t} tới rào chắn 1 của lần lặp ${s.iter} (stride ${stride}) và chờ.`);
     case 'barrier2':
       return cfg.temp
-        ? `${t} reaches barrier 2 of iteration ${s.iter} and waits until every thread has read.`
-        : `${t} reaches the barrier after its store, iteration ${s.iter}, and waits.`;
+        ? tr(`${t} reaches barrier 2 of iteration ${s.iter} and waits until every thread has read.`, `${t} tới rào chắn 2 của lần lặp ${s.iter} và chờ đến khi mọi luồng đã đọc xong.`)
+        : tr(`${t} reaches the barrier after its store, iteration ${s.iter}, and waits.`, `${t} tới rào chắn sau lần ghi của nó, lần lặp ${s.iter}, và chờ.`);
     case 'read': {
       const [a, b] = s.reads!;
       const sum = `${val(a.value + b.value)}`;
       return cfg.temp
-        ? `${t}, stride ${stride}: temp = buffer_s[${s.thread}] + buffer_s[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${sum}.`
-        : `${t}, stride ${stride}: loads buffer_s[${s.thread}] = ${carried(a)} and buffer_s[${s.thread - stride}] = ${carried(b)} for its +=.`;
+        ? tr(`${t}, stride ${stride}: temp = buffer_s[${s.thread}] + buffer_s[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${sum}.`, `${t}, stride ${stride}: temp = buffer_s[${s.thread}] + buffer_s[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${sum}.`)
+        : tr(`${t}, stride ${stride}: loads buffer_s[${s.thread}] = ${carried(a)} and buffer_s[${s.thread - stride}] = ${carried(b)} for its +=.`, `${t}, stride ${stride}: nạp buffer_s[${s.thread}] = ${carried(a)} và buffer_s[${s.thread - stride}] = ${carried(b)} cho phép += của nó.`);
     }
     case 'write':
       return cfg.temp
-        ? `${t} stores temp = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}) into buffer_s[${s.thread}].`
-        : `${t} finishes its +=: buffer_s[${s.thread}] = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}).`;
+        ? tr(`${t} stores temp = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}) into buffer_s[${s.thread}].`, `${t} ghi temp = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}) vào buffer_s[${s.thread}].`)
+        : tr(`${t} finishes its +=: buffer_s[${s.thread}] = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}).`, `${t} hoàn tất phép +=: buffer_s[${s.thread}] = ${val(s.write!.value)} (${rangeText(s.write!.coef, true)}).`);
     case 'add': {
       const [a, b] = s.reads!;
-      return `${t}, stride ${stride}: ${buf(s.write!.buf)}[${s.thread}] = ${buf(a.buf)}[${s.thread}] + ${buf(b.buf)}[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${val(s.write!.value)}.`;
+      return tr(`${t}, stride ${stride}: ${buf(s.write!.buf)}[${s.thread}] = ${buf(a.buf)}[${s.thread}] + ${buf(b.buf)}[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${val(s.write!.value)}.`, `${t}, stride ${stride}: ${buf(s.write!.buf)}[${s.thread}] = ${buf(a.buf)}[${s.thread}] + ${buf(b.buf)}[${s.thread - stride}] = ${carried(a)} + ${carried(b)} = ${val(s.write!.value)}.`);
     }
     case 'copy':
-      return `${t} is idle at stride ${stride}, so it copies ${carried(s.reads![0])} from ${buf(s.reads![0].buf)} to ${buf(s.write!.buf)}.`;
+      return tr(`${t} is idle at stride ${stride}, so it copies ${carried(s.reads![0])} from ${buf(s.reads![0].buf)} to ${buf(s.write!.buf)}.`, `${t} rảnh ở stride ${stride}, nên nó chép ${carried(s.reads![0])} từ ${buf(s.reads![0].buf)} sang ${buf(s.write!.buf)}.`);
     case 'swap':
-      return `${t} swaps its pointers: inBuffer_s is now ${buf(s.pointers!.inBuf)}, outBuffer_s ${buf(s.pointers!.outBuf)}.`;
+      return tr(`${t} swaps its pointers: inBuffer_s is now ${buf(s.pointers!.inBuf)}, outBuffer_s ${buf(s.pointers!.outBuf)}.`, `${t} hoán đổi con trỏ: inBuffer_s giờ là ${buf(s.pointers!.inBuf)}, outBuffer_s là ${buf(s.pointers!.outBuf)}.`);
     case 'store':
-      return `${t} writes ${cfg.kind === 'double' ? `inBuffer_s[${s.thread}], that is ${buf(s.reads![0].buf)}[${s.thread}]` : `buffer_s[${s.thread}]`} = ${carried(s.reads![0])} to output[${s.thread}].`;
+      return tr(`${t} writes ${cfg.kind === 'double' ? `inBuffer_s[${s.thread}], that is ${buf(s.reads![0].buf)}[${s.thread}]` : `buffer_s[${s.thread}]`} = ${carried(s.reads![0])} to output[${s.thread}].`, `${t} ghi ${cfg.kind === 'double' ? `inBuffer_s[${s.thread}], tức ${buf(s.reads![0].buf)}[${s.thread}]` : `buffer_s[${s.thread}]`} = ${carried(s.reads![0])} ra output[${s.thread}].`);
     default:
       return '';
   }
 }
 
 const OP_WORD: Record<string, string> = {
-  load: 'loaded', barrier1: 'past barrier 1', barrier2: 'past barrier 2', read: 'has read', write: 'has stored',
-  add: 'has added', copy: 'has copied', swap: 'has swapped', store: 'finished',
+  get load() { return tr('loaded', 'đã nạp'); },
+  get barrier1() { return tr('past barrier 1', 'đã qua rào chắn 1'); },
+  get barrier2() { return tr('past barrier 2', 'đã qua rào chắn 2'); },
+  get read() { return tr('has read', 'đã đọc'); },
+  get write() { return tr('has stored', 'đã ghi'); },
+  get add() { return tr('has added', 'đã cộng'); },
+  get copy() { return tr('has copied', 'đã chép'); },
+  get swap() { return tr('has swapped', 'đã hoán đổi'); },
+  get store() { return tr('finished', 'đã xong'); },
 };
 
 /**
@@ -415,22 +423,22 @@ export function TraceView({ trace, codeLabel = 'CUDA' }: { trace: Trace; codeLab
   const done = at >= total;
   const doing = (t: number) => {
     const th = st.threads[t];
-    if (th.done) return 'finished';
-    if (th.waiting) return dbl ? 'waiting at the barrier' : `waiting at barrier ${th.waiting}`;
-    if (!th.last) return 'not started';
-    return th.iter < 0 ? 'loaded its element' : `iteration ${th.iter}: ${OP_WORD[th.last]}`;
+    if (th.done) return tr('finished', 'đã xong');
+    if (th.waiting) return dbl ? tr('waiting at the barrier', 'đang chờ ở rào chắn') : tr(`waiting at barrier ${th.waiting}`, `đang chờ ở rào chắn ${th.waiting}`);
+    if (!th.last) return tr('not started', 'chưa bắt đầu');
+    return th.iter < 0 ? tr('loaded its element', 'đã nạp phần tử của mình') : tr(`iteration ${th.iter}: ${OP_WORD[th.last]}`, `lần lặp ${th.iter}: ${OP_WORD[th.last]}`);
   };
   return (
     <div data-part="trace-view" data-schedule={trace.schedule}>
       <div className="row" style={{ marginBottom: '0.8rem' }}>
-        <button onClick={() => { setPlaying(false); setN(0); }} disabled={at === 0}>Restart</button>
-        <button onClick={() => { setPlaying(false); setN(at - 1); }} disabled={at === 0}>Back</button>
-        <button className="primary" onClick={() => { setPlaying(false); setN(at + 1); }} disabled={done}>Step</button>
-        <button onClick={() => { setPlaying(false); setN(nextRelease(trace, at)); }} disabled={done}>Run to next barrier</button>
-        <button onClick={() => setPlaying(!playing)} disabled={done}>{playing ? 'Pause' : 'Play'}</button>
-        <button onClick={() => { setPlaying(false); setN(total); }} disabled={done}>Run to the end</button>
-        {bad ? <button onClick={() => { setPlaying(false); setN(bad); }}>Go to the first failure</button> : null}
-        <span className="muted" aria-live="polite" data-readout="step">step {at} of {total}</span>
+        <button onClick={() => { setPlaying(false); setN(0); }} disabled={at === 0}><Translated vi="Bắt đầu lại">Restart</Translated></button>
+        <button onClick={() => { setPlaying(false); setN(at - 1); }} disabled={at === 0}><Translated vi="Lùi">Back</Translated></button>
+        <button className="primary" onClick={() => { setPlaying(false); setN(at + 1); }} disabled={done}><Translated vi="Bước">Step</Translated></button>
+        <button onClick={() => { setPlaying(false); setN(nextRelease(trace, at)); }} disabled={done}><Translated vi="Chạy tới rào chắn kế tiếp">Run to next barrier</Translated></button>
+        <button onClick={() => setPlaying(!playing)} disabled={done}>{playing ? tr('Pause', 'Tạm dừng') : tr('Play', 'Phát')}</button>
+        <button onClick={() => { setPlaying(false); setN(total); }} disabled={done}><Translated vi="Chạy đến cuối">Run to the end</Translated></button>
+        {bad ? <button onClick={() => { setPlaying(false); setN(bad); }}><Translated vi="Tới lỗi đầu tiên">Go to the first failure</Translated></button> : null}
+        <span className="muted" aria-live="polite" data-readout="step"><Translated vi={<>bước {at} / {total}</>}>step {at} of {total}</Translated></span>
       </div>
       <div className={'narrate' + (cur?.violation ? ' bad' : '')} role="status" style={{ marginBottom: '0.9rem' }} data-readout="narrate">
         {cur ? (
@@ -439,32 +447,41 @@ export function TraceView({ trace, codeLabel = 'CUDA' }: { trace: Trace; codeLab
             {cur.violation ? (
               <>
                 <br />
-                <b className="t-fail">Failure ({KIND_LABEL[cur.violation.kind]}): {cur.violation.message}.</b>
+                <b className="t-fail"><Translated vi="Lỗi">Failure</Translated> ({KIND_LABEL[cur.violation.kind]}): {cur.violation.message}.</b>
               </>
             ) : null}
           </>
         ) : (
-          <>Nothing has run yet. {trace.cfg.threads} threads, one per element, scan x0 to x{trace.cfg.threads - 1}. Press Step.</>
+          <Translated vi={<>Chưa có gì chạy. {trace.cfg.threads} luồng, mỗi luồng một phần tử, scan x0 đến x{trace.cfg.threads - 1}. Bấm Bước.</>}>Nothing has run yet. {trace.cfg.threads} threads, one per element, scan x0 to x{trace.cfg.threads - 1}. Press Step.</Translated>
         )}
       </div>
       <div style={{ overflowX: 'auto' }}>
         <KsGrid rows={grid.rows} labels={grid.labels} arrows={grid.arrows} marks={grid.marks} cellW={72}
-          label={dbl ? 'The two buffers, one row per iteration' : 'buffer_s, one row per iteration'} />
+          label={dbl ? tr('The two buffers, one row per iteration', 'Hai buffer, mỗi lần lặp một hàng') : tr('buffer_s, one row per iteration', 'buffer_s, mỗi lần lặp một hàng')} />
       </div>
-      <p className="muted" style={{ margin: '0.4rem 0 0.9rem' }}>
-        Each row is what one iteration wrote; dashed cells were left as they were. Under every value: the inputs it counts.
-        A heavy outline marks what the current step reads, a dashed one what it writes; red means not the value intended.
-      </p>
+      <Translated
+        vi={
+          <p className="muted" style={{ margin: '0.4rem 0 0.9rem' }}>
+            Mỗi hàng là những gì một lần lặp đã ghi; ô nét đứt được giữ nguyên. Dưới mỗi giá trị: các đầu vào mà nó tính.
+            Viền đậm đánh dấu chỗ bước hiện tại đọc, viền nét đứt là chỗ nó ghi; màu đỏ nghĩa là không phải giá trị mong muốn.
+          </p>
+        }
+      >
+        <p className="muted" style={{ margin: '0.4rem 0 0.9rem' }}>
+          Each row is what one iteration wrote; dashed cells were left as they were. Under every value: the inputs it counts.
+          A heavy outline marks what the current step reads, a dashed one what it writes; red means not the value intended.
+        </p>
+      </Translated>
       {done ? (
         <p style={{ margin: '0 0 0.9rem' }} data-readout="outcome" data-correct={trace.correct ? '1' : '0'}>
           {trace.correct ? (
-            <span className="chip ok">output correct</span>
+            <span className="chip ok"><Translated vi="output đúng">output correct</Translated></span>
           ) : (
-            <span className="chip fail">{trace.wrong.length} of {trace.cfg.threads} outputs wrong</span>
+            <span className="chip fail"><Translated vi={<>{trace.wrong.length} trên {trace.cfg.threads} output sai</>}>{trace.wrong.length} of {trace.cfg.threads} outputs wrong</Translated></span>
           )}{' '}
           {trace.correct
             ? `output = ${trace.output.join(' ')}`
-            : `${trace.wrong.length > 1 ? 'positions' : 'position'} ${trace.wrong.join(', ')}: ` + trace.wrong.map((i) => `${val(trace.output[i])}${trace.outputCoef[i] ? ` (${rangeText(trace.outputCoef[i])})` : ''} instead of ${trace.reference[i]}`).join('; ')}
+            : tr(`${trace.wrong.length > 1 ? 'positions' : 'position'} ${trace.wrong.join(', ')}: `, `vị trí ${trace.wrong.join(', ')}: `) + trace.wrong.map((i) => tr(`${val(trace.output[i])}${trace.outputCoef[i] ? ` (${rangeText(trace.outputCoef[i])})` : ''} instead of ${trace.reference[i]}`, `${val(trace.output[i])}${trace.outputCoef[i] ? ` (${rangeText(trace.outputCoef[i])})` : ''} thay vì ${trace.reference[i]}`)).join('; ')}
         </p>
       ) : null}
       <div className="cols" style={{ gridTemplateColumns: 'minmax(0, 7fr) minmax(0, 4fr)' }}>
@@ -472,9 +489,9 @@ export function TraceView({ trace, codeLabel = 'CUDA' }: { trace: Trace; codeLab
           <Code tabs={[{ label: codeLabel, code: src.code }]} highlight={lines} />
         </div>
         <div style={{ minWidth: 0 }}>
-          <table className="threads" aria-label="Threads of the block">
+          <table className="threads" aria-label={tr('Threads of the block', 'Các luồng của khối')}>
             <thead>
-              <tr><th>thread</th><th>doing</th>{dbl ? <th>in / out buffer</th> : <th>temp</th>}</tr>
+              <tr><th><Translated vi="luồng">thread</Translated></th><th><Translated vi="đang làm">doing</Translated></th>{dbl ? <th><Translated vi="buffer vào / ra">in / out buffer</Translated></th> : <th>temp{/* i18n-ignore: variable name */}</th>}</tr>
             </thead>
             <tbody>
               {st.threads.map((th, t) => (

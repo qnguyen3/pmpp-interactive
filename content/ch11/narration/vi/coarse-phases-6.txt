@@ -1,0 +1,1 @@
+Cuối cùng là bước ghi, từng đoạn một, trở về bộ nhớ toàn cục và lại được hợp nhất. Mỗi phần tử đi qua bộ nhớ chia sẻ hai lần, một lần lúc vào và một lần lúc ra. Theo cách đếm của sách, khối đã làm 32 phép cộng cho 16 phần tử, gấp đôi số phần tử. Kogge-Stone trên 16 phần tử làm 49 phép cộng.

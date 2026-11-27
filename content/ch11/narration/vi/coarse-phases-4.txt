@@ -1,0 +1,1 @@
+Pha hai. Giá trị cuối cùng của mỗi luồng là tổng của dải phần tử của nó: 7, 7, 6 và 11. 4 tổng này đi qua một lần scan khối, lần scan song song duy nhất còn lại trong kernel, và trở thành 7, 14, 20 và 31. Mỗi số là tổng của mọi thứ tính đến cuối dải đó.

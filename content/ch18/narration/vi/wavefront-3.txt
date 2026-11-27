@@ -1,0 +1,1 @@
+Kernel frontier chỉ khởi chạy luồng cho làn sóng cuối cùng, mỗi lần nhiều nhất 15 ô. Trong toàn bộ lần tìm kiếm, nó khởi chạy 197 luồng, mỗi ô một luồng, và đọc mỗi cạnh trong 672 cạnh đúng một lần. Tức là 869 đơn vị công việc so với 6779 của push. Đây là hiệu quả công việc: chỉ khởi chạy cho những gì đã thay đổi.

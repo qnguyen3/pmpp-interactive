@@ -16,6 +16,7 @@
 //     nodes 64 bytes apart within it.
 
 import { cell, type Cell, type EraId, type RowId } from './derefmap';
+import { tr } from '../lib/locale.ts';
 
 export type Alloc = 'malloc' | 'cudaHostAlloc' | 'cudaMalloc' | 'cudaMallocManaged';
 export type Setting = 'uva' | 'pascal' | 'hmm' | 'um-limited';
@@ -24,10 +25,34 @@ export type HopVerdict = 'local' | 'remote' | 'fault' | 'invalid';
 export const ALLOCS: Alloc[] = ['malloc', 'cudaHostAlloc', 'cudaMalloc', 'cudaMallocManaged'];
 
 export const SETTINGS: { id: Setting; label: string; era: EraId }[] = [
-  { id: 'uva', label: 'CUDA 4, unified addressing', era: 'uva' },
-  { id: 'pascal', label: 'Pascal and later, managed only (Linux, no HMM)', era: 'pascal' },
-  { id: 'hmm', label: 'HMM or ATS', era: 'hmm' },
-  { id: 'um-limited', label: 'Limited (Windows, WSL)', era: 'um-limited' },
+  {
+    id: 'uva',
+    get label() {
+      return tr('CUDA 4, unified addressing', 'CUDA 4, định địa chỉ thống nhất (unified addressing)');
+    },
+    era: 'uva',
+  },
+  {
+    id: 'pascal',
+    get label() {
+      return tr('Pascal and later, managed only (Linux, no HMM)', 'Pascal trở về sau, chỉ bộ nhớ managed (Linux, không HMM)');
+    },
+    era: 'pascal',
+  },
+  {
+    id: 'hmm',
+    get label() {
+      return tr('HMM or ATS', 'HMM hoặc ATS');
+    },
+    era: 'hmm',
+  },
+  {
+    id: 'um-limited',
+    get label() {
+      return tr('Limited (Windows, WSL)', 'Hạn chế (Windows, WSL)');
+    },
+    era: 'um-limited',
+  },
 ];
 
 const ROW: Record<Alloc, RowId> = {
@@ -39,19 +64,47 @@ const ROW: Record<Alloc, RowId> = {
 
 /** Made-up base addresses, one range per allocator. */
 export const RANGES: Record<Alloc, { base: number; name: string }> = {
-  malloc: { base: 0x7f2000001000, name: 'host heap (malloc)' },
-  cudaHostAlloc: { base: 0x7f3000000000, name: 'pinned host memory' },
-  cudaMalloc: { base: 0x7f4000000000, name: 'GPU 0 memory' },
-  cudaMallocManaged: { base: 0x7f5000000000, name: 'managed memory' },
+  malloc: {
+    base: 0x7f2000001000,
+    get name() {
+      return tr('host heap (malloc)', 'heap của host (malloc)');
+    },
+  },
+  cudaHostAlloc: {
+    base: 0x7f3000000000,
+    get name() {
+      return tr('pinned host memory', 'bộ nhớ ghim (pinned memory) của host');
+    },
+  },
+  cudaMalloc: {
+    base: 0x7f4000000000,
+    get name() {
+      return tr('GPU 0 memory', 'bộ nhớ của GPU 0');
+    },
+  },
+  cudaMallocManaged: {
+    base: 0x7f5000000000,
+    get name() {
+      return tr('managed memory', 'bộ nhớ managed');
+    },
+  },
 };
 
 export const NODE_VALUES = [3, 1, 4, 1, 5];
 
 export const HOP_LABEL: Record<HopVerdict, string> = {
-  local: 'read locally',
-  remote: 'read over the interconnect',
-  fault: 'page faults and migrates',
-  invalid: 'invalid dereference',
+  get local() {
+    return tr('read locally', 'đọc cục bộ');
+  },
+  get remote() {
+    return tr('read over the interconnect', 'đọc qua kênh kết nối');
+  },
+  get fault() {
+    return tr('page faults and migrates', 'lỗi trang và di chuyển');
+  },
+  get invalid() {
+    return tr('invalid dereference', 'dereference không hợp lệ');
+  },
 };
 
 /** 0x7f30_0000_0040: groups of four hex digits, as debuggers often print them. */
@@ -87,7 +140,7 @@ export interface Hop {
   address: number;
   range: string;
   /** How the kernel got the address: the kernel argument, or the next field of the previous node. */
-  via: 'argument' | 'previous node';
+  via: 'argument' | 'previous node'; // i18n-ignore: union members compared by the chapter, which shows its own text
   verdict: HopVerdict;
   /** The node's value if the read was valid, else null. */
   value: number | null;
@@ -113,7 +166,7 @@ export function chase(nodes: Alloc[], setting: Setting, values: number[] = NODE_
       alloc: nodes[i],
       address: addr[i],
       range: RANGES[nodes[i]].name,
-      via: i === 0 ? 'argument' : 'previous node',
+      via: i === 0 ? 'argument' : 'previous node', // i18n-ignore: union member, not shown as is
       verdict,
       value: ok ? values[i] : null,
       sum,

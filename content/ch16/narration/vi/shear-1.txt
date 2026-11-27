@@ -1,0 +1,1 @@
+Đây là một ô vuông, 3 ô con nhân 3. Mỗi ô con được ghi nhãn bằng luồng tính nó, và mỗi luồng sở hữu một hàng. Bước đầu tiên thắp sáng 1 ô con, rồi 2, rồi 3, rồi 2, rồi 1. Vậy 9 ô con mất 5 bước, và hầu hết các bước để các luồng ngồi không.

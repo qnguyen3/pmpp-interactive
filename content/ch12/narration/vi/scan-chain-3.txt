@@ -1,0 +1,1 @@
+Số 0 đọc các khóa của nó, đếm những khóa nó giữ, và công bố tổng của mình bằng một thao tác release. Số 1 cũng đã đọc và đếm xong. Nhưng các khóa của nó đi vào những vị trí mà số 0 sở hữu, nên trước khi ghi bất cứ thứ gì, nó quay vòng chờ cờ của số 0, đọc cờ bằng một lệnh nạp acquire.

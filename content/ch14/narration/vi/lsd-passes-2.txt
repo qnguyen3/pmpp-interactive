@@ -1,0 +1,1 @@
+Lượt 2 làm điều tương tự với bit kế tiếp, trên kết quả của lượt 1. Nó không bao giờ đổi thứ tự các khóa trong một nhóm. Nên giờ danh sách đã có thứ tự theo 2 bit thấp nhất: đầu tiên là các khóa kết thúc bằng không không, rồi không một, rồi một không, rồi một một.

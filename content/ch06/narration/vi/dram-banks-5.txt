@@ -1,0 +1,1 @@
+Nhưng bộ điều khiển không chọn bank. Địa chỉ chọn. Ở đây, hai yêu cầu liên tiếp cùng muốn một bank. Yêu cầu thứ hai phải chờ đến khi yêu cầu thứ nhất xong toàn bộ lần truy cập, và mọi thứ phía sau cũng phải chờ. Bus bỏ trống trong khoảng thời gian bằng 20 loạt truyền. Đó là một xung đột bank.

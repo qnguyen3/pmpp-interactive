@@ -1,0 +1,1 @@
+Lượt 2 lập histogram của byte thứ hai, nhưng chỉ cho các khóa trong ngăn chưa quyết định đó. Trước tiên một luồng kiểm tra xem khóa của nó có bắt đầu bằng tiền tố tìm được đến giờ không. Chỉ 13 lane qua phép kiểm tra và thực hiện một phép toán nguyên tử. Các lane khác ngồi không, tô màu xám, nên warp bị phân kỳ ở nhánh đó. Thêm hai khóa được quyết định ở phía trên.

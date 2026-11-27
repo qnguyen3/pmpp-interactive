@@ -34,6 +34,8 @@
 // Erasable TypeScript only, and no value imports: the browser checks import this file
 // directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- problems
 
 export type Kind = 'conv' | 'matvec' | 'hist' | 'spmv';
@@ -141,14 +143,43 @@ export function spmv(rows: number, heavy: number): SpmvProblem {
 export type Mapping = 'output' | 'input' | 'warp' | 'splitk';
 
 export const MAPPING_LABEL: Record<Kind, Partial<Record<Mapping, string>>> = {
-  conv: { output: 'output-centric (gather)', input: 'input-centric (scatter)' },
-  hist: { output: 'output-centric: a thread per bin', input: 'input-centric: a thread per input' },
-  spmv: { output: 'output-centric: a thread per row (CSR)', input: 'input-centric: a thread per non-zero (COO)' },
+  conv: {
+    get output() {
+      return tr('output-centric (gather)', 'hướng đầu ra (gather)');
+    },
+    get input() {
+      return tr('input-centric (scatter)', 'hướng đầu vào (scatter)');
+    },
+  },
+  hist: {
+    get output() {
+      return tr('output-centric: a thread per bin', 'hướng đầu ra: một luồng cho mỗi bin');
+    },
+    get input() {
+      return tr('input-centric: a thread per input', 'hướng đầu vào: một luồng cho mỗi đầu vào');
+    },
+  },
+  spmv: {
+    get output() {
+      return tr('output-centric: a thread per row (CSR)', 'hướng đầu ra: một luồng cho mỗi hàng (CSR)');
+    },
+    get input() {
+      return tr('input-centric: a thread per non-zero (COO)', 'hướng đầu vào: một luồng cho mỗi phần tử khác 0 (COO)');
+    },
+  },
   matvec: {
-    input: 'input-centric: a thread per input',
-    output: 'a thread per output',
-    warp: 'a warp per output',
-    splitk: 'split the input dimension: S warps per output',
+    get input() {
+      return tr('input-centric: a thread per input', 'hướng đầu vào: một luồng cho mỗi đầu vào');
+    },
+    get output() {
+      return tr('a thread per output', 'một luồng cho mỗi đầu ra');
+    },
+    get warp() {
+      return tr('a warp per output', 'một warp cho mỗi đầu ra');
+    },
+    get splitk() {
+      return tr('split the input dimension: S warps per output', 'chia chiều đầu vào: S warp cho mỗi đầu ra');
+    },
   },
 };
 
@@ -359,39 +390,42 @@ export function describeWorker(d: Decomposition, id: number): string {
   const outs = w.writes.map((x) => x.o);
   const nShared = outs.filter(shared).length;
   const tail = nShared
-    ? ` ${nShared === outs.length ? (outs.length === 1 ? 'That output has' : 'Every one of them has') : `${nShared} of them have`} other writers too, so each update is an atomic.`
-    : ' No other worker writes there, so a plain store is safe.';
+    ? tr(
+        ` ${nShared === outs.length ? (outs.length === 1 ? 'That output has' : 'Every one of them has') : `${nShared} of them have`} other writers too, so each update is an atomic.`,
+        ` ${nShared === outs.length ? (outs.length === 1 ? 'Đầu ra đó' : 'Tất cả các đầu ra đó') : `${nShared} trong số đó`} còn có worker khác cùng ghi, nên mỗi lần cập nhật là một phép toán nguyên tử.`,
+      )
+    : tr(' No other worker writes there, so a plain store is safe.', ' Không worker nào khác ghi vào đó, nên một lệnh store thường là an toàn.');
   if (p.kind === 'conv') {
     const r = (p.w - 1) / 2;
     if (d.mapping === 'output') {
       const lo = p.valid ? 'o' : 'o − ' + r;
       const hi = p.valid ? `o + ${p.w - 1}` : 'o + ' + r;
-      return `Thread ${id} owns out[${id}]. It reads in[${lo}] to in[${hi}] that exist (in[${fmtList(w.useful)}]), adds ${w.useful.length} products in a register and stores once.` + tail;
+      return tr(`Thread ${id} owns out[${id}]. It reads in[${lo}] to in[${hi}] that exist (in[${fmtList(w.useful)}]), adds ${w.useful.length} products in a register and stores once.`, `Luồng ${id} sở hữu out[${id}]. Nó đọc những phần tử từ in[${lo}] đến in[${hi}] có tồn tại (in[${fmtList(w.useful)}]), cộng ${w.useful.length} tích trong một thanh ghi và store một lần.`) + tail;
     }
-    return `Thread ${id} owns in[${id}]. It multiplies it by each filter tap and adds the product into every output that uses it: out[${fmtList(outs)}].` + tail;
+    return tr(`Thread ${id} owns in[${id}]. It multiplies it by each filter tap and adds the product into every output that uses it: out[${fmtList(outs)}].`, `Luồng ${id} sở hữu in[${id}]. Nó nhân phần tử này với từng hệ số của bộ lọc và cộng tích vào mọi đầu ra dùng nó: out[${fmtList(outs)}].`) + tail;
   }
   if (p.kind === 'hist') {
     if (d.mapping === 'output')
-      return `Thread ${id} owns bin ${id}. It cannot know which inputs fall in its bin without looking, so it reads all ${p.nIn} inputs and counts the ${w.useful.length} that do.` + tail;
-    return `Thread ${id} owns input ${id}, whose value is ${p.values[id]}. It adds 1 to bin ${p.values[id]}.` + tail;
+      return tr(`Thread ${id} owns bin ${id}. It cannot know which inputs fall in its bin without looking, so it reads all ${p.nIn} inputs and counts the ${w.useful.length} that do.`, `Luồng ${id} sở hữu bin ${id}. Nó không thể biết đầu vào nào rơi vào bin của mình nếu không xem, nên nó đọc cả ${p.nIn} đầu vào và đếm ${w.useful.length} đầu vào rơi vào đó.`) + tail;
+    return tr(`Thread ${id} owns input ${id}, whose value is ${p.values[id]}. It adds 1 to bin ${p.values[id]}.`, `Luồng ${id} sở hữu đầu vào ${id}, có giá trị ${p.values[id]}. Nó cộng 1 vào bin ${p.values[id]}.`) + tail;
   }
   if (p.kind === 'spmv') {
     if (d.mapping === 'output') {
       const first = w.useful[0] ?? 0;
-      return `Thread ${id} owns y[${id}]. The row pointers give its ${w.useful.length} non-zeros directly (k = ${first} to ${first + w.useful.length - 1}); it sums A·x over them in a register and stores once.` + tail;
+      return tr(`Thread ${id} owns y[${id}]. The row pointers give its ${w.useful.length} non-zeros directly (k = ${first} to ${first + w.useful.length - 1}); it sums A·x over them in a register and stores once.`, `Luồng ${id} sở hữu y[${id}]. Các con trỏ hàng cho nó trực tiếp ${w.useful.length} phần tử khác 0 của mình (k = ${first} đến ${first + w.useful.length - 1}); nó cộng A·x trên các phần tử đó trong một thanh ghi và store một lần.`) + tail;
     }
-    return `Thread ${id} owns non-zero ${id}, in row ${p.rowOf[id]}, column ${p.colOf[id]}. It adds A[${p.rowOf[id]}][${p.colOf[id]}]·x[${p.colOf[id]}] into y[${p.rowOf[id]}].` + tail;
+    return tr(`Thread ${id} owns non-zero ${id}, in row ${p.rowOf[id]}, column ${p.colOf[id]}. It adds A[${p.rowOf[id]}][${p.colOf[id]}]·x[${p.colOf[id]}] into y[${p.rowOf[id]}].`, `Luồng ${id} sở hữu phần tử khác 0 thứ ${id}, ở hàng ${p.rowOf[id]}, cột ${p.colOf[id]}. Nó cộng A[${p.rowOf[id]}][${p.colOf[id]}]·x[${p.colOf[id]}] vào y[${p.rowOf[id]}].`) + tail;
   }
   const { K } = p;
   const ww = d.opts.warpWidth;
   switch (d.mapping) {
     case 'input':
-      return `Thread ${id} owns x[${id}], column ${id} of W. For every output j it adds W[j][${id}]·x[${id}] into y[j].` + tail;
+      return tr(`Thread ${id} owns x[${id}], column ${id} of W. For every output j it adds W[j][${id}]·x[${id}] into y[j].`, `Luồng ${id} sở hữu x[${id}], cột ${id} của W. Với mọi đầu ra j, nó cộng W[j][${id}]·x[${id}] vào y[j].`) + tail;
     case 'output':
-      return `Thread ${id} owns y[${id}] and walks row ${id} of W alone, W[${id}][0] to W[${id}][${K - 1}]. Lane l of a warp reads W[l][k]: neighbouring lanes are ${K} floats apart.` + tail;
+      return tr(`Thread ${id} owns y[${id}] and walks row ${id} of W alone, W[${id}][0] to W[${id}][${K - 1}]. Lane l of a warp reads W[l][k]: neighbouring lanes are ${K} floats apart.`, `Luồng ${id} sở hữu y[${id}] và một mình duyệt hàng ${id} của W, từ W[${id}][0] đến W[${id}][${K - 1}]. Lane l của một warp đọc W[l][k]: các lane cạnh nhau cách nhau ${K} float.`) + tail;
     case 'warp': {
       const it = Math.ceil(K / ww);
-      return `Warp ${id} owns y[${id}]. Lane l reads W[${id}][l + i × ${ww}] for i = 0 to ${it - 1}, so the warp's lanes read one contiguous run at each step; the lanes combine their sums by shuffles and lane 0 stores.` + tail;
+      return tr(`Warp ${id} owns y[${id}]. Lane l reads W[${id}][l + i × ${ww}] for i = 0 to ${it - 1}, so the warp's lanes read one contiguous run at each step; the lanes combine their sums by shuffles and lane 0 stores.`, `Warp ${id} sở hữu y[${id}]. Lane l đọc W[${id}][l + i × ${ww}] với i = 0 đến ${it - 1}, nên ở mỗi bước các lane của warp đọc một đoạn liên tiếp; các lane gộp tổng của chúng bằng shuffle và lane 0 store.`) + tail;
     }
     case 'splitk': {
       const S = d.opts.S;
@@ -399,7 +433,7 @@ export function describeWorker(d: Decomposition, id: number): string {
       const c = id % S;
       const { start, len } = chunkOf(K, S, c);
       const it = Math.ceil(len / ww);
-      return `Warp ${id} owns output ${id} ÷ ${S} = ${o} and chunk ${id} mod ${S} = ${c}, which starts at ${start}. Lane l reads W[${o}][${start} + l + i × ${ww}] for i = 0 to ${it - 1}; the lanes combine their sums by shuffles and lane 0 adds the warp's sum into y[${o}].` + tail;
+      return tr(`Warp ${id} owns output ${id} ÷ ${S} = ${o} and chunk ${id} mod ${S} = ${c}, which starts at ${start}. Lane l reads W[${o}][${start} + l + i × ${ww}] for i = 0 to ${it - 1}; the lanes combine their sums by shuffles and lane 0 adds the warp's sum into y[${o}].`, `Warp ${id} sở hữu đầu ra ${id} ÷ ${S} = ${o} và chunk ${id} mod ${S} = ${c}, bắt đầu tại ${start}. Lane l đọc W[${o}][${start} + l + i × ${ww}] với i = 0 đến ${it - 1}; các lane gộp tổng của chúng bằng shuffle và lane 0 cộng tổng của warp vào y[${o}].`) + tail;
     }
   }
   return '';
@@ -453,11 +487,11 @@ export interface Preset {
 }
 
 export const PRESETS: Preset[] = [
-  { id: 'conv-scatter', label: 'Convolution, scattered', state: { ...DEFAULT_STATE, kind: 'conv', mapping: 'input' } },
-  { id: 'hist-bins', label: 'Histogram, a thread per bin', state: { ...DEFAULT_STATE, kind: 'hist', mapping: 'output' } },
-  { id: 'spmv-coo', label: 'Skewed sparse matrix, COO', state: { ...DEFAULT_STATE, kind: 'spmv', mapping: 'input' } },
+  { id: 'conv-scatter', get label() { return tr('Convolution, scattered', 'Tích chập, kiểu scatter'); }, state: { ...DEFAULT_STATE, kind: 'conv', mapping: 'input' } },
+  { id: 'hist-bins', get label() { return tr('Histogram, a thread per bin', 'Histogram, một luồng cho mỗi bin'); }, state: { ...DEFAULT_STATE, kind: 'hist', mapping: 'output' } },
+  { id: 'spmv-coo', get label() { return tr('Skewed sparse matrix, COO', 'Ma trận thưa bị lệch, COO'); }, state: { ...DEFAULT_STATE, kind: 'spmv', mapping: 'input' } },
   {
-    id: 'gemv-narrow', label: 'Narrow decode GEMV, split-K',
+    id: 'gemv-narrow', get label() { return tr('Narrow decode GEMV, split-K', 'GEMV hẹp khi decode, split-K'); },
     state: { ...DEFAULT_STATE, kind: 'matvec', mapping: 'splitk', matvec: { N: 2, K: 256, S: 4, warpWidth: NVIDIA_WARP } },
   },
 ];
@@ -589,9 +623,15 @@ export function warpOps(cfg: SplitKConfig, w: number): SKOp[] {
 
 export type Interleave = 'sequential' | 'round-robin' | 'reversed';
 export const INTERLEAVE_LABEL: Record<Interleave, string> = {
-  sequential: 'one warp at a time',
-  'round-robin': 'all warps together, in turn',
-  reversed: 'one warp at a time, last warp first',
+  get sequential() {
+    return tr('one warp at a time', 'lần lượt từng warp');
+  },
+  get 'round-robin'() {
+    return tr('all warps together, in turn', 'tất cả các warp cùng lúc, luân phiên');
+  },
+  get reversed() {
+    return tr('one warp at a time, last warp first', 'lần lượt từng warp, warp cuối trước');
+  },
 };
 
 /** A schedule: the warp that performs each successive operation. */
@@ -762,10 +802,13 @@ export function describeSKStep(run: SKRun, n: number, lane: number): string {
   const { cfg } = run;
   const { j, c, start } = warpPlace(cfg, st.warp);
   const ww = cfg.warpWidth;
-  const who = `Warp ${st.warp}`;
+  const who = tr(`Warp ${st.warp}`, `Warp ${st.warp}`);
   const where = cfg.S === 1
-    ? `${who} owns output j = ${st.warp}`
-    : `${who} owns output j = ${st.warp} ÷ ${cfg.S} = ${j} and chunk c = ${st.warp} mod ${cfg.S} = ${c}, which starts at c × ${cfg.K} ÷ ${cfg.S} = ${start}`;
+    ? tr(`${who} owns output j = ${st.warp}`, `${who} sở hữu đầu ra j = ${st.warp}`)
+    : tr(
+        `${who} owns output j = ${st.warp} ÷ ${cfg.S} = ${j} and chunk c = ${st.warp} mod ${cfg.S} = ${c}, which starts at c × ${cfg.K} ÷ ${cfg.S} = ${start}`,
+        `${who} sở hữu đầu ra j = ${st.warp} ÷ ${cfg.S} = ${j} và chunk c = ${st.warp} mod ${cfg.S} = ${c}, bắt đầu tại c × ${cfg.K} ÷ ${cfg.S} = ${start}`,
+      );
   const after = run.snaps[n + 1];
   const B = cfg.batch;
   const ys = (cells: number[]) => cells.map((cell) => `Y[${Math.floor(cell / cfg.N)}][${cell % cfg.N}] = ${after.Y[cell]}`).join(', ');
@@ -775,29 +818,53 @@ export function describeSKStep(run: SKRun, n: number, lane: number): string {
       const k = st.ks![lane];
       const laneTxt = k >= 0
         ? ` Lane ${lane}: W[${j}][${start} + ${lane} + ${st.op.strip} × ${ww}] = W[${j}][${k}] = ${run.data.W[j * cfg.K + k]}.`
-        : ` Lane ${lane} has nothing to read in this strip.`;
-      return `${where}. Strip ${st.op.strip}: the lanes load W[${j}][${live[0]}] to W[${j}][${live[live.length - 1]}], one contiguous run, and the same columns of x for all ${B} batch rows.` + laneTxt;
+        : tr(` Lane ${lane} has nothing to read in this strip.`, ` Lane ${lane} không có gì để đọc trong dải này.`);
+      return tr(
+        `${where}. Strip ${st.op.strip}: the lanes load W[${j}][${live[0]}] to W[${j}][${live[live.length - 1]}], one contiguous run, and the same columns of x for all ${B} batch rows.`,
+        `${where}. Dải ${st.op.strip}: các lane nạp W[${j}][${live[0]}] đến W[${j}][${live[live.length - 1]}], một đoạn liên tiếp, và cùng các cột đó của x cho cả ${B} hàng của batch.`,
+      ) + laneTxt;
     }
     case 'fma': {
       const k = st.ks![lane];
       const before = run.snaps[n].acc[st.warp];
       const laneTxt = k >= 0
-        ? ` Lane ${lane}: ${Array.from({ length: B }, (_, b) => `sum ${b} = ${before[b][lane]} + ${run.data.W[j * cfg.K + k]} × ${run.data.X[b * cfg.K + k]} = ${after.acc[st.warp][b][lane]}`).join('; ')}.`
+        ? ` Lane ${lane}: ${Array.from({ length: B }, (_, b) => tr(`sum ${b} = ${before[b][lane]} + ${run.data.W[j * cfg.K + k]} × ${run.data.X[b * cfg.K + k]} = ${after.acc[st.warp][b][lane]}`, `tổng ${b} = ${before[b][lane]} + ${run.data.W[j * cfg.K + k]} × ${run.data.X[b * cfg.K + k]} = ${after.acc[st.warp][b][lane]}`)).join('; ')}.` // i18n-ignore: lane label and code notation; the sums inside are translated
         : '';
-      return `${where}. Each lane multiplies its weight by x for every batch row and adds the products to its ${B} running sums, in registers.` + laneTxt;
+      return tr(
+        `${where}. Each lane multiplies its weight by x for every batch row and adds the products to its ${B} running sums, in registers.`,
+        `${where}. Mỗi lane nhân trọng số của mình với x cho mọi hàng của batch và cộng các tích vào ${B} tổng đang tích lũy của nó, trong thanh ghi.`,
+      ) + laneTxt;
     }
     case 'shfl':
-      return `${who}: shuffle down by ${st.op.offset}. Lane l adds lane l + ${st.op.offset}'s sums to its own, through registers, not memory. After this step lanes 0 to ${st.op.offset! - 1} hold the partial totals.`;
+      return tr(
+        `${who}: shuffle down by ${st.op.offset}. Lane l adds lane l + ${st.op.offset}'s sums to its own, through registers, not memory. After this step lanes 0 to ${st.op.offset! - 1} hold the partial totals.`,
+        `${who}: shuffle xuống ${st.op.offset}. Lane l cộng các tổng của lane l + ${st.op.offset} vào tổng của mình, qua thanh ghi, không qua bộ nhớ. Sau bước này các lane 0 đến ${st.op.offset! - 1} giữ các tổng một phần.`,
+      );
     case 'store':
-      return `${who}: lane 0 stores the warp's totals, ${ys(st.touched!)}. With S = 1 no other warp writes these cells, so a plain store is safe.`;
+      return tr(
+        `${who}: lane 0 stores the warp's totals, ${ys(st.touched!)}. With S = 1 no other warp writes these cells, so a plain store is safe.`,
+        `${who}: lane 0 store các tổng của warp, ${ys(st.touched!)}. Với S = 1, không warp nào khác ghi vào các ô này, nên một lệnh store thường là an toàn.`,
+      );
     case 'atomic':
-      return `${who}: lane 0 adds the warp's totals with an atomic, which reads, adds and writes in one indivisible step: ${ys(st.touched!)}. These cells now hold chunk${after.parts[st.touched![0]].length > 1 ? 's' : ''} ${after.parts[st.touched![0]].join(', ')}.`;
+      return tr(
+        `${who}: lane 0 adds the warp's totals with an atomic, which reads, adds and writes in one indivisible step: ${ys(st.touched!)}. These cells now hold chunk${after.parts[st.touched![0]].length > 1 ? 's' : ''} ${after.parts[st.touched![0]].join(', ')}.`,
+        `${who}: lane 0 cộng các tổng của warp bằng một phép toán nguyên tử, vốn đọc, cộng và ghi trong một bước không thể chia cắt: ${ys(st.touched!)}. Các ô này giờ chứa chunk ${after.parts[st.touched![0]].join(', ')}.`,
+      );
     case 'read':
-      return `${who}: plain +=, part 1 of 2. Lane 0 reads ${st.touched!.map((cell) => `Y[${Math.floor(cell / cfg.N)}][${cell % cfg.N}] = ${run.snaps[n].Y[cell]}`).join(', ')} into registers.`;
+      return tr(
+        `${who}: plain +=, part 1 of 2. Lane 0 reads ${st.touched!.map((cell) => `Y[${Math.floor(cell / cfg.N)}][${cell % cfg.N}] = ${run.snaps[n].Y[cell]}`).join(', ')} into registers.`,
+        `${who}: += thường, phần 1 trên 2. Lane 0 đọc ${st.touched!.map((cell) => `Y[${Math.floor(cell / cfg.N)}][${cell % cfg.N}] = ${run.snaps[n].Y[cell]}`).join(', ')} vào thanh ghi.`,
+      );
     case 'write':
       return st.lost
-        ? `${who}: plain +=, part 2 of 2. Lane 0 writes its copy plus its totals: ${ys(st.touched!)}. Another warp wrote these cells after this warp read them, so chunk ${st.lost.join(', ')}'s contribution is overwritten and lost.`
-        : `${who}: plain +=, part 2 of 2. Lane 0 writes its copy plus its totals: ${ys(st.touched!)}. Nobody wrote in between, so nothing is lost this time.`;
+        ? tr(
+            `${who}: plain +=, part 2 of 2. Lane 0 writes its copy plus its totals: ${ys(st.touched!)}. Another warp wrote these cells after this warp read them, so chunk ${st.lost.join(', ')}'s contribution is overwritten and lost.`,
+            `${who}: += thường, phần 2 trên 2. Lane 0 ghi bản sao của nó cộng với các tổng của nó: ${ys(st.touched!)}. Một warp khác đã ghi vào các ô này sau khi warp này đọc chúng, nên phần đóng góp của chunk ${st.lost.join(', ')} bị ghi đè và mất.`,
+          )
+        : tr(
+            `${who}: plain +=, part 2 of 2. Lane 0 writes its copy plus its totals: ${ys(st.touched!)}. Nobody wrote in between, so nothing is lost this time.`,
+            `${who}: += thường, phần 2 trên 2. Lane 0 ghi bản sao của nó cộng với các tổng của nó: ${ys(st.touched!)}. Không ai ghi xen vào giữa, nên lần này không có gì bị mất.`,
+          );
   }
 }
 
@@ -807,16 +874,32 @@ export type Decomp = 'output' | 'input' | 'either';
 export type Criterion = 'atomics' | 'parallelism' | 'mapping' | 'balance' | 'none';
 
 export const DECOMP_LABEL: Record<Decomp, string> = {
-  output: 'output-centric',
-  input: 'input-centric',
-  either: 'the same either way',
+  get output() {
+    return tr('output-centric', 'hướng đầu ra');
+  },
+  get input() {
+    return tr('input-centric', 'hướng đầu vào');
+  },
+  get either() {
+    return tr('the same either way', 'cách nào cũng như nhau');
+  },
 };
 export const CRITERION_LABEL: Record<Criterion, string> = {
-  atomics: 'avoids atomics',
-  parallelism: 'exposes parallelism',
-  mapping: 'inputs easy to find',
-  balance: 'load balance',
-  none: 'atomics not needed either way',
+  get atomics() {
+    return tr('avoids atomics', 'tránh phép toán nguyên tử');
+  },
+  get parallelism() {
+    return tr('exposes parallelism', 'bộc lộ tính song song');
+  },
+  get mapping() {
+    return tr('inputs easy to find', 'dễ tìm đầu vào');
+  },
+  get balance() {
+    return tr('load balance', 'cân bằng tải');
+  },
+  get none() {
+    return tr('atomics not needed either way', 'cách nào cũng không cần phép toán nguyên tử');
+  },
 };
 
 export interface TourRow {
@@ -840,105 +923,210 @@ export interface TourRow {
 
 export const TOUR: TourRow[] = [
   {
-    id: 'matmul', name: 'Matrix multiplication', chapter: '3, 5, 15', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534',
-    why: 'A thread per output element, gathering in a register. Every other criterion agrees: plenty of outputs, each output\'s inputs are known (a row and a column), and every output costs the same.',
-    notesKey: 'matrix multiplication (Ch. 3, 5, 15)',
+    id: 'matmul', get name() { return tr('Matrix multiplication', 'Phép nhân ma trận'); }, chapter: '3, 5, 15', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534',
+    get why() {
+      return tr(
+        'A thread per output element, gathering in a register. Every other criterion agrees: plenty of outputs, each output\'s inputs are known (a row and a column), and every output costs the same.',
+        'Một luồng cho mỗi phần tử đầu ra, gom (gather) trong một thanh ghi. Mọi tiêu chí khác đều đồng ý: rất nhiều đầu ra, đầu vào của mỗi đầu ra đã biết (một hàng và một cột), và mọi đầu ra tốn như nhau.',
+      );
+    },
+    notesKey: 'matrix multiplication (Ch. 3, 5, 15)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'conv', name: 'Convolution and stencil', chapter: '7, 8', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534',
-    why: 'As for matrix multiplication: the input-centric version would loop over the outputs each input feeds and update them atomically, and nothing else favours it.',
-    notesKey: 'convolution (Ch. 7), stencil (Ch. 8)',
+    id: 'conv', get name() { return tr('Convolution and stencil', 'Tích chập và stencil'); }, chapter: '7, 8', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534',
+    get why() {
+      return tr(
+        'As for matrix multiplication: the input-centric version would loop over the outputs each input feeds and update them atomically, and nothing else favours it.',
+        'Như với phép nhân ma trận: phiên bản hướng đầu vào sẽ lặp qua các đầu ra mà mỗi đầu vào đóng góp và cập nhật chúng bằng phép toán nguyên tử, và không có gì khác ủng hộ nó.',
+      );
+    },
+    notesKey: 'convolution (Ch. 7), stencil (Ch. 8)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'hist', name: 'Histogram', chapter: '9', decomp: 'input', accept: ['parallelism', 'mapping', 'balance'], inputCentricAtomics: 'needed', pages: '534',
-    why: 'Input-centric, atomics and all. A thread per bin would avoid them but lose on three counts: far fewer bins than inputs (parallelism), every bin thread must inspect every input (mapping), and bins get different counts (balance).',
-    notesKey: 'Histogram (Ch. 9)',
+    id: 'hist', get name() { return tr('Histogram', 'Histogram'); }, chapter: '9', decomp: 'input', accept: ['parallelism', 'mapping', 'balance'], inputCentricAtomics: 'needed', pages: '534',
+    get why() {
+      return tr(
+        'Input-centric, atomics and all. A thread per bin would avoid them but lose on three counts: far fewer bins than inputs (parallelism), every bin thread must inspect every input (mapping), and bins get different counts (balance).',
+        'Hướng đầu vào, chấp nhận cả phép toán nguyên tử. Một luồng cho mỗi bin sẽ tránh được chúng nhưng thua ở ba điểm: số bin ít hơn nhiều so với số đầu vào (tính song song), mỗi luồng của bin phải xem mọi đầu vào (ánh xạ), và các bin nhận số lượng khác nhau (cân bằng tải).',
+      );
+    },
+    notesKey: 'Histogram (Ch. 9)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'reduction', name: 'Reduction', chapter: '10', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534',
-    why: 'Judged one iteration at a time: each thread produces one element of the iteration\'s output by adding two of its inputs. Scattering instead would make several inputs update one output, which needs atomics.',
-    notesKey: 'Reduction (Ch. 10)',
+    id: 'reduction', get name() { return tr('Reduction', 'Phép rút gọn'); }, chapter: '10', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534',
+    get why() {
+      return tr(
+        'Judged one iteration at a time: each thread produces one element of the iteration\'s output by adding two of its inputs. Scattering instead would make several inputs update one output, which needs atomics.',
+        'Xét từng vòng lặp một: mỗi luồng tạo ra một phần tử đầu ra của vòng lặp bằng cách cộng hai đầu vào của nó. Nếu scatter thay vào đó thì nhiều đầu vào sẽ cập nhật một đầu ra, việc này cần phép toán nguyên tử.',
+      );
+    },
+    notesKey: 'Reduction (Ch. 10)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'scan', name: 'Scan', chapter: '11', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534',
-    why: 'Like reduction, output-centric per iteration to avoid atomics. (The book prints "Chapter 12" here; scan is chapter 11.)',
-    notesKey: 'scan (book says "Chapter 12"',
+    id: 'scan', get name() { return tr('Scan', 'Scan'); }, chapter: '11', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534',
+    get why() {
+      return tr(
+        'Like reduction, output-centric per iteration to avoid atomics. (The book prints "Chapter 12" here; scan is chapter 11.)',
+        'Giống phép rút gọn, hướng đầu ra theo từng vòng lặp để tránh phép toán nguyên tử. (Sách in "Chapter 12" ở đây; scan là chương 11.)',
+      );
+    },
+    notesKey: 'scan (book says "Chapter 12"', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'filter', name: 'Filter (unstable and stable)', chapter: '12', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '534–535',
-    why: 'A thread per input decides whether to keep it and where it goes. A thread per output slot would have to inspect many elements to learn which input lands in its slot. And the stable filter mixes: its scan is itself output-centric.',
-    notesKey: 'Unstable and stable filter (Ch. 12)',
+    id: 'filter', get name() { return tr('Filter (unstable and stable)', 'Lọc (không ổn định và ổn định)'); }, chapter: '12', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '534–535',
+    get why() {
+      return tr(
+        'A thread per input decides whether to keep it and where it goes. A thread per output slot would have to inspect many elements to learn which input lands in its slot. And the stable filter mixes: its scan is itself output-centric.',
+        'Một luồng cho mỗi đầu vào quyết định có giữ nó không và nó đi đâu. Một luồng cho mỗi ô đầu ra sẽ phải xem nhiều phần tử để biết đầu vào nào rơi vào ô của mình. Và phép lọc ổn định thì pha trộn: bước scan của nó tự nó là hướng đầu ra.',
+      );
+    },
+    notesKey: 'Unstable and stable filter (Ch. 12)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'merge', name: 'Merge', chapter: '13', decomp: 'output', accept: ['balance'], inputCentricAtomics: 'one-writer', pages: '535',
-    why: 'Not atomics: every output receives exactly one input, so neither version needs them. Chunks of the output give every thread the same number of elements; chunks of one input would leave threads merging very different amounts (imbalance and divergence).',
-    notesKey: 'Merge (Ch. 13)',
+    id: 'merge', get name() { return tr('Merge', 'Trộn'); }, chapter: '13', decomp: 'output', accept: ['balance'], inputCentricAtomics: 'one-writer', pages: '535',
+    get why() {
+      return tr(
+        'Not atomics: every output receives exactly one input, so neither version needs them. Chunks of the output give every thread the same number of elements; chunks of one input would leave threads merging very different amounts (imbalance and divergence).',
+        'Không phải vì phép toán nguyên tử: mỗi đầu ra nhận đúng một đầu vào, nên phiên bản nào cũng không cần chúng. Chia đầu ra thành các đoạn cho mọi luồng cùng số phần tử; chia theo một đầu vào sẽ khiến các luồng trộn những lượng rất khác nhau (mất cân bằng và phân kỳ).',
+      );
+    },
+    notesKey: 'Merge (Ch. 13)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'oddeven', name: 'Odd-even sort', chapter: '14', decomp: 'either', accept: ['none'], inputCentricAtomics: 'one-writer', pages: '533, 535',
-    why: 'Each thread reads a pair and writes the same pair. Inputs and outputs correspond so directly that the label does not matter: no gather, no scatter.',
-    notesKey: 'Sorting (Ch. 14)',
+    id: 'oddeven', get name() { return tr('Odd-even sort', 'Sắp xếp chẵn-lẻ'); }, chapter: '14', decomp: 'either', accept: ['none'], inputCentricAtomics: 'one-writer', pages: '533, 535',
+    get why() {
+      return tr(
+        'Each thread reads a pair and writes the same pair. Inputs and outputs correspond so directly that the label does not matter: no gather, no scatter.',
+        'Mỗi luồng đọc một cặp và ghi chính cặp đó. Đầu vào và đầu ra tương ứng trực tiếp đến mức cái nhãn không quan trọng: không gather, không scatter.',
+      );
+    },
+    notesKey: 'Sorting (Ch. 14)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'radix', name: 'One radix-sort iteration', chapter: '14', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '535',
-    why: 'Each thread takes an input element and works out where it goes, like the filter it generalises. A thread per output position could not tell which key lands there without looking.',
-    notesKey: 'Sorting (Ch. 14)',
+    id: 'radix', get name() { return tr('One radix-sort iteration', 'Một vòng lặp radix sort'); }, chapter: '14', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '535',
+    get why() {
+      return tr(
+        'Each thread takes an input element and works out where it goes, like the filter it generalises. A thread per output position could not tell which key lands there without looking.',
+        'Mỗi luồng lấy một phần tử đầu vào và tính xem nó đi đâu, giống phép lọc mà nó tổng quát hóa. Một luồng cho mỗi vị trí đầu ra không thể biết khóa nào rơi vào đó nếu không xem.',
+      );
+    },
+    notesKey: 'Sorting (Ch. 14)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'mergesort', name: 'One merge-sort level', chapter: '14', decomp: 'output', accept: ['balance'], inputCentricAtomics: 'one-writer', pages: '535',
-    why: 'Each level is mainly a merge, so it takes merge\'s decomposition, for merge\'s reason.',
-    notesKey: 'Sorting (Ch. 14)',
+    id: 'mergesort', get name() { return tr('One merge-sort level', 'Một mức merge sort'); }, chapter: '14', decomp: 'output', accept: ['balance'], inputCentricAtomics: 'one-writer', pages: '535',
+    get why() {
+      return tr(
+        'Each level is mainly a merge, so it takes merge\'s decomposition, for merge\'s reason.',
+        'Mỗi mức chủ yếu là một phép trộn, nên nó dùng cách phân rã của phép trộn, vì cùng lý do.',
+      );
+    },
+    notesKey: 'Sorting (Ch. 14)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'wavefront', name: 'Wavefront dynamic programming', chapter: '16', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '535',
-    why: 'The thread for one cell gathers the earlier cells it depends on. Scattering each finished cell into its successors would need atomics, because several cells feed one successor.',
-    notesKey: 'Wavefront / dynamic programming (Ch. 16)',
+    id: 'wavefront', get name() { return tr('Wavefront dynamic programming', 'Quy hoạch động theo wavefront'); }, chapter: '16', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '535',
+    get why() {
+      return tr(
+        'The thread for one cell gathers the earlier cells it depends on. Scattering each finished cell into its successors would need atomics, because several cells feed one successor.',
+        'Luồng của một ô gom các ô trước đó mà nó phụ thuộc. Scatter mỗi ô đã xong vào các ô kế tiếp sẽ cần phép toán nguyên tử, vì nhiều ô cùng đóng góp vào một ô kế tiếp.',
+      );
+    },
+    notesKey: 'Wavefront / dynamic programming (Ch. 16)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'csr', name: 'SpMV with CSR, ELL or JDS', chapter: '17', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '535',
-    why: 'A thread per output element walks its row\'s non-zeros and gathers.',
-    notesKey: 'SpMV/CSR, SpMV/ELL, SpMV/JDS (Ch. 17)',
+    id: 'csr', get name() { return tr('SpMV with CSR, ELL or JDS', 'SpMV với CSR, ELL hoặc JDS'); }, chapter: '17', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '535',
+    get why() {
+      return tr(
+        'A thread per output element walks its row\'s non-zeros and gathers.',
+        'Một luồng cho mỗi phần tử đầu ra duyệt các phần tử khác 0 trong hàng của nó và gom lại.',
+      );
+    },
+    notesKey: 'SpMV/CSR, SpMV/ELL, SpMV/JDS (Ch. 17)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'coo', name: 'SpMV with COO', chapter: '17', decomp: 'input', accept: ['balance', 'parallelism', 'mapping'], inputCentricAtomics: 'needed', pages: '535–536',
-    why: 'A thread per non-zero, with an atomic per update: the atomics are the price of more parallelism and even load. A thread per row would have to search all the non-zeros for its own.',
-    notesKey: 'SpMV/COO (Ch. 17)',
+    id: 'coo', get name() { return tr('SpMV with COO', 'SpMV với COO'); }, chapter: '17', decomp: 'input', accept: ['balance', 'parallelism', 'mapping'], inputCentricAtomics: 'needed', pages: '535–536',
+    get why() {
+      return tr(
+        'A thread per non-zero, with an atomic per update: the atomics are the price of more parallelism and even load. A thread per row would have to search all the non-zeros for its own.',
+        'Một luồng cho mỗi phần tử khác 0, với một phép toán nguyên tử cho mỗi lần cập nhật: phép toán nguyên tử là cái giá cho tính song song cao hơn và tải đều. Một luồng cho mỗi hàng sẽ phải tìm trong tất cả các phần tử khác 0 để ra phần của mình.',
+      );
+    },
+    notesKey: 'SpMV/COO (Ch. 17)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'csc', name: 'SpMV with CSC', chapter: '17', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'needed', pages: '536',
-    why: 'CSC stores columns, so a thread per input-vector element walks its column and scatters with atomics. A thread per row would have to scan every column to find its row\'s non-zeros.',
-    notesKey: 'SpMV/CSC (Ch. 17)',
+    id: 'csc', get name() { return tr('SpMV with CSC', 'SpMV với CSC'); }, chapter: '17', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'needed', pages: '536',
+    get why() {
+      return tr(
+        'CSC stores columns, so a thread per input-vector element walks its column and scatters with atomics. A thread per row would have to scan every column to find its row\'s non-zeros.',
+        'CSC lưu theo cột, nên một luồng cho mỗi phần tử của vector đầu vào duyệt cột của nó và scatter bằng phép toán nguyên tử. Một luồng cho mỗi hàng sẽ phải quét mọi cột để tìm các phần tử khác 0 của hàng mình.',
+      );
+    },
+    notesKey: 'SpMV/CSC (Ch. 17)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'bfs-push', name: 'BFS, vertex-centric push or edge-centric', chapter: '18', decomp: 'input', accept: ['parallelism', 'balance'], inputCentricAtomics: 'idempotent', pages: '536',
-    why: 'Threads own vertices or edges and write their neighbours\' levels. No atomics: every writer writes the same value, so the update is idempotent. What decides is parallelism and load balance, and those depend on the graph.',
-    notesKey: 'vertex-centric push and edge-centric',
+    id: 'bfs-push', get name() { return tr('BFS, vertex-centric push or edge-centric', 'BFS, push hướng đỉnh hoặc hướng cạnh'); }, chapter: '18', decomp: 'input', accept: ['parallelism', 'balance'], inputCentricAtomics: 'idempotent', pages: '536',
+    get why() {
+      return tr(
+        'Threads own vertices or edges and write their neighbours\' levels. No atomics: every writer writes the same value, so the update is idempotent. What decides is parallelism and load balance, and those depend on the graph.',
+        'Các luồng sở hữu đỉnh hoặc cạnh và ghi mức (level) của các đỉnh kề. Không cần phép toán nguyên tử: mọi luồng ghi đều ghi cùng một giá trị, nên phép cập nhật là lũy đẳng. Điều quyết định là tính song song và cân bằng tải, và những thứ đó phụ thuộc vào đồ thị.',
+      );
+    },
+    notesKey: 'vertex-centric push and edge-centric', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'bfs-pull', name: 'BFS, vertex-centric pull', chapter: '18', decomp: 'output', accept: ['parallelism', 'balance'], inputCentricAtomics: 'idempotent', pages: '536',
-    why: 'Each thread updates only its own vertex\'s level. As for push, atomics are not the question; parallelism and balance are, and they depend on the graph.',
-    notesKey: 'vertex-centric pull',
+    id: 'bfs-pull', get name() { return tr('BFS, vertex-centric pull', 'BFS, pull hướng đỉnh'); }, chapter: '18', decomp: 'output', accept: ['parallelism', 'balance'], inputCentricAtomics: 'idempotent', pages: '536',
+    get why() {
+      return tr(
+        'Each thread updates only its own vertex\'s level. As for push, atomics are not the question; parallelism and balance are, and they depend on the graph.',
+        'Mỗi luồng chỉ cập nhật mức của đỉnh của chính nó. Như với push, phép toán nguyên tử không phải là vấn đề; tính song song và cân bằng tải mới là vấn đề, và chúng phụ thuộc vào đồ thị.',
+      );
+    },
+    notesKey: 'vertex-centric pull', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'epm', name: 'Electrostatic potential map', chapter: '21', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '536',
-    why: 'Grid-centric (a thread per grid point) gathers; atom-centric scatters into every grid point with atomics. Both expose plenty of parallelism, so atomics decide. For the cutoff version, binning solves the problem of finding each point\'s atoms.',
-    notesKey: 'Electrostatic potential map (Ch. 21)',
+    id: 'epm', get name() { return tr('Electrostatic potential map', 'Bản đồ thế tĩnh điện'); }, chapter: '21', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '536',
+    get why() {
+      return tr(
+        'Grid-centric (a thread per grid point) gathers; atom-centric scatters into every grid point with atomics. Both expose plenty of parallelism, so atomics decide. For the cutoff version, binning solves the problem of finding each point\'s atoms.',
+        'Hướng lưới (một luồng cho mỗi điểm lưới) thì gom; hướng nguyên tử thì scatter vào mọi điểm lưới bằng phép toán nguyên tử. Cả hai đều bộc lộ nhiều tính song song, nên phép toán nguyên tử là yếu tố quyết định. Với phiên bản có bán kính cắt (cutoff), việc chia bin giải quyết bài toán tìm các nguyên tử của mỗi điểm.',
+      );
+    },
+    notesKey: 'Electrostatic potential map (Ch. 21)', // i18n-ignore: lookup key matched against notes/ch22.md
   },
   {
-    id: 'embedding', name: 'Embedding lookup', chapter: 'ours', decomp: 'output', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '533 (criteria)', ours: true,
-    why: 'out[t][d] = table[token[t]][d]: the owner of an output knows its input from the token id. A thread per table row could scatter without atomics (each output has one source) but would have to search the tokens for its own.',
+    id: 'embedding', get name() { return tr('Embedding lookup', 'Tra cứu embedding'); }, chapter: 'ours', decomp: 'output', accept: ['mapping'], inputCentricAtomics: 'one-writer', pages: '533 (criteria)', ours: true,
+    get why() {
+      return tr(
+        'out[t][d] = table[token[t]][d]: the owner of an output knows its input from the token id. A thread per table row could scatter without atomics (each output has one source) but would have to search the tokens for its own.',
+        'out[t][d] = table[token[t]][d]: chủ sở hữu của một đầu ra biết đầu vào của nó từ token id. Một luồng cho mỗi hàng của bảng có thể scatter mà không cần phép toán nguyên tử (mỗi đầu ra có một nguồn) nhưng sẽ phải tìm trong các token để ra phần của mình.',
+      );
+    },
   },
   {
-    id: 'gemv', name: 'Decode GEMV, y = W x', chapter: 'ours', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534 (as matrix multiplication)', ours: true,
-    why: 'A warp per output gathers in registers and reads W in contiguous runs. When there are too few outputs to keep the device busy, split-K trades some atomics for parallelism: lab 22.1.',
+    id: 'gemv', get name() { return tr('Decode GEMV, y = W x', 'GEMV khi decode, y = W x'); }, chapter: 'ours', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '533–534 (as matrix multiplication)', ours: true,
+    get why() {
+      return tr(
+        'A warp per output gathers in registers and reads W in contiguous runs. When there are too few outputs to keep the device busy, split-K trades some atomics for parallelism: lab 22.1.',
+        'Một warp cho mỗi đầu ra gom trong thanh ghi và đọc W theo các đoạn liên tiếp. Khi có quá ít đầu ra để giữ thiết bị bận rộn, split-K đổi một ít phép toán nguyên tử lấy tính song song: lab 22.1.',
+      );
+    },
   },
   {
-    id: 'softmax', name: 'Softmax normaliser (sum over a row)', chapter: 'ours', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534 (as reduction)', ours: true,
-    why: 'The sum of exponentials over a row is a reduction, so by the book\'s reasoning it is output-centric per iteration. Adding every element into one total with atomics would serialise on one address.',
+    id: 'softmax', get name() { return tr('Softmax normaliser (sum over a row)', 'Mẫu số chuẩn hóa softmax (tổng trên một hàng)'); }, chapter: 'ours', decomp: 'output', accept: ['atomics'], inputCentricAtomics: 'needed', pages: '534 (as reduction)', ours: true,
+    get why() {
+      return tr(
+        'The sum of exponentials over a row is a reduction, so by the book\'s reasoning it is output-centric per iteration. Adding every element into one total with atomics would serialise on one address.',
+        'Tổng các hàm mũ trên một hàng là một phép rút gọn, nên theo lập luận của sách, nó hướng đầu ra theo từng vòng lặp. Cộng mọi phần tử vào một tổng duy nhất bằng phép toán nguyên tử sẽ tuần tự hóa trên một địa chỉ.',
+      );
+    },
   },
   {
-    id: 'tokencounts', name: 'Repetition-penalty token counts (lab 9.3)', chapter: 'ours', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'needed', pages: '534 (as histogram)', ours: true,
-    why: 'A histogram over a vocabulary. Here the bins outnumber the tokens, so the parallelism argument flips; but a thread per vocabulary id would still read every token to find its own. Input-centric, atomics and all.',
+    id: 'tokencounts', get name() { return tr('Repetition-penalty token counts (lab 9.3)', 'Đếm token cho repetition penalty (lab 9.3)'); }, chapter: 'ours', decomp: 'input', accept: ['mapping'], inputCentricAtomics: 'needed', pages: '534 (as histogram)', ours: true,
+    get why() {
+      return tr(
+        'A histogram over a vocabulary. Here the bins outnumber the tokens, so the parallelism argument flips; but a thread per vocabulary id would still read every token to find its own. Input-centric, atomics and all.',
+        'Một histogram trên một bộ từ vựng. Ở đây số bin nhiều hơn số token, nên lập luận về tính song song bị đảo ngược; nhưng một luồng cho mỗi id trong bộ từ vựng vẫn sẽ phải đọc mọi token để tìm phần của mình. Hướng đầu vào, chấp nhận cả phép toán nguyên tử.',
+      );
+    },
   },
 ];
 

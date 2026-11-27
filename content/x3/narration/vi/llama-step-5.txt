@@ -1,0 +1,1 @@
+Tiếp theo là phần feed forward. Lại RMSNorm, rồi hai lớp tuyến tính đặt cạnh nhau, SwiGLU để kết hợp chúng, một lớp tuyến tính thứ ba để đi xuống lại, và thêm một phép cộng residual. [short pause] Rồi cùng mười sáu lần khởi chạy đó chạy lại cho lớp tiếp theo, và lớp sau nữa, cho đến khi mọi lớp đều xong.

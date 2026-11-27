@@ -1,0 +1,1 @@
+Cuối cùng, tô màu mỗi khối theo số luồng của nó có việc làm. 12 khối đầy đủ: mỗi khối 256. 3 khối ở mép phải có 192. 4 khối dọc mép dưới có 224. Khối ở góc có 168. Cộng lại: 4712, mỗi điểm ảnh đúng một lần. Chương 4 sẽ quay lại bốn loại khối này.

@@ -1,0 +1,1 @@
+Đây là ô đầu vào của sách: sáu mặt phẳng, mỗi mặt sáu nhân sáu điểm. Mỗi điểm một luồng thì cần 216 luồng, và điều đó được phép. Nhưng một ô rộng 32 điểm sẽ cần 32,768 luồng, trong khi một khối chỉ chứa tối đa 1,024. Mỗi điểm một luồng thì không thể làm ô lớn lên. Phải có gì đó thay đổi.

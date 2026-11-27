@@ -1,0 +1,1 @@
+Qua khoảng 41 hàng, tại ngưỡng ví dụ của sách là 20 phép toán mỗi byte, phần tính toán kéo dài hơn dòng trọng số. Giờ bước bị giới hạn bởi tính toán, không phải băng thông, và nó tăng tỉ lệ với batch. Đây là điểm gãy. Trước nó, các yêu cầu thêm vào gần như đi nhờ miễn phí. Sau nó, mỗi yêu cầu đều tốn thời gian.

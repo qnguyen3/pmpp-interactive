@@ -1,0 +1,1 @@
+Đây là một head của một query, tám giá trị, được vẽ thành bốn mũi tên nhỏ. Mỗi mũi tên là một cặp số, hai tọa độ của một điểm trên đường tròn. Với cách ghép cặp liên tiếp, phần tử 0 và phần tử 1 tạo thành mũi tên đầu tiên, 2 và 3 tạo thành mũi tên thứ hai, và cứ thế dọc theo head.

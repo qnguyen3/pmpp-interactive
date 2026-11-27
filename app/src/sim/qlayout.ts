@@ -36,6 +36,7 @@
 // The warp width is always a parameter (32 on NVIDIA, 64 or 32 on AMD, read from the
 // pipeline on Metal: ch05-facts B5, ch03-facts C9); nothing here assumes 32.
 import { SEGMENT_MODELS, warpAccess, type SegmentModelId, type WarpAccess } from './coalesce';
+import { tr } from '../lib/locale.ts';
 
 export { SEGMENT_MODELS, type SegmentModelId };
 
@@ -58,15 +59,30 @@ export interface QLayout {
 
 export const LAYOUTS: Record<LayoutId, QLayout> = {
   'q8_0-split': {
-    id: 'q8_0-split', label: 'Q8_0, codes and scales in separate arrays (lab X2.1)', owner: "llama.cpp's Q8_0 values, split into two arrays",
-    blockWeights: 32, codeBytes: 32, scaleBytes: 2, interleaved: false, facts: 'x2-facts D1, A5; lab X2.1 solution',
+    id: 'q8_0-split',
+    get label() {
+      return tr('Q8_0, codes and scales in separate arrays (lab X2.1)', 'Q8_0, mã và hệ số tỷ lệ ở các mảng riêng (lab X2.1)');
+    },
+    get owner() {
+      return tr("llama.cpp's Q8_0 values, split into two arrays", 'giá trị Q8_0 của llama.cpp, tách thành hai mảng');
+    },
+    blockWeights: 32, codeBytes: 32, scaleBytes: 2, interleaved: false,
+    facts: 'x2-facts D1, A5; lab X2.1 solution', // i18n-ignore: facts-file citation
   },
   'q4_0-blocks': {
-    id: 'q4_0-blocks', label: "Q4_0 18-byte blocks (llama.cpp's layout)", owner: 'llama.cpp',
+    id: 'q4_0-blocks',
+    get label() {
+      return tr("Q4_0 18-byte blocks (llama.cpp's layout)", 'khối Q4_0 18 byte (bố cục của llama.cpp)');
+    },
+    owner: 'llama.cpp',
     blockWeights: 32, codeBytes: 16, scaleBytes: 2, interleaved: true, facts: 'x2-facts D1, A5, C5',
   },
   'mlx4-split': {
-    id: 'mlx4-split', label: 'MLX-style 4-bit, group 64, scales in their own array', owner: 'MLX',
+    id: 'mlx4-split',
+    get label() {
+      return tr('MLX-style 4-bit, group 64, scales in their own array', '4-bit kiểu MLX, nhóm 64, hệ số tỷ lệ ở mảng riêng');
+    },
+    owner: 'MLX',
     blockWeights: 64, codeBytes: 32, scaleBytes: 4, interleaved: false, facts: 'x2-facts D5',
   },
 };
@@ -96,10 +112,13 @@ export interface Mapping {
 /** Why a mapping cannot run, or null. */
 export function problem(m: Mapping): string | null {
   const l = LAYOUTS[m.layout];
-  if (m.inW <= 0 || m.inW % l.blockWeights !== 0) return `the row length must be a whole number of blocks of ${l.blockWeights} weights`;
-  if (m.warpWidth % m.lanesPerBlock !== 0) return 'the lanes of a warp must split evenly into blocks';
+  if (m.inW <= 0 || m.inW % l.blockWeights !== 0) return tr(`the row length must be a whole number of blocks of ${l.blockWeights} weights`, `độ dài hàng phải là một số nguyên lần khối ${l.blockWeights} trọng số`);
+  if (m.warpWidth % m.lanesPerBlock !== 0) return tr('the lanes of a warp must split evenly into blocks', 'các lane của một warp phải chia đều vào các khối');
   if (l.codeBytes % (m.lanesPerBlock * m.loadBytes) !== 0)
-    return `a block has ${l.codeBytes} code bytes, which ${m.lanesPerBlock} lanes cannot split into ${m.loadBytes}-byte loads`;
+    return tr(
+        `a block has ${l.codeBytes} code bytes, which ${m.lanesPerBlock} lanes cannot split into ${m.loadBytes}-byte loads`,
+        `một khối có ${l.codeBytes} byte mã, ${m.lanesPerBlock} lane không thể chia chúng thành các lần tải ${m.loadBytes} byte`,
+      );
   return null;
 }
 

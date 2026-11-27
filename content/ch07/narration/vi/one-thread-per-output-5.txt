@@ -1,0 +1,1 @@
+Nhưng các luồng không chạy một mình. Trong ví dụ đồ chơi này, cả 16 luồng của khối ở góc cùng nằm trong một warp, và chúng bước qua các điểm lọc cùng nhau. Ở mỗi điểm lọc, các lane có đầu vào là ô ma ngồi không trong khi các lane bên cạnh thực hiện phép nhân. Sự ngồi không đó, từng lane một, chính là phân kỳ điều khiển.

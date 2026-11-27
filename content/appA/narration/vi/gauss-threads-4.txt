@@ -1,0 +1,1 @@
+Cột thứ hai lặp lại mẫu này với 2 luồng, cột thứ ba với một luồng. Rồi phép thế ngược chạy từ dưới lên. Z bằng 3, nên luồng 1 tìm ra Y bằng 2. Rồi luồng 0 tìm ra X bằng 1. [short pause] Hãy đếm các ô rảnh. Khi hệ lớn dần, gần một nửa số bước của các luồng không làm gì cả.

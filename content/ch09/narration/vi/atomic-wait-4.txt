@@ -1,0 +1,1 @@
+Với nhiều bin, các chuỗi hình thành song song cạnh nhau. Rải đều 8 lần cập nhật lên 4 bin, và mỗi chuỗi dài 2 mắt xích. Giờ hãy làm lệch dữ liệu, để 5 lần cập nhật rơi vào một bin. Chuỗi đó quyết định vạch đích, trong khi 3 bin còn lại ngồi không. Bin bận nhất, chứ không phải số lượng bin, quyết định nhịp độ.

@@ -1,0 +1,1 @@
+Khối 1 tính bản đồ đầu ra 1. Nó cần đúng 27 giá trị đầu vào như cũ, và nó lại nạp cả 48 lần. Bộ nhớ chia sẻ thuộc về một khối, nên không có gì khối 0 đã nạp có thể giúp nó. Mỗi bản đồ đầu ra thêm vào lặp lại toàn bộ lưu lượng đầu vào.

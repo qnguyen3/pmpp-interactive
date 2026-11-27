@@ -1,0 +1,1 @@
+Giờ hãy giao cho chúng 64 chuỗi không phụ thuộc vào nhau. Bên phải nhận cả 64 chuỗi cùng lúc và xong ở thời điểm 16. Bên trái làm qua 16 đợt, mỗi đợt 4 chuỗi, và xong ở thời điểm 64. Kết quả đầu tiên của nó vẫn đến sớm hơn, ở thời điểm 4. Kết quả đầu tiên là độ trễ. Kết quả cuối cùng là thông lượng.

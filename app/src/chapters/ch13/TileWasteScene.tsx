@@ -1,4 +1,5 @@
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { PRESETS, bookTiled, exactTiled, tag, type Item, type TileIteration } from '../../sim/mergetile';
 
 // "Loaded twice, used once": the book's tiled merge (Figs. 13.10 to 13.13) on one block
@@ -91,7 +92,7 @@ function outputs(run: typeof RUN, upto: number): (Item | null)[] {
 }
 
 const split = (it: TileIteration) =>
-  it.threads.map((t, q) => `thread ${q}: ${t.a} of A, ${t.b} of B`).join(';  ');
+  it.threads.map((t, q) => tr(`thread ${q}: ${t.a} of A, ${t.b} of B`, `luồng ${q}: ${t.a} của A, ${t.b} của B`)).join(';  ');
 
 /** One iteration of the book's scheme, as a frame: loads first, then (if `merged`) what the merge used. */
 function bookFrame(beat: number, run: typeof RUN, A: readonly number[], B: readonly number[], n: number, merged: boolean, cProgress: number, headline: string): Frame {
@@ -113,7 +114,7 @@ function bookFrame(beat: number, run: typeof RUN, A: readonly number[], B: reado
     C: outputs(run, cUpto),
     arrows: merged ? 0.25 : 1,
     threads: merged ? split(it) : undefined,
-    counter: `loaded so far: ${t.loaded}   used so far: ${t.used}`,
+    counter: tr(`loaded so far: ${t.loaded}   used so far: ${t.used}`, `đã nạp: ${t.loaded}   đã dùng: ${t.used}`),
     headline,
     data: {
       scheme: 'book',
@@ -164,9 +165,9 @@ function Stage(f: Frame) {
   const mA = mid(loadedA, AX);
   const mB = mid(loadedB, BX);
   return (
-    <svg viewBox={`0 0 ${W} 330`} role="img" aria-label="A tiled merge: what one block loads and what it uses" style={{ width: '100%', maxWidth: W, display: 'block' }}>
-      <g data-beat={f.beat} {...Object.fromEntries(Object.entries(f.data).map(([k, v]) => [`data-${k}`, String(v)]))}>
-        <text x={8} y={GY - 16} fontSize="11" style={{ fill: 'var(--global)' }} fontWeight="600">global memory</text>
+    <svg viewBox={`0 0 ${W} 330`} role="img" aria-label={tr('A tiled merge: what one block loads and what it uses', 'Một phép trộn phân ô: một khối nạp gì và dùng gì')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
+      <g data-beat={f.beat} {...Object.fromEntries(Object.entries(f.data).map(([k, v]) => [`data-${k}` /* i18n-ignore: data attribute name */, String(v)]))}>
+        <text x={8} y={GY - 16} fontSize="11" style={{ fill: 'var(--global)' }} fontWeight="600"><Translated vi="bộ nhớ toàn cục (global memory)">global memory</Translated></text>
         <text x={AX - 8} y={GY + 15} fontSize="13" fontWeight="650" textAnchor="end" style={{ fill: 'var(--global)' }}>A</text>
         <Cells x={AX} y={GY} w={GW} h={22} vals={f.A} states={f.gA} name="A" kind="g" />
         <text x={BX - 8} y={GY + 15} fontSize="13" fontWeight="650" textAnchor="end" style={{ fill: 'var(--global)' }}>B</text>
@@ -179,8 +180,8 @@ function Stage(f: Frame) {
           <line x1={mB} y1={GY + 26} x2={sBx + (f.sB.length * SW) / 2} y2={SY - 6} stroke="var(--shared)" strokeWidth="1.6" opacity={f.arrows} />
         ) : null}
 
-        <text x={8} y={SY - 12} fontSize="11" style={{ fill: 'var(--shared)' }} fontWeight="600">shared memory</text>
-        <text x={sAx - 8} y={SY + 20} fontSize="12.5" fontWeight="650" textAnchor="end" style={{ fill: 'var(--shared)' }}>{f.exact ? 'tile' : 'A_S'}</text>
+        <text x={8} y={SY - 12} fontSize="11" style={{ fill: 'var(--shared)' }} fontWeight="600"><Translated vi="bộ nhớ chia sẻ (shared memory)">shared memory</Translated></text>
+        <text x={sAx - 8} y={SY + 20} fontSize="12.5" fontWeight="650" textAnchor="end" style={{ fill: 'var(--shared)' }}>{f.exact ? tr('tile', 'ô') : 'A_S'}</text>
         {/* empty slots of the tiles, so a partly loaded tile shows */}
         {Array.from({ length: f.exact ? TILE : TILE }, (_, s) => (
           <rect key={'ea' + s} x={sAx + s * SW} y={SY} width={SW - 2} height={28} rx="2" fill="none" stroke="var(--rule)" strokeDasharray="2 3" opacity={f.exact ? 1 : 1} />
@@ -197,15 +198,15 @@ function Stage(f: Frame) {
         <Cells x={sBx} y={SY} w={SW} h={28} vals={f.sB.map((c) => c.v)} states={f.sB.map((c) => c.s)} name="BS" kind="s" />
         {f.exact && f.sA.length + f.sB.length ? (
           <g>
-            <text x={sAx + (f.sA.length * SW) / 2} y={SY + 44} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{f.sA.length ? `from A` : ''}</text>
-            <text x={sBx + (f.sB.length * SW) / 2} y={SY + 44} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{f.sB.length ? `from B` : ''}</text>
+            <text x={sAx + (f.sA.length * SW) / 2} y={SY + 44} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{f.sA.length ? tr(`from A`, `từ A`) : ''}</text>
+            <text x={sBx + (f.sB.length * SW) / 2} y={SY + 44} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{f.sB.length ? tr(`from B`, `từ B`) : ''}</text>
           </g>
         ) : null}
         {f.threads ? (
           <text x={W / 2} y={SY + 60} fontSize="11.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }} data-threads>{f.threads}</text>
         ) : null}
 
-        <text x={8} y={CY - 10} fontSize="11" style={{ fill: 'var(--global)' }} fontWeight="600">C, global memory</text>
+        <text x={8} y={CY - 10} fontSize="11" style={{ fill: 'var(--global)' }} fontWeight="600"><Translated vi="C, bộ nhớ toàn cục">C, global memory</Translated></text>
         <g data-order={f.C.map((x) => (x ? tag(x) : '·')).join(' ')}>
           {f.C.map((x, k) => (
             <g key={k}>
@@ -253,13 +254,13 @@ function exactFrame(p: number): Frame {
     exact: true,
     C,
     arrows: loaded && !merged ? 1 : 0,
-    threads: searched ? `search on global memory first: the first ${t.cRange[1]} outputs take ${a1 - a0} of A and ${b1 - b0} of B` : undefined,
+    threads: searched ? tr(`search on global memory first: the first ${t.cRange[1]} outputs take ${a1 - a0} of A and ${b1 - b0} of B`, `tìm trên bộ nhớ toàn cục trước: ${t.cRange[1]} đầu ra đầu tiên lấy ${a1 - a0} của A và ${b1 - b0} của B`) : undefined,
     counter: done
-      ? `whole merge: loaded ${EXACT.totals.loaded}, used ${EXACT.totals.used}; one search per tile, ${EXACT.totals.extraSearchReads} extra reads in all`
+      ? tr(`whole merge: loaded ${EXACT.totals.loaded}, used ${EXACT.totals.used}; one search per tile, ${EXACT.totals.extraSearchReads} extra reads in all`, `cả phép trộn: nạp ${EXACT.totals.loaded}, dùng ${EXACT.totals.used}; mỗi ô một lần tìm, tổng cộng thêm ${EXACT.totals.extraSearchReads} lần đọc`)
       : loaded
-        ? `loaded so far: ${a1 - a0 + b1 - b0}   used so far: ${merged ? t.used : 0}`
+        ? tr(`loaded so far: ${a1 - a0 + b1 - b0}   used so far: ${merged ? t.used : 0}`, `đã nạp: ${a1 - a0 + b1 - b0}   đã dùng: ${merged ? t.used : 0}`)
         : undefined,
-    headline: done ? 'every loaded element is used: what CUB, rocPRIM and MLX do' : 'search first, then load exactly what the tile will use',
+    headline: done ? tr('every loaded element is used: what CUB, rocPRIM and MLX do', 'mọi phần tử đã nạp đều được dùng: cách CUB, rocPRIM và MLX làm') : tr('search first, then load exactly what the tile will use', 'tìm trước, rồi nạp đúng những gì ô sẽ dùng'),
     data: {
       scheme: 'exact',
       it: 0,
@@ -276,49 +277,57 @@ function exactFrame(p: number): Frame {
 const beats: Beat[] = [
   {
     clip: 'tile-waste-1',
-    label: 'Load a tile',
+    get label() {
+      return tr('Load a tile', 'Nạp một ô');
+    },
     draw: (p) => {
       if (p < 0.35) {
-        const f = bookFrame(1, RUN, UNEVEN.A, UNEVEN.B, 0, false, 0, `one block, the next ${IT[0].cOut} outputs: how many come from A, how many from B?`);
+        const f = bookFrame(1, RUN, UNEVEN.A, UNEVEN.B, 0, false, 0, tr(`one block, the next ${IT[0].cOut} outputs: how many come from A, how many from B?`, `một khối, ${IT[0].cOut} đầu ra tiếp theo: bao nhiêu đến từ A, bao nhiêu từ B?`));
         return <Stage {...f} gA={f.gA.map(() => '')} gB={f.gB.map(() => '')} sA={[]} sB={[]} arrows={0} counter={undefined}
           data={{ ...f.data, phase: 'before', aloaded: 0, bloaded: 0, loaded: 0 }} />;
       }
-      const f = bookFrame(1, RUN, UNEVEN.A, UNEVEN.B, 0, false, 0, `it cannot know yet, so it loads ${IT[0].aLoaded} of A and ${IT[0].bLoaded} of B`);
+      const f = bookFrame(1, RUN, UNEVEN.A, UNEVEN.B, 0, false, 0, tr(`it cannot know yet, so it loads ${IT[0].aLoaded} of A and ${IT[0].bLoaded} of B`, `nó chưa thể biết, nên nó nạp ${IT[0].aLoaded} của A và ${IT[0].bLoaded} của B`));
       const shown = Math.round(TILE * ramp(p, 0.35, 0.7));
       return <Stage {...f} sA={f.sA.slice(0, shown)} sB={f.sB.slice(0, shown)} />;
     },
   },
   {
     clip: 'tile-waste-2',
-    label: 'Use what the merge needs',
+    get label() {
+      return tr('Use what the merge needs', 'Dùng những gì phép trộn cần');
+    },
     draw: (p) => {
       const merged = p >= 0.3;
       const wasted = IT[0].aLoaded + IT[0].bLoaded - IT[0].cOut;
       return (
         <Stage {...bookFrame(2, RUN, UNEVEN.A, UNEVEN.B, 0, merged, ramp(p, 0.3, 0.6),
-          !merged ? 'each thread searches the tile for its own 4 outputs'
-            : p < 0.7 ? `used: ${IT[0].aUsed} of A and ${IT[0].bUsed} of B`
-              : `${wasted} of the ${IT[0].aLoaded + IT[0].bLoaded} loaded elements were never used`)} />
+          !merged ? tr('each thread searches the tile for its own 4 outputs', 'mỗi luồng tìm trong ô cho 4 đầu ra của riêng nó')
+            : p < 0.7 ? tr(`used: ${IT[0].aUsed} of A and ${IT[0].bUsed} of B`, `đã dùng: ${IT[0].aUsed} của A và ${IT[0].bUsed} của B`)
+              : tr(`${wasted} of the ${IT[0].aLoaded + IT[0].bLoaded} loaded elements were never used`, `${wasted} trong ${IT[0].aLoaded + IT[0].bLoaded} phần tử đã nạp chưa bao giờ được dùng`))} />
       );
     },
   },
   {
     clip: 'tile-waste-3',
-    label: 'Load again',
+    get label() {
+      return tr('Load again', 'Nạp lại');
+    },
     draw: (p) => {
       const merged = p >= 0.5;
       const again = IT[0].aLoaded - IT[0].aUsed + (IT[0].bLoaded - IT[0].bUsed);
       return (
         <Stage {...bookFrame(3, RUN, UNEVEN.A, UNEVEN.B, 1, merged, ramp(p, 0.5, 0.7),
-          !merged ? `the next tiles start at A[${IT[1].aStart}] and B[${IT[1].bStart}]: ${again} elements are loaded a second time`
-            : p < 0.8 ? `this time: ${IT[1].aUsed} of A and ${IT[1].bUsed} of B`
-              : `the whole merge: ${RUN.totals.loaded} elements loaded for ${RUN.totals.used} outputs`)} />
+          !merged ? tr(`the next tiles start at A[${IT[1].aStart}] and B[${IT[1].bStart}]: ${again} elements are loaded a second time`, `các ô tiếp theo bắt đầu ở A[${IT[1].aStart}] và B[${IT[1].bStart}]: ${again} phần tử bị nạp lần thứ hai`)
+            : p < 0.8 ? tr(`this time: ${IT[1].aUsed} of A and ${IT[1].bUsed} of B`, `lần này: ${IT[1].aUsed} của A và ${IT[1].bUsed} của B`)
+              : tr(`the whole merge: ${RUN.totals.loaded} elements loaded for ${RUN.totals.used} outputs`, `cả phép trộn: nạp ${RUN.totals.loaded} phần tử cho ${RUN.totals.used} đầu ra`))} />
       );
     },
   },
   {
     clip: 'tile-waste-4',
-    label: 'The worst case',
+    get label() {
+      return tr('The worst case', 'Trường hợp xấu nhất');
+    },
     draw: (p) => {
       const n = p < 0.5 ? 0 : 1;
       const local = n === 0 ? ramp(p, 0.15, 0.4) : ramp(p, 0.6, 0.85);
@@ -326,18 +335,20 @@ const beats: Beat[] = [
       const it = IT_W[n];
       return (
         <Stage {...bookFrame(4, RUN_W, WORST.A, WORST.B, n, merged, local,
-          !merged ? `another merge: tile ${n} loads ${it.aLoaded} of A and ${it.bLoaded} of B`
-            : `all ${it.cOut} outputs from A: a smaller A tile could not have written them`)} />
+          !merged ? tr(`another merge: tile ${n} loads ${it.aLoaded} of A and ${it.bLoaded} of B`, `một phép trộn khác: ô ${n} nạp ${it.aLoaded} của A và ${it.bLoaded} của B`)
+            : tr(`all ${it.cOut} outputs from A: a smaller A tile could not have written them`, `cả ${it.cOut} đầu ra đều từ A: một ô A nhỏ hơn đã không thể ghi chúng`))} />
       );
     },
   },
   {
     clip: 'tile-waste-5',
-    label: 'Search first',
+    get label() {
+      return tr('Search first', 'Tìm trước');
+    },
     draw: (p) => <Stage {...exactFrame(p)} />,
   },
 ];
 
 export function TileWasteScene() {
-  return <Scene chapter="ch13" title="Loaded twice, used once" beats={beats} />;
+  return <Scene chapter="ch13" title={tr('Loaded twice, used once', 'Nạp hai lần, dùng một lần')} beats={beats} />;
 }

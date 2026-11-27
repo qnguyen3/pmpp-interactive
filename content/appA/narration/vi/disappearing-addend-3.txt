@@ -1,0 +1,1 @@
+Giờ hai cửa sổ được cộng chính xác. Tổng thật nhỉnh hơn 1000.3 một chút. Định dạng này không biểu diễn được nó. Hai giá trị gần nhất là 1000 và 1000.5, cách nhau nửa đơn vị. Làm tròn đến số chẵn gần nhất chọn giá trị gần hơn, 1000.5. Sai số khoảng 4 phần mười đơn vị ở vị trí cuối.

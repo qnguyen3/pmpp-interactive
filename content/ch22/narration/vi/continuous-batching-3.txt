@@ -1,0 +1,1 @@
+Giờ là continuous batching. Ở mỗi bước, các yêu cầu đã xong rời đi và các yêu cầu đang chờ vào thay. Các chỗ luôn được lấp đầy, và các yêu cầu ngắn được trả về ngay khi xong. Ý tưởng này có 3 tên gọi: iteration-level scheduling, từ bài báo Orca, in-flight batching, và continuous batching. Chúng là cùng một kỹ thuật.

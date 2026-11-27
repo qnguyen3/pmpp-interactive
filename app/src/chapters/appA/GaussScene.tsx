@@ -1,5 +1,6 @@
 import { Scene, type Beat } from '../../components/Scene';
 import { system, trace, type Phase, type ThreadState, type Trace } from '../../sim/gauss';
+import { Translated, tr } from '../../lib/i18n';
 
 // "One thread per row": the book's parallel elimination as a timeline of thread states,
 // every frame taken from src/sim/gauss.ts (trace) with exact fractions and IEEE specials.
@@ -7,13 +8,13 @@ import { system, trace, type Phase, type ThreadState, type Trace } from '../../s
 
 // ---------------------------------------------------------------- shared drawing (also used by the stepper in SA7)
 export const STATE_LABEL: Record<ThreadState, string> = {
-  ready: 'ready',
-  working: 'working',
-  skipping: 'skips: no such variable',
-  idle: 'idle',
-  waiting: 'at the barrier',
-  searching: 'pivot search',
-  finished: 'finished',
+  get ready() { return tr('ready', 'sẵn sàng'); },
+  get working() { return tr('working', 'đang làm'); },
+  get skipping() { return tr('skips: no such variable', 'bỏ qua: không có biến này'); },
+  get idle() { return tr('idle', 'rảnh'); },
+  get waiting() { return tr('at the barrier', 'ở rào chắn'); },
+  get searching() { return tr('pivot search', 'tìm phần tử chốt'); },
+  get finished() { return tr('finished', 'đã xong'); },
 };
 
 const BAR = 6;
@@ -75,35 +76,35 @@ function Matrix({ phase, x, y, vars, lane = 34 }: { phase: Phase; x: number; y: 
 function opText(p: Phase, t: number): string {
   const s = p.threads[t];
   if (p.kind === 'divide' && p.divisors?.[t]) return '÷ ' + cellText(p.divisors[t]!.text).replace('·', '0');
-  if (p.kind === 'subtract' && s === 'working') return `− row ${p.col + 1}`;
-  if (s === 'skipping') return 'skips';
+  if (p.kind === 'subtract' && s === 'working') return tr(`− row ${p.col + 1}`, `− hàng ${p.col + 1}`);
+  if (s === 'skipping') return tr('skips', 'bỏ qua');
   if (p.kind === 'pivot' && s === 'searching') {
     const j = p.pivot!.rows.indexOf(t);
     return `|${cellText(p.pivot!.abs[j].text).replace('·', '0')}|${p.pivot!.winner === t ? ' max' : ''}`;
   }
-  if (p.kind === 'swap' && s === 'working') return 'swap';
-  if (p.kind === 'backsub' && s === 'working') return 'substitute';
+  if (p.kind === 'swap' && s === 'working') return tr('swap', 'hoán đổi');
+  if (p.kind === 'backsub' && s === 'working') return tr('substitute', 'thế ngược');
   return '';
 }
 
 export function phaseTitle(p: Phase, vars: string[]): string {
   switch (p.kind) {
     case 'start':
-      return 'one thread per row, all rows in one block\'s shared memory';
+      return tr('one thread per row, all rows in one block\'s shared memory', 'một luồng mỗi hàng, mọi hàng nằm trong bộ nhớ chia sẻ (shared memory) của một khối');
     case 'pivot':
-      return `pivot search for ${vars[p.col]}: max |coefficient| is in row ${p.pivot!.winner + 1}`;
+      return tr(`pivot search for ${vars[p.col]}: max |coefficient| is in row ${p.pivot!.winner + 1}`, `tìm phần tử chốt cho ${vars[p.col]}: |hệ số| lớn nhất ở hàng ${p.pivot!.winner + 1}`);
     case 'swap':
-      return `swap: row ${p.swap![1] + 1} moves to the top`;
+      return tr(`swap: row ${p.swap![1] + 1} moves to the top`, `hoán đổi: hàng ${p.swap![1] + 1} lên trên cùng`);
     case 'divide':
-      return `divide: every remaining row by its own coefficient of ${vars[p.col]}`;
+      return tr(`divide: every remaining row by its own coefficient of ${vars[p.col]}`, `chia: mỗi hàng còn lại cho hệ số ${vars[p.col]} của chính nó`);
     case 'subtract':
-      return `subtract row ${p.col + 1}: ${vars[p.col]} leaves the rows below`;
+      return tr(`subtract row ${p.col + 1}: ${vars[p.col]} leaves the rows below`, `trừ hàng ${p.col + 1}: ${vars[p.col]} rời khỏi các hàng bên dưới`);
     case 'barrier':
-      return 'barrier: every thread waits';
+      return tr('barrier: every thread waits', 'rào chắn: mọi luồng chờ');
     case 'backsub':
-      return `back substitution: row ${p.col + 1} gives ${vars[p.col]} = ${cellText(p.m[p.col][p.m.length].text)}`;
+      return tr(`back substitution: row ${p.col + 1} gives ${vars[p.col]} = ${cellText(p.m[p.col][p.m.length].text)}`, `thế ngược: hàng ${p.col + 1} cho ${vars[p.col]} = ${cellText(p.m[p.col][p.m.length].text)}`);
     case 'done':
-      return 'solution: ' + vars.map((v, i) => `${v} = ${cellText(p.m[i][p.m.length].text)}`).join(', ');
+      return tr('solution: ', 'nghiệm: ') + vars.map((v, i) => `${v} = ${cellText(p.m[i][p.m.length].text)}`).join(', ');
   }
 }
 
@@ -128,16 +129,16 @@ function Stage({ t, idx, beat, intro = 1 }: { t: Trace; idx: number; beat: numbe
   const inf = flat.filter((c) => Math.abs(c.v) === Infinity).length;
   const nanRows = ph.m.filter((r) => r.some((c) => Number.isNaN(c.v))).length;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Threads eliminating one row each" style={{ width: '100%', maxWidth: W, display: 'block' }}
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Threads eliminating one row each', 'Các luồng, mỗi luồng khử một hàng')} style={{ width: '100%', maxWidth: W, display: 'block' }}
       data-beat={beat} data-system={t.sys.id} data-pivot={t.opts.pivot ? 1 : 0} data-index={idx} data-phase={ph.kind} data-nan={nan} data-inf={inf}
       data-rhs={ph.m.map((r) => r[n].text).join(',')}>
       <text x={20} y={24} fontSize="12" style={{ fill: 'var(--ink-2)' }}>
-        {t.sys.id === 'book1' ? "the book's first system" : "the book's second system"}{t.opts.pivot ? ', with pivoting' : ', no pivoting'}
+        {t.sys.id === 'book1' ? tr("the book's first system", 'hệ thứ nhất của sách') : tr("the book's second system", 'hệ thứ hai của sách')}{t.opts.pivot ? tr(', with pivoting', ', có chọn phần tử chốt') : tr(', no pivoting', ', không chọn phần tử chốt')}
       </text>
-      <text x={TX} y={TY - 12} fontSize="11" style={{ fill: 'var(--ink-3)' }}>time →</text>
+      <text x={TX} y={TY - 12} fontSize="11" style={{ fill: 'var(--ink-3)' }}>{tr('time →', 'thời gian →')}</text>
       {Array.from({ length: n }, (_, k) => (
         <g key={k} opacity={intro}>
-          <text x={20} y={TY + k * LANE + 18} fontSize="12.5" fontWeight="600">thread {k}</text>
+          <text x={20} y={TY + k * LANE + 18} fontSize="12.5" fontWeight="600"><Translated vi={<>luồng {k}</>}>thread {k}</Translated></text>
           <text x={MX - 8} y={TY + k * LANE + 19} fontSize="11.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>{opText(ph, k)}</text>
         </g>
       ))}
@@ -146,32 +147,32 @@ function Stage({ t, idx, beat, intro = 1 }: { t: Trace; idx: number; beat: numbe
       {ph.kind === 'barrier' ? (
         <g>
           <rect x={MX - 4} y={TY + n * LANE - 2} width={4 * MW} height={22} rx="3" fill="var(--ink)" />
-          <text x={MX + 2 * MW - 4} y={TY + n * LANE + 13} fontSize="12" textAnchor="middle" style={{ fill: 'var(--page)' }}>barrier: all {n} threads wait</text>
+          <text x={MX + 2 * MW - 4} y={TY + n * LANE + 13} fontSize="12" textAnchor="middle" style={{ fill: 'var(--page)' }}><Translated vi={<>rào chắn: cả {n} luồng chờ</>}>barrier: all {n} threads wait</Translated></text>
         </g>
       ) : null}
       <g transform={`translate(20 ${H - 70})`}>
         {(
           [
-            ['working', 'var(--ink)', 'var(--rule)'],
-            ['skips', 'none', 'var(--ink)'],
-            ['idle', 'var(--rule-soft)', 'var(--rule)'],
-            ['pivot search', 'var(--shared-wash)', 'var(--shared)'],
-            ['finished', 'var(--ok-wash)', 'var(--ok)'],
+            [tr('working', 'đang làm'), 'var(--ink)', 'var(--rule)'],
+            [tr('skips', 'bỏ qua'), 'none', 'var(--ink)'],
+            [tr('idle', 'rảnh'), 'var(--rule-soft)', 'var(--rule)'],
+            [tr('pivot search', 'tìm phần tử chốt'), 'var(--shared-wash)', 'var(--shared)'],
+            [tr('finished', 'đã xong'), 'var(--ok-wash)', 'var(--ok)'],
           ] as const
         ).map(([l, f, s], i) => (
           <g key={l} transform={`translate(${i * 112} 0)`}>
-            <rect width={12} height={12} rx="2" fill={f} stroke={s} strokeDasharray={l === 'skips' ? '3 2' : undefined} />
+            <rect width={12} height={12} rx="2" fill={f} stroke={s} strokeDasharray={l === tr('skips', 'bỏ qua') ? '3 2' : undefined} />
             <text x={17} y={10} fontSize="11">{l}</text>
           </g>
         ))}
         <rect x={5 * 112} width={4} height={14} fill="var(--ink)" />
-        <text x={5 * 112 + 9} y={10} fontSize="11">barrier</text>
+        <text x={5 * 112 + 9} y={10} fontSize="11">{tr('barrier', 'rào chắn')}</text>
       </g>
       <text x={20} y={H - 18} fontSize="13.5" fontWeight="600" style={{ fill: nan || inf ? 'var(--fail)' : 'var(--ink)' }}>
         {nanRows === n
-          ? `NaN in all ${n} rows: the answer is lost, though the system has one`
+          ? tr(`NaN in all ${n} rows: the answer is lost, though the system has one`, `NaN ở cả ${n} hàng: đáp án bị mất, dù hệ có nghiệm`)
           : nan || inf
-            ? 'row 1 divided by 0: infinity, and 0 / 0 is NaN'
+            ? tr('row 1 divided by 0: infinity, and 0 / 0 is NaN', 'hàng 1 chia cho 0: vô cực, và 0 / 0 là NaN')
             : phaseTitle(ph, VARS)}
       </text>
     </svg>
@@ -181,14 +182,14 @@ function Stage({ t, idx, beat, intro = 1 }: { t: Trace; idx: number; beat: numbe
 const end1 = T1.phases.length - 1;
 const end3 = T3.phases.length - 1;
 const beats: Beat[] = [
-  { clip: 'gauss-threads-1', label: 'One row each', draw: (p) => <Stage t={T1} idx={0} beat={1} intro={Math.min(1, 0.2 + p * 2)} /> },
-  { clip: 'gauss-threads-2', label: 'Divide, barrier', draw: (p) => <Stage t={T1} idx={at(1, 2, p)} beat={2} /> },
-  { clip: 'gauss-threads-3', label: 'Subtract, barrier', draw: (p) => <Stage t={T1} idx={at(3, 4, p)} beat={3} /> },
-  { clip: 'gauss-threads-4', label: 'The rest', draw: (p) => <Stage t={T1} idx={at(5, end1, p)} beat={4} /> },
-  { clip: 'gauss-threads-5', label: 'A zero pivot', draw: (p) => <Stage t={T2} idx={at(0, 4, p)} beat={5} /> },
-  { clip: 'gauss-threads-6', label: 'Pivoting', draw: (p) => <Stage t={T3} idx={at(1, end3, p)} beat={6} /> },
+  { clip: 'gauss-threads-1', get label() { return tr('One row each', 'Mỗi luồng một hàng'); }, draw: (p) => <Stage t={T1} idx={0} beat={1} intro={Math.min(1, 0.2 + p * 2)} /> },
+  { clip: 'gauss-threads-2', get label() { return tr('Divide, barrier', 'Chia, rào chắn'); }, draw: (p) => <Stage t={T1} idx={at(1, 2, p)} beat={2} /> },
+  { clip: 'gauss-threads-3', get label() { return tr('Subtract, barrier', 'Trừ, rào chắn'); }, draw: (p) => <Stage t={T1} idx={at(3, 4, p)} beat={3} /> },
+  { clip: 'gauss-threads-4', get label() { return tr('The rest', 'Phần còn lại'); }, draw: (p) => <Stage t={T1} idx={at(5, end1, p)} beat={4} /> },
+  { clip: 'gauss-threads-5', get label() { return tr('A zero pivot', 'Phần tử chốt bằng không'); }, draw: (p) => <Stage t={T2} idx={at(0, 4, p)} beat={5} /> },
+  { clip: 'gauss-threads-6', get label() { return tr('Pivoting', 'Chọn phần tử chốt'); }, draw: (p) => <Stage t={T3} idx={at(1, end3, p)} beat={6} /> },
 ];
 
 export function GaussScene() {
-  return <Scene chapter="appA" title="One thread per row" beats={beats} />;
+  return <Scene chapter="appA" title={tr('One thread per row', 'Một luồng mỗi hàng')} beats={beats} />;
 }

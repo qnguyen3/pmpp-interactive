@@ -13,6 +13,7 @@ import {
   parentChoices,
   runBFS,
 } from '../../sim/bfs';
+import { Translated, tr } from '../../lib/i18n';
 
 // "The wavefront": BFS on a 15 × 15 wiring grid (our own layout in the spirit of Fig. 18.5),
 // first as levels, then as the push kernel's threads, then as the frontier kernel's, then as
@@ -93,7 +94,7 @@ function Grid(f: Frame) {
           })
         : null}
       {f.path && f.path.length > 1 ? (
-        <polyline points={f.path.map((v) => `${cx(v)},${cy(v)}`).join(' ')} fill="none" stroke="var(--ink)" strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="round" />
+        <polyline points={f.path.map((v) => `${cx(v)},${cy(v)}`).join(' ')} fill="none" stroke="var(--ink)" strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="round" /> // i18n-ignore: SVG stroke style values
       ) : null}
       {f.ties ? [...f.ties].map((v) => <circle key={'t' + v} cx={cx(v)} cy={cy(v)} r={7.5} fill="none" stroke="var(--ink)" strokeWidth="1.3" strokeDasharray="2 2" data-tie={v} />) : null}
       {[MAZE_ROOT, MAZE_GOAL].map((v, i) => (
@@ -108,10 +109,12 @@ function Grid(f: Frame) {
 
 function Stage(f: Frame) {
   return (
-    <svg viewBox="0 0 720 370" role="img" aria-label="Breadth-first search on a wiring grid" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+    <svg viewBox="0 0 720 370" role="img" aria-label={tr('Breadth-first search on a wiring grid', 'Tìm kiếm theo chiều rộng trên một lưới đi dây')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       <g data-beat={f.beat} {...Object.fromEntries(Object.entries(f.data).map(([k, v]) => ['data-' + k, String(v)]))}>
         <text x={GX} y={18} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-          {MAZE_W} × {MAZE_H} wiring grid: {N} free blocks, {M} edges (each step counted both ways); S source, T target
+          <Translated vi={<>lưới đi dây {MAZE_W} × {MAZE_H}: {N} ô trống, {M} cạnh (mỗi bước tính cả hai chiều); S là nguồn, T là đích</>}>
+            {MAZE_W} × {MAZE_H} wiring grid: {N} free blocks, {M} edges (each step counted both ways); S source, T target
+          </Translated>
         </text>
         <Grid {...f} />
         <g transform={`translate(${RX}, 0)`}>{f.panel}</g>
@@ -129,12 +132,12 @@ function LevelBars({ upto, y }: { upto: number; y: number }) {
   const h = 6;
   return (
     <g>
-      <text x={0} y={y - 96} fontSize="11" style={{ fill: 'var(--ink-2)' }}>cells per level</text>
+      <text x={0} y={y - 96} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="số ô mỗi mức">cells per level</Translated></text>
       {SIZES.map((s, L) =>
         L <= upto ? <rect key={L} x={L * 11} y={y - s * h} width={9} height={s * h} fill={L === upto ? 'var(--global)' : 'var(--global-wash)'} stroke="var(--global)" strokeWidth="0.6" /> : null,
       )}
       <line x1={0} y1={y + 0.5} x2={(D + 1) * 11} y2={y + 0.5} stroke="var(--rule)" />
-      <text x={0} y={y + 14} fontSize="10" style={{ fill: 'var(--ink-2)' }}>level 0</text>
+      <text x={0} y={y + 14} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="mức 0">level 0</Translated></text>
       <text x={D * 11 - 8} y={y + 14} fontSize="10" style={{ fill: 'var(--ink-2)' }}>{D}</text>
     </g>
   );
@@ -146,7 +149,7 @@ const callOf = (p: number) => 1 + Math.min(D, Math.floor(ramp(p, 0.04, 0.94) * (
 const beats: Beat[] = [
   {
     clip: 'wavefront-1',
-    label: 'Blocks and wires',
+    get label() { return tr('Blocks and wires', 'Ô và dây'); },
     draw: (p) => {
       const k = p < 0.24 ? 0 : Math.min(D, Math.floor(ramp(p, 0.24, 0.96) * (D + 1)));
       return (
@@ -158,8 +161,8 @@ const beats: Beat[] = [
           data={{ level: k, wave: SIZES[k] }}
           panel={
             <>
-              <Line y={40} bold>{p < 0.24 ? 'a free block is a vertex, a wire step an edge' : `level ${k}: ${SIZES[k]} block${SIZES[k] === 1 ? '' : 's'}`}</Line>
-              <Line y={60}>{k > 0 ? `the wavefront, labelled ${k} by the search` : 'the search starts at S, level 0'}</Line>
+              <Line y={40} bold>{p < 0.24 ? tr('a free block is a vertex, a wire step an edge', 'một ô trống là một đỉnh, một bước dây là một cạnh') : tr(`level ${k}: ${SIZES[k]} block${SIZES[k] === 1 ? '' : 's'}`, `mức ${k}: ${SIZES[k]} ô`)}</Line>
+              <Line y={60}>{k > 0 ? tr(`the wavefront, labelled ${k} by the search`, `mặt sóng, được phép tìm kiếm gán nhãn ${k}`) : tr('the search starts at S, level 0', 'phép tìm kiếm bắt đầu tại S, mức 0')}</Line>
               <LevelBars upto={k} y={210} />
             </>
           }
@@ -169,7 +172,7 @@ const beats: Beat[] = [
   },
   {
     clip: 'wavefront-2',
-    label: 'A thread per cell',
+    get label() { return tr('A thread per cell', 'Một luồng cho mỗi ô'); },
     draw: (p) => {
       const c = callOf(p);
       const cur = PUSH.calls[c - 1];
@@ -183,16 +186,16 @@ const beats: Beat[] = [
           data={{ call: c, launched: cur.items, working, idle: cur.items - working, total: sum(done.map((x) => x.items)) }}
           panel={
             <>
-              <Line y={40} bold>push, call {c} of {CALLS}</Line>
-              <Line y={62}>{cur.items} threads launched, one per free block</Line>
-              <Line y={82}>{working} working: on the last wavefront</Line>
-              <Line y={102}>{cur.items - working} idle: check their block and stop</Line>
-              <Line y={136} bold>so far: {sum(done.map((x) => x.items))} threads launched</Line>
-              <Line y={156}>{sum(done.map((x) => x.pastCheck))} of them had work</Line>
+              <Line y={40} bold><Translated vi={<>push, lần gọi {c} trên {CALLS}</>}>push, call {c} of {CALLS}</Translated></Line>
+              <Line y={62}><Translated vi={<>{cur.items} luồng được khởi chạy, mỗi ô trống một luồng</>}>{cur.items} threads launched, one per free block</Translated></Line>
+              <Line y={82}><Translated vi={<>{working} luồng làm việc: nằm trên mặt sóng vừa rồi</>}>{working} working: on the last wavefront</Translated></Line>
+              <Line y={102}><Translated vi={<>{cur.items - working} luồng rảnh: kiểm tra ô của mình rồi dừng</>}>{cur.items - working} idle: check their block and stop</Translated></Line>
+              <Line y={136} bold><Translated vi={<>đến giờ: {sum(done.map((x) => x.items))} luồng đã khởi chạy</>}>so far: {sum(done.map((x) => x.items))} threads launched</Translated></Line>
+              <Line y={156}><Translated vi={<>{sum(done.map((x) => x.pastCheck))} luồng trong số đó có việc</>}>{sum(done.map((x) => x.pastCheck))} of them had work</Translated></Line>
               <circle cx={6} cy={190} r={3.4} fill="var(--ink)" />
-              <text x={16} y={194} fontSize="11">a thread with work</text>
+              <text x={16} y={194} fontSize="11"><Translated vi="một luồng có việc">a thread with work</Translated></text>
               <circle cx={6} cy={210} r={1.9} fill="var(--ink-3)" opacity={0.7} />
-              <text x={16} y={214} fontSize="11">a thread that stops at once</text>
+              <text x={16} y={214} fontSize="11"><Translated vi="một luồng dừng ngay">a thread that stops at once</Translated></text>
             </>
           }
         />
@@ -201,7 +204,7 @@ const beats: Beat[] = [
   },
   {
     clip: 'wavefront-3',
-    label: 'A thread per frontier cell',
+    get label() { return tr('A thread per frontier cell', 'Một luồng cho mỗi ô của frontier'); },
     draw: (p) => {
       const c = callOf(p);
       const cur = FRONT.calls[c - 1];
@@ -218,15 +221,15 @@ const beats: Beat[] = [
           data={{ call: c, threads: cur.items, 'threads-total': sum(done.map((x) => x.items)), 'edges-total': sum(done.map((x) => x.edgeWork)), work: fw, 'push-work': pw }}
           panel={
             <>
-              <Line y={40} bold>frontier, call {c} of {CALLS}</Line>
-              <Line y={62}>{cur.items} thread{cur.items === 1 ? '' : 's'}, one per block of the last wavefront</Line>
-              <Line y={82}>{cur.edgeWork} edges read</Line>
-              <Line y={116} bold>so far: {sum(done.map((x) => x.items))} threads, {sum(done.map((x) => x.edgeWork))} edges</Line>
-              <text x={0} y={152} fontSize="11" style={{ fill: 'var(--ink-2)' }}>work so far: threads + edges read</text>
+              <Line y={40} bold><Translated vi={<>frontier, lần gọi {c} trên {CALLS}</>}>frontier, call {c} of {CALLS}</Translated></Line>
+              <Line y={62}><Translated vi={<>{cur.items} luồng, mỗi ô của mặt sóng vừa rồi một luồng</>}>{cur.items} thread{cur.items === 1 ? '' : 's'}, one per block of the last wavefront</Translated></Line>
+              <Line y={82}><Translated vi={<>{cur.edgeWork} cạnh được đọc</>}>{cur.edgeWork} edges read</Translated></Line>
+              <Line y={116} bold><Translated vi={<>đến giờ: {sum(done.map((x) => x.items))} luồng, {sum(done.map((x) => x.edgeWork))} cạnh</>}>so far: {sum(done.map((x) => x.items))} threads, {sum(done.map((x) => x.edgeWork))} edges</Translated></Line>
+              <text x={0} y={152} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="khối lượng việc đến giờ: số luồng + số cạnh đã đọc">work so far: threads + edges read</Translated></text>
               <rect x={0} y={160} width={pw * scale} height={16} fill="var(--ink-3)" />
-              <text x={pw * scale + 6} y={173} fontSize="11.5">push {pw}</text>
+              <text x={pw * scale + 6} y={173} fontSize="11.5"><Translated vi={<>push {pw}</>}>push {pw}</Translated></text>
               <rect x={0} y={184} width={fw * scale} height={16} fill="var(--ink)" />
-              <text x={fw * scale + 6} y={197} fontSize="11.5">frontier {fw}</text>
+              <text x={fw * scale + 6} y={197} fontSize="11.5"><Translated vi={<>frontier {fw}</>}>frontier {fw}</Translated></text>
               {c === CALLS ? <Line y={232} bold data="nm">{fw} = n + m = {N} + {M}</Line> : null}
             </>
           }
@@ -236,7 +239,7 @@ const beats: Beat[] = [
   },
   {
     clip: 'wavefront-4',
-    label: 'A launch per level',
+    get label() { return tr('A launch per level', 'Một lần khởi chạy cho mỗi mức'); },
     draw: (p) => {
       const k = Math.min(CALLS, Math.floor(ramp(p, 0.04, 0.9) * (CALLS + 1)));
       const largest = Math.max(...SIZES);
@@ -247,18 +250,18 @@ const beats: Beat[] = [
           data={{ launches: k, largest }}
           panel={
             <>
-              <Line y={40} bold>{k} launch{k === 1 ? '' : 'es'}, {k} read-back{k === 1 ? '' : 's'}</Line>
-              <text x={0} y={70} fontSize="11" style={{ fill: 'var(--ink-2)' }}>launch</text>
+              <Line y={40} bold><Translated vi={<>{k} lần khởi chạy, {k} lần đọc lại</>}>{k} launch{k === 1 ? '' : 'es'}, {k} read-back{k === 1 ? '' : 's'}</Translated></Line>
+              <text x={0} y={70} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="khởi chạy">launch</Translated></text>
               {Array.from({ length: CALLS }, (_, i) => (
                 <rect key={'l' + i} x={i * 11} y={76} width={8} height={18} rx="1" fill={i < k ? 'var(--ink)' : 'none'} stroke="var(--ink-3)" strokeWidth="0.8" />
               ))}
-              <text x={0} y={116} fontSize="11" style={{ fill: 'var(--ink-2)' }}>read back the frontier size, decide whether to go on</text>
+              <text x={0} y={116} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="đọc lại kích thước frontier, quyết định có chạy tiếp không">read back the frontier size, decide whether to go on</Translated></text>
               {Array.from({ length: CALLS }, (_, i) => (
                 <rect key={'r' + i} x={i * 11} y={122} width={8} height={18} rx="1" fill={i < k ? 'var(--ink-2)' : 'none'} stroke="var(--ink-3)" strokeWidth="0.8" />
               ))}
-              <Line y={176}>largest wavefront: {largest} of {N} blocks</Line>
-              <Line y={196}>each launch has a fixed cost, however little it does</Line>
-              {k === CALLS ? <Line y={230} bold>{CALLS} levels: {CALLS} fixed costs</Line> : null}
+              <Line y={176}><Translated vi={<>mặt sóng lớn nhất: {largest} trên {N} ô</>}>largest wavefront: {largest} of {N} blocks</Translated></Line>
+              <Line y={196}><Translated vi={<>mỗi lần khởi chạy có một chi phí cố định, dù nó làm ít việc đến đâu</>}>each launch has a fixed cost, however little it does</Translated></Line>
+              {k === CALLS ? <Line y={230} bold><Translated vi={<>{CALLS} mức: {CALLS} lần chi phí cố định</>}>{CALLS} levels: {CALLS} fixed costs</Translated></Line> : null}
             </>
           }
         />
@@ -267,7 +270,7 @@ const beats: Beat[] = [
   },
   {
     clip: 'wavefront-5',
-    label: 'Walking back',
+    get label() { return tr('Walking back', 'Đi ngược về'); },
     draw: (p) => {
       const shown = Math.max(1, Math.ceil(ramp(p, 0.06, 0.8) * PATH.length));
       const part = PATH.slice(PATH.length - shown);
@@ -282,13 +285,13 @@ const beats: Beat[] = [
           data={{ shown, 'path-length': PATH.length, ties: ties.size, target: LV[MAZE_GOAL] }}
           panel={
             <>
-              <Line y={40} bold>target T at level {LV[MAZE_GOAL]}</Line>
-              <Line y={62}>step to a neighbour one level lower, until S</Line>
-              <Line y={96} bold>{shown} of {PATH.length} blocks walked</Line>
-              <Line y={118}>{ties.size} tie{ties.size === 1 ? '' : 's'} so far: two neighbours one level lower</Line>
+              <Line y={40} bold><Translated vi={<>đích T ở mức {LV[MAZE_GOAL]}</>}>target T at level {LV[MAZE_GOAL]}</Translated></Line>
+              <Line y={62}><Translated vi={<>bước sang một ô kề thấp hơn một mức, cho tới S</>}>step to a neighbour one level lower, until S</Translated></Line>
+              <Line y={96} bold><Translated vi={<>đã đi {shown} trên {PATH.length} ô</>}>{shown} of {PATH.length} blocks walked</Translated></Line>
+              <Line y={118}><Translated vi={<>{ties.size} chỗ hòa đến giờ: hai ô kề cùng thấp hơn một mức</>}>{ties.size} tie{ties.size === 1 ? '' : 's'} so far: two neighbours one level lower</Translated></Line>
               <circle cx={7} cy={146} r={7.5} fill="none" stroke="var(--ink)" strokeWidth="1.3" strokeDasharray="2 2" />
-              <text x={20} y={150} fontSize="11">a tie: the fixed rule takes the lower-numbered</text>
-              {shown === PATH.length ? <Line y={186} bold>a shortest wire: {PATH.length - 1} steps</Line> : null}
+              <text x={20} y={150} fontSize="11"><Translated vi="một chỗ hòa: quy tắc cố định chọn ô có số nhỏ hơn">a tie: the fixed rule takes the lower-numbered</Translated></text>
+              {shown === PATH.length ? <Line y={186} bold><Translated vi={<>một đường dây ngắn nhất: {PATH.length - 1} bước</>}>a shortest wire: {PATH.length - 1} steps</Translated></Line> : null}
             </>
           }
         />
@@ -298,5 +301,5 @@ const beats: Beat[] = [
 ];
 
 export function WavefrontScene() {
-  return <Scene chapter="ch18" title="The wavefront" beats={beats} />;
+  return <Scene chapter="ch18" title={tr('The wavefront', 'Mặt sóng')} beats={beats} />;
 }

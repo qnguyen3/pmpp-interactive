@@ -1,0 +1,1 @@
+Vậy mỗi backend đứng ở đâu? Trên CUDA, bộ đếm khiến việc chờ là hợp lệ. Trên HIP cùng đoạn mã đó vẫn chạy, nhưng hãy coi nó là unverified, vì AMD không ghi tài liệu về lời hứa nào như vậy. Trên Metal, hãy tránh việc chờ: để một threadgroup đi qua dải của nó theo thứ tự, với các rào chắn, giống cách lab 12.4 xử lý từng hàng.

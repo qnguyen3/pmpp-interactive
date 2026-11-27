@@ -1,0 +1,1 @@
+Tổng có trọng số đọc mọi hàng value thêm một lần nữa, và cộng nó, nhân với xác suất của nó, vào một hàng đầu ra: o phẩy. Một lần nữa, mỗi phần tử được đọc chỉ dùng cho một phép nhân cộng. Toàn bộ V cache đã chảy qua chỉ để tạo một hàng đầu ra.

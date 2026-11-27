@@ -23,6 +23,7 @@
 //
 // Erasable TypeScript only.
 import { BF16, FP16, FP32, add, div, maxFinite, mul, round, sub, ulp, type Format } from './minifloat';
+import { tr } from '../lib/locale.ts';
 
 export const SOFTMAX_FORMATS: Format[] = [FP32, BF16, FP16];
 
@@ -141,9 +142,39 @@ export function softmaxTrace(logits: number[], scale: number, f: Format, subtrac
 
 /** The explorer's rows. */
 export const SOFTMAX_PRESETS: { id: string; label: string; logits: number[] }[] = [
-  { id: 'typical', label: 'a typical row', logits: [3.2, 1.5, -0.8, 7.1, 2.4, -3, 0.6, 5.5] },
-  { id: 'large', label: 'large logits', logits: [12, 30, 25, -4, 18, 9, 31.5, 2] },
-  { id: 'huge', label: 'huge logits', logits: [95, 120, 40, -10, 60, 118, 0, 75] },
-  { id: 'flat', label: 'eight equal logits of 10', logits: [10, 10, 10, 10, 10, 10, 10, 10] },
-  { id: 'wide', label: 'one very negative', logits: [6, 2, -60, 4, 1, -20, 3, 5] },
+  {
+    id: 'typical',
+    get label() {
+      return tr('a typical row', 'một hàng điển hình');
+    },
+    logits: [3.2, 1.5, -0.8, 7.1, 2.4, -3, 0.6, 5.5],
+  },
+  {
+    id: 'large',
+    get label() {
+      return tr('large logits', 'logits lớn');
+    },
+    logits: [12, 30, 25, -4, 18, 9, 31.5, 2],
+  },
+  {
+    id: 'huge',
+    get label() {
+      return tr('huge logits', 'logits rất lớn');
+    },
+    logits: [95, 120, 40, -10, 60, 118, 0, 75],
+  },
+  {
+    id: 'flat',
+    get label() {
+      return tr('eight equal logits of 10', 'tám logits bằng nhau, đều là 10');
+    },
+    logits: [10, 10, 10, 10, 10, 10, 10, 10],
+  },
+  {
+    id: 'wide',
+    get label() {
+      return tr('one very negative', 'một giá trị rất âm');
+    },
+    logits: [6, 2, -60, 4, 1, -20, 3, 5],
+  },
 ];

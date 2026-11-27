@@ -1,0 +1,1 @@
+Hãy xem sự khác biệt lan ra. Sau vòng hai, nó vẫn là một từ, nhưng là một từ khác. Sau vòng ba, hai từ khác nhau. Sau vòng bốn, ba từ. Đến vòng năm, cả bốn từ đều khác nhau. Những con số này lấy thẳng từ mô hình đã được kiểm thử, không phải từ một hình vẽ.

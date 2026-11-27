@@ -1,0 +1,1 @@
+Giờ cũng 8 luồng đó cộng 1 vào cùng một bin, bằng phép toán nguyên tử. Một phép toán nguyên tử giữ vị trí đó trong suốt một lần nạp rồi một lần ghi, 400 chu kỳ trong ví dụ của sách. Phép kế tiếp không thể bắt đầu cho đến khi phép trước đã xong. [short pause] Vậy vạch đích lùi ra tới 8 lần 400 chu kỳ.

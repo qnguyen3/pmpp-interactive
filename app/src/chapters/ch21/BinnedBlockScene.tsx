@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { SCENE, acceptMasks, binCentre, diverges, sceneCase, type Outcome } from '../../sim/cutoff';
+import { Translated, tr } from '../../lib/i18n';
 
 // "A block walks its neighbourhood": one block of the binned cutoff kernel (p. 526) on the
 // scene case of src/sim/cutoff.ts (a 9 × 9 box of 4 × 4-point bins, 160 atoms, capacity 4,
@@ -66,7 +67,7 @@ function Stage(f: Frame) {
   const anyAccept = e && f.slot == null ? walk.points.map((_, t) => e.outcome.some((row) => row[t] === 'accept')) : null;
   const [cx, cy] = binCentre(world, BX, BY);
   return (
-    <svg viewBox="0 0 720 372" role="img" aria-label="One block walking its list of neighbour bins"
+    <svg viewBox="0 0 720 372" role="img" aria-label={tr('One block walking its list of neighbour bins', 'Một khối đi qua danh sách các ngăn lân cận của nó')}
       style={{ width: '100%', maxWidth: 720, display: 'block' }}
       data-lit={f.lit} data-entry={f.entry ?? ''} data-slot={f.slot ?? ''}
       data-tested={f.counters?.tested ?? ''} data-accepted={f.counters?.accepted ?? ''} data-dummy={f.counters?.dummy ?? ''}>
@@ -106,14 +107,16 @@ function Stage(f: Frame) {
       {e && f.staged ? (
         <g data-staged={slots.join(',')}>
           <text x={RX} y={60} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--shared)' }}>
-            shared memory: bin ({e.bx}, {e.by}), offset ({e.rel.dx}, {e.rel.dy}), {CAP} slots
+            <Translated vi={<>bộ nhớ chia sẻ: ngăn ({e.bx}, {e.by}), độ lệch ({e.rel.dx}, {e.rel.dy}), {CAP} ô chứa</>}>
+              shared memory: bin ({e.bx}, {e.by}), offset ({e.rel.dx}, {e.rel.dy}), {CAP} slots
+            </Translated>
           </text>
           {slots.map((s, k) => (
             <g key={k}>
               <rect x={RX + k * 84} y={68} width={78} height={30} rx="3"
                 fill={s < 0 ? `url(#${hatch})` : f.slot === k ? 'var(--shared)' : 'var(--shared-wash)'} stroke="var(--shared)" strokeWidth={f.slot === k ? 2.2 : 1} />
               <text x={RX + k * 84 + 39} y={87} fontSize="11" textAnchor="middle" style={{ fill: f.slot === k && s >= 0 ? 'var(--page)' : 'var(--ink)' }}>
-                {s < 0 ? 'dummy, q 0' : `atom ${s}`}
+                {s < 0 ? tr('dummy, q 0', 'giả, q 0') : tr(`atom ${s}`, `nguyên tử ${s}`)}
               </text>
             </g>
           ))}
@@ -129,7 +132,7 @@ function Stage(f: Frame) {
       {e && f.staged && f.lanes ? (
         <g>
           <text x={RX} y={152} fontSize="11.5" fontWeight="600">
-            the block's {walk.points.length} threads{outcome ? (slots[f.slot!] < 0 ? ': a dummy, tested by every lane' : `: test atom ${slots[f.slot!]}`) : ': accepted anything from this bin?'}
+            <Translated vi={<>{walk.points.length} luồng của khối</>}>the block's {walk.points.length} threads</Translated>{outcome ? (slots[f.slot!] < 0 ? tr(': a dummy, tested by every lane', ': một nguyên tử giả, mọi lane đều kiểm tra') : tr(`: test atom ${slots[f.slot!]}`, `: kiểm tra nguyên tử ${slots[f.slot!]}`)) : tr(': accepted anything from this bin?', ': có nhận gì từ ngăn này không?')}
           </text>
           {walk.points.map((_, t) => {
             const o = outcome ? outcome[t] : anyAccept![t] ? 'accept' : 'reject';
@@ -144,7 +147,9 @@ function Stage(f: Frame) {
           })}
           {outcome && slots[f.slot!] >= 0 ? (
             <text x={RX + S * 34 + 12} y={200} fontSize="11.5" style={{ fill: diverges(outcome.map((o) => o === 'accept')) ? 'var(--fail)' : 'var(--ink-2)' }}>
-              {outcome.filter((o) => o === 'accept').length} accept, {outcome.filter((o) => o === 'reject').length} reject
+              <Translated vi={<>{outcome.filter((o) => o === 'accept').length} nhận, {outcome.filter((o) => o === 'reject').length} loại</>}>
+                {outcome.filter((o) => o === 'accept').length} accept, {outcome.filter((o) => o === 'reject').length} reject
+              </Translated>
             </text>
           ) : null}
         </g>
@@ -152,38 +157,38 @@ function Stage(f: Frame) {
       {/* counters */}
       {f.counters ? (
         <g data-counters="">
-          <text x={RX} y={300} fontSize="12">list entry {f.counters.k + 1} of {LIST.length}</text>
-          <text x={RX} y={318} fontSize="12">tests so far: <tspan fontWeight="650">{thousands(f.counters.tested)}</tspan> ({thousands(f.counters.dummy)} on dummies)</text>
-          <text x={RX} y={336} fontSize="12">accepted so far: <tspan fontWeight="650">{thousands(f.counters.accepted)}</tspan></text>
+          <text x={RX} y={300} fontSize="12"><Translated vi={<>mục {f.counters.k + 1} trên {LIST.length} của danh sách</>}>list entry {f.counters.k + 1} of {LIST.length}</Translated></text>
+          <text x={RX} y={318} fontSize="12"><Translated vi={<>số phép kiểm tra đến giờ: <tspan fontWeight="650">{thousands(f.counters.tested)}</tspan> ({thousands(f.counters.dummy)} trên nguyên tử giả)</>}>tests so far: <tspan fontWeight="650">{thousands(f.counters.tested)}</tspan> ({thousands(f.counters.dummy)} on dummies)</Translated></text>
+          <text x={RX} y={336} fontSize="12"><Translated vi={<>đã nhận đến giờ: <tspan fontWeight="650">{thousands(f.counters.accepted)}</tspan></>}>accepted so far: <tspan fontWeight="650">{thousands(f.counters.accepted)}</tspan></Translated></text>
         </g>
       ) : null}
       {f.tally ? (
         <g data-tally="">
           <rect x={RX - 6} y={140} width={354} height={130} fill="var(--page)" />
-          <text x={RX} y={162} fontSize="13" fontWeight="650">this block, {walk.points.length} threads, {LIST.length} bins</text>
-          <text x={RX} y={186} fontSize="12.5">tests: {thousands(walk.tested)} ({thousands(walk.dummyTests)} on dummy atoms)</text>
-          <text x={RX} y={208} fontSize="12.5">accepted: {thousands(walk.accepted)} ({Math.round((walk.accepted / walk.tested) * 100)} percent)</text>
-          <text x={RX} y={236} fontSize="12.5" style={{ fill: 'var(--ink-2)' }}>direct summation, same points: {walk.points.length} × {world.atoms.length} = {thousands(walk.directPairs)} pairs</text>
-          <text x={RX} y={256} fontSize="11.5" style={{ fill: 'var(--ink-3)' }}>(that grows with the box; the list does not)</text>
+          <text x={RX} y={162} fontSize="13" fontWeight="650"><Translated vi={<>khối này, {walk.points.length} luồng, {LIST.length} ngăn</>}>this block, {walk.points.length} threads, {LIST.length} bins</Translated></text>
+          <text x={RX} y={186} fontSize="12.5"><Translated vi={<>phép kiểm tra: {thousands(walk.tested)} ({thousands(walk.dummyTests)} trên nguyên tử giả)</>}>tests: {thousands(walk.tested)} ({thousands(walk.dummyTests)} on dummy atoms)</Translated></text>
+          <text x={RX} y={208} fontSize="12.5"><Translated vi={<>đã nhận: {thousands(walk.accepted)} ({Math.round((walk.accepted / walk.tested) * 100)} phần trăm)</>}>accepted: {thousands(walk.accepted)} ({Math.round((walk.accepted / walk.tested) * 100)} percent)</Translated></text>
+          <text x={RX} y={236} fontSize="12.5" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>tổng trực tiếp, cùng các điểm: {walk.points.length} × {world.atoms.length} = {thousands(walk.directPairs)} cặp</>}>direct summation, same points: {walk.points.length} × {world.atoms.length} = {thousands(walk.directPairs)} pairs</Translated></text>
+          <text x={RX} y={256} fontSize="11.5" style={{ fill: 'var(--ink-3)' }}><Translated vi="(con số đó tăng theo hộp; danh sách thì không)">(that grows with the box; the list does not)</Translated></text>
         </g>
       ) : null}
       {f.timeline != null ? (
         <g opacity={f.timeline} data-timeline="">
-          <text x={RX} y={160} fontSize="12" fontWeight="600">one volume</text>
+          <text x={RX} y={160} fontSize="12" fontWeight="600"><Translated vi="một thể tích">one volume</Translated></text>
           <rect x={RX} y={168} width={200} height={20} fill="var(--global-wash)" stroke="var(--global)" />
-          <text x={RX + 100} y={182} fontSize="10.5" textAnchor="middle">kernel (device)</text>
+          <text x={RX + 100} y={182} fontSize="10.5" textAnchor="middle"><Translated vi="kernel (thiết bị)">kernel (device)</Translated></text>
           <rect x={RX + 204} y={168} width={96} height={20} fill="var(--fail-wash)" stroke="var(--fail)" />
-          <text x={RX + 252} y={182} fontSize="10.5" textAnchor="middle">host: overflow</text>
-          <text x={RX} y={220} fontSize="12" fontWeight="600">sub-volumes</text>
+          <text x={RX + 252} y={182} fontSize="10.5" textAnchor="middle"><Translated vi="host: phần tràn">host: overflow</Translated></text>
+          <text x={RX} y={220} fontSize="12" fontWeight="600"><Translated vi="các thể tích con">sub-volumes</Translated></text>
           {[0, 1, 2].map((k) => (
             <g key={k}>
               <rect x={RX + k * 92} y={228} width={88} height={20} fill="var(--global-wash)" stroke="var(--global)" />
-              <text x={RX + k * 92 + 44} y={242} fontSize="10.5" textAnchor="middle">kernel {k + 1}</text>
+              <text x={RX + k * 92 + 44} y={242} fontSize="10.5" textAnchor="middle"><Translated vi={<>kernel {k + 1}</>}>kernel {k + 1}</Translated></text>
               <rect x={RX + (k + 1) * 92} y={252} width={70} height={20} fill="var(--fail-wash)" stroke="var(--fail)" />
-              <text x={RX + (k + 1) * 92 + 35} y={266} fontSize="10" textAnchor="middle">host {k + 1}</text>
+              <text x={RX + (k + 1) * 92 + 35} y={266} fontSize="10" textAnchor="middle"><Translated vi={<>host {k + 1}</>}>host {k + 1}</Translated></text>
             </g>
           ))}
-          <text x={RX} y={300} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}>{binning.overflow.length} overflow atoms of {world.atoms.length}; capacity {CAP}, largest bin {Math.max(...binning.occupancy)}</text>
+          <text x={RX} y={300} fontSize="11.5" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>{binning.overflow.length} nguyên tử tràn trên {world.atoms.length}; sức chứa {CAP}, ngăn lớn nhất {Math.max(...binning.occupancy)}</>}>{binning.overflow.length} overflow atoms of {world.atoms.length}; capacity {CAP}, largest bin {Math.max(...binning.occupancy)}</Translated></text>
         </g>
       ) : null}
     </svg>
@@ -195,61 +200,61 @@ const countersAt = (k: number) => ({ tested: LIST[k].cumTested, accepted: LIST[k
 const beats: Beat[] = [
   {
     clip: 'binned-block-1',
-    label: 'The list',
+    get label() { return tr('The list', 'Danh sách'); },
     draw: (p) => {
       const lit = Math.round(ramp(p, 0.15, 0.8) * LIST.length);
-      return <Stage lit={lit} headline={lit < LIST.length ? `bins the super circle touches: ${lit}` : `${LIST.length} bins: a list of relative offsets, made once on the host`} />;
+      return <Stage lit={lit} headline={lit < LIST.length ? tr(`bins the super circle touches: ${lit}`, `số ngăn mà vòng tròn lớn chạm tới: ${lit}`) : tr(`${LIST.length} bins: a list of relative offsets, made once on the host`, `${LIST.length} ngăn: một danh sách độ lệch tương đối, lập một lần trên host`)} />;
     },
   },
   {
     clip: 'binned-block-2',
-    label: 'Stage a bin',
+    get label() { return tr('Stage a bin', 'Nạp một ngăn'); },
     draw: (p) => (
-      <Stage lit={LIST.length} entry={0} staged={p > 0.2} barrier={p > 0.6 ? 'barrier: wait until the whole bin is in shared memory' : null}
-        headline={`offset (${LIST[0].rel.dx}, ${LIST[0].rel.dy}): the block loads the bin together`} />
+      <Stage lit={LIST.length} entry={0} staged={p > 0.2} barrier={p > 0.6 ? tr('barrier: wait until the whole bin is in shared memory', 'rào chắn: chờ đến khi cả ngăn đã nằm trong bộ nhớ chia sẻ') : null}
+        headline={tr(`offset (${LIST[0].rel.dx}, ${LIST[0].rel.dy}): the block loads the bin together`, `độ lệch (${LIST[0].rel.dx}, ${LIST[0].rel.dy}): cả khối cùng nạp ngăn`)} />
     ),
   },
   {
     clip: 'binned-block-3',
-    label: 'Test and diverge',
+    get label() { return tr('Test and diverge', 'Kiểm tra và phân kỳ'); },
     draw: (p) => {
       const dummy = p >= 0.62;
       const e = DIV.e;
       return (
         <Stage lit={LIST.length} entry={e.k} staged lanes slot={dummy ? DIV.d : DIV.k}
           counters={null}
-          headline={dummy ? 'a dummy atom: every lane tests it, none gains anything' : `atom ${e.slots[DIV.k]}: some lanes accept, some reject; the warp diverges`} />
+          headline={dummy ? tr('a dummy atom: every lane tests it, none gains anything', 'một nguyên tử giả: mọi lane đều kiểm tra nó, không lane nào được gì') : tr(`atom ${e.slots[DIV.k]}: some lanes accept, some reject; the warp diverges`, `nguyên tử ${e.slots[DIV.k]}: vài lane nhận, vài lane loại; warp phân kỳ`)} />
       );
     },
   },
   {
     clip: 'binned-block-4',
-    label: 'Down the list',
+    get label() { return tr('Down the list', 'Đi hết danh sách'); },
     draw: (p) => {
       const k = Math.min(LIST.length - 1, 1 + Math.floor(ramp(p, 0.08, 0.95) * (LIST.length - 1)));
       const local = (ramp(p, 0.08, 0.95) * (LIST.length - 1)) % 1;
       return (
         <Stage lit={LIST.length} entry={k} staged lanes counters={countersAt(k)}
-          barrier={local > 0.75 ? 'barrier: no overwriting until every thread has read' : null}
-          headline={`entry ${k + 1}: offset (${LIST[k].rel.dx}, ${LIST[k].rel.dy}), ${LIST[k].accepted} accepted of ${LIST[k].tested} tests`} />
+          barrier={local > 0.75 ? tr('barrier: no overwriting until every thread has read', 'rào chắn: không ghi đè cho đến khi mọi luồng đã đọc xong') : null}
+          headline={tr(`entry ${k + 1}: offset (${LIST[k].rel.dx}, ${LIST[k].rel.dy}), ${LIST[k].accepted} accepted of ${LIST[k].tested} tests`, `mục ${k + 1}: độ lệch (${LIST[k].rel.dx}, ${LIST[k].rel.dy}), ${LIST[k].accepted} được nhận trên ${LIST[k].tested} phép kiểm tra`)} />
       );
     },
   },
   {
     clip: 'binned-block-5',
-    label: 'Tally',
-    draw: () => <Stage lit={LIST.length} tally counters={countersAt(LIST.length - 1)} headline="the end of the list" />,
+    get label() { return tr('Tally', 'Tổng kết'); },
+    draw: () => <Stage lit={LIST.length} tally counters={countersAt(LIST.length - 1)} headline={tr('the end of the list', 'cuối danh sách')} />,
   },
   {
     clip: 'binned-block-6',
-    label: 'Overflow',
+    get label() { return tr('Overflow', 'Phần tràn'); },
     draw: (p) => (
       <Stage lit={LIST.length} overflow timeline={ramp(p, 0.3, 0.6)}
-        headline={`${binning.overflow.length} atoms did not fit their bins: the host adds them afterwards`} />
+        headline={tr(`${binning.overflow.length} atoms did not fit their bins: the host adds them afterwards`, `${binning.overflow.length} nguyên tử không vừa ngăn của chúng: host cộng chúng vào sau`)} />
     ),
   },
 ];
 
 export function BinnedBlockScene() {
-  return <Scene chapter="ch21" title="A block walks its neighbourhood" beats={beats} />;
+  return <Scene chapter="ch21" title={tr('A block walks its neighbourhood', 'Một khối đi qua vùng lân cận của nó')} beats={beats} />;
 }

@@ -1,0 +1,1 @@
+Hãy theo dõi hai khóa, không một không một và không một không không. Chúng chỉ khác nhau ở bit thấp nhất, và chúng đến sai thứ tự. Lượt 1 đặt không một không không lên trước. Lượt 2 thấy cùng một bit ở cả hai và, vì ổn định, giữ nguyên chúng như vậy. Đó là cách mỗi lượt thừa hưởng công việc của các lượt trước.

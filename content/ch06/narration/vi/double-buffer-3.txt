@@ -1,0 +1,1 @@
+Đặt rào chắn đó trở lại, và thay vào đó bỏ rào chắn sau lần ghi. Giờ luồng 0 ghi, đi thẳng vào vòng lặp kế tiếp, và đọc vị trí 1 trước khi luồng 1 kịp ghi nó. Đó là lỗi đọc sau ghi. Bên đọc cần một giá trị chưa tồn tại, và dù thêm bao nhiêu bộ nhớ cũng không sửa được điều đó.

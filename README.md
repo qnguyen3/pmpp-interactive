@@ -1,5 +1,7 @@
 # PMPP, worked through
 
+English | [Tiếng Việt](README.vi.md)
+
 An interactive study copy of *Programming Massively Parallel Processors* (5th edition),
 built for one reader: lessons with simulations and narrated animation in a local web
 app, and labs that run on your own GPUs through CUDA, HIP or Metal.
@@ -19,6 +21,9 @@ template. `PROGRESS.md` holds the current state and what is still open; the plan
 
 Needs Node.js 20 or newer. Your progress is saved to `progress/progress.json`; commit it
 or sync it to carry it between machines.
+
+The app is in English and Vietnamese: the language switch is at the foot of the rail. To
+translate or review a page, start with `docs/i18n/README.md`.
 
 ## Run the labs
 

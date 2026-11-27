@@ -1,0 +1,1 @@
+Vòng lặp làm 7 phép cộng, và cây cũng vậy: cùng một lượng công việc. Điều thay đổi là span, tức số bước nối tiếp, 7 bước so với 3. Mỗi ô vuông là 1 bộ cộng bận trong 1 bước. Với N giá trị, công việc là N trừ 1 theo cả hai cách, và span của cây là logarit cơ số 2 của N.

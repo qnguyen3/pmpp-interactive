@@ -1,0 +1,1 @@
+Số nguyên 16 bit đi trước. Sau 2 tích, nó giữ 32,258. Tích thứ ba đẩy nó vượt quá 32,767, giá trị lớn nhất nó có thể giữ, và nó quay vòng thành một số âm. Mọi tích sau đó đều được cộng vào rác, và không có gì trong kernel nhận ra.

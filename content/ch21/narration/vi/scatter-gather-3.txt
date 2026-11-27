@@ -1,0 +1,1 @@
+Các luồng cùng nhau di chuyển dọc theo hàng, nên mỗi bước lại là một va chạm 4 chiều trên một điểm duy nhất. Không ai quy định thứ tự áp dụng một hàng đợi. Ở đây hai lần chạy áp dụng nó theo hai thứ tự khác nhau, và điểm 3 kết thúc với các tổng khác nhau ở những chữ số cuối, vì phép cộng dấu phẩy động không có tính kết hợp.

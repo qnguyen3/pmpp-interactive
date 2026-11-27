@@ -1,5 +1,6 @@
 import type { ReactNode, SVGProps } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import {
   BM,
   BN,
@@ -109,7 +110,7 @@ function Tile({ v, children, patches, warpTiles, waveTiles }: { v: View; childre
                   <Box v={v} r0={t.wRow} c0={t.wCol} rows={G32.warpRows} cols={G32.warpCols} fill="none" stroke="var(--ink)" strokeWidth="1.4" />
                   {m.s < 3 ? (
                     <text x={m.x(t.wCol + G32.warpCols / 2)} y={m.y(t.wRow + 6)} fontSize="11" textAnchor="middle"
-                      stroke="var(--page)" strokeWidth="3" paintOrder="stroke" style={{ fill: 'var(--ink-2)' }}>warp {w}</text>
+                      stroke="var(--page)" strokeWidth="3" paintOrder="stroke" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>warp {w}</>}>warp {w}</Translated></text>
                   ) : null}
                 </g>
               );
@@ -124,7 +125,7 @@ function Tile({ v, children, patches, warpTiles, waveTiles }: { v: View; childre
                 <g key={w} data-wave-tile={w}>
                   <Box v={v} r0={t.wRow} c0={t.wCol} rows={G64.warpRows} cols={G64.warpCols} fill="none" stroke="var(--ink)" strokeWidth="1.4" />
                   <text x={m.x(t.wCol + G64.warpCols / 2)} y={m.y(t.wRow + G64.warpRows / 2) + 4} fontSize="11" textAnchor="middle"
-                    stroke="var(--page)" strokeWidth="3" paintOrder="stroke" style={{ fill: 'var(--ink-2)' }}>wavefront {w}</text>
+                    stroke="var(--page)" strokeWidth="3" paintOrder="stroke" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>wavefront {w}</>}>wavefront {w}</Translated></text>
                 </g>
               );
             })}
@@ -159,14 +160,14 @@ function Memory({ res, shown, counter, W }: { res: StoreResult; shown: number; c
   const pitch = strips.length > 4 ? 28 : 40;
   return (
     <g data-sectors={res.transactions} data-useful={res.efficiency} data-rows={strips.length} data-width={W}>
-      <text x={MX} y={TY + 4} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>C in global memory: what this one instruction writes</text>
-      <text x={MX} y={TY + 20} fontSize="10" style={{ fill: 'var(--ink-3)' }}>one box per 32-byte sector touched; one strip per matrix row</text>
+      <text x={MX} y={TY + 4} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>{tr('C in global memory: what this one instruction writes', 'C trong bộ nhớ toàn cục: những gì lệnh duy nhất này ghi')}</text>
+      <text x={MX} y={TY + 20} fontSize="10" style={{ fill: 'var(--ink-3)' }}>{tr('one box per 32-byte sector touched; one strip per matrix row', 'mỗi sector 32 byte được chạm tới là một hộp; mỗi hàng ma trận là một dải')}</text>
       <g opacity={shown}>
         {strips.map((s, k) => {
           const y = TY + 40 + k * pitch;
           return (
             <g key={s.row} data-strip-row={s.row} data-strip-sectors={s.seg1 - s.seg0}>
-              <text x={MX} y={y + 11} fontSize="10" style={{ fill: 'var(--ink-2)' }}>row {s.row}</text>
+              <text x={MX} y={y + 11} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>hàng {s.row}</>}>row {s.row}</Translated></text>
               {s.used.map((u, j) => (
                 <rect key={j} x={MSTRIP + j * SECTOR * PX_BYTE} y={y} width={SECTOR * PX_BYTE - 1} height={14}
                   fill="var(--global-wash)" stroke="var(--global)" strokeWidth="0.6" />
@@ -180,7 +181,15 @@ function Memory({ res, shown, counter, W }: { res: StoreResult; shown: number; c
       </g>
       {counter ? (
         <text x={MX} y={TY + TS - 2} fontSize="13" fontWeight="600" data-counter="">
-          {res.transactions} sectors · {thousands(res.bytesNeeded)} of {thousands(res.bytesFetched)} bytes used · {Math.round(res.efficiency * 1000) / 10} %
+          <Translated
+            vi={
+              <>
+                {res.transactions} sector · dùng {thousands(res.bytesNeeded)} trên {thousands(res.bytesFetched)} byte · {Math.round(res.efficiency * 1000) / 10} %
+              </>
+            }
+          >
+            {res.transactions} sectors · {thousands(res.bytesNeeded)} of {thousands(res.bytesFetched)} bytes used · {Math.round(res.efficiency * 1000) / 10} %
+          </Translated>
         </text>
       ) : null}
     </g>
@@ -189,11 +198,13 @@ function Memory({ res, shown, counter, W }: { res: StoreResult; shown: number; c
 
 function Stage({ beat, headline, children }: { beat: number; headline: ReactNode; children: ReactNode }) {
   return (
-    <svg viewBox="0 0 760 352" role="img" data-beat={beat} aria-label="Animation of the output tile being remapped for coalesced stores" style={{ width: '100%', maxWidth: 760, display: 'block' }}>
+    <svg viewBox="0 0 760 352" role="img" data-beat={beat} aria-label={tr('Animation of the output tile being remapped for coalesced stores', 'Hoạt hình ô đầu ra được ánh xạ lại để các lần ghi được hợp nhất')} style={{ width: '100%', maxWidth: 760, display: 'block' }}>
       <text x={TX} y={22} fontSize="13" fontWeight="600" data-headline="">{headline}</text>
       {children}
       <text x={TX} y={TY + TS + 18} fontSize="10" style={{ fill: 'var(--ink-3)' }}>
-        C is {thousands(N)} floats wide and starts on a 256-byte boundary; block (0, 0); NVIDIA's 32-byte sectors.
+        <Translated vi={<>C rộng {thousands(N)} float và bắt đầu ở một ranh giới 256 byte; khối (0, 0); sector 32 byte của NVIDIA.</>}>
+          C is {thousands(N)} floats wide and starts on a 256-byte boundary; block (0, 0); NVIDIA's 32-byte sectors.
+        </Translated>
       </text>
     </svg>
   );
@@ -259,9 +270,11 @@ function InfoLines({ lines, y0 = TY + 44 }: { lines: ReactNode[]; y0?: number })
 const beats: Beat[] = [
   {
     clip: 'remap-1',
-    label: '8 × 8, scalar',
+    get label() {
+      return tr('8 × 8, scalar', '8 × 8, vô hướng');
+    },
     draw: (p) => (
-      <Stage beat={1} headline="§15.3: each thread owns an 8 × 8 patch; warp 6 stores one float per lane">
+      <Stage beat={1} headline={tr('§15.3: each thread owns an 8 × 8 patch; warp 6 stores one float per lane', '§15.3: mỗi luồng sở hữu một mảng 8 × 8; warp 6 ghi một float mỗi lane')}>
         <Tile v={FULL} patches={1}>
           <CoarseWarp v={FULL} warp={WARP} />
           <Written v={FULL} res={SCALAR} upto={Math.floor(ramp(p, 0.1, 0.5) * 32)} />
@@ -272,9 +285,11 @@ const beats: Beat[] = [
   },
   {
     clip: 'remap-2',
-    label: 'float4',
+    get label() {
+      return tr('float4', 'float4');
+    },
     draw: (p) => (
-      <Stage beat={2} headline="Exercise 2: a float4 store per lane, a quarter of the instructions">
+      <Stage beat={2} headline={tr('Exercise 2: a float4 store per lane, a quarter of the instructions', 'Bài tập 2: mỗi lane một lần ghi float4, chỉ còn một phần tư số lệnh')}>
         <Tile v={FULL} patches={1}>
           <CoarseWarp v={FULL} warp={WARP} />
           <Written v={FULL} res={FLOAT4} upto={Math.floor(ramp(p, 0.1, 0.45) * 32)} />
@@ -285,21 +300,23 @@ const beats: Beat[] = [
   },
   {
     clip: 'remap-3',
-    label: 'Warp tiles',
+    get label() {
+      return tr('Warp tiles', 'Ô của warp');
+    },
     draw: (p) => {
       const v = lerp(FULL, ZOOM, ramp(p, 0.58, 0.95));
       return (
-        <Stage beat={3} headline={`8 warps as ${G32.WR} × ${G32.WC} warp tiles of ${G32.warpRows} × ${G32.warpCols}`}>
+        <Stage beat={3} headline={tr(`8 warps as ${G32.WR} × ${G32.WC} warp tiles of ${G32.warpRows} × ${G32.warpCols}`, `8 warp thành ${G32.WR} × ${G32.WC} ô warp cỡ ${G32.warpRows} × ${G32.warpCols}`)}>
           <Tile v={v} patches={1 - ramp(p, 0.05, 0.3)} warpTiles={ramp(p, 0.05, 0.3)}>
             <g opacity={ramp(p, 0.3, 0.5)}>
               <Box v={v} r0={W6.wRow} c0={W6.wCol} rows={G32.warpRows} cols={G32.warpCols} fill="var(--reg-wash)" />
             </g>
           </Tile>
           <InfoLines lines={[
-            `block tile ${BM} × ${BN}, ${G32.warps} warps of 32 lanes`,
-            `warp tile ${G32.warpRows} rows × ${G32.warpCols} columns`,
-            `warp 6 starts at row ${W6.wRow}, column ${W6.wCol}`,
-            'same 8 × 8 outputs per thread as before',
+            tr(`block tile ${BM} × ${BN}, ${G32.warps} warps of 32 lanes`, `ô của khối ${BM} × ${BN}, ${G32.warps} warp, mỗi warp 32 lane`),
+            tr(`warp tile ${G32.warpRows} rows × ${G32.warpCols} columns`, `ô warp ${G32.warpRows} hàng × ${G32.warpCols} cột`),
+            tr(`warp 6 starts at row ${W6.wRow}, column ${W6.wCol}`, `warp 6 bắt đầu ở hàng ${W6.wRow}, cột ${W6.wCol}`),
+            tr('same 8 × 8 outputs per thread as before', 'vẫn 8 × 8 đầu ra mỗi luồng như trước'),
           ]} />
         </Stage>
       );
@@ -307,12 +324,14 @@ const beats: Beat[] = [
   },
   {
     clip: 'remap-4',
-    label: 'Quadrants',
+    get label() {
+      return tr('Quadrants', 'Góc phần tư');
+    },
     draw: (p) => {
       const upto = p < 0.2 ? 0 : Math.ceil(ramp(p, 0.2, 0.55) * 32);
       const quads = p < 0.58 ? 1 : 1 + Math.floor(ramp(p, 0.58, 0.82) * 3);
       return (
-        <Stage beat={4} headline={`4 quadrants of ${G32.QR} × ${G32.QC}; lanes 8 × ${G32.LC}; one 4 × 4 square per lane per quadrant`}>
+        <Stage beat={4} headline={tr(`4 quadrants of ${G32.QR} × ${G32.QC}; lanes 8 × ${G32.LC}; one 4 × 4 square per lane per quadrant`, `4 góc phần tư cỡ ${G32.QR} × ${G32.QC}; lane xếp 8 × ${G32.LC}; mỗi lane một ô vuông 4 × 4 trong mỗi góc phần tư`)}>
           <Tile v={ZOOM} warpTiles={1}>
             <Box v={ZOOM} r0={W6.wRow} c0={W6.wCol} rows={G32.warpRows} cols={G32.warpCols} fill="var(--page)" />
             <LaneSquares v={ZOOM} W={32} warp={WARP} upto={upto} quads={quads} labels mark={p > 0.84 ? LANE : undefined} />
@@ -320,9 +339,9 @@ const beats: Beat[] = [
           </Tile>
           <g opacity={ramp(p, 0.84, 0.95)}>
             <InfoLines lines={[
-              `lane ${LANE}: lane row ${L5.lRow / 4}, lane column ${L5.lCol / 4}`,
-              ...L5.subTiles.map((s) => `quadrant (${s.qr}, ${s.qc}): rows ${s.row}–${s.row + 3}, columns ${s.col}–${s.col + 3}`),
-              '4 squares of 16 = a logical 8 × 8 tile: 64 registers',
+              tr(`lane ${LANE}: lane row ${L5.lRow / 4}, lane column ${L5.lCol / 4}`, `lane ${LANE}: hàng lane ${L5.lRow / 4}, cột lane ${L5.lCol / 4}`),
+              ...L5.subTiles.map((s) => tr(`quadrant (${s.qr}, ${s.qc}): rows ${s.row}–${s.row + 3}, columns ${s.col}–${s.col + 3}`, `góc phần tư (${s.qr}, ${s.qc}): hàng ${s.row}–${s.row + 3}, cột ${s.col}–${s.col + 3}`)),
+              tr('4 squares of 16 = a logical 8 × 8 tile: 64 registers', '4 ô vuông 16 phần tử = một ô logic 8 × 8: 64 thanh ghi'),
             ]} />
           </g>
         </Stage>
@@ -331,11 +350,13 @@ const beats: Beat[] = [
   },
   {
     clip: 'remap-5',
-    label: 'The store again',
+    get label() {
+      return tr('The store again', 'Lại lần ghi đó');
+    },
     draw: (p) => {
       const rowsShown = Math.ceil(ramp(p, 0.05, 0.42) * 8);
       return (
-        <Stage beat={5} headline={`§15.5: each lane row of ${G32.LC} writes ${G32.laneRowBytes} contiguous bytes`}>
+        <Stage beat={5} headline={tr(`§15.5: each lane row of ${G32.LC} writes ${G32.laneRowBytes} contiguous bytes`, `§15.5: mỗi hàng ${G32.LC} lane ghi ${G32.laneRowBytes} byte liên tiếp`)}>
           <Tile v={ZOOM} warpTiles={1}>
             <Box v={ZOOM} r0={W6.wRow} c0={W6.wCol} rows={G32.warpRows} cols={G32.warpCols} fill="var(--page)" />
             <LaneSquares v={ZOOM} W={32} warp={WARP} upto={32} quads={4} />
@@ -349,12 +370,14 @@ const beats: Beat[] = [
   },
   {
     clip: 'remap-6',
-    label: '64 lanes',
+    get label() {
+      return tr('64 lanes', '64 lane');
+    },
     draw: (p) => {
       const v = lerp(ZOOM, FULL, ramp(p, 0, 0.22));
       const wave = remapThread(WAVE * 64, 64);
       return (
-        <Stage beat={6} headline={`64 lanes: ${G64.warps} wavefronts as ${G64.WR} × ${G64.WC} tiles of ${G64.warpRows} × ${G64.warpCols}; lane rows of ${G64.LC} write ${G64.laneRowBytes} bytes`}>
+        <Stage beat={6} headline={tr(`64 lanes: ${G64.warps} wavefronts as ${G64.WR} × ${G64.WC} tiles of ${G64.warpRows} × ${G64.warpCols}; lane rows of ${G64.LC} write ${G64.laneRowBytes} bytes`, `64 lane: ${G64.warps} wavefront thành ${G64.WR} × ${G64.WC} ô cỡ ${G64.warpRows} × ${G64.warpCols}; mỗi hàng ${G64.LC} lane ghi ${G64.laneRowBytes} byte`)}>
           <Tile v={v} warpTiles={1 - ramp(p, 0.15, 0.3)} waveTiles={ramp(p, 0.22, 0.38)}>
             <g opacity={ramp(p, 0.3, 0.45)}>
               <Box v={v} r0={wave.wRow} c0={wave.wCol} rows={G64.warpRows} cols={G64.warpCols} fill="var(--page)" />
@@ -371,5 +394,5 @@ const beats: Beat[] = [
 ];
 
 export function RemapScene() {
-  return <Scene chapter="ch15" title="From a block tile to one lane's four sub-tiles" beats={beats} />;
+  return <Scene chapter="ch15" title={tr("From a block tile to one lane's four sub-tiles", 'Từ ô của khối đến bốn ô con của một lane')} beats={beats} />;
 }

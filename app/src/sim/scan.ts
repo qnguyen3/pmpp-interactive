@@ -33,7 +33,10 @@
 // and transformers' 1 - p is formed in double and rounded to float32 once (our modelling
 // choice; the facts file does not say how PyTorch rounds the scalar).
 //
-// Erasable TypeScript only, and no imports: the browser checks import this file directly.
+// Erasable TypeScript only, and the one import is lib/locale.ts (itself import-free): the browser
+// checks import this file directly.
+
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- the book's rows
 /** The sausage orders of p. 252. */
@@ -138,9 +141,15 @@ function tidy(s: string): string {
 // ---------------------------------------------------------------- scans in an order
 export type Order = 'loop' | 'kogge-stone' | 'brent-kung';
 export const ORDER_LABEL: Record<Order, string> = {
-  loop: 'the loop of Fig. 11.1',
-  'kogge-stone': 'Kogge-Stone order',
-  'brent-kung': 'Brent-Kung order',
+  get loop() {
+    return tr('the loop of Fig. 11.1', 'vòng lặp của Fig. 11.1');
+  },
+  get 'kogge-stone'() {
+    return tr('Kogge-Stone order', 'thứ tự Kogge-Stone');
+  },
+  get 'brent-kung'() {
+    return tr('Brent-Kung order', 'thứ tự Brent-Kung');
+  },
 };
 
 /** Inclusive scan with every addition rounded by `round` (Math.fround for float32), in an order. */
@@ -200,16 +209,33 @@ export function orderAdditions(n: number, order: Order): number {
 export type Rule = 'exclusive' | 'inclusive' | 'mlx' | 'ascending';
 export const RULES: Rule[] = ['exclusive', 'inclusive', 'mlx', 'ascending'];
 export const RULE_LABEL: Record<Rule, string> = {
-  exclusive: 'mass before < p',
-  inclusive: 'mass up to and including < p',
-  mlx: 'mass before < p × total, then keep ties',
-  ascending: 'ascending cumsum ≤ 1 − p',
+  get exclusive() {
+    return tr('mass before < p', 'khối lượng trước nó < p');
+  },
+  get inclusive() {
+    return tr('mass up to and including < p', 'khối lượng tính cả nó < p');
+  },
+  get mlx() {
+    return tr('mass before < p × total, then keep ties', 'khối lượng trước nó < p × tổng, rồi giữ các token bằng nhau');
+  },
+  get ascending() {
+    return tr('ascending cumsum ≤ 1 − p', 'cumsum tăng dần ≤ 1 − p');
+  },
 };
 export const RULE_WHO: Record<Rule, string> = {
-  exclusive: 'llama.cpp (host and backend samplers); vLLM and transformers reach the same set',
-  inclusive: 'nobody: the off-by-one',
-  mlx: 'mlx-lm apply_top_p',
-  ascending: 'transformers TopPLogitsWarper, vLLM PyTorch path',
+  get exclusive() {
+    return tr(
+      'llama.cpp (host and backend samplers); vLLM and transformers reach the same set',
+      'llama.cpp (bộ lấy mẫu phía host và phía backend); vLLM và transformers ra cùng một tập',
+    );
+  },
+  get inclusive() {
+    return tr('nobody: the off-by-one', 'không ai cả: lỗi lệch một (off-by-one)');
+  },
+  mlx: 'mlx-lm apply_top_p', // i18n-ignore: library and function name, kept in English
+  get ascending() {
+    return tr('transformers TopPLogitsWarper, vLLM PyTorch path', 'TopPLogitsWarper của transformers, nhánh PyTorch của vLLM');
+  },
 };
 export const RULE_FACT: Record<Rule, string> = {
   exclusive: 'D2, D4',
@@ -320,12 +346,47 @@ export interface Preset {
   p: number;
 }
 export const PRESETS: Preset[] = [
-  { id: 'peaked', label: 'peaked', probs: [0.62, 0.18, 0.09, 0.05, 0.03, 0.02, 0.01], p: 0.9 },
-  { id: 'flat', label: 'flat', probs: [0.14, 0.13, 0.13, 0.12, 0.12, 0.12, 0.11, 0.08, 0.05], p: 0.5 },
+  {
+    id: 'peaked',
+    get label() {
+      return tr('peaked', 'nhọn');
+    },
+    probs: [0.62, 0.18, 0.09, 0.05, 0.03, 0.02, 0.01],
+    p: 0.9,
+  },
+  {
+    id: 'flat',
+    get label() {
+      return tr('flat', 'phẳng');
+    },
+    probs: [0.14, 0.13, 0.13, 0.12, 0.12, 0.12, 0.11, 0.08, 0.05],
+    p: 0.5,
+  },
   { id: 'dyadic', label: '0.5 0.25 0.125 0.125', probs: [0.5, 0.25, 0.125, 0.125], p: 0.75 },
-  { id: 'tied', label: 'four tied at 0.25', probs: [0.25, 0.25, 0.25, 0.25], p: 0.5 },
-  { id: 'boundary-tie', label: 'a tie at the boundary', probs: [0.4, 0.2, 0.2, 0.2], p: 0.5 },
-  { id: 'zero-tail', label: 'a zero tail', probs: [0.5, 0.3, 0.2, 0, 0, 0], p: 0.95 },
+  {
+    id: 'tied',
+    get label() {
+      return tr('four tied at 0.25', 'bốn token bằng nhau ở 0.25');
+    },
+    probs: [0.25, 0.25, 0.25, 0.25],
+    p: 0.5,
+  },
+  {
+    id: 'boundary-tie',
+    get label() {
+      return tr('a tie at the boundary', 'bằng nhau ở ranh giới');
+    },
+    probs: [0.4, 0.2, 0.2, 0.2],
+    p: 0.5,
+  },
+  {
+    id: 'zero-tail',
+    get label() {
+      return tr('a zero tail', 'đuôi bằng 0');
+    },
+    probs: [0.5, 0.3, 0.2, 0, 0, 0],
+    p: 0.95,
+  },
 ];
 
 // ---------------------------------------------------------------- orders that disagree
@@ -395,4 +456,15 @@ export const FLIP: Flip = {
 };
 
 /** The presets plus the row on which the two orders disagree. */
-export const ALL_PRESETS: Preset[] = [...PRESETS, { id: 'flip', label: 'two orders disagree', probs: FLIP.probs, p: FLIP.p }];
+// Array spread keeps the PRESETS objects themselves, so their label getters still read at call time.
+export const ALL_PRESETS: Preset[] = [
+  ...PRESETS,
+  {
+    id: 'flip',
+    get label() {
+      return tr('two orders disagree', 'hai thứ tự cho kết quả khác nhau');
+    },
+    probs: FLIP.probs,
+    p: FLIP.p,
+  },
+];

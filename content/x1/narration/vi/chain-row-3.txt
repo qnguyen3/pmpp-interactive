@@ -1,0 +1,1 @@
+Giờ năm token còn lại trượt vào thứ tự giảm dần và trở thành các xác suất có tổng bằng 1. Chỉ năm giá trị được sắp xếp, và chỉ năm giá trị được chuẩn hóa, không phải cả bộ từ vựng. Mọi giai đoạn sau giai đoạn này đều làm việc trên năm con số. Token 2 giữ 62 phần trăm khối xác suất, và token 7 khoảng 16.

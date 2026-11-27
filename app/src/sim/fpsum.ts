@@ -34,6 +34,7 @@
 // Erasable TypeScript only (the browser checks import this module through the app's server).
 
 import { BF16, FP16, FP32, TOY5, add as mfAdd, maxFinite, round as mfRound, ulp as mfUlp, values as mfValues, type Format } from './minifloat';
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- formats and rounding
 export type Acc = 'fp32' | 'fp16' | 'bf16';
@@ -120,14 +121,78 @@ export function rng(seed: number): () => number {
 
 export type DataKind = 'ones' | 'uniform' | 'mixed' | 'mixed-asc' | 'mixed-desc' | 'cancelling' | 'softmax' | 'big-small';
 export const DATA: { id: DataKind; label: string; note: string }[] = [
-  { id: 'ones', label: 'ones', note: 'every value is 1' },
-  { id: 'uniform', label: 'uniform on [0, 1)', note: 'random values between 0 and 1' },
-  { id: 'mixed', label: 'mixed magnitudes', note: 'log-uniform between 2^-14 and 2^-2, random order' },
-  { id: 'mixed-asc', label: 'mixed, ascending', note: 'the same values sorted smallest first' },
-  { id: 'mixed-desc', label: 'mixed, descending', note: 'the same values sorted largest first' },
-  { id: 'cancelling', label: 'cancelling', note: 'mixed magnitudes with random signs' },
-  { id: 'softmax', label: 'softmax terms', note: 'exp(z − max z) for standard-normal logits z' },
-  { id: 'big-small', label: 'one big, many small', note: '1.0 first, then values below 2^-24, half an FP32 ULP of 1' },
+  {
+    id: 'ones',
+    get label() {
+      return tr('ones', 'toàn số 1');
+    },
+    get note() {
+      return tr('every value is 1', 'mọi giá trị đều là 1');
+    },
+  },
+  {
+    id: 'uniform',
+    get label() {
+      return tr('uniform on [0, 1)', 'đều trên [0, 1)');
+    },
+    get note() {
+      return tr('random values between 0 and 1', 'các giá trị ngẫu nhiên giữa 0 và 1');
+    },
+  },
+  {
+    id: 'mixed',
+    get label() {
+      return tr('mixed magnitudes', 'độ lớn trộn lẫn');
+    },
+    get note() {
+      return tr('log-uniform between 2^-14 and 2^-2, random order', 'log-uniform giữa 2^-14 và 2^-2, thứ tự ngẫu nhiên');
+    },
+  },
+  {
+    id: 'mixed-asc',
+    get label() {
+      return tr('mixed, ascending', 'trộn lẫn, tăng dần');
+    },
+    get note() {
+      return tr('the same values sorted smallest first', 'cùng các giá trị đó, sắp xếp từ nhỏ nhất trước');
+    },
+  },
+  {
+    id: 'mixed-desc',
+    get label() {
+      return tr('mixed, descending', 'trộn lẫn, giảm dần');
+    },
+    get note() {
+      return tr('the same values sorted largest first', 'cùng các giá trị đó, sắp xếp từ lớn nhất trước');
+    },
+  },
+  {
+    id: 'cancelling',
+    get label() {
+      return tr('cancelling', 'triệt tiêu');
+    },
+    get note() {
+      return tr('mixed magnitudes with random signs', 'độ lớn trộn lẫn với dấu ngẫu nhiên');
+    },
+  },
+  {
+    id: 'softmax',
+    get label() {
+      return tr('softmax terms', 'các số hạng softmax');
+    },
+    get note() {
+      return tr('exp(z − max z) for standard-normal logits z', 'exp(z − max z) với logits z phân phối chuẩn tắc');
+    },
+  },
+  {
+    id: 'big-small',
+    get label() {
+      return tr('one big, many small', 'một lớn, nhiều nhỏ');
+    },
+    get note() {
+      return tr('1.0 first, then values below 2^-24, half an FP32 ULP of 1', '1.0 trước, rồi các giá trị dưới 2^-24, tức nửa ULP FP32 của 1');
+    },
+  },
 ];
 export const DEFAULT_SEED = 7;
 
@@ -224,12 +289,42 @@ export function errorsOf(result: number, ref: number, scale: number, f: Acc | Fo
 // ---------------------------------------------------------------- methods
 export type Method = 'sequential' | 'sorted' | 'tree' | 'tree-neighbours' | 'chunked' | 'kahan' | 'kahan-chunked';
 export const METHODS: { id: Method; label: string }[] = [
-  { id: 'sequential', label: 'sequential loop' },
-  { id: 'sorted', label: 'sorted by |x|, then the loop' },
-  { id: 'tree', label: 'pairwise tree' },
-  { id: 'chunked', label: 'chunked: c per thread, then a tree' },
-  { id: 'kahan', label: 'Kahan loop' },
-  { id: 'kahan-chunked', label: 'Kahan per thread, then a tree' },
+  {
+    id: 'sequential',
+    get label() {
+      return tr('sequential loop', 'vòng lặp tuần tự');
+    },
+  },
+  {
+    id: 'sorted',
+    get label() {
+      return tr('sorted by |x|, then the loop', 'sắp xếp theo |x|, rồi vòng lặp');
+    },
+  },
+  {
+    id: 'tree',
+    get label() {
+      return tr('pairwise tree', 'cây từng cặp');
+    },
+  },
+  {
+    id: 'chunked',
+    get label() {
+      return tr('chunked: c per thread, then a tree', 'chia chunk: c phần tử mỗi luồng, rồi một cây');
+    },
+  },
+  {
+    id: 'kahan',
+    get label() {
+      return tr('Kahan loop', 'vòng lặp Kahan');
+    },
+  },
+  {
+    id: 'kahan-chunked',
+    get label() {
+      return tr('Kahan per thread, then a tree', 'Kahan cho từng luồng, rồi một cây');
+    },
+  },
 ];
 
 export function sumSequential(values: ArrayLike<number>, f: Acc | Format): number {
@@ -584,13 +679,23 @@ export function kahanVariant(name: KahanVariantName, values: ArrayLike<number>, 
 
 /** Which version is in which slot of the bug hunt (and of kahan.h): the order the reader sees. */
 export const BUG_HUNT: { version: number; name: KahanVariantName }[] = [
-  { version: 1, name: 'sign' },
-  { version: 2, name: 'correct' },
-  { version: 3, name: 'late-c' },
+  { version: 1, name: 'sign' }, // i18n-ignore: variant identifier
+  { version: 2, name: 'correct' }, // i18n-ignore: variant identifier
+  { version: 3, name: 'late-c' }, // i18n-ignore: variant identifier
   { version: 4, name: 'no-c' },
 ];
 export type Verdict = 'kahan' | 'plain' | 'worse';
-export const VERDICT_LABEL: Record<Verdict, string> = { kahan: 'like Kahan', plain: 'like the plain sum', worse: 'worse than plain' };
+export const VERDICT_LABEL: Record<Verdict, string> = {
+  get kahan() {
+    return tr('like Kahan', 'giống Kahan');
+  },
+  get plain() {
+    return tr('like the plain sum', 'giống tổng thường');
+  },
+  get worse() {
+    return tr('worse than plain', 'tệ hơn tổng thường');
+  },
+};
 
 export interface VariantRun {
   name: KahanVariantName;
@@ -678,10 +783,34 @@ export interface TeaserRow {
   e: Errors;
 }
 const TEASER_ROWS: Omit<TeaserRow, 'e'>[] = [
-  { id: 'fp32-loop', label: 'float loop', acc: 'fp32', method: 'sequential' },
-  { id: 'fp32-tree', label: 'float tree', acc: 'fp32', method: 'tree' },
-  { id: 'fp16-loop', label: 'half loop', acc: 'fp16', method: 'sequential' },
-  { id: 'fp16-tree', label: 'half tree', acc: 'fp16', method: 'tree' },
+  {
+    id: 'fp32-loop',
+    get label() {
+      return tr('float loop', 'vòng lặp float');
+    },
+    acc: 'fp32', method: 'sequential',
+  },
+  {
+    id: 'fp32-tree',
+    get label() {
+      return tr('float tree', 'cây float');
+    },
+    acc: 'fp32', method: 'tree',
+  },
+  {
+    id: 'fp16-loop',
+    get label() {
+      return tr('half loop', 'vòng lặp half');
+    },
+    acc: 'fp16', method: 'sequential',
+  },
+  {
+    id: 'fp16-tree',
+    get label() {
+      return tr('half tree', 'cây half');
+    },
+    acc: 'fp16', method: 'tree',
+  },
 ];
 /** One softmax denominator of a 131,072-entry row (standard-normal logits, the default seed), summed four ways. */
 export function teaser(): { reference: number; rows: TeaserRow[] } {

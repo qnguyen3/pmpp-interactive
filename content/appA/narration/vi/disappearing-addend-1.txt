@@ -1,0 +1,1 @@
+Hai số độ chính xác một nửa, 1000 và 0.3. Mỗi số gồm một bit dấu, một số mũ, và một cửa sổ 11 bit có nghĩa. 1000 có số mũ 9. 0.3 có số mũ âm 2. Bộ cộng không thể cộng chúng như vậy. [short pause] Trước hết nó phải đưa cả hai về cùng một số mũ, nghĩa là phải dịch số nhỏ hơn.

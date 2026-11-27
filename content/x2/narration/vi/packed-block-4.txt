@@ -1,0 +1,1 @@
+Các khối nằm nối đuôi nhau trong bộ nhớ, mỗi khối 18 byte, và mã của một khối bắt đầu sau 2 byte. Vậy cứ cách một khối, mã lại bắt đầu lệch 2 byte so với một ranh giới 4 byte, và một lần nạp 4 byte ở đó bị lệch căn chỉnh. Các kernel đọc mã thành các word 16 bit, vốn luôn thẳng hàng.

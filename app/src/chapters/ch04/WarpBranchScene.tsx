@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr, tr as trText } from '../../lib/i18n';
 import { SceneReadout, useNarrow } from './sceneText';
 import {
   FIG49,
@@ -44,7 +45,13 @@ const TRIPS = fig410Trips(W);
 const LOOP = run(loop(W, TRIPS));
 
 const rowLabel = (x: Issue): string =>
-  x.part === 'A' ? `A, instruction ${x.k + 1}` : x.part === 'B' ? `B, instruction ${x.k + 1}` : x.part === 'body' ? `iteration ${x.iter! + 1}` : x.label;
+  x.part === 'A'
+    ? tr(`A, instruction ${x.k + 1}`, `A, lệnh ${x.k + 1}`)
+    : x.part === 'B'
+      ? tr(`B, instruction ${x.k + 1}`, `B, lệnh ${x.k + 1}`)
+      : x.part === 'body'
+        ? tr(`iteration ${x.iter! + 1}`, `vòng lặp ${x.iter! + 1}`)
+        : x.label;
 
 interface Frame {
   /** Rows drawn, oldest first. */
@@ -77,14 +84,20 @@ function Stage(f: Frame) {
   const last = f.rows.length - 1;
   return (
     <>
-      <svg viewBox={`0 0 ${VIEW_W} ${narrow ? VIEW_H_NARROW : VIEW_H}`} role="img" aria-label="Animation of one warp executing instructions, one row per instruction" style={{ width: '100%', maxWidth: VIEW_W, display: 'block' }}>
+      <svg viewBox={`0 0 ${VIEW_W} ${narrow ? VIEW_H_NARROW : VIEW_H}`} role="img" aria-label={tr('Animation of one warp executing instructions, one row per instruction', 'Hoạt hình một warp thực thi các lệnh, mỗi lệnh một hàng')} style={{ width: '100%', maxWidth: VIEW_W, display: 'block' }}>
         <defs>
           <pattern id="wb-wait" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="5" stroke="var(--ink-3)" strokeWidth="1.2" />
           </pattern>
         </defs>
-        <text x={X0} y={18} fontSize="12" fontWeight="600">one warp: {W} lanes, each a thread with its own registers</text>
-        <text x={X0 - 8} y={34} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>instruction issued</text>
+        <text x={X0} y={18} fontSize="12" fontWeight="600">
+          <Translated vi={<>một warp: {W} lane, mỗi lane là một luồng với các thanh ghi riêng</>}>
+            one warp: {W} lanes, each a thread with its own registers
+          </Translated>
+        </text>
+        <text x={X0 - 8} y={34} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>
+          <Translated vi="lệnh được phát">instruction issued</Translated>
+        </text>
         {[0, 8, 16, 24, 31].map((i) => (
           <text key={i} x={laneX(i) + CELL / 2 - 1} y={34} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{i}</text>
         ))}
@@ -113,7 +126,7 @@ function Stage(f: Frame) {
               </g>
             ))}
             <text x={laneX(W) + 8} y={rowY[i] + 12} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-              {r.count === W ? `all ${W}` : `${r.count} run, ${W - r.count} wait`}
+              {r.count === W ? tr(`all ${W}`, `cả ${W}`) : tr(`${r.count} run, ${W - r.count} wait`, `${r.count} chạy, ${W - r.count} chờ`)}
             </text>
           </g>
         ))}
@@ -121,7 +134,9 @@ function Stage(f: Frame) {
           <g data-barrier={f.barrierBefore}>
             <rect x={X0} y={rowY[f.barrierBefore] - 17} width={W * CELL - 2} height={13} rx="2" fill="var(--ink)" />
             <text x={X0 + (W * CELL) / 2} y={rowY[f.barrierBefore] - 7} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--page)' }}>
-              warp barrier: every lane arrives before any goes on
+              <Translated vi="rào chắn warp: mọi lane đều đến trước khi bất kỳ lane nào đi tiếp">
+                warp barrier: every lane arrives before any goes on
+              </Translated>
             </text>
           </g>
         ) : null}
@@ -149,9 +164,9 @@ function Stage(f: Frame) {
 const counters = (rows: Issue[], uniform?: number) => {
   const useful = rows.reduce((a, r) => a + r.count, 0);
   return [
-    { label: 'warp-steps spent', value: String(rows.length) },
-    ...(uniform != null ? [{ label: 'a uniform warp needs', value: String(uniform) }] : []),
-    { label: 'lanes left waiting', value: `${rows.length * W - useful} lane-steps` },
+    { label: tr('warp-steps spent', 'số bước warp đã dùng'), value: String(rows.length) },
+    ...(uniform != null ? [{ label: tr('a uniform warp needs', 'một warp đồng nhất cần'), value: String(uniform) }] : []),
+    { label: tr('lanes left waiting', 'lane phải chờ'), value: tr(`${rows.length * W - useful} lane-steps`, `${rows.length * W - useful} bước-lane`) },
   ];
 };
 
@@ -164,103 +179,117 @@ const cRow = BRANCH.issues.slice(-1);
 const beats: Beat[] = [
   {
     clip: 'warp-branch-1',
-    label: 'In step',
+    get label() {
+      return tr('In step', 'Đồng bộ từng bước');
+    },
     draw: (p) => {
       const n = Math.max(1, shown(p, 0.08, 0.8, STRAIGHT.issues.length));
       const rows = STRAIGHT.issues.slice(0, n);
       return (
         <Stage rows={rows} labels={STRAIGHT_LINE.map((x) => x.text)}
-          counters={[{ label: 'instructions fetched', value: String(n) }, { label: 'lane-operations done', value: String(rows.reduce((a, r) => a + r.count, 0)) }]}
-          headline={`${n} ${n === 1 ? 'fetch' : 'fetches'}, each executed by all ${W} lanes`} />
+          counters={[{ label: tr('instructions fetched', 'số lệnh đã nạp'), value: String(n) }, { label: tr('lane-operations done', 'số thao tác lane đã làm'), value: String(rows.reduce((a, r) => a + r.count, 0)) }]}
+          headline={tr(`${n} ${n === 1 ? 'fetch' : 'fetches'}, each executed by all ${W} lanes`, `${n} lần nạp, mỗi lần được cả ${W} lane thực thi`)} />
       );
     },
   },
   {
     clip: 'warp-branch-2',
-    label: 'The split',
+    get label() {
+      return tr('The split', 'Chỗ rẽ nhánh');
+    },
     draw: (p) => (
-      <Stage rows={condRow} labels={['test: threadIdx.x < 24']} wants={p > 0.34 ? WANTS : undefined} wantsLabel="wants"
+      <Stage rows={condRow} labels={[tr('test: threadIdx.x < 24', 'kiểm tra: threadIdx.x < 24')]} wants={p > 0.34 ? WANTS : undefined} wantsLabel={tr('wants', 'muốn')}
         threshold={p > 0.34 ? T : undefined}
-        headline={p > 0.62 ? `${T} lanes want A, ${W - T} want B, and there is one instruction stream` : 'every lane evaluates the condition on its own index'} />
+        headline={p > 0.62 ? tr(`${T} lanes want A, ${W - T} want B, and there is one instruction stream`, `${T} lane muốn A, ${W - T} muốn B, và chỉ có một dòng lệnh`) : tr('every lane evaluates the condition on its own index', 'mỗi lane tự tính điều kiện trên chỉ số của riêng nó')} />
     ),
   },
   {
     clip: 'warp-branch-3',
-    label: 'Pass A',
+    get label() {
+      return tr('Pass A', 'Lượt A');
+    },
     draw: (p) => {
       const rows = [...condRow, ...aRows.slice(0, Math.max(1, shown(p, 0.12, 0.62, aRows.length)))];
       return (
-        <Stage rows={rows} labels={['test: threadIdx.x < 24']} wants={WANTS} wantsLabel="wants" threshold={T} counters={counters(rows)}
-          headline={`pass A: ${aRows[0].count} lanes execute, ${W - aRows[0].count} are masked and wait`} />
+        <Stage rows={rows} labels={[tr('test: threadIdx.x < 24', 'kiểm tra: threadIdx.x < 24')]} wants={WANTS} wantsLabel={tr('wants', 'muốn')} threshold={T} counters={counters(rows)}
+          headline={tr(`pass A: ${aRows[0].count} lanes execute, ${W - aRows[0].count} are masked and wait`, `lượt A: ${aRows[0].count} lane thực thi, ${W - aRows[0].count} lane bị che và chờ`)} />
       );
     },
   },
   {
     clip: 'warp-branch-4',
-    label: 'Pass B',
+    get label() {
+      return tr('Pass B', 'Lượt B');
+    },
     draw: (p) => {
       const nb = Math.max(1, shown(p, 0.08, 0.5, bRows.length));
       const rows = [...condRow, ...aRows, ...bRows.slice(0, nb), ...(p > 0.6 ? cRow : [])];
       return (
-        <Stage rows={rows} labels={['test: threadIdx.x < 24']} wants={WANTS} wantsLabel="wants" threshold={T} counters={counters(rows)}
-          headline={p > 0.6 ? `then C, with all ${W} lanes again` : `pass B: ${bRows[0].count} lanes execute, ${W - bRows[0].count} wait`} />
+        <Stage rows={rows} labels={[tr('test: threadIdx.x < 24', 'kiểm tra: threadIdx.x < 24')]} wants={WANTS} wantsLabel={tr('wants', 'muốn')} threshold={T} counters={counters(rows)}
+          headline={p > 0.6 ? tr(`then C, with all ${W} lanes again`, `rồi đến C, lại với cả ${W} lane`) : tr(`pass B: ${bRows[0].count} lanes execute, ${W - bRows[0].count} wait`, `lượt B: ${bRows[0].count} lane thực thi, ${W - bRows[0].count} lane chờ`)} />
       );
     },
   },
   {
     clip: 'warp-branch-5',
-    label: 'The count',
+    get label() {
+      return tr('The count', 'Phép đếm');
+    },
     draw: (p) => {
       const t = T + Math.round(ramp(p, 0.36, 0.62) * (W - T));
       const tr: Trace = t === T ? BRANCH : run(ifElse(W, maskBelow(W, t), COST, COST, `threadIdx.x < ${t}`));
       return (
-        <Stage rows={tr.issues} labels={[`test: threadIdx.x < ${t}`]} threshold={t}
-          wants={maskBelow(W, t).map((a) => (a ? 'A' : 'B'))} wantsLabel="wants"
+        <Stage rows={tr.issues} labels={[trText(`test: threadIdx.x < ${t}`, `kiểm tra: threadIdx.x < ${t}`)]} threshold={t}
+          wants={maskBelow(W, t).map((a) => (a ? 'A' : 'B'))} wantsLabel={trText('wants', 'muốn')}
           counters={[
-            { label: 'warp-steps spent', value: String(tr.spent) },
-            { label: 'a uniform warp needs', value: String(tr.uniform) },
-            { label: 'lanes left waiting', value: `${tr.idle} lane-steps` },
+            { label: trText('warp-steps spent', 'số bước warp đã dùng'), value: String(tr.spent) },
+            { label: trText('a uniform warp needs', 'một warp đồng nhất cần'), value: String(tr.uniform) },
+            { label: trText('lanes left waiting', 'lane phải chờ'), value: trText(`${tr.idle} lane-steps`, `${tr.idle} bước-lane`) },
           ]}
-          headline={t === W ? 'the split is on the edge of the warp: one path, no second pass' : `threshold ${t}: two paths inside one warp, two passes`} />
+          headline={t === W ? trText('the split is on the edge of the warp: one path, no second pass', 'chỗ chia nằm đúng mép warp: một nhánh, không có lượt thứ hai') : trText(`threshold ${t}: two paths inside one warp, two passes`, `ngưỡng ${t}: hai nhánh trong một warp, hai lượt`)} />
       );
     },
   },
   {
     clip: 'warp-branch-6',
-    label: 'A loop',
+    get label() {
+      return tr('A loop', 'Một vòng lặp');
+    },
     draw: (p) => {
       const body = LOOP.issues.filter((x) => x.part === 'body');
       const n = Math.max(1, shown(p, 0.2, 0.86, body.length));
       const rows = body.slice(0, n);
       const cur = rows[rows.length - 1];
       return (
-        <Stage rows={rows} wants={TRIPS} wantsLabel="trip count"
+        <Stage rows={rows} wants={TRIPS} wantsLabel={tr('trip count', 'số vòng lặp')}
           counters={[
-            { label: 'iterations run', value: `${n} of ${LOOP.stmts[1].passes}` },
-            { label: 'lanes left waiting', value: `${rows.length * W - rows.reduce((a, r) => a + r.count, 0)} lane-steps` },
+            { label: tr('iterations run', 'số vòng đã chạy'), value: tr(`${n} of ${LOOP.stmts[1].passes}`, `${n} trên ${LOOP.stmts[1].passes}`) },
+            { label: tr('lanes left waiting', 'lane phải chờ'), value: tr(`${rows.length * W - rows.reduce((a, r) => a + r.count, 0)} lane-steps`, `${rows.length * W - rows.reduce((a, r) => a + r.count, 0)} bước-lane`) },
           ]}
-          headline={cur.count === W ? `iteration ${n}: every lane still has work` : `iteration ${n}: ${cur.count} lanes work, ${W - cur.count} have finished and wait`} />
+          headline={cur.count === W ? tr(`iteration ${n}: every lane still has work`, `vòng ${n}: mọi lane vẫn còn việc`) : tr(`iteration ${n}: ${cur.count} lanes work, ${W - cur.count} have finished and wait`, `vòng ${n}: ${cur.count} lane làm việc, ${W - cur.count} lane đã xong và chờ`)} />
       );
     },
   },
   {
     clip: 'warp-branch-7',
-    label: 'Order',
+    get label() {
+      return tr('Order', 'Thứ tự');
+    },
     draw: (p) => {
       const mixed = MIXED.issues.slice(1, -1);
       const n = Math.max(1, shown(p, 0.1, 0.52, mixed.length));
       const done = p > 0.72;
       const rows = [...mixed.slice(0, n), ...(done ? MIXED.issues.slice(-1) : [])];
       return (
-        <Stage rows={rows} wants={WANTS} wantsLabel="wants" threshold={T} barrierBefore={done ? mixed.length : undefined}
-          counters={[{ label: 'warp-steps for A and B', value: `${mixed.length}, in any order` }]}
-          side={['NVIDIA: the two paths may be mixed', 'AMD: lockstep is documented', 'Apple: not documented']}
-          headline={done ? 'a step that needs every lane comes after a warp barrier' : 'the same instructions, with the two paths taking turns'} />
+        <Stage rows={rows} wants={WANTS} wantsLabel={tr('wants', 'muốn')} threshold={T} barrierBefore={done ? mixed.length : undefined}
+          counters={[{ label: tr('warp-steps for A and B', 'số bước warp cho A và B'), value: tr(`${mixed.length}, in any order`, `${mixed.length}, theo thứ tự bất kỳ`) }]}
+          side={[tr('NVIDIA: the two paths may be mixed', 'NVIDIA: hai nhánh có thể đan xen'), tr('AMD: lockstep is documented', 'AMD: có tài liệu về chạy đồng bộ (lockstep)'), tr('Apple: not documented', 'Apple: không có tài liệu')]}
+          headline={done ? tr('a step that needs every lane comes after a warp barrier', 'một bước cần mọi lane phải đến sau một rào chắn warp') : tr('the same instructions, with the two paths taking turns', 'vẫn những lệnh đó, với hai nhánh thay phiên nhau')} />
       );
     },
   },
 ];
 
 export function WarpBranchScene() {
-  return <Scene chapter="ch04" title="A warp at a branch" beats={beats} />;
+  return <Scene chapter="ch04" title={tr('A warp at a branch', 'Một warp tại nhánh rẽ')} beats={beats} />;
 }

@@ -1,0 +1,1 @@
+Giờ là cả một hàng gồm 4,096 giá trị: 128 khối dữ liệu thực tế. Tổng số nguyên của mỗi khối trở thành một float, và các float đó được cộng lại. Trong bộ tích lũy half, sai số leo lên hàng nghìn lần sai số của float. Trong float, nó chỉ ở mức làm tròn. Quy tắc: số nguyên bên trong một khối, float giữa các khối, không bao giờ dùng half cho một tổng.

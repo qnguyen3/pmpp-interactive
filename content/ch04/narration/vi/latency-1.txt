@@ -1,0 +1,1 @@
+Một warp, một mình trên một đơn vị thực thi. Nó tính trong 2 chu kỳ. Rồi nó xin dữ liệu từ bộ nhớ toàn cục, và chờ 6 chu kỳ để có câu trả lời. [short pause] Hãy xem dải ở phía dưới. Trong phần lớn thời gian này, đơn vị thực thi không có việc gì để làm.

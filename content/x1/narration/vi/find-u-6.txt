@@ -1,0 +1,1 @@
+Cuối cùng là hai đầu mút. Nếu u đúng bằng không, phép kiểm tra lớn hơn hẳn không bao giờ chọn một token có trọng số bằng không. Và nếu việc làm tròn khiến không có tổng nào vượt quá mục tiêu, điều mà hai thứ tự cộng của kernel có thể gây ra, khối sẽ lấy token còn lại cuối cùng có trọng số dương.

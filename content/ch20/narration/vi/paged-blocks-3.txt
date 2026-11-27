@@ -1,0 +1,1 @@
+Một yêu cầu hoàn tất. Các khối của nó quay thẳng về danh sách trống, và trong cùng bước đó một yêu cầu đang chờ được nhận vào các khối ấy. Không có gì phải di chuyển hay nén gọn, vì không yêu cầu nào cần các khối của nó nằm cạnh nhau.

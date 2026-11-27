@@ -15,6 +15,11 @@
 //
 // Nothing here models time, lockstep execution or divergence cost. Block-level functions
 // work one iteration at a time (every thread of an iteration, then the next iteration).
+//
+// The one import is lib/locale.ts (itself import-free), so the browser checks can still import
+// this file directly in Node.
+
+import { tr } from '../lib/locale.ts';
 
 export const BOOK_WARP = 32;
 
@@ -87,7 +92,7 @@ export function sourceOf(op: Op, lane: number, param: number, width: number): { 
 }
 
 export function checkWidth(width: number, warp: number): string | null {
-  if (!isPow2(width) || width > warp) return `width must be a power of two from 1 to ${warp}; ${width} is not (the guide: "Other values will produce undefined results")`;
+  if (!isPow2(width) || width > warp) return `width must be a power of two from 1 to ${warp}; ${width} is not (the guide: "Other values will produce undefined results")`; // i18n-ignore: error text thrown for invalid input, not shown
   return null;
 }
 
@@ -357,21 +362,21 @@ export function hybrid(values: number[], blockDim: number, width: number, varian
   const W = width;
   const postLoopBarrier = opts.postLoopBarrier ?? true;
   const sh = new Shared(B);
-  for (let t = 0; t < B; t++) sh.write(t, t, values[t] + values[t + B], 'line 04');
+  for (let t = 0; t < B; t++) sh.write(t, t, values[t] + values[t + B], 'line 04'); // i18n-ignore: internal access-site tag, not shown
   const keep = (s: number) => (variant === 'printed' ? s >= W : variant === 'double' ? s >= 1 : s > W);
   const strides: number[] = [];
   for (let s = B / 2; s >= 1 && keep(s); s /= 2) {
     sh.barrier();
     strides.push(s);
     // Every active thread reads before any writes: one iteration is one step in time.
-    const got = range(s).map((t) => add(sh.read(t, t, 'line 08'), sh.read(t + s, t, 'line 08')));
-    range(s).forEach((t) => sh.write(t, t, got[t], 'line 08'));
+    const got = range(s).map((t) => add(sh.read(t, t, 'line 08'), sh.read(t + s, t, 'line 08'))); // i18n-ignore: internal access-site tag, not shown
+    range(s).forEach((t) => sh.write(t, t, got[t], 'line 08')); // i18n-ignore: internal access-site tag, not shown
   }
   const liveTo = strides.length ? strides[strides.length - 1] : B;
   const snapshot = sh.vals.slice();
   if (postLoopBarrier) sh.barrier();
   const reads = range(W).map((t) => (variant === 'early2' ? [t, t + W] : [t]));
-  const lanes = reads.map((rs, t) => rs.map((k) => sh.read(k, t, 'line 13')).reduce<number | null>((a, v) => add(a, v), 0));
+  const lanes = reads.map((rs, t) => rs.map((k) => sh.read(k, t, 'line 13')).reduce<number | null>((a, v) => add(a, v), 0)); // i18n-ignore: internal access-site tag, not shown
   const warp = warpReduceTrace(lanes, { pattern: 'down' });
   const expected = values.reduce((a, v) => a + v, 0);
   const shown = Math.min(B, 2 * W);
@@ -470,9 +475,15 @@ export function twoStage(values: number[], blockDim: number, width: number, guar
 export type Kernel = 'shared' | 'hybrid' | 'twostage';
 export const KERNELS: Kernel[] = ['shared', 'hybrid', 'twostage'];
 export const KERNEL_LABEL: Record<Kernel, string> = {
-  shared: 'shared memory (Fig. 10.10)',
-  hybrid: 'hybrid (Fig. 10.14)',
-  twostage: 'two-stage (Fig. 10.16)',
+  get shared() {
+    return tr('shared memory (Fig. 10.10)', 'bộ nhớ chia sẻ (Fig. 10.10)');
+  },
+  get hybrid() {
+    return tr('hybrid (Fig. 10.14)', 'kết hợp (Fig. 10.14)');
+  },
+  get twostage() {
+    return tr('two-stage (Fig. 10.16)', 'hai giai đoạn (Fig. 10.16)');
+  },
 };
 
 export interface CostStep {
@@ -512,10 +523,24 @@ export function blockCosts(kernel: Kernel, blockDim: number, width: number): Cos
   if (!isPow2(B) || !isPow2(W) || B < W) throw new Error('blockDim and width must be powers of two with blockDim >= width');
   const warps = B / W;
   const input = ones(2 * B);
-  const steps: CostStep[] = [{ label: 'each thread adds its two elements', what: 'load', barrierBefore: false, warps, slots: warps * W, useful: B }];
+  // Step labels are getters: S108 builds the costs in a memo keyed on the block shape only.
+  const steps: CostStep[] = [
+    {
+      get label() {
+        return tr('each thread adds its two elements', 'mỗi luồng cộng hai phần tử của nó');
+      },
+      what: 'load', // i18n-ignore: union member, not shown
+      barrierBefore: false,
+      warps,
+      slots: warps * W,
+      useful: B,
+    },
+  ];
   const sharedStep = (s: number, barrier: boolean): CostStep => ({
-    label: `stride ${s} in shared memory`,
-    what: 'shared',
+    get label() {
+      return tr(`stride ${s} in shared memory`, `bước nhảy ${s} trong bộ nhớ chia sẻ`);
+    },
+    what: 'shared', // i18n-ignore: union member, not shown
     barrierBefore: barrier,
     warps: Math.ceil(s / W),
     slots: Math.ceil(s / W) * W,
@@ -523,7 +548,9 @@ export function blockCosts(kernel: Kernel, blockDim: number, width: number): Cos
   });
   const shuffleSteps = (t: Trace, nWarps: number, label: string, firstBarrier: boolean): CostStep[] =>
     t.steps.map((st, k) => ({
-      label: `${label}: shuffle down ${st.stride}`,
+      get label() {
+        return tr(`${label}: shuffle down ${st.stride}`, `${label === 'every warp' ? 'mọi warp' : label}: shuffle down ${st.stride}`); // i18n-ignore: 'every warp' is the English key the Vietnamese is looked up by
+      },
       what: 'shuffle' as const,
       barrierBefore: firstBarrier && k === 0,
       warps: nWarps,
@@ -549,7 +576,7 @@ export function blockCosts(kernel: Kernel, blockDim: number, width: number): Cos
   } else if (kernel === 'hybrid') {
     const h = hybrid(input, B, W, 'printed');
     for (const s of h.strides) steps.push(sharedStep(s, true));
-    steps.push(...shuffleSteps(h.warp, 1, 'warp 0', true));
+    steps.push(...shuffleSteps(h.warp, 1, 'warp 0', true)); // i18n-ignore: same in both languages; the label getter in shuffleSteps translates it
     barriers = h.barriers;
     sharedReads = h.sharedReads;
     sharedWrites = h.sharedWrites;
@@ -559,8 +586,8 @@ export function blockCosts(kernel: Kernel, blockDim: number, width: number): Cos
   } else {
     const r = twoStage(input, B, W, true);
     const stage1 = warpReduceTrace(range(W).map(() => 2), { pattern: 'down' });
-    steps.push(...shuffleSteps(stage1, warps, 'every warp', false));
-    steps.push(...shuffleSteps(r.stage2, 1, 'warp 0', true));
+    steps.push(...shuffleSteps(stage1, warps, 'every warp', false)); // i18n-ignore: English key; the label getter in shuffleSteps translates it
+    steps.push(...shuffleSteps(r.stage2, 1, 'warp 0', true)); // i18n-ignore: same in both languages; the label getter in shuffleSteps translates it
     barriers = r.barriers;
     sharedReads = r.sharedReads;
     sharedWrites = r.sharedWrites;

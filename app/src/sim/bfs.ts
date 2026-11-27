@@ -36,6 +36,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export const UNVISITED = 4294967295; // UINT_MAX, as the course's .cu files define it
 
 export type Edge = readonly [number, number];
@@ -89,7 +91,7 @@ export const hasEdge = (g: Graph, s: number, d: number) => g.edges.some(([a, b])
 /** Fig. 18.1 (p. 426): 9 vertices, 15 edges. Positions are ours, laid out like the figure. */
 export const BOOK: Graph = makeGraph(
   'book',
-  "the book's graph (Fig. 18.1)",
+  "the book's graph (Fig. 18.1)", // i18n-ignore: graph name built at module level and copied by toggleEdge; shown untranslated by ch18 LevelExplorer (consumer fix)
   9,
   [[0, 1], [0, 2], [1, 3], [1, 4], [2, 5], [2, 6], [2, 7], [3, 4], [3, 8], [4, 5], [4, 8], [5, 6], [6, 8], [7, 0], [7, 6]],
   [
@@ -101,7 +103,7 @@ export const BOOK: Graph = makeGraph(
 /** Exercise 1 (p. 450): 8 vertices, 15 edges. The edge directions are our reading of the drawing. */
 export const EX1: Graph = makeGraph(
   'ex1',
-  'the Exercise 1 graph (our reading of p. 450)',
+  'the Exercise 1 graph (our reading of p. 450)', // i18n-ignore: graph name built at module level and copied by toggleEdge; shown untranslated by ch18 LevelExplorer (consumer fix)
   8,
   [[0, 5], [0, 2], [1, 0], [1, 4], [1, 7], [2, 3], [3, 0], [3, 6], [4, 3], [5, 1], [5, 7], [6, 4], [7, 2], [7, 4], [7, 6]],
   [
@@ -121,7 +123,7 @@ export function chain(n = 10): Graph {
   const pos = Array.from({ length: n }, (_, i) =>
     i < half ? { x: 0.04 + (0.92 * i) / Math.max(1, half - 1), y: 0.25 } : { x: 0.96 - (0.92 * (i - half)) / Math.max(1, half - 1), y: 0.78 },
   );
-  return makeGraph('chain', `a chain of ${n} (a road)`, n, both(pairs), pos, 0);
+  return makeGraph('chain', `a chain of ${n} (a road)`, n, both(pairs), pos, 0); // i18n-ignore: graph name built at module level and copied by toggleEdge; shown untranslated by ch18 LevelExplorer (consumer fix)
 }
 
 /** A celebrity: hub 0 joined both ways to every leaf. Ours. */
@@ -133,11 +135,11 @@ export function star(leaves = 10): Graph {
     const a = (2 * Math.PI * i) / leaves - Math.PI / 2;
     pos.push({ x: 0.5 + 0.44 * Math.cos(a), y: 0.5 + 0.44 * Math.sin(a) });
   }
-  return makeGraph('star', `a star with one hub and ${leaves} leaves`, leaves + 1, both(pairs), pos, 1);
+  return makeGraph('star', `a star with one hub and ${leaves} leaves`, leaves + 1, both(pairs), pos, 1); // i18n-ignore: graph name built at module level and copied by toggleEdge; shown untranslated by ch18 LevelExplorer (consumer fix)
 }
 
 /** A w × h grid, each cell joined both ways to its four neighbours. Vertex r·w + c. Ours. */
-export function grid(w = 4, h = w, blocked: (r: number, c: number) => boolean = () => false, id = 'grid', name = `a ${w} × ${h} grid`): Graph {
+export function grid(w = 4, h = w, blocked: (r: number, c: number) => boolean = () => false, id = 'grid', name = `a ${w} × ${h} grid`): Graph { // i18n-ignore: graph name built at module level and copied by toggleEdge; shown untranslated by ch18 LevelExplorer (consumer fix)
   const vertexOf = new Map<number, number>();
   const cell: { r: number; c: number }[] = [];
   for (let r = 0; r < h; r++)
@@ -181,7 +183,7 @@ export const MAZE_SOURCE = { r: 3, c: 4 } as const;
 export const MAZE_TARGET = { r: 10, c: 11 } as const;
 const blockedSet = new Set(MAZE_BLOCKED.map(([r, c]) => r * MAZE_W + c));
 export const MAZE: Graph = (() => {
-  const g = grid(MAZE_W, MAZE_H, (r, c) => blockedSet.has(r * MAZE_W + c), 'maze', 'a 15 × 15 wiring grid with blockages (ours)');
+  const g = grid(MAZE_W, MAZE_H, (r, c) => blockedSet.has(r * MAZE_W + c), 'maze', 'a 15 × 15 wiring grid with blockages (ours)'); // i18n-ignore: name of the scene's graph, never shown
   return { ...g, root: vertexAt(g, MAZE_SOURCE.r, MAZE_SOURCE.c) };
 })();
 /** The vertex of a grid graph at (r, c), or -1 for a blocked or missing cell. */
@@ -292,11 +294,21 @@ export function treeEdges(g: Graph, root: number): Edge[] {
 export type Variant = 'push' | 'pull' | 'edge' | 'frontier' | 'diropt';
 export type Kernel = 'push' | 'pull' | 'edge' | 'frontier';
 export const VARIANT_NAME: Record<Variant, string> = {
-  push: 'vertex-centric push (Fig. 18.6)',
-  pull: 'vertex-centric pull (Fig. 18.8)',
-  edge: 'edge-centric (Fig. 18.10)',
-  frontier: 'push with frontiers (Figs. 18.12, 18.14)',
-  diropt: 'direction-optimised (push, then pull)',
+  get push() {
+    return tr('vertex-centric push (Fig. 18.6)', 'push lấy đỉnh làm trung tâm (Fig. 18.6)');
+  },
+  get pull() {
+    return tr('vertex-centric pull (Fig. 18.8)', 'pull lấy đỉnh làm trung tâm (Fig. 18.8)');
+  },
+  get edge() {
+    return tr('edge-centric (Fig. 18.10)', 'lấy cạnh làm trung tâm (Fig. 18.10)');
+  },
+  get frontier() {
+    return tr('push with frontiers (Figs. 18.12, 18.14)', 'push với frontier (Figs. 18.12, 18.14)');
+  },
+  get diropt() {
+    return tr('direction-optimised (push, then pull)', 'tối ưu theo hướng (push, rồi pull)');
+  },
 };
 export type Role = 'surplus' | 'idle' | 'iterates' | 'labels';
 export type ArrayName = 'level' | 'srcPtrs' | 'dst' | 'dstPtrs' | 'src' | 'prevFrontier';

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { countsAfter, gather, route } from '../../sim/sparseroute';
 
 // "Routing tokens to experts": exercise 3's COO-to-CSR conversion (count, scan, scatter)
@@ -81,7 +82,7 @@ function Matrix({ shown, hot }: { shown: number; hot?: number }) {
   R.pairs.slice(0, shown).forEach((p, i) => on.set(`${p.expert},${p.token}`, i));
   return (
     <g data-matrix={shown}>
-      <text x={MX} y={MY - 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>router picks: experts × tokens</text>
+      <text x={MX} y={MY - 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="lựa chọn của router: expert × token">router picks: experts × tokens</Translated></text>
       {Array.from({ length: R.tokens }, (_, t) => (
         <text key={t} x={MX + t * MC + MC / 2} y={MY - 6} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>t{t}</text>
       ))}
@@ -107,7 +108,7 @@ function Matrix({ shown, hot }: { shown: number; hot?: number }) {
 function Counters({ counts, show = 1, final = false }: { counts: number[]; show?: number; final?: boolean }) {
   return (
     <g opacity={show} data-counts={counts.join(',')}>
-      <text x={CX} y={MY - 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>count (histogram)</text>
+      <text x={CX} y={MY - 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="đếm (histogram)">count (histogram)</Translated></text>
       {counts.map((c, e) => (
         <g key={e}>
           <text x={CX} y={MY + e * MC + 16} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>E{e}</text>
@@ -116,7 +117,7 @@ function Counters({ counts, show = 1, final = false }: { counts: number[]; show?
           ))}
           <text x={CX + 22 + Math.max(c, 0) * 14 + 4} y={MY + e * MC + 16} fontSize="11" fontWeight="600">{c}</text>
           {final && c === 0 ? (
-            <text x={CX + 40} y={MY + e * MC + 16} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>no tokens: skip its GEMM</text>
+            <text x={CX + 40} y={MY + e * MC + 16} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="không có token: bỏ qua GEMM của nó">no tokens: skip its GEMM</Translated></text>
           ) : null}
         </g>
       ))}
@@ -125,7 +126,7 @@ function Counters({ counts, show = 1, final = false }: { counts: number[]; show?
 }
 
 function Offsets({ shown, show = 1 }: { shown: number; show?: number }) {
-  const labels = [...Array.from({ length: R.experts }, (_, e) => `E${e}`), 'end'];
+  const labels = [...Array.from({ length: R.experts }, (_, e) => `E${e}`), tr('end', 'cuối')];
   return (
     <g opacity={show} data-offsets={R.offsets.slice(0, shown).join(',')}>
       <text x={OX} y={MY - 26} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>offsets = rowPtrs</text>
@@ -158,13 +159,15 @@ function Slices({ t, y, hot, show = 1 }: { t: number; y: number; hot?: number; s
             {empty ? (
               <>
                 <line x1={a} x2={a} y1={y - 4} y2={yb + 8} stroke="var(--ink-3)" strokeDasharray="3 3" />
-                <text x={a} y={yb + 32} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>E{e}: empty</text>
+                <text x={a} y={yb + 32} fontSize="10" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>E{e}: rỗng</>}>E{e}: empty</Translated></text>
               </>
             ) : (
               <>
                 <path d={`M${a + 2},${yb} v6 H${b - 2} v-6`} fill="none" stroke={hot === e ? 'var(--ink)' : 'var(--ink-2)'} strokeWidth={hot === e ? 2 : 1.2} />
                 <text x={(a + b) / 2} y={yb + 20} fontSize="10.5" textAnchor="middle" fontWeight={hot === e ? 700 : 500}>
-                  E{e}: {R.counts[e]} tokens{t > 0.5 ? `, padded to ${R.slices.padded[e]}` : ''}
+                  <Translated vi={<>E{e}: {R.counts[e]} token{t > 0.5 ? `, đệm lên ${R.slices.padded[e]}` : ''}</>}>
+                    E{e}: {R.counts[e]} tokens{t > 0.5 ? tr(`, padded to ${R.slices.padded[e]}`, `, đệm lên ${R.slices.padded[e]}`) : ''}
+                  </Translated>
                 </text>
               </>
             )}
@@ -190,9 +193,9 @@ function PadBoxes({ show }: { show: number }) {
 
 function Stage({ beat, children, headline, data }: { beat: number; children: ReactNode; headline: string; data?: Record<string, string> }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Routing tokens to experts: count, scan, scatter, run, put back"
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Routing tokens to experts: count, scan, scatter, run, put back', 'Định tuyến token tới expert: đếm, scan, rải, chạy, đặt lại')}
       style={{ width: '100%', maxWidth: W, display: 'block' }}>
-      <g data-beat={beat} {...Object.fromEntries(Object.entries(data ?? {}).map(([k, v]) => [`data-${k}`, v]))}>
+      <g data-beat={beat} {...Object.fromEntries(Object.entries(data ?? {}).map(([k, v]) => [`data-${k}`, v]))}>{/* i18n-ignore: attribute name */}
         {children}
         <text x={SX} y={H - 8} fontSize="13" fontWeight="600">{headline}</text>
       </g>
@@ -209,14 +212,16 @@ const ghosts = () =>
 const beats: Beat[] = [
   {
     clip: 'route-1',
-    label: 'Pairs',
+    get label() {
+      return tr('Pairs', 'Các cặp');
+    },
     draw: (p) => {
       // the first token's two picks are there from the start, so the opening frame is not empty
       const shown = Math.max(R.topk, Math.min(N, Math.ceil(ramp(p, 0.05, 0.7) * N)));
       return (
-        <Stage beat={1} headline={`${N} token–expert pairs in token order: a COO list (row = expert, column = token)`} data={{ shown: String(shown) }}>
+        <Stage beat={1} headline={tr(`${N} token–expert pairs in token order: a COO list (row = expert, column = token)`, `${N} cặp token–expert theo thứ tự token: một danh sách COO (hàng = expert, cột = token)`)} data={{ shown: String(shown) }}>
           <Matrix shown={shown} hot={shown - 1} />
-          <StripLabel y={TOP} text="pairs in token order (slot = 2 × token + choice)" />
+          <StripLabel y={TOP} text={tr('pairs in token order (slot = 2 × token + choice)', 'các cặp theo thứ tự token (vị trí = 2 × token + lựa chọn)')} />
           {ghosts()}
           {R.pairs.slice(0, shown).map((_, i) => <PairBox key={i} b={{ i, x: topX(i), y: TOP, w: SW, hot: i === shown - 1 && p < 0.75 }} />)}
         </Stage>
@@ -225,16 +230,18 @@ const beats: Beat[] = [
   },
   {
     clip: 'route-2',
-    label: 'Count',
+    get label() {
+      return tr('Count', 'Đếm');
+    },
     draw: (p) => {
       const k = Math.min(N, Math.floor(ramp(p, 0.08, 0.72) * (N + 0.999)));
       const counts = countsAfter(R, k);
       const hot = k < N ? k : undefined;
       return (
-        <Stage beat={2} headline={k < N ? `counting pair ${k}: one atomic add on its expert's counter` : `counts ${list(R.counts)}: expert ${R.empty.join(', ')} has no tokens`}>
+        <Stage beat={2} headline={k < N ? tr(`counting pair ${k}: one atomic add on its expert's counter`, `đếm cặp ${k}: một phép cộng nguyên tử trên bộ đếm của expert của nó`) : tr(`counts ${list(R.counts)}: expert ${R.empty.join(', ')} has no tokens`, `số đếm ${list(R.counts)}: expert ${R.empty.join(', ')} không có token nào`)}>
           <Matrix shown={N} hot={hot} />
           <Counters counts={counts} final={k >= N} />
-          <StripLabel y={TOP} text="pairs in token order" />
+          <StripLabel y={TOP} text={tr('pairs in token order', 'các cặp theo thứ tự token')} />
           {allTop(false, hot)}
         </Stage>
       );
@@ -242,15 +249,17 @@ const beats: Beat[] = [
   },
   {
     clip: 'route-3',
-    label: 'Scan',
+    get label() {
+      return tr('Scan', 'Scan');
+    },
     draw: (p) => {
       const shown = Math.min(R.offsets.length, Math.floor(ramp(p, 0.08, 0.7) * (R.offsets.length + 0.999)));
       return (
-        <Stage beat={3} headline={shown >= R.offsets.length ? `exclusive scan + total = ${list(R.offsets)}: CSR's rowPtrs` : 'exclusive scan: each expert starts where the previous ones end'}>
+        <Stage beat={3} headline={shown >= R.offsets.length ? tr(`exclusive scan + total = ${list(R.offsets)}: CSR's rowPtrs`, `scan loại trừ + tổng = ${list(R.offsets)}: rowPtrs của CSR`) : tr('exclusive scan: each expert starts where the previous ones end', 'scan loại trừ: mỗi expert bắt đầu ở chỗ các expert trước kết thúc')}>
           <Matrix shown={N} />
           <Counters counts={R.counts} final />
           <Offsets shown={shown} />
-          <StripLabel y={TOP} text="pairs in token order" />
+          <StripLabel y={TOP} text={tr('pairs in token order', 'các cặp theo thứ tự token')} />
           {allTop()}
         </Stage>
       );
@@ -258,7 +267,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'route-4',
-    label: 'Scatter',
+    get label() {
+      return tr('Scatter', 'Rải');
+    },
     draw: (p) => {
       const ts = R.pairs.map((_, i) => {
         const start = (i / N) * 0.55 + 0.05;
@@ -271,14 +282,14 @@ const beats: Beat[] = [
         note: t >= 1 && done < N ? `${R.offsets[R.pairs[i].expert]}+${R.scatter.rank[i]}` : undefined,
       }));
       return (
-        <Stage beat={4} headline={done < N ? 'position = offsets[expert] + rank (earlier pairs of the same expert)' : 'each expert\'s tokens are contiguous, still in token order'}
+        <Stage beat={4} headline={done < N ? tr('position = offsets[expert] + rank (earlier pairs of the same expert)', 'vị trí = offsets[expert] + rank (số cặp trước đó của cùng expert)') : tr('each expert\'s tokens are contiguous, still in token order', 'các token của mỗi expert nằm liền nhau, vẫn theo thứ tự token')}
           data={{ order: SORTED.map((x) => x.slot).join(',') }}>
           <Matrix shown={N} />
           <Counters counts={R.counts} final />
           <Offsets shown={R.offsets.length} />
-          <StripLabel y={TOP} text="pairs in token order" />
+          <StripLabel y={TOP} text={tr('pairs in token order', 'các cặp theo thứ tự token')} />
           {ghosts()}
-          <StripLabel y={MID} text="pairs in expert order (stable scatter)" />
+          <StripLabel y={MID} text={tr('pairs in expert order (stable scatter)', 'các cặp theo thứ tự expert (rải ổn định)')} />
           {done === N ? <Slices t={0} y={MID + 10} /> : null}
           {boxes.map((b) => <PairBox key={b.i} b={b} />)}
         </Stage>
@@ -287,7 +298,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'route-5',
-    label: 'Run',
+    get label() {
+      return tr('Run', 'Chạy');
+    },
     draw: (p) => {
       const m = ease(ramp(p, 0.05, 0.3));
       // the GEMMs run one expert after another; the empty one is skipped
@@ -296,14 +309,14 @@ const beats: Beat[] = [
       const hot = p >= 0.38 ? run[Math.min(run.length - 1, Math.floor(at))] : undefined;
       const boxes = R.pairs.map((pr, i) => ({ i, x: lerp(compactX(i), paddedX(i), m), y: MID, w: lerp(SW, PW, m), hot: hot === pr.expert }));
       return (
-        <Stage beat={5} headline={hot == null ? `slices padded to multiples of ${R.tile}: ${R.slices.pads} pad slots, every store unconditional` : `GEMM: the ${R.counts[hot]} tokens of E${hot} × E${hot}'s weights; E${R.empty.join(', E')} skipped`}
+        <Stage beat={5} headline={hot == null ? tr(`slices padded to multiples of ${R.tile}: ${R.slices.pads} pad slots, every store unconditional`, `các lát được đệm lên bội của ${R.tile}: ${R.slices.pads} vị trí đệm, mọi lần ghi đều không điều kiện`) : tr(`GEMM: the ${R.counts[hot]} tokens of E${hot} × E${hot}'s weights; E${R.empty.join(', E')} skipped`, `GEMM: ${R.counts[hot]} token của E${hot} × trọng số của E${hot}; bỏ qua E${R.empty.join(', E')}`)}
           data={{ starts: R.slices.starts.join(','), pads: String(R.slices.pads), skip: R.empty.join(',') }}>
           <Matrix shown={N} />
           <Counters counts={R.counts} final />
           <Offsets shown={R.offsets.length} />
-          <StripLabel y={TOP} text="pairs in token order" />
+          <StripLabel y={TOP} text={tr('pairs in token order', 'các cặp theo thứ tự token')} />
           {ghosts()}
-          <StripLabel y={MID} text={`pairs in expert order, slices padded to tiles of ${R.tile}`} />
+          <StripLabel y={MID} text={tr(`pairs in expert order, slices padded to tiles of ${R.tile}`, `các cặp theo thứ tự expert, các lát được đệm theo ô (tile) cỡ ${R.tile}`)} />
           <PadBoxes show={m} />
           <Slices t={m} y={MID + 10} hot={hot} />
           {boxes.map((b) => <PairBox key={b.i} b={b} />)}
@@ -313,7 +326,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'route-6',
-    label: 'Put back',
+    get label() {
+      return tr('Put back', 'Đặt lại');
+    },
     draw: (p) => {
       const boxes = R.pairs.map((_, i) => {
         const start = (R.paddedPos[i] / R.slices.total) * 0.35;
@@ -322,16 +337,16 @@ const beats: Beat[] = [
       });
       const combine = ramp(p, 0.68, 0.85);
       return (
-        <Stage beat={6} headline={combine < 1 ? 'the inverse permutation (JDS\'s row array) sends each output to its token\'s slot' : 'each token combines its two experts\' outputs'}
+        <Stage beat={6} headline={combine < 1 ? tr('the inverse permutation (JDS\'s row array) sends each output to its token\'s slot', 'hoán vị ngược (mảng row của JDS) gửi mỗi đầu ra về vị trí của token của nó') : tr('each token combines its two experts\' outputs', 'mỗi token kết hợp đầu ra của hai expert của nó')}
           data={{ back: R.pairs.map((x) => x.slot).join(',') }}>
           <Matrix shown={N} />
           <Counters counts={R.counts} final />
           <Offsets shown={R.offsets.length} />
-          <StripLabel y={TOP} text="pairs in token order" />
+          <StripLabel y={TOP} text={tr('pairs in token order', 'các cặp theo thứ tự token')} />
           {ghosts()}
-          <StripLabel y={MID} text="expert outputs, in expert order" />
+          <StripLabel y={MID} text={tr('expert outputs, in expert order', 'đầu ra của các expert, theo thứ tự expert')} />
           <PadBoxes show={1 - ramp(p, 0, 0.3)} />
-          <StripLabel y={BOT} text="expert outputs back in token order" />
+          <StripLabel y={BOT} text={tr('expert outputs back in token order', 'đầu ra của các expert, trở lại thứ tự token')} />
           {boxes.map((b) => <PairBox key={b.i} b={b} />)}
           <g opacity={combine} data-combine={combine >= 1 ? 1 : 0}>
             {Array.from({ length: R.tokens }, (_, t) => {
@@ -353,5 +368,5 @@ const beats: Beat[] = [
 ];
 
 export function RouteScene() {
-  return <Scene chapter="ch17" title="Routing tokens to experts" beats={beats} />;
+  return <Scene chapter="ch17" title={tr('Routing tokens to experts', 'Định tuyến token tới expert')} beats={beats} />;
 }

@@ -20,7 +20,10 @@
 // Counts only: nothing here models time, caches, queues, or what a compiler may already
 // have aggregated (ch12-facts A7, B4).
 //
-// Erasable TypeScript only, and no imports: the browser checks import this file directly.
+// Erasable TypeScript only, and the one import is lib/locale.ts (itself import-free): the browser
+// checks import this file directly.
+
+import { tr } from '../lib/locale.ts';
 
 // ---------------------------------------------------------------- keys and keep flags
 /** Fig. 12.1: sixteen keys k0 to k15; the shaded ones are kept. */
@@ -146,10 +149,18 @@ export function inPlaceOverwrites(keep: readonly boolean[]): Overwrite[] {
 export type Pattern = 'random' | 'runs' | 'spread' | 'sorted';
 export const PATTERNS: readonly Pattern[] = ['random', 'runs', 'spread', 'sorted'];
 export const PATTERN_LABEL: Record<Pattern, string> = {
-  random: 'independent random keys',
-  runs: 'runs of kept keys',
-  spread: 'evenly spread (at 50 percent, every other key)',
-  sorted: 'sorted: the kept keys come first',
+  get random() {
+    return tr('independent random keys', 'khóa ngẫu nhiên độc lập');
+  },
+  get runs() {
+    return tr('runs of kept keys', 'các dải khóa được giữ liền nhau');
+  },
+  get spread() {
+    return tr('evenly spread (at 50 percent, every other key)', 'rải đều (ở 50 phần trăm, cứ cách một khóa)');
+  },
+  get sorted() {
+    return tr('sorted: the kept keys come first', 'đã sắp xếp: các khóa được giữ đứng trước');
+  },
 };
 /** Pattern "runs": the input is cut into runs of this many keys, each kept or dropped as a whole. */
 export const RUN_LENGTH = 50;

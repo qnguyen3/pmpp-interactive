@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { decodePhases, phaseTotals, type Phase } from '../../sim/kvcache';
+import { Translated, tr } from '../../lib/i18n';
 
 // "One decode step streams the whole cache" (section 20.4). One layer of a Llama 2
 // 7B-shaped model (32 heads of 128, so a 4,096-wide row; book p. 506), 16-bit, with 4,096
@@ -70,7 +71,7 @@ function Cache({ x, label, stream, appended }: { x: number; label: string; strea
         <rect x={x + (1 - appended) * 60} y={y0 + STRIPS * hS + 1} width={w} height={5} fill="var(--reg)" opacity={appended} data-appended="" />
       ) : null}
       <text x={x} y={y0 + STRIPS * hS + 22} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>
-        {SCENE.n.toLocaleString('en-US')} rows of {D.toLocaleString('en-US')}
+        <Translated vi={<>{SCENE.n.toLocaleString('en-US')} hàng rộng {D.toLocaleString('en-US')}</>}>{SCENE.n.toLocaleString('en-US')} rows of {D.toLocaleString('en-US')}</Translated>
       </text>
     </g>
   );
@@ -92,16 +93,16 @@ function Stage(f: FrameProps) {
   const c = f.counters ?? { bytes: 0, flops: 0, ai: 0 };
   const wx = 18;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="One decode step of one layer, streaming the weights and the cache"
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('One decode step of one layer, streaming the weights and the cache', 'Một bước decode của một lớp, đọc tuần tự trọng số và cache')}
       style={{ width: '100%', maxWidth: W, display: 'block' }}>
       <text x={12} y={24} fontSize="14.5" fontWeight="600" data-headline="">{f.headline}</text>
       <text x={W - 12} y={44} fontSize="10.5" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>
-        one layer, 32 heads of 128, 16-bit, {SCENE.n.toLocaleString('en-US')} cached tokens
+        <Translated vi={<>một lớp, 32 head rộng 128, 16-bit, {SCENE.n.toLocaleString('en-US')} token trong cache</>}>one layer, 32 heads of 128, 16-bit, {SCENE.n.toLocaleString('en-US')} cached tokens</Translated>
       </text>
       {f.children ?? (
         <g data-bytes={Math.round(c.bytes)} data-flops={Math.round(c.flops)}>
           {/* the token's row and the three weight matrices */}
-          <text x={wx} y={66} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}>x′ (one row)</text>
+          <text x={wx} y={66} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}><Translated vi="x′ (một hàng)">x′ (one row)</Translated></text>
           <rect x={wx} y={72} width={140} height={7} fill="var(--reg)" />
           {['W_Q', 'W_K', 'W_V'].map((name, i) => {
             const y = 96 + i * 62;
@@ -121,14 +122,14 @@ function Stage(f: FrameProps) {
               <rect x={wx + 150} y={116 + i * 62} width={60} height={6} fill="var(--reg)" />
             </g>
           ))}
-          <Cache x={250} label="K cache" stream={f.kStream} appended={f.append ?? 0} />
-          <Cache x={370} label="V cache" stream={f.vStream} appended={f.append ?? 0} />
+          <Cache x={250} label={tr('K cache', 'K cache')} stream={f.kStream} appended={f.append ?? 0} />
+          <Cache x={370} label={tr('V cache', 'V cache')} stream={f.vStream} appended={f.append ?? 0} />
           {/* scores and output */}
           {f.scores ? (
             <g>
               <text x={250} y={312} fontSize="11.5" style={{ fill: 'var(--reg)' }}>{f.softmax ? 'p′ = softmax(s′)' : 's′ = q′ Kᵀ'}</text>
               <rect x={250} y={318} width={206 * f.scores} height={6} fill={f.softmax ? 'var(--shared)' : 'var(--reg)'} />
-              <text x={462} y={324} fontSize="10" style={{ fill: 'var(--ink-2)' }}>32 × 4,096 scores</text>
+              <text x={462} y={324} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="32 × 4,096 điểm số">32 × 4,096 scores</Translated></text>
             </g>
           ) : null}
           {f.out ? (
@@ -137,13 +138,13 @@ function Stage(f: FrameProps) {
               <rect x={wx + 150} y={298} width={60} height={6} fill="var(--reg)" />
             </g>
           ) : null}
-          <Counter y={92} label="bytes read and written" value={mib(c.bytes)} unit="MiB" frac={c.bytes / TOTAL.bytes} />
-          <Counter y={140} label="floating-point operations" value={mflop(c.flops)} unit="M" frac={c.flops / TOTAL.flops} />
-          <text x={CX} y={200} fontSize="11.5">FLOP per byte so far</text>
+          <Counter y={92} label={tr('bytes read and written', 'số byte đọc và ghi')} value={mib(c.bytes)} unit="MiB" frac={c.bytes / TOTAL.bytes} />
+          <Counter y={140} label={tr('floating-point operations', 'phép toán dấu phẩy động')} value={mflop(c.flops)} unit="M" frac={c.flops / TOTAL.flops} />
+          <text x={CX} y={200} fontSize="11.5"><Translated vi="FLOP trên mỗi byte tính đến giờ">FLOP per byte so far</Translated></text>
           <text x={CX + 138} y={222} fontSize="15" fontWeight="650" data-ai={c.ai.toFixed(6)}>{c.bytes > 0 ? c.ai.toFixed(2) : '–'}</text>
-          <text x={CX} y={252} fontSize="10" style={{ fill: 'var(--ink-2)' }}>the book’s example GPU can do</text>
-          <text x={CX} y={265} fontSize="10" style={{ fill: 'var(--ink-2)' }}>about 20 FLOPs per byte it fetches</text>
-          <text x={CX} y={278} fontSize="10" style={{ fill: 'var(--ink-2)' }}>(66.9 TFLOP/s, 3.35 TB/s; ch. 5 p. 94)</text>
+          <text x={CX} y={252} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="GPU ví dụ của sách làm được">the book’s example GPU can do</Translated></text>
+          <text x={CX} y={265} fontSize="10" style={{ fill: 'var(--ink-2)' }}><Translated vi="khoảng 20 FLOP cho mỗi byte nó nạp">about 20 FLOPs per byte it fetches</Translated></text>
+          <text x={CX} y={278} fontSize="10" style={{ fill: 'var(--ink-2)' }}>(66.9 TFLOP/s, 3.35 TB/s; ch. 5 p. 94){/* i18n-ignore: figures and citation */}</text>
         </g>
       )}
     </svg>
@@ -160,7 +161,7 @@ function Growth({ p }: { p: number }) {
   const shown = Math.max(1, Math.ceil(ramp(p, 0.05, 0.75) * GROWTH.length));
   return (
     <g>
-      <text x={x0 - 44} y={74} fontSize="11.5">bytes one decode step of this layer moves, by cached tokens N</text>
+      <text x={x0 - 44} y={74} fontSize="11.5"><Translated vi="số byte một bước decode của lớp này di chuyển, theo số token trong cache N">bytes one decode step of this layer moves, by cached tokens N</Translated></text>
       {GROWTH.slice(0, shown).map((g, i) => {
         const x = x0 + i * (bw + 20);
         const hw = (g.weights / max) * hMax;
@@ -176,9 +177,9 @@ function Growth({ p }: { p: number }) {
         );
       })}
       <rect x={x0 - 44} y={316} width={12} height={10} fill="var(--global)" />
-      <text x={x0 - 28} y={325} fontSize="10.5">K and V caches</text>
+      <text x={x0 - 28} y={325} fontSize="10.5"><Translated vi="K cache và V cache">K and V caches</Translated></text>
       <rect x={x0 + 70} y={316} width={12} height={10} fill="var(--global-wash)" stroke="var(--global)" />
-      <text x={x0 + 86} y={325} fontSize="10.5">projection weights (the same at every N)</text>
+      <text x={x0 + 86} y={325} fontSize="10.5"><Translated vi="trọng số phép chiếu (như nhau ở mọi N)">projection weights (the same at every N)</Translated></text>
     </g>
   );
 }
@@ -186,17 +187,21 @@ function Growth({ p }: { p: number }) {
 const beats: Beat[] = [
   {
     clip: 'decode-stream-1',
-    label: 'Projections',
+    get label() {
+      return tr('Projections', 'Các phép chiếu');
+    },
     draw: (p) => {
       const f = ramp(p, 0.08, 0.85);
-      return <Stage headline="Three GEMVs: every weight read once to make one row" weights={f} rows={ramp(p, 0.3, 0.95)} counters={partial(0, f)} />;
+      return <Stage headline={tr('Three GEMVs: every weight read once to make one row', 'Ba GEMV: mỗi trọng số đọc một lần để tạo một hàng')} weights={f} rows={ramp(p, 0.3, 0.95)} counters={partial(0, f)} />;
     },
   },
   {
     clip: 'decode-stream-2',
-    label: 'Append',
+    get label() {
+      return tr('Append', 'Nối thêm');
+    },
     draw: (p) => (
-      <Stage headline="k′ and v′ become row N of this layer’s caches" weights={1} rows={1} append={ramp(p, 0.1, 0.6)} counters={partial(1, ramp(p, 0.1, 0.6))} />
+      <Stage headline={tr('k′ and v′ become row N of this layer’s caches', 'k′ và v′ trở thành hàng N trong cache của lớp này')} weights={1} rows={1} append={ramp(p, 0.1, 0.6)} counters={partial(1, ramp(p, 0.1, 0.6))} />
     ),
   },
   {
@@ -204,13 +209,15 @@ const beats: Beat[] = [
     label: 'q′ Kᵀ',
     draw: (p) => {
       const f = ramp(p, 0.05, 0.92);
-      return <Stage headline="q′ meets every cached key: each row read once, used once" weights={1} rows={1} append={1} kStream={f} scores={f} counters={partial(2, f)} />;
+      return <Stage headline={tr('q′ meets every cached key: each row read once, used once', 'q′ gặp mọi key trong cache: mỗi hàng đọc một lần, dùng một lần')} weights={1} rows={1} append={1} kStream={f} scores={f} counters={partial(2, f)} />;
     },
   },
   {
     clip: 'decode-stream-4',
-    label: 'Softmax',
-    draw: () => <Stage headline="A softmax over one short row of scores per head" weights={1} rows={1} append={1} kStream={1} scores={1} softmax counters={partial(4, 0)} />,
+    get label() {
+      return tr('Softmax', 'Softmax');
+    },
+    draw: () => <Stage headline={tr('A softmax over one short row of scores per head', 'Một softmax trên một hàng điểm số ngắn cho mỗi head')} weights={1} rows={1} append={1} kStream={1} scores={1} softmax counters={partial(4, 0)} />,
   },
   {
     clip: 'decode-stream-5',
@@ -218,16 +225,18 @@ const beats: Beat[] = [
     draw: (p) => {
       const f = ramp(p, 0.05, 0.9);
       return (
-        <Stage headline="The weighted sum streams every value row once more" weights={1} rows={1} append={1} kStream={1} vStream={f} scores={1} softmax
+        <Stage headline={tr('The weighted sum streams every value row once more', 'Tổng có trọng số đọc tuần tự mọi hàng value thêm một lần nữa')} weights={1} rows={1} append={1} kStream={1} vStream={f} scores={1} softmax
           out={p > 0.9} counters={partial(4, f)} />
       );
     },
   },
   {
     clip: 'decode-stream-6',
-    label: 'Next token',
+    get label() {
+      return tr('Next token', 'Token kế tiếp');
+    },
     draw: (p) => (
-      <Stage headline="Next token: all of it again, one row longer">
+      <Stage headline={tr('Next token: all of it again, one row longer', 'Token kế tiếp: lại toàn bộ như thế, dài thêm một hàng')}>
         <Growth p={p} />
       </Stage>
     ),
@@ -235,5 +244,5 @@ const beats: Beat[] = [
 ];
 
 export function DecodeStreamScene() {
-  return <Scene chapter="ch20" title="One decode step streams the whole cache" beats={beats} />;
+  return <Scene chapter="ch20" title={tr('One decode step streams the whole cache', 'Một bước decode đọc tuần tự toàn bộ cache')} beats={beats} />;
 }

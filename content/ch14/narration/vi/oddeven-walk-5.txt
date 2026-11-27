@@ -1,0 +1,1 @@
+Mọi luồng hoán đổi cũng ghi 1 vào cùng một cờ, tất cả trong cùng một bước. Chúng đều ghi cùng một giá trị, nhưng đó vẫn là một race condition, và mô hình bộ nhớ CUDA coi race condition là hành vi không xác định. Nên lệnh ghi được làm thành nguyên tử.

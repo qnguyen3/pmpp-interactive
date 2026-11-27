@@ -1,0 +1,1 @@
+Lượt 1 xây một histogram của byte cao nhất. Khối có 16 luồng, nên luồng 0 đọc các cột 0, 16, 32 và 48, cứ thế tiếp. Mỗi luồng cộng 1 vào ngăn của khóa mình bằng một phép toán nguyên tử trong bộ nhớ chia sẻ. Khi vòng cuối xong, một lần đọc hàng đã cho ra một histogram 256 ngăn.

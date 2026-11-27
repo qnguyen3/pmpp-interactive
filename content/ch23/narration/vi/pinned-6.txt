@@ -1,0 +1,1 @@
+Ngày nay quy tắc này lỏng hơn những gì sách nói, và dễ bị bỏ sót hơn. Trên CUDA, một lần sao chép bất đồng bộ từ bộ nhớ phân trang là hợp lệ, nhưng nó lặng lẽ trở thành đồng bộ. HIP cũng vậy, với hip host malloc là hàm cấp phát bộ nhớ ghim. Trên Apple silicon, một buffer dùng chung vốn đã là bộ nhớ của GPU, nên không có gì để sao chép hay ghim.

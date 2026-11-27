@@ -1,0 +1,1 @@
+Giờ là hóa đơn. 12 ô chứa 8 phần tử khác không, và ô nào cũng mang thêm một chỉ số cột. Một hàng dài quyết định độ rộng cho mọi hàng. Trong ví dụ của sách, một ma trận 1000 nhân 1000 chỉ chiếm khoảng 2 phần trăm kích thước dày đặc khi lưu dạng CSR, lại chiếm 40 phần trăm khi lưu dạng ELL. Trang tiếp theo hỏi nên làm gì với điều đó.

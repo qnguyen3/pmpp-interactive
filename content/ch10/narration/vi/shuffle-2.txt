@@ -1,0 +1,1 @@
+Mỗi lane cộng thứ nó nhận được vào thứ nó đã có. Rồi khoảng cách giảm một nửa: 8, rồi 4, rồi 2, rồi 1. Mỗi lần, chỉ nửa dưới của các lane quan trọng trước đó là còn quan trọng. Sau 5 bước, lane 0 giữ tổng của cả 32 giá trị. Ở đây là 162.

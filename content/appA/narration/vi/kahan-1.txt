@@ -1,0 +1,1 @@
+Một biến tích lũy kiểu float đang giữ 1. Các giá trị nhỏ lần lượt đến, mỗi giá trị bằng 2 mũ âm 25. Đó là một phần tư khoảng cách giữa 1 và số float liền trên nó, nên mỗi phép cộng đều làm tròn ngược về 1. Tổng thông thường không hề nhúc nhích, trong khi tổng thật tiếp tục tăng.

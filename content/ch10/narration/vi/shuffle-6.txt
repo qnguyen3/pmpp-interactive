@@ -1,0 +1,1 @@
+Trên một wavefront AMD gồm 64 lane, vòng lặp viết cho 32 vẫn bắt đầu từ 16. Lane 0 gom các lane 0 đến 31, còn lane 32 gom các lane 32 đến 63. Khi mọi giá trị là 1, mỗi lane đó giữ 32, và không lane nào giữ 64. Cách sửa: bắt đầu vòng lặp từ kích thước warp chia 2, và trên HIP thì truyền một mặt nạ 64 bit.

@@ -27,14 +27,15 @@
 //     whatever was there before).
 //
 // Erasable TypeScript only, no runtime imports: the browser checks import this file in Node.
+import { tr as trText } from '../lib/locale.ts';
 
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled';
 export const SCHEDULES: readonly Schedule[] = ['lockstep', 'in-order', 'reversed', 'shuffled'];
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
+  get lockstep() { return trText('all threads in lockstep', 'mọi luồng chạy đồng bộ từng bước (lockstep)'); },
+  get 'in-order'() { return trText('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước'); },
+  get reversed() { return trText('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước'); },
+  get shuffled() { return trText('random interleaving', 'xen kẽ ngẫu nhiên'); },
 };
 
 /** The corrected kernel's identity for max: the most negative finite float (not -infinity). */
@@ -249,7 +250,7 @@ export function runRow(cfg: SoftmaxConfig, input: SoftmaxInput, row: number, sch
         const v = S[p.idx!];
         s.value = v;
         s.masked = p.idx! > row;
-        if (s.masked) flag(s, 'masked-read', `thread ${t} read S[${row}][${p.idx}], a column in row ${row}'s future`);
+        if (s.masked) flag(s, 'masked-read', trText(`thread ${t} read S[${row}][${p.idx}], a column in row ${row}'s future`, `luồng ${t} đọc S[${row}][${p.idx}], một cột nằm trong tương lai của hàng ${row}`));
         if (v > th.privMax) th.privMax = v;
         break;
       }
@@ -261,9 +262,9 @@ export function runRow(cfg: SoftmaxConfig, input: SoftmaxInput, row: number, sch
       case 'readMax':
         s.value = shared.value;
         if (shared.holds === 'unset')
-          flag(s, 'read-before-write', `thread ${t} read max_or_sum before thread 0 had stored the row max in it`);
+          flag(s, 'read-before-write', trText(`thread ${t} read max_or_sum before thread 0 had stored the row max in it`, `luồng ${t} đọc max_or_sum trước khi luồng 0 lưu max của hàng vào đó`));
         else if (shared.holds === 'sum')
-          flag(s, 'overwritten-before-read', `thread ${t} wanted the max, but thread 0 had already overwritten max_or_sum with the sum`);
+          flag(s, 'overwritten-before-read', trText(`thread ${t} wanted the max, but thread 0 had already overwritten max_or_sum with the sum`, `luồng ${t} cần max, nhưng luồng 0 đã ghi đè max_or_sum bằng sum`));
         th.maxRow = shared.value;
         break;
       case 'sum': {
@@ -271,8 +272,8 @@ export function runRow(cfg: SoftmaxConfig, input: SoftmaxInput, row: number, sch
         const e = f(Math.exp(x));
         s.value = e;
         s.masked = p.idx! > row;
-        if (s.masked) flag(s, 'masked-read', `thread ${t} read S[${row}][${p.idx}], a column in row ${row}'s future`);
-        if (e === Infinity) flag(s, 'overflow', `exp(${fmtNum(x)}) is beyond float32's range (above about 88.72), so it is infinity`);
+        if (s.masked) flag(s, 'masked-read', trText(`thread ${t} read S[${row}][${p.idx}], a column in row ${row}'s future`, `luồng ${t} đọc S[${row}][${p.idx}], một cột nằm trong tương lai của hàng ${row}`));
+        if (e === Infinity) flag(s, 'overflow', trText(`exp(${fmtNum(x)}) is beyond float32's range (above about 88.72), so it is infinity`, `exp(${fmtNum(x)}) vượt quá phạm vi của float32 (trên khoảng 88.72), nên nó là vô cực`));
         th.privSum = f(th.privSum + e);
         break;
       }
@@ -284,7 +285,7 @@ export function runRow(cfg: SoftmaxConfig, input: SoftmaxInput, row: number, sch
       case 'readSum':
         s.value = shared.value;
         if (shared.holds !== 'sum')
-          flag(s, 'read-before-write', `thread ${t} read max_or_sum before thread 0 had stored the row sum in it (it still held ${shared.holds === 'max' ? 'the max' : 'nothing'})`);
+          flag(s, 'read-before-write', trText(`thread ${t} read max_or_sum before thread 0 had stored the row sum in it (it still held ${shared.holds === 'max' ? 'the max' : 'nothing'})`, `luồng ${t} đọc max_or_sum trước khi luồng 0 lưu sum của hàng vào đó (nó vẫn đang giữ ${shared.holds === 'max' ? 'max' : 'không gì cả'})`));
         th.sumRow = shared.value;
         break;
       case 'out': {
@@ -327,7 +328,7 @@ export function runRow(cfg: SoftmaxConfig, input: SoftmaxInput, row: number, sch
         threads[0].sumRow = sum;
         s.value = sum;
         if (reductions === 2 && !cfg.barrier13 && !cfg.barrier19)
-          flag(s, 'temp-reuse', 'the sum reduction reused temp_store with no barrier since the max reduction finished; CUB asks for one');
+          flag(s, 'temp-reuse', trText('the sum reduction reused temp_store with no barrier since the max reduction finished; CUB asks for one', 'phép rút gọn sum dùng lại temp_store mà không có rào chắn nào kể từ khi phép rút gọn max kết thúc; CUB yêu cầu có một rào chắn'));
       }
     }
     threads.forEach((x, t) => {
@@ -395,14 +396,14 @@ export function runAllRows(cfg: SoftmaxConfig, input: SoftmaxInput, schedule: Sc
 
 /** The kernel variants the lesson's outcome table runs. */
 export const VARIANTS: readonly { id: string; label: string; over: Partial<SoftmaxConfig>; offset?: number }[] = [
-  { id: 'as-corrected', label: 'all four barriers', over: {} },
-  { id: 'no10', label: 'no barrier at line 10', over: { barrier10: false } },
-  { id: 'no13', label: 'no barrier at line 13', over: { barrier13: false } },
-  { id: 'no19', label: 'no barrier at line 19', over: { barrier19: false } },
-  { id: 'no22', label: 'no barrier at line 22', over: { barrier22: false } },
-  { id: 'bound', label: 'loop bound idx < N (mask lost)', over: { bound: 'n' } },
-  { id: 'nomax', label: 'no max subtraction', over: { subtractMax: false } },
-  { id: 'nomax90', label: 'no max subtraction, logits + 90', over: { subtractMax: false }, offset: 90 },
+  { id: 'as-corrected', get label() { return trText('all four barriers', 'cả bốn rào chắn'); }, over: {} },
+  { id: 'no10', get label() { return trText('no barrier at line 10', 'không có rào chắn ở dòng 10'); }, over: { barrier10: false } },
+  { id: 'no13', get label() { return trText('no barrier at line 13', 'không có rào chắn ở dòng 13'); }, over: { barrier13: false } },
+  { id: 'no19', get label() { return trText('no barrier at line 19', 'không có rào chắn ở dòng 19'); }, over: { barrier19: false } },
+  { id: 'no22', get label() { return trText('no barrier at line 22', 'không có rào chắn ở dòng 22'); }, over: { barrier22: false } },
+  { id: 'bound', get label() { return trText('loop bound idx < N (mask lost)', 'cận vòng lặp idx < N (mất mặt nạ)'); }, over: { bound: 'n' } },
+  { id: 'nomax', get label() { return trText('no max subtraction', 'không trừ max'); }, over: { subtractMax: false } },
+  { id: 'nomax90', get label() { return trText('no max subtraction, logits + 90', 'không trừ max, logits + 90'); }, over: { subtractMax: false }, offset: 90 },
 ];
 
 function fmtNum(x: number): string {

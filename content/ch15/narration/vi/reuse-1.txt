@@ -1,0 +1,1 @@
+Đây là một góc 128 nhân 128 của C, được cắt thành các ô 32 nhân 32, mỗi ô một khối. Hãy xem hàng trên cùng. Khối đầu tiên nạp dải A của nó từ bộ nhớ toàn cục. Khối thứ hai cũng vậy, rồi khối thứ ba, và khối thứ tư. Bốn khối, cùng 32 hàng của A, được nạp 4 lần.

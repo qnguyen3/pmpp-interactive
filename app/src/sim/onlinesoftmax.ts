@@ -25,6 +25,8 @@
 // (2 ULP on CUDA, ch10 A11) or Metal's; there are no threads, tiles of S in shared memory
 // or warps here (flashkernel.ts has those).
 
+import { tr } from '../lib/locale.ts';
+
 const f = Math.fround;
 export const FLT_MAX = 3.4028234663852886e38;
 /** llama.cpp's start value for the running max, -FLT_MAX/2 (facts A5, D1), as a float32. */
@@ -35,17 +37,31 @@ export type InitMax = 'neg-inf' | 'sentinel';
 export type Form = 'deferred' | 'normalised';
 
 export const ORDER_LABEL: Record<TileOrder, string> = {
-  ltr: 'left to right (the book)',
-  rtl: 'right to left',
-  shuffled: 'shuffled',
+  get ltr() {
+    return tr('left to right (the book)', 'trái sang phải (theo sách)');
+  },
+  get rtl() {
+    return tr('right to left', 'phải sang trái');
+  },
+  get shuffled() {
+    return tr('shuffled', 'xáo trộn');
+  },
 };
 export const INIT_LABEL: Record<InitMax, string> = {
-  'neg-inf': 'minus infinity (FlashAttention-2)',
-  sentinel: '-FLT_MAX/2 (llama.cpp)',
+  get 'neg-inf'() {
+    return tr('minus infinity (FlashAttention-2)', 'âm vô cực (FlashAttention-2)');
+  },
+  get sentinel() {
+    return tr('-FLT_MAX/2 (llama.cpp)', '-FLT_MAX/2 (llama.cpp)');
+  },
 };
 export const FORM_LABEL: Record<Form, string> = {
-  deferred: 'deferred Õ, one division at the end (the code)',
-  normalised: 'normalised o, Eq. 20.6 at every step',
+  get deferred() {
+    return tr('deferred Õ, one division at the end (the code)', 'Õ chưa chia, một phép chia duy nhất ở cuối (như trong mã)');
+  },
+  get normalised() {
+    return tr('normalised o, Eq. 20.6 at every step', 'o đã chuẩn hóa, Eq. 20.6 ở mọi bước');
+  },
 };
 
 export const initValue = (init: InitMax) => (init === 'neg-inf' ? -Infinity : SENTINEL);
@@ -53,10 +69,18 @@ export const initValue = (init: InitMax) => (init === 'neg-inf' ? -Infinity : SE
 // ---------------------------------------------------------------- data
 export type PresetId = 'demo' | 'random' | 'late' | 'offset';
 export const PRESET_LABEL: Record<PresetId, string> = {
-  demo: 'the scene’s row',
-  random: 'random (fixed seed)',
-  late: 'max arrives late',
-  offset: 'large: every score + 100',
+  get demo() {
+    return tr('the scene’s row', 'hàng của cảnh minh họa');
+  },
+  get random() {
+    return tr('random (fixed seed)', 'ngẫu nhiên (seed cố định)');
+  },
+  get late() {
+    return tr('max arrives late', 'giá trị max đến muộn');
+  },
+  get offset() {
+    return tr('large: every score + 100', 'lớn: mọi điểm số + 100');
+  },
 };
 
 export const ROW_N = 12;

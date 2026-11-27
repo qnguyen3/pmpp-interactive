@@ -1,0 +1,1 @@
+Giờ hãy mở rộng chữ số. Với 2 bit có 4 bucket, và với 8 bit thì có 256. Trên các khóa ngẫu nhiên, gần như mỗi luồng của warp khi đó có một bucket riêng, và vì thế có một dải riêng. Chi phí leo lên gần một sector cho mỗi khóa, gần 32 sector cho một lần ghi chỉ cần 4.

@@ -14,6 +14,8 @@
 // The model is one warp and one column per lane, so a row has exactly WARP columns. The
 // strided loop over longer rows and the second stage across warps are left out.
 
+import { tr } from '../lib/locale.ts';
+
 export const WARP = 32;
 /** The butterfly's offsets in the order the CUDA kernel visits them. */
 export const OFFSETS = [16, 8, 4, 2, 1] as const;
@@ -119,11 +121,36 @@ export function m4Argmax(row: number[]): number {
 
 export type Impl = 'cuda' | 'metal' | 'host' | 'torch' | 'm4';
 export const IMPLS: { id: Impl; label: string; rule: string; cite: string }[] = [
-  { id: 'cuda', label: 'llama.cpp CUDA (argmax.cu, also the HIP file)', rule: "lane 0's pair after the xor butterfly; a pair is replaced only by a strictly larger value", cite: 'ch10 D2' },
-  { id: 'metal', label: 'llama.cpp Metal (kernel_argmax_f32)', rule: 'the largest index among the lanes that hold the maximum', cite: 'ch10 D2' },
-  { id: 'host', label: 'llama.cpp host greedy sampler', rule: 'the lowest index: a strict > scan from index 0', cite: 'ch10 D2' },
-  { id: 'torch', label: 'torch.argmax (transformers greedy)', rule: 'documented: the first maximal value', cite: 'ch10 D4, x1 D4' },
-  { id: 'm4', label: "the course's M4 (lab 10.3)", rule: 'the lowest index among the maxima, by its combine rule', cite: 'lab 10.3 argmaxCombine' },
+  {
+    id: 'cuda',
+    get label() { return tr('llama.cpp CUDA (argmax.cu, also the HIP file)', 'llama.cpp CUDA (argmax.cu, cũng là file HIP)'); },
+    get rule() { return tr("lane 0's pair after the xor butterfly; a pair is replaced only by a strictly larger value", 'cặp của lane 0 sau butterfly xor; một cặp chỉ bị thay bởi một giá trị lớn hơn hẳn'); },
+    cite: 'ch10 D2', // i18n-ignore: citation
+  },
+  {
+    id: 'metal',
+    get label() { return tr('llama.cpp Metal (kernel_argmax_f32)', 'llama.cpp Metal (kernel_argmax_f32)'); },
+    get rule() { return tr('the largest index among the lanes that hold the maximum', 'chỉ số lớn nhất trong các lane đang giữ cực đại'); },
+    cite: 'ch10 D2', // i18n-ignore: citation
+  },
+  {
+    id: 'host',
+    get label() { return tr('llama.cpp host greedy sampler', 'sampler greedy trên host của llama.cpp'); },
+    get rule() { return tr('the lowest index: a strict > scan from index 0', 'chỉ số nhỏ nhất: quét bằng phép so sánh > chặt từ chỉ số 0'); },
+    cite: 'ch10 D2', // i18n-ignore: citation
+  },
+  {
+    id: 'torch',
+    get label() { return tr('torch.argmax (transformers greedy)', 'torch.argmax (greedy của transformers)'); },
+    get rule() { return tr('documented: the first maximal value', 'theo tài liệu: giá trị cực đại đầu tiên'); },
+    cite: 'ch10 D4, x1 D4', // i18n-ignore: citation
+  },
+  {
+    id: 'm4',
+    get label() { return tr("the course's M4 (lab 10.3)", 'M4 của khóa học (lab 10.3)'); },
+    get rule() { return tr('the lowest index among the maxima, by its combine rule', 'chỉ số nhỏ nhất trong các cực đại, theo quy tắc kết hợp của nó'); },
+    cite: 'lab 10.3 argmaxCombine', // i18n-ignore: citation
+  },
 ];
 export function argmaxBy(impl: Impl, row: number[]): number {
   switch (impl) {
@@ -152,16 +179,16 @@ export type Stage = 'penalties' | 'top-k' | 'top-p' | 'temperature' | 'draw';
 export const STAGE_LIST: Stage[] = ['penalties', 'top-k', 'top-p', 'temperature', 'draw'];
 export type System = 'llama-default' | 'llama-bs' | 'transformers' | 'mlx-lm';
 export const SYSTEMS: { id: System; label: string }[] = [
-  { id: 'llama-default', label: 'llama.cpp, defaults' },
-  { id: 'llama-bs', label: 'llama.cpp with -bs' },
-  { id: 'transformers', label: 'transformers generate' },
-  { id: 'mlx-lm', label: 'mlx-lm' },
+  { id: 'llama-default', get label() { return tr('llama.cpp, defaults', 'llama.cpp, mặc định'); } },
+  { id: 'llama-bs', get label() { return tr('llama.cpp with -bs', 'llama.cpp với -bs'); } },
+  { id: 'transformers', get label() { return tr('transformers generate', 'transformers generate'); } },
+  { id: 'mlx-lm', get label() { return tr('mlx-lm', 'mlx-lm'); } },
 ];
 export type Bin = 'host' | 'kernels' | 'framework';
 export const BINS: { id: Bin; label: string }[] = [
-  { id: 'host', label: 'host CPU code' },
-  { id: 'kernels', label: "the project's GPU graph (one backend kernel per op)" },
-  { id: 'framework', label: "framework tensor ops on the logits' device" },
+  { id: 'host', get label() { return tr('host CPU code', 'mã CPU trên host'); } },
+  { id: 'kernels', get label() { return tr("the project's GPU graph (one backend kernel per op)", 'graph GPU của dự án (mỗi op một kernel backend)'); } },
+  { id: 'framework', get label() { return tr("framework tensor ops on the logits' device", 'tensor op của framework trên thiết bị chứa logits'); } },
 ];
 
 export interface Cell {
@@ -179,32 +206,38 @@ export interface Cell {
  * later goes in only with the item that settles it, never by analogy.
  */
 export const STAGES: Cell[] = [
-  { system: 'llama-default', stage: 'penalties', bin: 'host', cite: 'x1 D1, D2; ch09 D4', evidence: 'backend_sampling = false; llama_sampler_penalties_apply walks the candidate array on the host' },
-  { system: 'llama-default', stage: 'top-k', bin: 'host', cite: 'x1 D1; ch14 D3', evidence: 'host top-k is a partial sort of the candidate array' },
-  { system: 'llama-default', stage: 'top-p', bin: 'host', cite: 'x1 D1; ch14 D3', evidence: 'host top-p: softmax, adaptive partial sort, running sum' },
-  { system: 'llama-default', stage: 'temperature', bin: 'host', cite: 'x1 D1, D2', evidence: 'llama_sampler_temp_impl divides each logit by temp' },
-  { system: 'llama-default', stage: 'draw', bin: 'host', cite: 'x1 D3', evidence: 'dist: std::mt19937 and a running sum compared with u × total' },
-  { system: 'llama-bs', stage: 'penalties', bin: 'kernels', cite: 'ch09 D4', evidence: 'host counts uploaded, scattered with ggml_set_rows and gathered with ggml_get_rows' },
-  { system: 'llama-bs', stage: 'top-k', bin: 'kernels', cite: 'ch14 D3, D2', evidence: 'backend top-k calls ggml_top_k (top-k.cu, Metal argsort.metal)' },
-  { system: 'llama-bs', stage: 'top-p', bin: 'kernels', cite: 'ch14 D3; ch11 D2', evidence: 'ggml_argsort, ggml_soft_max, ggml_cumsum, a ggml_step mask' },
-  { system: 'llama-bs', stage: 'temperature', bin: 'kernels', cite: 'x1 D2', evidence: 'ggml_scale(ctx, logits, 1.0f / temp)' },
-  { system: 'llama-bs', stage: 'draw', bin: 'kernels', cite: 'x1 D3', evidence: 'ggml_soft_max, ggml_cumsum, ggml_step, ggml_sum; u still drawn on the host' },
-  { system: 'transformers', stage: 'penalties', bin: 'framework', cite: 'x1 D4', evidence: 'RepetitionPenaltyLogitsProcessor: torch.where on the scores' },
-  { system: 'transformers', stage: 'top-k', bin: 'framework', cite: 'x1 D4', evidence: 'TopKLogitsWarper: torch.topk and a mask' },
-  { system: 'transformers', stage: 'top-p', bin: 'framework', cite: 'x1 D4; ch11 D4', evidence: 'TopPLogitsWarper, tensor ops' },
-  { system: 'transformers', stage: 'temperature', bin: 'framework', cite: 'x1 D4', evidence: 'TemperatureLogitsWarper: scores / temperature' },
-  { system: 'transformers', stage: 'draw', bin: 'framework', cite: 'x1 D4, D5', evidence: 'torch.multinomial(probs, 1): argmax(p / q) on the tensor’s device' },
-  { system: 'mlx-lm', stage: 'penalties', bin: 'framework', cite: 'x1 D8', evidence: 'mx.where(selected < 0, selected * penalty, selected / penalty)' },
-  { system: 'mlx-lm', stage: 'top-k', bin: 'framework', cite: 'x1 D8; ch12 D6', evidence: 'mx.argpartition and mx.put_along_axis' },
-  { system: 'mlx-lm', stage: 'top-p', bin: 'framework', cite: 'x1 D8; ch11 D3', evidence: 'mx.where(logprobs < threshold, -inf, logprobs)' },
-  { system: 'mlx-lm', stage: 'temperature', bin: 'framework', cite: 'x1 D8', evidence: 'logits * (1.0 / temp) inside categorical_sampling' },
-  { system: 'mlx-lm', stage: 'draw', bin: 'framework', cite: 'x1 D7, D8', evidence: 'mx.random.categorical with a Threefry key' },
+  { system: 'llama-default', stage: 'penalties', bin: 'host', cite: 'x1 D1, D2; ch09 D4', get evidence() { return tr('backend_sampling = false; llama_sampler_penalties_apply walks the candidate array on the host', 'backend_sampling = false; llama_sampler_penalties_apply duyệt mảng ứng viên trên host'); } }, // i18n-ignore: citation
+  { system: 'llama-default', stage: 'top-k', bin: 'host', cite: 'x1 D1; ch14 D3', get evidence() { return tr('host top-k is a partial sort of the candidate array', 'top-k trên host là một phép sắp xếp một phần mảng ứng viên'); } }, // i18n-ignore: citation
+  { system: 'llama-default', stage: 'top-p', bin: 'host', cite: 'x1 D1; ch14 D3', get evidence() { return tr('host top-p: softmax, adaptive partial sort, running sum', 'top-p trên host: softmax, sắp xếp một phần thích ứng, tổng tích lũy'); } }, // i18n-ignore: citation
+  { system: 'llama-default', stage: 'temperature', bin: 'host', cite: 'x1 D1, D2', get evidence() { return tr('llama_sampler_temp_impl divides each logit by temp', 'llama_sampler_temp_impl chia mỗi logit cho temp'); } }, // i18n-ignore: citation
+  { system: 'llama-default', stage: 'draw', bin: 'host', cite: 'x1 D3', get evidence() { return tr('dist: std::mt19937 and a running sum compared with u × total', 'dist: std::mt19937 và một tổng tích lũy so với u × total'); } }, // i18n-ignore: citation
+  { system: 'llama-bs', stage: 'penalties', bin: 'kernels', cite: 'ch09 D4', get evidence() { return tr('host counts uploaded, scattered with ggml_set_rows and gathered with ggml_get_rows', 'số đếm từ host được tải lên, rải bằng ggml_set_rows và gom bằng ggml_get_rows'); } }, // i18n-ignore: citation
+  { system: 'llama-bs', stage: 'top-k', bin: 'kernels', cite: 'ch14 D3, D2', get evidence() { return tr('backend top-k calls ggml_top_k (top-k.cu, Metal argsort.metal)', 'top-k trên backend gọi ggml_top_k (top-k.cu, Metal argsort.metal)'); } }, // i18n-ignore: citation
+  { system: 'llama-bs', stage: 'top-p', bin: 'kernels', cite: 'ch14 D3; ch11 D2', get evidence() { return tr('ggml_argsort, ggml_soft_max, ggml_cumsum, a ggml_step mask', 'ggml_argsort, ggml_soft_max, ggml_cumsum, một mặt nạ ggml_step'); } }, // i18n-ignore: citation
+  { system: 'llama-bs', stage: 'temperature', bin: 'kernels', cite: 'x1 D2', evidence: 'ggml_scale(ctx, logits, 1.0f / temp)' }, // i18n-ignore: citation
+  { system: 'llama-bs', stage: 'draw', bin: 'kernels', cite: 'x1 D3', get evidence() { return tr('ggml_soft_max, ggml_cumsum, ggml_step, ggml_sum; u still drawn on the host', 'ggml_soft_max, ggml_cumsum, ggml_step, ggml_sum; u vẫn được rút trên host'); } }, // i18n-ignore: citation
+  { system: 'transformers', stage: 'penalties', bin: 'framework', cite: 'x1 D4', get evidence() { return tr('RepetitionPenaltyLogitsProcessor: torch.where on the scores', 'RepetitionPenaltyLogitsProcessor: torch.where trên các điểm số'); } }, // i18n-ignore: citation
+  { system: 'transformers', stage: 'top-k', bin: 'framework', cite: 'x1 D4', get evidence() { return tr('TopKLogitsWarper: torch.topk and a mask', 'TopKLogitsWarper: torch.topk và một mặt nạ'); } }, // i18n-ignore: citation
+  { system: 'transformers', stage: 'top-p', bin: 'framework', cite: 'x1 D4; ch11 D4', get evidence() { return tr('TopPLogitsWarper, tensor ops', 'TopPLogitsWarper, các tensor op'); } }, // i18n-ignore: citation
+  { system: 'transformers', stage: 'temperature', bin: 'framework', cite: 'x1 D4', evidence: 'TemperatureLogitsWarper: scores / temperature' }, // i18n-ignore: citation
+  { system: 'transformers', stage: 'draw', bin: 'framework', cite: 'x1 D4, D5', get evidence() { return tr('torch.multinomial(probs, 1): argmax(p / q) on the tensor’s device', 'torch.multinomial(probs, 1): argmax(p / q) trên thiết bị chứa tensor'); } }, // i18n-ignore: citation
+  { system: 'mlx-lm', stage: 'penalties', bin: 'framework', cite: 'x1 D8', evidence: 'mx.where(selected < 0, selected * penalty, selected / penalty)' }, // i18n-ignore: citation
+  { system: 'mlx-lm', stage: 'top-k', bin: 'framework', cite: 'x1 D8; ch12 D6', get evidence() { return tr('mx.argpartition and mx.put_along_axis', 'mx.argpartition và mx.put_along_axis'); } }, // i18n-ignore: citation
+  { system: 'mlx-lm', stage: 'top-p', bin: 'framework', cite: 'x1 D8; ch11 D3', evidence: 'mx.where(logprobs < threshold, -inf, logprobs)' }, // i18n-ignore: citation
+  { system: 'mlx-lm', stage: 'temperature', bin: 'framework', cite: 'x1 D8', get evidence() { return tr('logits * (1.0 / temp) inside categorical_sampling', 'logits * (1.0 / temp) bên trong categorical_sampling'); } }, // i18n-ignore: citation
+  { system: 'mlx-lm', stage: 'draw', bin: 'framework', cite: 'x1 D7, D8', get evidence() { return tr('mx.random.categorical with a Threefry key', 'mx.random.categorical với một khóa Threefry'); } }, // i18n-ignore: citation
 ];
 export const cellOf = (system: System, stage: Stage) => STAGES.find((c) => c.system === system && c.stage === stage);
 
 /** The order each system applies its stages in (x1 D1, D4, D8): the reason the table's columns are not one pipeline. */
 export const ORDER: Partial<Record<System, string[]>> = {
-  'llama-default': ['penalties', 'DRY', 'top-n-sigma', 'top-k', 'typical', 'top-p', 'min-p', 'XTC', 'temperature', 'dist or greedy'],
-  transformers: ['repetition penalty and other processors', 'temperature', 'top-k', 'top-p', 'min-p', 'softmax', 'torch.multinomial'],
-  'mlx-lm': ['logits processors (penalties)', 'top-p', 'min-p', 'XTC', 'top-k', 'temperature and categorical'],
+  get 'llama-default'() {
+    return ['penalties', 'DRY', 'top-n-sigma', 'top-k', 'typical', 'top-p', 'min-p', 'XTC', 'temperature', tr('dist or greedy', 'dist hoặc greedy')];
+  },
+  get transformers() {
+    return [tr('repetition penalty and other processors', 'hình phạt lặp lại và các processor khác'), 'temperature', 'top-k', 'top-p', 'min-p', 'softmax', 'torch.multinomial'];
+  },
+  get 'mlx-lm'() {
+    return [tr('logits processors (penalties)', 'logits processor (hình phạt)'), 'top-p', 'min-p', 'XTC', 'top-k', tr('temperature and categorical', 'nhiệt độ và categorical')];
+  },
 };

@@ -1,0 +1,1 @@
+Lấy một word 16 bit: byte 4 và 5, chứa bốn trọng số. Các kernel Metal áp mặt nạ lên nó theo bốn cách và không bao giờ dịch bit. Mỗi mã sau khi áp mặt nạ ra lớn hơn 1, 256, 16 hoặc 4096 lần. Vì vậy các activation tương ứng đã được chia trước cho chính các lũy thừa của hai đó, và mọi tích đều ra chính xác.

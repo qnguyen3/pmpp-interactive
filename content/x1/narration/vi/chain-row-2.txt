@@ -1,0 +1,1 @@
+Top-k, với k bằng 5. Năm cột cao nhất vẫn sáng, và bảy cột còn lại mờ đi ngay tại chỗ. Chưa có gì được sắp xếp: một phép chọn chỉ cần tìm ra điểm cắt. Token 3 và token 10 bằng nhau ở điểm cắt, cả hai đều là 0.7. Quy tắc là chọn id token nhỏ hơn, nên token 3 ở lại và token 10 bị loại.

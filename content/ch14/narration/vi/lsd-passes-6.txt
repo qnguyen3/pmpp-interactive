@@ -1,0 +1,1 @@
+Mỗi lượt là một phép phân hoạch ổn định. Đó là phép lọc ổn định của chương 12, với một danh sách thứ hai cho các khóa không qua phép kiểm tra. Và đích đến của mỗi khóa đến từ một phép scan loại trừ trên các bit, phép này đếm số bit một đứng trước mỗi khóa. Đó là cách mục tiếp theo chạy một lượt song song.

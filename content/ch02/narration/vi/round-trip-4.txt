@@ -1,0 +1,1 @@
+Phần 2. Một câu lệnh khởi chạy kernel, và nó trả về ngay. Host không chờ device chạy xong, thậm chí không chờ nó bắt đầu. Tạm thời, hãy coi device như một chiếc hộp kín lấp đầy C. [short pause] Mục 2.5 sẽ mở chiếc hộp đó.

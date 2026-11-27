@@ -6,6 +6,8 @@
 // (Fig. 9.2, p. 203); histogram.test.ts compiles that file and checks that it counts
 // exactly what histogram() counts.
 
+import { tr } from '../lib/locale.ts';
+
 /** Side of the explorer's square images. */
 export const SIDE = 8;
 /** Pixels per preset image. */
@@ -106,10 +108,34 @@ function noise(seed: number, n: number): number[] {
 }
 
 export const PRESETS: Preset[] = [
-  { id: 'sky', label: 'bright sky over dark ground', values: SKY },
-  { id: 'night', label: 'night scene', values: NIGHT },
-  { id: 'noise', label: 'noise', values: noise(9, PIXELS) },
-  { id: 'flat', label: 'flat grey', values: new Array<number>(PIXELS).fill(128) },
+  {
+    id: 'sky',
+    get label() {
+      return tr('bright sky over dark ground', 'trời sáng trên nền đất tối');
+    },
+    values: SKY,
+  },
+  {
+    id: 'night',
+    get label() {
+      return tr('night scene', 'cảnh ban đêm');
+    },
+    values: NIGHT,
+  },
+  {
+    id: 'noise',
+    get label() {
+      return tr('noise', 'nhiễu');
+    },
+    values: noise(9, PIXELS),
+  },
+  {
+    id: 'flat',
+    get label() {
+      return tr('flat grey', 'xám đồng nhất');
+    },
+    values: new Array<number>(PIXELS).fill(128),
+  },
 ];
 
 export const preset = (id: PresetId): Preset => PRESETS.find((p) => p.id === id)!;

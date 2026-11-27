@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { apply, grow, run, type Block, type GrowStep } from '../../sim/vmmgrow';
 
 // "Growing a buffer without copying it" (§C.9). One token sequence, 32 tokens with 4
@@ -83,11 +84,11 @@ function Doubling({ d, dim = false }: { d: DState; dim?: boolean }) {
   return (
     <g opacity={dim ? 0.45 : 1} data-part="double" data-copied={d.copied} data-moves={d.moves} data-allocated={d.allocated}>
       <text x={X0} y={16} fontSize="12" fontWeight="600">
-        Allocate twice as much and copy
+        <Translated vi="Cấp phát gấp đôi rồi sao chép">Allocate twice as much and copy</Translated>
       </text>
       <line x1={X0} x2={X0 + TOP * U} y1={y + 36} y2={y + 36} stroke="var(--rule)" />
       <text x={X0 + TOP * U} y={y + 48} fontSize="10" textAnchor="end" style={{ fill: 'var(--ink-3)' }}>
-        addresses →
+        <Translated vi="địa chỉ →">addresses →</Translated>
       </text>
       {d.blocks.map(({ b, state, held }) => (
         <g key={b.base + ':' + state} data-part="block" data-base={b.base} data-size={b.size} data-state={state} data-held={held}>
@@ -118,7 +119,16 @@ function Doubling({ d, dim = false }: { d: DState; dim?: boolean }) {
         />
       ) : null}
       <text x={X0} y={y + 64} fontSize="12" data-part="double-counters">
-        copied so far: {d.copied} token{d.copied === 1 ? '' : 's'} · base pointer moved: {d.moves} time{d.moves === 1 ? '' : 's'} · allocated now: {d.allocated} slots for {d.phase === 'settled' ? d.t : d.t - 1} token{(d.phase === 'settled' ? d.t : d.t - 1) === 1 ? '' : 's'}
+        <Translated
+          vi={
+            <>
+              đã sao chép: {d.copied} token · con trỏ gốc đã dời: {d.moves} lần · đang cấp phát: {d.allocated} ô cho{' '}
+              {d.phase === 'settled' ? d.t : d.t - 1} token
+            </>
+          }
+        >
+          copied so far: {d.copied} token{d.copied === 1 ? '' : 's'} · base pointer moved: {d.moves} time{d.moves === 1 ? '' : 's'} · allocated now: {d.allocated} slots for {d.phase === 'settled' ? d.t : d.t - 1} token{(d.phase === 'settled' ? d.t : d.t - 1) === 1 ? '' : 's'}
+        </Translated>
       </text>
     </g>
   );
@@ -140,7 +150,7 @@ function Mapping({ v, show = 1 }: { v: VState; show?: number }) {
   return (
     <g opacity={show} data-part="vmm" data-reserved={v.reserved} data-mapped={v.mapped} data-copied={v.copied} data-moves={v.moves} data-granted={v.granted}>
       <text x={X0} y={y - 16} fontSize="12" fontWeight="600">
-        Reserve once, map chunks
+        <Translated vi="Đặt trước một lần, ánh xạ từng chunk">Reserve once, map chunks</Translated>
       </text>
       {v.reserved ? (
         <rect x={X0} y={y} width={v.reserved * U - 2} height={30} rx="2" fill="none" stroke="var(--global)" strokeDasharray="5 3" data-part="reserved" />
@@ -158,27 +168,37 @@ function Mapping({ v, show = 1 }: { v: VState; show?: number }) {
       ))}
       {v.mapped ? (
         <text x={X0 + v.reserved * U + 8} y={y + 46} fontSize="11" style={{ fill: 'var(--ink-2)' }}>
-          ✓ access granted · ✗ not yet
+          <Translated vi="✓ đã cấp quyền truy cập · ✗ chưa">✓ access granted · ✗ not yet</Translated>
         </text>
       ) : null}
       {v.pool ? (
         <g data-part="pool">
           <rect x={X0 + (v.reserved + 3) * U} y={y} width={PER_CHUNK * U - 2} height={30} rx="2" fill="var(--global-wash)" stroke="var(--global)" />
           <text x={X0 + (v.reserved + 3 + PER_CHUNK / 2) * U} y={y + 19} fontSize="11" textAnchor="middle">
-            new chunk
+            <Translated vi="chunk mới">new chunk</Translated>
           </text>
           <text x={X0 + (v.reserved + 3 + PER_CHUNK / 2) * U} y={y + 46} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-            memory, no address
+            <Translated vi="có bộ nhớ, chưa có địa chỉ">memory, no address</Translated>
           </text>
         </g>
       ) : null}
       {v.read ? (
         <text x={X0 + 2} y={y + 68} fontSize="12" fontWeight="600" data-part="read" data-status={v.read} style={{ fill: v.read === 'ok' ? 'var(--ok)' : 'var(--fail)' }}>
-          {v.read === 'ok' ? 'kernel reads the first chunk: ok' : 'kernel reads the first chunk: crash, no access granted'}
+          {v.read === 'ok'
+            ? tr('kernel reads the first chunk: ok', 'kernel đọc chunk đầu tiên: ok')
+            : tr('kernel reads the first chunk: crash, no access granted', 'kernel đọc chunk đầu tiên: crash, chưa được cấp quyền truy cập')}
         </text>
       ) : null}
       <text x={X0} y={y + 94} fontSize="12" data-part="vmm-counters">
-        copied so far: {v.copied} · base pointer moved: {v.moves} times · memory behind the range: {v.mapped * PER_CHUNK} slots
+        <Translated
+          vi={
+            <>
+              đã sao chép: {v.copied} · con trỏ gốc đã dời: {v.moves} lần · bộ nhớ phía sau dải địa chỉ: {v.mapped * PER_CHUNK} ô
+            </>
+          }
+        >
+          copied so far: {v.copied} · base pointer moved: {v.moves} times · memory behind the range: {v.mapped * PER_CHUNK} slots
+        </Translated>
       </text>
     </g>
   );
@@ -186,9 +206,12 @@ function Mapping({ v, show = 1 }: { v: VState; show?: number }) {
 
 function Stage({ top, bottom, headline }: { top?: ReactNode; bottom?: ReactNode; headline: string }) {
   return (
-    <svg viewBox="0 0 720 320" role="img" aria-label="Animation: growing a buffer by copying, and by mapping chunks into a reserved range" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+    <svg viewBox="0 0 720 320" role="img" aria-label={tr(
+        'Animation: growing a buffer by copying, and by mapping chunks into a reserved range',
+        'Hoạt hình: nới rộng một buffer bằng cách sao chép, và bằng cách ánh xạ các chunk vào một dải địa chỉ đã đặt trước',
+      )} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       <defs>
-        <marker id="gb-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id="gb-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">{/* i18n-ignore: SVG attribute */}
           <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--global)" />
         </marker>
       </defs>
@@ -211,7 +234,9 @@ const FINAL = doubling(TOKENS, 'settled');
 const beats: Beat[] = [
   {
     clip: 'grow-buffer-1',
-    label: 'The usual way',
+    get label() {
+      return tr('The usual way', 'Cách thông thường');
+    },
     draw: (p) => {
       const firstMove = DOUBLE.steps.find((s) => s.moved) as GrowStep;
       const { t, frac } = pace(p, 1, firstMove.token, (x) => x === firstMove.token, 6);
@@ -219,42 +244,63 @@ const beats: Beat[] = [
       const d = doubling(t, ph);
       const headline =
         ph === 'both'
-          ? `full: a new buffer of ${firstMove.to.size} slots elsewhere; both exist, ${d.allocated} slots for ${t - 1} tokens`
+          ? tr(
+              `full: a new buffer of ${firstMove.to.size} slots elsewhere; both exist, ${d.allocated} slots for ${t - 1} tokens`,
+              `đầy: một buffer mới ${firstMove.to.size} ô ở chỗ khác; cả hai cùng tồn tại, ${d.allocated} ô cho ${t - 1} token`,
+            )
           : ph === 'copy'
-            ? `copy all ${t - 1} tokens across`
+            ? tr(`copy all ${t - 1} tokens across`, `sao chép cả ${t - 1} token sang`)
             : DOUBLE.steps[t - 1].moved
-              ? 'free the old buffer: the base pointer has moved'
-              : `a buffer of ${DOUBLE.steps[0].to.size} slots, holding ${t} token${t === 1 ? '' : 's'}`;
+              ? tr('free the old buffer: the base pointer has moved', 'giải phóng buffer cũ: con trỏ gốc đã dời đi')
+              : tr(
+                  `a buffer of ${DOUBLE.steps[0].to.size} slots, holding ${t} token${t === 1 ? '' : 's'}`,
+                  `một buffer ${DOUBLE.steps[0].to.size} ô, đang chứa ${t} token`,
+                );
       return <Stage top={<Doubling d={d} />} headline={headline} />;
     },
   },
   {
     clip: 'grow-buffer-2',
-    label: 'Copies add up',
+    get label() {
+      return tr('Copies add up', 'Các lần sao chép cộng dồn');
+    },
     draw: (p) => {
       const first = (DOUBLE.steps.find((s) => s.moved) as GrowStep).token + 1;
       const { t, frac } = pace(p, first, TOKENS, (x) => DOUBLE.steps[x - 1].moved, 6);
       const s = DOUBLE.steps[t - 1];
       const ph = phaseOf(s, frac);
       const d = doubling(t, ph);
-      const headline = ph === 'copy' ? `token ${t}: copy ${s.copied} tokens into ${s.to.size} new slots` : `token ${t}: ${d.copied} tokens copied so far, pointer moved ${d.moves} times`;
+      const headline =
+        ph === 'copy'
+          ? tr(`token ${t}: copy ${s.copied} tokens into ${s.to.size} new slots`, `token ${t}: sao chép ${s.copied} token vào ${s.to.size} ô mới`)
+          : tr(
+              `token ${t}: ${d.copied} tokens copied so far, pointer moved ${d.moves} times`,
+              `token ${t}: đã sao chép ${d.copied} token, con trỏ đã dời ${d.moves} lần`,
+            );
       return <Stage top={<Doubling d={d} />} headline={headline} />;
     },
   },
   {
     clip: 'grow-buffer-3',
-    label: 'Reserve',
+    get label() {
+      return tr('Reserve', 'Đặt trước');
+    },
     draw: (p) => (
       <Stage
         top={<Doubling d={FINAL} dim />}
         bottom={<Mapping v={{ reserved: TOKENS, mapped: 0, held: 0, granted: 0, copied: 0, moves: 0 }} show={ramp(p, 0.05, 0.35)} />}
-        headline={`reserve ${TOKENS / PER_CHUNK} chunks of addresses: nothing behind them yet`}
+        headline={tr(
+          `reserve ${TOKENS / PER_CHUNK} chunks of addresses: nothing behind them yet`,
+          `đặt trước ${TOKENS / PER_CHUNK} chunk địa chỉ: chưa có gì phía sau chúng`,
+        )}
       />
     ),
   },
   {
     clip: 'grow-buffer-4',
-    label: 'Map and grant',
+    get label() {
+      return tr('Map and grant', 'Ánh xạ và cấp quyền');
+    },
     draw: (p) => {
       const step = p < 0.3 ? 0 : p < 0.5 ? 1 : p < 0.75 ? 2 : 3;
       const v: VState =
@@ -265,13 +311,20 @@ const beats: Beat[] = [
             : step === 2
               ? { reserved: TOKENS, mapped: 1, held: 0, granted: 0, copied: 0, moves: 0, read: READ_BEFORE.kind === 'crash' ? 'crash' : 'ok' }
               : { reserved: TOKENS, mapped: 1, held: 0, granted: 1, copied: 0, moves: 0, read: READ_AFTER.kind === 'ok' ? 'ok' : 'crash' };
-      const headline = ['create a chunk: memory with no address yet', 'map it at the start of the range', 'mapped is not accessible: the read crashes', 'grant access: now a kernel can read it'][step];
+      const headline = [
+        tr('create a chunk: memory with no address yet', 'tạo một chunk: bộ nhớ chưa có địa chỉ'),
+        tr('map it at the start of the range', 'ánh xạ nó vào đầu dải địa chỉ'),
+        tr('mapped is not accessible: the read crashes', 'được ánh xạ chưa có nghĩa là truy cập được: lần đọc bị crash'),
+        tr('grant access: now a kernel can read it', 'cấp quyền truy cập: giờ kernel đọc được nó'),
+      ][step];
       return <Stage top={<Doubling d={FINAL} dim />} bottom={<Mapping v={v} />} headline={headline} />;
     },
   },
   {
     clip: 'grow-buffer-5',
-    label: 'Grow in place',
+    get label() {
+      return tr('Grow in place', 'Nới rộng tại chỗ');
+    },
     draw: (p) => {
       const { t, frac } = pace(p, 1, TOKENS, (x) => !!VMM.steps[x - 1].newChunks, 2);
       const s = VMM.steps[t - 1];
@@ -279,15 +332,24 @@ const beats: Beat[] = [
       const v = vmmAt(t, (s.mapped ?? 0) - (fresh && t > 1 ? 1 : 0), fresh ? t - 1 : t);
       const headline =
         t === TOKENS && frac > 0.5
-          ? `${TOKENS} tokens: copied ${DOUBLE.copiedTotal} against ${VMM.copiedTotal}; the pointer moved ${DOUBLE.pointerChanges} times against ${VMM.pointerChanges}`
+          ? tr(
+              `${TOKENS} tokens: copied ${DOUBLE.copiedTotal} against ${VMM.copiedTotal}; the pointer moved ${DOUBLE.pointerChanges} times against ${VMM.pointerChanges}`,
+              `${TOKENS} token: sao chép ${DOUBLE.copiedTotal} so với ${VMM.copiedTotal}; con trỏ dời ${DOUBLE.pointerChanges} lần so với ${VMM.pointerChanges}`,
+            )
           : fresh
-            ? `token ${t}: map chunk ${s.mapped} right after the last, and grant access`
-            : `token ${t}: ${s.mapped} chunk${s.mapped === 1 ? '' : 's'} mapped, nothing copied, same base`;
+            ? tr(
+                `token ${t}: map chunk ${s.mapped} right after the last, and grant access`,
+                `token ${t}: ánh xạ chunk ${s.mapped} ngay sau chunk trước, và cấp quyền truy cập`,
+              )
+            : tr(
+                `token ${t}: ${s.mapped} chunk${s.mapped === 1 ? '' : 's'} mapped, nothing copied, same base`,
+                `token ${t}: đã ánh xạ ${s.mapped} chunk, không sao chép gì, vẫn địa chỉ gốc cũ`,
+              );
       return <Stage top={<Doubling d={FINAL} dim />} bottom={<Mapping v={v} />} headline={headline} />;
     },
   },
 ];
 
 export function GrowBufferScene() {
-  return <Scene chapter="appC" title="Growing a buffer without copying it" beats={beats} />;
+  return <Scene chapter="appC" title={tr('Growing a buffer without copying it', 'Nới rộng một buffer mà không sao chép')} beats={beats} />;
 }

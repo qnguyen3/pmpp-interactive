@@ -1,0 +1,1 @@
+Pha ba. Mỗi luồng cộng tổng đã scan của luồng đứng trước nó vào mọi giá trị trong thanh ghi của mình. Luồng 0 không cộng gì. Luồng 1 cộng 7. Luồng 2 cộng 14, và luồng 3 cộng 20. Sau đó mỗi luồng ghi dải phần tử đã hoàn tất của mình trở lại bộ nhớ chia sẻ.

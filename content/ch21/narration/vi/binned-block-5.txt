@@ -1,0 +1,1 @@
+Ở cuối danh sách, khối này đã thực hiện 1344 phép kiểm tra, 752 trong số đó trên nguyên tử giả, và chấp nhận 114, khoảng 8 phần trăm. Tính tổng trực tiếp sẽ ghép 16 điểm này với cả 160 nguyên tử: 2560 cặp. Con số đó tăng theo kích thước hộp. Danh sách thì không.

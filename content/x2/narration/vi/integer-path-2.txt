@@ -1,0 +1,1 @@
+Giờ đến các trọng số. Một word 32 bit chứa 8 mã 4 bit. Một mặt nạ giữ lại 4 bit thấp của mỗi byte: đó là các trọng số từ 0 đến 3. Dịch word sang phải 4 bit rồi áp mặt nạ lần nữa, và bạn có các trọng số từ 16 đến 19. Các mã vẫn là số không dấu, từ 0 đến 15. Chưa có gì trừ đi 8 cả.

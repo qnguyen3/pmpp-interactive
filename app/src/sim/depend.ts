@@ -38,19 +38,37 @@
 // No imports and no syntax that needs compiling away beyond types, so the
 // browser checks can load this file directly.
 
+import { tr } from '../lib/locale.ts';
+
 export type Op = 'grayscale' | 'vecadd' | 'biasadd' | 'blur' | 'mean' | 'neighbour' | 'inplace' | 'softmax';
 
 export const OPS: Op[] = ['grayscale', 'vecadd', 'biasadd', 'blur', 'mean', 'neighbour', 'inplace', 'softmax'];
 
 export const OP_LABEL: Record<Op, string> = {
-  grayscale: 'Grayscale',
-  vecadd: 'Vector add',
-  biasadd: 'Bias add',
-  blur: '1D blur',
-  mean: 'Mean of all elements',
-  neighbour: 'Neighbour sum, out of place',
-  inplace: 'Running sum, in place',
-  softmax: 'Softmax over a row',
+  get grayscale() {
+    return tr('Grayscale', 'Chuyển sang ảnh xám');
+  },
+  get vecadd() {
+    return tr('Vector add', 'Cộng vectơ');
+  },
+  get biasadd() {
+    return tr('Bias add', 'Cộng bias');
+  },
+  get blur() {
+    return tr('1D blur', 'Làm mờ 1D');
+  },
+  get mean() {
+    return tr('Mean of all elements', 'Trung bình của mọi phần tử');
+  },
+  get neighbour() {
+    return tr('Neighbour sum, out of place', 'Tổng lân cận, ghi ra chỗ khác');
+  },
+  get inplace() {
+    return tr('Running sum, in place', 'Tổng cộng dồn, ghi tại chỗ');
+  },
+  get softmax() {
+    return tr('Softmax over a row', 'Softmax trên một hàng');
+  },
 };
 
 /** The body of the sequential loop over k, as one line of C. */
@@ -58,21 +76,37 @@ export const OP_BODY: Record<Op, string> = {
   grayscale: 'O[k] = 0.299f*I[3*k] + 0.587f*I[3*k + 1] + 0.114f*I[3*k + 2];',
   vecadd: 'C[k] = A[k] + B[k];',
   biasadd: 'y[k] = x[k] + b[k % d];',
-  blur: 'out[k] = average of in[k - r] ... in[k + r], skipping positions outside the array;',
+  get blur() {
+    return tr('out[k] = average of in[k - r] ... in[k + r], skipping positions outside the array;', 'out[k] = trung bình của in[k - r] ... in[k + r], bỏ qua các vị trí nằm ngoài mảng;');
+  },
   mean: 'mean = (x[0] + x[1] + ... + x[n - 1]) / n;',
   neighbour: 'y[k] = x[k - 1] + x[k];',
   inplace: 'x[k] = x[k - 1] + x[k];',
-  softmax: 'y[k] = exp(x[k]) / (sum of exp(x[j]) over the row of k);',
+  get softmax() {
+    return tr('y[k] = exp(x[k]) / (sum of exp(x[j]) over the row of k);', 'y[k] = exp(x[k]) / (tổng các exp(x[j]) trên hàng chứa k);');
+  },
 };
 
 /** A convention the one-line body leaves unsaid. */
 export const OP_NOTE: Partial<Record<Op, string>> = {
-  neighbour: 'x[-1] counts as 0',
-  inplace: 'x[-1] counts as 0',
-  blur: 'r is the radius',
-  biasadd: 'd is the width of a row',
-  softmax:
-    'the plain formula; real kernels first subtract the row maximum for numerical stability, a second value combined from the row, as in chapter 10 and milestone M4',
+  get neighbour() {
+    return tr('x[-1] counts as 0', 'x[-1] được tính là 0');
+  },
+  get inplace() {
+    return tr('x[-1] counts as 0', 'x[-1] được tính là 0');
+  },
+  get blur() {
+    return tr('r is the radius', 'r là bán kính');
+  },
+  get biasadd() {
+    return tr('d is the width of a row', 'd là độ rộng của một hàng');
+  },
+  get softmax() {
+    return tr(
+      'the plain formula; real kernels first subtract the row maximum for numerical stability, a second value combined from the row, as in chapter 10 and milestone M4',
+      'công thức thuần; kernel thực tế trước hết trừ đi giá trị lớn nhất của hàng để ổn định số học, một giá trị thứ hai được gộp từ hàng, như ở chương 10 và mốc dự án M4',
+    );
+  },
 };
 
 /** The grayscale weights of the book's Eq. 2.1 (p. 22): L = 0.299 r + 0.587 g + 0.114 b. */
@@ -124,12 +158,12 @@ export function shape(op: Op, p: Params = defaults(op)): Shape {
     case 'biasadd':
       return { inputs: [{ name: 'x', length: p.n }, { name: 'b', length: p.d }], combine: null, output: { name: 'y', length: p.n }, inPlace: false };
     case 'blur':
-      return { inputs: [{ name: 'in', length: p.n }], combine: null, output: { name: 'out', length: p.n }, inPlace: false };
+      return { inputs: [{ name: 'in', length: p.n }], combine: null, output: { name: 'out', length: p.n }, inPlace: false }; // i18n-ignore: array names in the pseudocode
     case 'mean':
       return {
         inputs: [{ name: 'x', length: p.n }],
-        combine: { name: 'partial sums', length: combineCount(op, p) },
-        output: { name: 'mean', length: 1 },
+        combine: { name: tr('partial sums', 'các tổng riêng phần'), length: combineCount(op, p) },
+        output: { name: 'mean', length: 1 }, // i18n-ignore: array name in the pseudocode
         inPlace: false,
       };
     case 'neighbour':
@@ -139,7 +173,7 @@ export function shape(op: Op, p: Params = defaults(op)): Shape {
     case 'softmax':
       return {
         inputs: [{ name: 'x', length: p.n }],
-        combine: { name: 'row sums', length: combineCount(op, p) },
+        combine: { name: tr('row sums', 'các tổng theo hàng'), length: combineCount(op, p) },
         output: { name: 'y', length: p.n },
         inPlace: false,
       };
@@ -258,17 +292,33 @@ export type Bin = 'elementwise' | 'manyreads' | 'combine' | 'chain';
 export const BINS: Bin[] = ['elementwise', 'manyreads', 'combine', 'chain'];
 
 export const BIN_LABEL: Record<Bin, string> = {
-  elementwise: 'Independent per element',
-  manyreads: 'Independent per output, many reads',
-  combine: 'Needs a combine first',
-  chain: 'A chain',
+  get elementwise() {
+    return tr('Independent per element', 'Độc lập theo từng phần tử');
+  },
+  get manyreads() {
+    return tr('Independent per output, many reads', 'Độc lập theo từng đầu ra, đọc nhiều');
+  },
+  get combine() {
+    return tr('Needs a combine first', 'Cần gộp trước');
+  },
+  get chain() {
+    return tr('A chain', 'Một chuỗi');
+  },
 };
 
 export const BIN_LONG: Record<Bin, string> = {
-  elementwise: 'Independent per element: one thread per output, and one line of work in it.',
-  manyreads: 'Independent per output, but each output reads many inputs: a loop inside every thread.',
-  combine: 'Needs a combine across elements first: some value built from a whole row or array.',
-  chain: 'A chain: each result needs the previous one.',
+  get elementwise() {
+    return tr('Independent per element: one thread per output, and one line of work in it.', 'Độc lập theo từng phần tử: mỗi đầu ra một luồng, và một dòng công việc trong luồng đó.');
+  },
+  get manyreads() {
+    return tr('Independent per output, but each output reads many inputs: a loop inside every thread.', 'Độc lập theo từng đầu ra, nhưng mỗi đầu ra đọc nhiều đầu vào: một vòng lặp bên trong mỗi luồng.');
+  },
+  get combine() {
+    return tr('Needs a combine across elements first: some value built from a whole row or array.', 'Cần gộp qua các phần tử trước: một giá trị nào đó được tạo từ cả một hàng hoặc cả mảng.');
+  },
+  get chain() {
+    return tr('A chain: each result needs the previous one.', 'Một chuỗi: mỗi kết quả cần kết quả trước nó.');
+  },
 };
 
 /** The dependency facts a bin is decided from. */
@@ -406,10 +456,18 @@ export function runSequential(op: Op, data: Data, p: Params = defaults(op)): num
 export type OrderName = 'forward' | 'reversed' | 'evens-first' | 'shuffled';
 export const ORDERS: OrderName[] = ['forward', 'reversed', 'evens-first', 'shuffled'];
 export const ORDER_LABEL: Record<OrderName, string> = {
-  forward: 'thread 0 first',
-  reversed: 'last thread first',
-  'evens-first': 'even threads, then odd',
-  shuffled: 'a fixed shuffle',
+  get forward() {
+    return tr('thread 0 first', 'luồng 0 trước');
+  },
+  get reversed() {
+    return tr('last thread first', 'luồng cuối trước');
+  },
+  get 'evens-first'() {
+    return tr('even threads, then odd', 'luồng chẵn, rồi luồng lẻ');
+  },
+  get shuffled() {
+    return tr('a fixed shuffle', 'một hoán vị cố định');
+  },
 };
 
 /** A named order of n threads. "shuffled" is a fixed permutation, the same every time. */
@@ -506,27 +564,39 @@ export interface DecodeItem {
 export const DECODE_ITEMS: DecodeItem[] = [
   {
     id: 'residual',
-    label: 'Residual add',
+    get label() {
+      return tr('Residual add', 'Cộng residual');
+    },
     body: 'y[i] = x[i] + r[i]',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 2, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch02'],
   },
   {
     id: 'bias',
-    label: 'Bias add',
+    get label() {
+      return tr('Bias add', 'Cộng bias');
+    },
     body: 'y[t][j] = x[t][j] + b[j]',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 2, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch02'],
   },
   {
     id: 'scale',
-    label: 'Scaling by a constant',
+    get label() {
+      return tr('Scaling by a constant', 'Nhân với một hằng số');
+    },
     body: 'y[i] = a * x[i]',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 1, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch02'],
@@ -535,34 +605,48 @@ export const DECODE_ITEMS: DecodeItem[] = [
     id: 'gelu',
     label: 'GELU',
     body: 'y[i] = gelu(x[i])',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 1, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch02'],
   },
   {
     id: 'linear',
-    label: 'The matmul of a linear layer',
+    get label() {
+      return tr('The matmul of a linear layer', 'Phép nhân ma trận của một lớp tuyến tính');
+    },
     body: 'y[j] = W[j][0]*x[0] + W[j][1]*x[1] + ... + W[j][d-1]*x[d-1]',
-    sizeName: 'input width d',
+    get sizeName() {
+      return tr('input width d', 'độ rộng đầu vào d');
+    },
     deps: { reads: (d) => 2 * d, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch03', 'ch05', 'ch15'],
   },
   {
     id: 'layernorm',
-    label: 'Layer norm',
+    get label() {
+      return tr('Layer norm', 'Layer norm');
+    },
     body: 'y[i] = g[i] * (x[i] - mean) / sqrt(var + eps) + b[i]',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 3, combines: 2, prior: false },
     stage: 'forward',
     where: ['ch10'],
   },
   {
     id: 'kvappend',
-    label: 'Appending to the KV cache',
+    get label() {
+      return tr('Appending to the KV cache', 'Thêm vào KV cache');
+    },
     body: 'cache[t][j] = k_new[j]',
-    sizeName: 'hidden size',
+    get sizeName() {
+      return tr('hidden size', 'kích thước ẩn (hidden size)');
+    },
     deps: { reads: () => 1, combines: 0, prior: false },
     stage: 'forward',
     where: ['ch02', 'ch20'],
@@ -572,36 +656,56 @@ export const DECODE_ITEMS: DecodeItem[] = [
     // stability, so two values are combined from the whole vocabulary. The
     // explorer's 'softmax' keeps the plain formula, with one (see OP_NOTE).
     id: 'softmax',
-    label: 'Softmax over the vocabulary',
-    body: 'p[v] = exp(z[v] - m) / (sum of exp(z[u] - m) over the vocabulary), where m is the largest z',
-    sizeName: 'vocabulary size',
+    get label() {
+      return tr('Softmax over the vocabulary', 'Softmax trên bộ từ vựng');
+    },
+    get body() {
+      return tr('p[v] = exp(z[v] - m) / (sum of exp(z[u] - m) over the vocabulary), where m is the largest z', 'p[v] = exp(z[v] - m) / (tổng các exp(z[u] - m) trên bộ từ vựng), với m là z lớn nhất');
+    },
+    get sizeName() {
+      return tr('vocabulary size', 'kích thước bộ từ vựng');
+    },
     deps: { reads: () => 1, combines: 2, prior: false },
     stage: 'sampling',
     where: ['ch10'],
   },
   {
     id: 'argmax',
-    label: 'Argmax',
-    body: 'token = index of the largest z[v]',
-    sizeName: 'vocabulary size',
+    get label() {
+      return tr('Argmax', 'Argmax');
+    },
+    get body() {
+      return tr('token = index of the largest z[v]', 'token = chỉ số của z[v] lớn nhất');
+    },
+    get sizeName() {
+      return tr('vocabulary size', 'kích thước bộ từ vựng');
+    },
     deps: { reads: () => 0, combines: 1, prior: false },
     stage: 'sampling',
     where: ['ch10'],
   },
   {
     id: 'cumprob',
-    label: 'Cumulative probability for top-p',
+    get label() {
+      return tr('Cumulative probability for top-p', 'Xác suất tích lũy cho top-p');
+    },
     body: 'c[i] = c[i-1] + p[i]',
-    sizeName: 'vocabulary size',
+    get sizeName() {
+      return tr('vocabulary size', 'kích thước bộ từ vựng');
+    },
     deps: { reads: () => 1, combines: 0, prior: true },
     stage: 'sampling',
     where: ['ch11', 'x1'],
   },
   {
     id: 'genloop',
-    label: 'The generation loop around the step',
+    get label() {
+      return tr('The generation loop around the step', 'Vòng lặp sinh bao quanh bước');
+    },
     body: 'token[t] = decode(token[0], ..., token[t-1])',
-    sizeName: 'tokens so far',
+    get sizeName() {
+      return tr('tokens so far', 'số token đến lúc này');
+    },
     deps: { reads: () => 0, combines: 0, prior: true },
     stage: 'loop',
     where: ['ch20'],

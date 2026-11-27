@@ -1,0 +1,1 @@
+Các điểm số đi qua một phép softmax. Đó là một vectơ ngắn, một giá trị cho mỗi token trong cache ở mỗi head. So với các lượt đi qua trọng số và các khóa, nó rẻ, đó là lý do sách bỏ nó ra khỏi phép đếm.

@@ -1,0 +1,1 @@
+Hãy đếm số lần đọc cho ví dụ nhỏ này. Kernel trực tiếp đọc 96 giá trị đầu vào. Trải tường minh đọc 48 để ghi 48 phần tử của B, rồi đọc lại chúng. Trải ngầm định gom 48, và chỉ giữ các bản sao trong bộ nhớ chia sẻ. Cái giá là một phép chia và một phép lấy dư trong mỗi lần gom.

@@ -15,6 +15,8 @@
 //
 // Erasable TypeScript only and no imports: the browser checks import this file directly.
 
+import { tr } from '../lib/locale.ts';
+
 export type FormatId =
   | 'f32'
   | 'f16'
@@ -42,15 +44,15 @@ export interface WeightFormat {
   fact: string;
 }
 
-export const F32: WeightFormat = { id: 'f32', name: 'FP32', owner: 'IEEE 754 binary32', block: 1, blockBytes: 4, codeBits: 32, fact: 'x2-facts E1' };
-export const F16: WeightFormat = { id: 'f16', name: 'FP16', owner: 'IEEE 754 binary16', block: 1, blockBytes: 2, codeBits: 16, fact: 'x2-facts E1; appA-facts A2' };
+export const F32: WeightFormat = { id: 'f32', name: 'FP32', owner: 'IEEE 754 binary32', block: 1, blockBytes: 4, codeBits: 32, fact: 'x2-facts E1' }; // i18n-ignore: standard name
+export const F16: WeightFormat = { id: 'f16', name: 'FP16', owner: 'IEEE 754 binary16', block: 1, blockBytes: 2, codeBits: 16, fact: 'x2-facts E1; appA-facts A2' }; // i18n-ignore: standard name
 export const BF16: WeightFormat = { id: 'bf16', name: 'BF16', owner: 'bfloat16', block: 1, blockBytes: 2, codeBits: 16, fact: 'x2-facts E1; appA-facts A2' };
 export const Q8_0: WeightFormat = { id: 'q8_0', name: 'Q8_0', owner: 'llama.cpp', block: 32, blockBytes: 34, codeBits: 8, fact: 'x2-facts D1, E1' };
 export const Q4_0: WeightFormat = { id: 'q4_0', name: 'Q4_0', owner: 'llama.cpp', block: 32, blockBytes: 18, codeBits: 4, fact: 'x2-facts D1, E1' };
 export const Q4_1: WeightFormat = { id: 'q4_1', name: 'Q4_1', owner: 'llama.cpp', block: 32, blockBytes: 20, codeBits: 4, fact: 'x2-facts D1, E1' };
 export const Q4_K: WeightFormat = { id: 'q4_k', name: 'Q4_K', owner: 'llama.cpp', block: 256, blockBytes: 144, codeBits: 4, fact: 'x2-facts D2, E1' };
 export const MXFP4: WeightFormat = {
-  id: 'mxfp4', name: 'MXFP4', owner: 'OCP MX; llama.cpp block_mxfp4', block: 32, blockBytes: 17, codeBits: 4, fact: 'x2-facts E1; appA-facts D2',
+  id: 'mxfp4', name: 'MXFP4', owner: 'OCP MX; llama.cpp block_mxfp4', block: 32, blockBytes: 17, codeBits: 4, fact: 'x2-facts E1; appA-facts D2', // i18n-ignore: standard and type names
 };
 
 export type ScaleType = 'f16' | 'f32';
@@ -70,7 +72,13 @@ export function mlxAffine(bits: number, group: number, scale: ScaleType = 'f16')
   const sb = scale === 'f16' ? 2 : 4;
   return {
     id: `mlx-${bits}-g${group}-${scale}`,
-    name: `MLX affine ${bits}-bit, group ${group}, ${scale === 'f16' ? 'FP16' : 'FP32'} scale and bias`,
+    // A getter: FORMATS calls mlxAffine at module load, and the name must follow the reader's language.
+    get name() {
+      return tr(
+        `MLX affine ${bits}-bit, group ${group}, ${scale === 'f16' ? 'FP16' : 'FP32'} scale and bias`,
+        `MLX affine ${bits}-bit, nhóm ${group}, scale và bias dạng ${scale === 'f16' ? 'FP16' : 'FP32'}`,
+      );
+    },
     owner: 'MLX',
     block: group,
     blockBytes: (group * bits) / 8 + 2 * sb,

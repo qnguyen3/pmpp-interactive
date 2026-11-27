@@ -1,0 +1,1 @@
+Hóa đơn. Để làm 8 phép cộng, 96 byte đã đi qua ranh giới. Tức là 12 byte cho mỗi phần tử. [short pause] Giờ cùng các bước đó với một bộ nhớ dùng chung duy nhất, như trên Apple silicon. Không có ranh giới. Không có gì phải đi qua, và không có lời gọi giải phóng nào. Chỉ còn một điều. Host vẫn phải chờ trước khi đọc kết quả.

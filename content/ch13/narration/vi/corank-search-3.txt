@@ -1,0 +1,1 @@
+Vậy hãy chia đôi khoảng cách. i giảm 2, xuống 1, và j tăng 2, lên 2. Tổng của chúng vẫn là 3. [short pause] Giờ phép kiểm tra thứ nhất qua được. Nhưng phép thứ hai so sánh B ở chỉ số 1, giữ giá trị 10, với A ở chỉ số 1, giữ giá trị 7. 10 không nhỏ hơn, nên giờ j quá cao.

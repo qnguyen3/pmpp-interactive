@@ -1,0 +1,1 @@
+Cuối cùng, một cái bẫy. Lấy 1, 3, 2, 4. Bước chẵn đầu tiên so sánh 1 với 3, và 2 với 4. Không có gì hoán đổi, nhưng danh sách vẫn chưa được sắp xếp. [short pause] Nên host chờ hai bước liên tiếp, một chẵn và một lẻ, theo thứ tự nào cũng được, mà cả hai đều yên lặng.

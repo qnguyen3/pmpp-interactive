@@ -1,0 +1,1 @@
+Bỏ phép toán nguyên tử đi, và để một warp gồm 8 lane thực hiện một lần đọc, cộng và ghi thông thường, đồng bộ từng bước. Mọi lane đều đọc được 0. Mọi lane đều ghi 1. Nó xong rất nhanh, và bin kết thúc ở giá trị 1. Bảy trong 8 lần cập nhật đã biến mất, và không có gì báo lại điều đó.

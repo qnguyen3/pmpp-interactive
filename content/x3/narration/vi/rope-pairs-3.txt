@@ -1,0 +1,1 @@
+Cách chia đôi nhóm cùng tám giá trị đó theo kiểu khác. Phần tử 0 đi với phần tử 4, phần tử 1 với 5, 2 với 6, và 3 với 7. Phép xoay hoàn toàn giống hệt, cùng các góc và cùng các tần số. Chỉ có các bạn ghép cặp thay đổi, và đó là toàn bộ khác biệt giữa hai kernel.

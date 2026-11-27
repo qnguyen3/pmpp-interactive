@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { CORRECT, blurImage, patch, spot, type BlurOptions, type BlurResult } from '../../sim/blur';
 
 // ---------------------------------------------------------------- drawing a small picture
@@ -110,7 +111,7 @@ interface Grid {
 }
 function Stage({ grids, lines, rule }: { grids: Grid[]; lines: { text: string; tone?: 'fail' | 'ok' | 'muted'; bold?: boolean }[]; rule?: number }) {
   return (
-    <svg viewBox="0 0 720 330" role="img" aria-label="Animation of a blur kernel writing to a second buffer and then in place"
+    <svg viewBox="0 0 720 330" role="img" aria-label={tr('Animation of a blur kernel writing to a second buffer and then in place', 'Hoạt hình một kernel làm mờ ghi vào buffer thứ hai, rồi ghi tại chỗ')}
       style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       {grids.map((g) => (
         <g key={g.title}>
@@ -124,8 +125,8 @@ function Stage({ grids, lines, rule }: { grids: Grid[]; lines: { text: string; t
       ))}
       {rule ? (
         <g opacity={rule}>
-          <text x={LX} y={GY + H * C + 30} fontSize="13.5" fontWeight="600">Each thread writes only its own element,</text>
-          <text x={LX} y={GY + H * C + 50} fontSize="13.5" fontWeight="600">and reads only data that no thread writes.</text>
+          <text x={LX} y={GY + H * C + 30} fontSize="13.5" fontWeight="600"><Translated vi="Mỗi luồng chỉ ghi phần tử của riêng nó,">Each thread writes only its own element,</Translated></text>
+          <text x={LX} y={GY + H * C + 50} fontSize="13.5" fontWeight="600"><Translated vi="và chỉ đọc dữ liệu mà không luồng nào ghi.">and reads only data that no thread writes.</Translated></text>
         </g>
       ) : null}
     </svg>
@@ -161,7 +162,9 @@ const at = (t: { row: number; col: number }) => `(${t.row}, ${t.col})`;
 const beats: Beat[] = [
   {
     clip: 'in-place-blur-1',
-    label: 'Two buffers',
+    get label() {
+      return tr('Two buffers', 'Hai buffer');
+    },
     draw: (p) => {
       const k = Math.min(N, Math.floor(ramp(p, 0.06, 0.78) * (N + 1)));
       const s = separate[k];
@@ -169,13 +172,13 @@ const beats: Beat[] = [
       return (
         <Stage
           grids={[
-            { x: LX, title: 'in: every thread reads here', look: input(t) },
-            { x: RX, title: 'out: every thread stores one element', look: buffer(s, { blankUnwritten: true, hot: k > 0 ? separate[N].ran[k - 1].row * W + separate[N].ran[k - 1].col : undefined }) },
+            { x: LX, title: tr('in: every thread reads here', 'in: mọi luồng đọc ở đây'), look: input(t) },
+            { x: RX, title: tr('out: every thread stores one element', 'out: mỗi luồng ghi một phần tử'), look: buffer(s, { blankUnwritten: true, hot: k > 0 ? separate[N].ran[k - 1].row * W + separate[N].ran[k - 1].col : undefined }) },
           ]}
           lines={[
-            { text: `${k} of ${N} threads done`, bold: true },
-            { text: t ? `thread ${at(t)} reads its patch` : 'all threads done', tone: 'muted' },
-            ...(k === N ? [{ text: `${N - separate[N].wrong.length} of ${N} match the reference`, tone: 'ok' as const, bold: true }] : []),
+            { text: tr(`${k} of ${N} threads done`, `${k} trên ${N} luồng đã xong`), bold: true },
+            { text: t ? tr(`thread ${at(t)} reads its patch`, `luồng ${at(t)} đọc vùng lân cận của nó`) : tr('all threads done', 'mọi luồng đã xong'), tone: 'muted' },
+            ...(k === N ? [{ text: tr(`${N - separate[N].wrong.length} of ${N} match the reference`, `${N - separate[N].wrong.length} trên ${N} khớp với kết quả tham chiếu`), tone: 'ok' as const, bold: true }] : []),
           ]}
         />
       );
@@ -183,7 +186,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'in-place-blur-2',
-    label: 'One buffer',
+    get label() {
+      return tr('One buffer', 'Một buffer');
+    },
     draw: (p) => {
       const k = Math.min(8, Math.floor(ramp(p, 0.3, 0.6) * 9));
       const s = forward[k];
@@ -191,14 +196,14 @@ const beats: Beat[] = [
       return (
         <Stage
           grids={[
-            { x: LX, title: 'one buffer: in and out', look: buffer(s, { mark: true, reader: next }) },
-            { x: RX, title: 'what it should become', tier: false, look: plain(ref) },
+            { x: LX, title: tr('one buffer: in and out', 'một buffer: vừa in vừa out'), look: buffer(s, { mark: true, reader: next }) },
+            { x: RX, title: tr('what it should become', 'kết quả đúng phải là'), tier: false, look: plain(ref) },
           ]}
           lines={[
-            { text: `${k} of ${N} threads done`, bold: true },
-            ...(k >= 7 ? [{ text: '7 threads stored a 0 over a 0', tone: 'muted' as const }] : []),
-            ...(k >= 8 ? [{ text: `thread (1, 1) stores ${forward[8].out[7]}`, tone: 'fail' as const, bold: true }] : []),
-            ...(next ? [{ text: `thread ${at(next)} is next:` }, { text: `it reads ${forward[8].out[7]} where in held ${pic.data[7]}` }] : []),
+            { text: tr(`${k} of ${N} threads done`, `${k} trên ${N} luồng đã xong`), bold: true },
+            ...(k >= 7 ? [{ text: tr('7 threads stored a 0 over a 0', '7 luồng ghi 0 đè lên 0'), tone: 'muted' as const }] : []),
+            ...(k >= 8 ? [{ text: tr(`thread (1, 1) stores ${forward[8].out[7]}`, `luồng (1, 1) ghi ${forward[8].out[7]}`), tone: 'fail' as const, bold: true }] : []),
+            ...(next ? [{ text: tr(`thread ${at(next)} is next:`, `luồng ${at(next)} chạy tiếp theo:`) }, { text: tr(`it reads ${forward[8].out[7]} where in held ${pic.data[7]}`, `nó đọc ${forward[8].out[7]} ở chỗ in từng là ${pic.data[7]}`) }] : []),
           ]}
         />
       );
@@ -206,7 +211,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'in-place-blur-3',
-    label: 'In order',
+    get label() {
+      return tr('In order', 'Theo thứ tự');
+    },
     draw: (p) => {
       const k = 8 + Math.min(N - 8, Math.floor(ramp(p, 0.04, 0.62) * (N - 7)));
       const s = forward[k];
@@ -214,16 +221,16 @@ const beats: Beat[] = [
       return (
         <Stage
           grids={[
-            { x: LX, title: 'one buffer, threads in order', look: buffer(s, { mark: true, reader: done ? undefined : forward[N].ran[k] }) },
-            { x: RX, title: 'the reference', tier: false, look: plain(ref) },
+            { x: LX, title: tr('one buffer, threads in order', 'một buffer, các luồng theo thứ tự'), look: buffer(s, { mark: true, reader: done ? undefined : forward[N].ran[k] }) },
+            { x: RX, title: tr('the reference', 'kết quả tham chiếu'), tier: false, look: plain(ref) },
           ]}
           lines={[
-            { text: `${k} of ${N} threads done`, bold: true },
-            { text: `wrong so far: ${wrongSoFar(s)}`, tone: 'fail', bold: true },
+            { text: tr(`${k} of ${N} threads done`, `${k} trên ${N} luồng đã xong`), bold: true },
+            { text: tr(`wrong so far: ${wrongSoFar(s)}`, `số chỗ sai đến giờ: ${wrongSoFar(s)}`), tone: 'fail', bold: true },
             ...(done
               ? [
-                  { text: `${s.wrong.length} of ${N} pixels are wrong` },
-                  { text: 'accesses outside the buffer: ' + s.accesses.length, tone: 'muted' as const },
+                  { text: tr(`${s.wrong.length} of ${N} pixels are wrong`, `${s.wrong.length} trên ${N} điểm ảnh bị sai`) },
+                  { text: tr('accesses outside the buffer: ', 'số lần truy cập ra ngoài buffer: ') + s.accesses.length, tone: 'muted' as const },
                 ]
               : []),
           ]}
@@ -233,7 +240,9 @@ const beats: Beat[] = [
   },
   {
     clip: 'in-place-blur-4',
-    label: 'Reversed',
+    get label() {
+      return tr('Reversed', 'Đảo ngược');
+    },
     draw: (p) => {
       const k = Math.min(N, Math.floor(ramp(p, 0.14, 0.62) * (N + 1)));
       const s = reversed[k];
@@ -242,13 +251,13 @@ const beats: Beat[] = [
       return (
         <Stage
           grids={[
-            { x: LX, title: 'same kernel, threads reversed', look: buffer(s, { mark: true, reader: done ? undefined : reversed[N].ran[k] }) },
-            { x: RX, title: 'the run before, threads in order', look: plain(forward[N].out, true) },
+            { x: LX, title: tr('same kernel, threads reversed', 'cùng kernel, các luồng theo thứ tự ngược'), look: buffer(s, { mark: true, reader: done ? undefined : reversed[N].ran[k] }) },
+            { x: RX, title: tr('the run before, threads in order', 'lần chạy trước, các luồng theo thứ tự'), look: plain(forward[N].out, true) },
           ]}
           lines={[
-            { text: `${k} of ${N} threads done`, bold: true },
-            { text: `wrong so far: ${wrongSoFar(s)}`, tone: 'fail', bold: true },
-            ...(done ? [{ text: `the two runs differ in ${differ} pixels` }, { text: 'same code, same input', tone: 'muted' as const }] : []),
+            { text: tr(`${k} of ${N} threads done`, `${k} trên ${N} luồng đã xong`), bold: true },
+            { text: tr(`wrong so far: ${wrongSoFar(s)}`, `số chỗ sai đến giờ: ${wrongSoFar(s)}`), tone: 'fail', bold: true },
+            ...(done ? [{ text: tr(`the two runs differ in ${differ} pixels`, `hai lần chạy khác nhau ở ${differ} điểm ảnh`) }, { text: tr('same code, same input', 'cùng mã, cùng đầu vào'), tone: 'muted' as const }] : []),
           ]}
         />
       );
@@ -256,17 +265,19 @@ const beats: Beat[] = [
   },
   {
     clip: 'in-place-blur-5',
-    label: 'The rule',
+    get label() {
+      return tr('The rule', 'Quy tắc');
+    },
     draw: (p) => (
       <Stage
         grids={[
-          { x: LX, title: 'in: read by many, written by nobody', look: input() },
-          { x: RX, title: 'out: each element written by one thread', look: plain(separate[N].out) },
+          { x: LX, title: tr('in: read by many, written by nobody', 'in: nhiều luồng đọc, không luồng nào ghi'), look: input() },
+          { x: RX, title: tr('out: each element written by one thread', 'out: mỗi phần tử do một luồng ghi'), look: plain(separate[N].out) },
         ]}
         lines={[
-          { text: 'grayscale, blur, matmul:', bold: true },
-          { text: 'all three keep the rule', tone: 'muted' },
-          ...(p > 0.62 ? [{ text: 'chapter 5: shared memory' }, { text: 'that threads also write,', tone: 'muted' as const }, { text: 'and the barriers it needs', tone: 'muted' as const }] : []),
+          { text: tr('grayscale, blur, matmul:', 'grayscale, làm mờ, matmul:'), bold: true },
+          { text: tr('all three keep the rule', 'cả ba đều giữ quy tắc này'), tone: 'muted' },
+          ...(p > 0.62 ? [{ text: tr('chapter 5: shared memory', 'chương 5: bộ nhớ chia sẻ (shared memory)') }, { text: tr('that threads also write,', 'mà các luồng cũng ghi vào,'), tone: 'muted' as const }, { text: tr('and the barriers it needs', 'và các rào chắn (barrier) nó cần'), tone: 'muted' as const }] : []),
         ]}
         rule={ramp(p, 0.12, 0.3)}
       />
@@ -275,5 +286,5 @@ const beats: Beat[] = [
 ];
 
 export function InPlaceBlurScene() {
-  return <Scene chapter="ch03" title="Why the blur writes somewhere else" beats={beats} />;
+  return <Scene chapter="ch03" title={tr('Why the blur writes somewhere else', 'Vì sao phép làm mờ ghi sang chỗ khác')} beats={beats} />;
 }

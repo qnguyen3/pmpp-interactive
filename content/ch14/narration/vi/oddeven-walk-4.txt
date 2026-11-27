@@ -1,0 +1,1 @@
+Mỗi bước trả giá khoảng N chia 2 phép so sánh, dù có gì di chuyển hay không. Qua khoảng N bước, hóa đơn tăng theo N bình phương. Với 1,024 giá trị, đó là khoảng nửa triệu phép so sánh, so với khoảng 10 nghìn cho một phép sắp xếp cần N log N.

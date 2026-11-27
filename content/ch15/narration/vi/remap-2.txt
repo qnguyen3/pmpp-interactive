@@ -1,0 +1,1 @@
+Giờ hãy cho mỗi lane một lệnh ghi float4. Một lane ghi 16 byte một lúc, nên warp chỉ cần một phần tư số lệnh. Nhưng các lane vẫn cách nhau 32 byte. Lệnh vẫn chạm vào 32 sector, và mỗi sector chỉ được dùng một nửa.

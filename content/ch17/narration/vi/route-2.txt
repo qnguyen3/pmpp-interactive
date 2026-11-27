@@ -1,0 +1,1 @@
+Đầu tiên, đếm. Mỗi cặp cộng 1 vào bộ đếm của expert của nó, đó chính là histogram của chương 9. Expert 0 có 6 token, expert 1 và 3 mỗi expert có 5, và expert 2 không có token nào. Không ai chọn nó, nên phép nhân ma trận của nó có thể bỏ qua hoàn toàn.

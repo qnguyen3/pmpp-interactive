@@ -1,0 +1,1 @@
+Đây là cùng mô hình đó dưới dạng hai đường cong. Số token mỗi giây tăng theo batch, rồi đi ngang khi qua điểm gãy. Thời gian cho mỗi token của từng người dùng gần như đi ngang, rồi tăng lên. Đó là sự đánh đổi của sách: nhiều thông lượng hơn cho cả nhóm, trả giá bằng thời gian chờ lâu hơn cho mỗi người dùng một khi bước không còn miễn phí.

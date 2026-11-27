@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { E2M1, binade, emax } from '../../sim/minifloat';
 import { SCENE_BLOCK, blockBytes, elemGrid, maxTree, quantizeBlock, sceneValues, type QuantOpts } from '../../sim/mxblock';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Quantising one block": one MXFP4 block of 32 weights through the OCP rule, every
 // drawing computed from src/sim/mxblock.ts (quantizeBlock, maxTree) on a fixed block
@@ -75,7 +76,7 @@ function Headline({ text }: { text: string }) {
 function Frame({ beat, data, children }: { beat: number; data: Record<string, string | number>; children: ReactNode }) {
   const attrs = Object.fromEntries(Object.entries(data).map(([k, v]) => ['data-' + k.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase()), String(v)]));
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="One MXFP4 block being quantised" data-beat={beat} {...attrs}
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('One MXFP4 block being quantised', 'Một khối MXFP4 đang được lượng tử hóa')} data-beat={beat} {...attrs}
       style={{ width: '100%', maxWidth: W, display: 'block' }}>
       {children}
     </svg>
@@ -88,10 +89,10 @@ function beat1(p: number) {
   const dots = V.map((v, i) => ({ u: v, i, hot: i === AT && p > 0.35 }));
   return (
     <Frame beat={1} data={{ shown, outlier: V[AT], rest: fmt(REST) }}>
-      <text x={LX0} y={40} fontSize="12" style={{ fill: 'var(--ink-2)' }}>32 weights of one block, on a number line (weights in global memory)</text>
+      <text x={LX0} y={40} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('32 weights of one block, on a number line (weights in global memory)', '32 trọng số của một khối, trên một trục số (trọng số nằm trong bộ nhớ toàn cục (global memory))')}</text>
       <Line y={150}><Dots y={150} dots={dots} /></Line>
-      {p > 0.35 ? <text x={ux(V[AT])} y={110} fontSize="12" textAnchor="middle">element {AT}: {fmt(V[AT])}</text> : null}
-      <Headline text={p > 0.35 ? `one outlier at ${fmt(V[AT])}; the other 31 lie within ±${fmt(REST)}` : `${shown} weights, one block`} />
+      {p > 0.35 ? <text x={ux(V[AT])} y={110} fontSize="12" textAnchor="middle"><Translated vi={<>phần tử {AT}: {fmt(V[AT])}</>}>element {AT}: {fmt(V[AT])}</Translated></text> : null}
+      <Headline text={p > 0.35 ? tr(`one outlier at ${fmt(V[AT])}; the other 31 lie within ±${fmt(REST)}`, `một giá trị ngoại lai ở ${fmt(V[AT])}; 31 giá trị còn lại nằm trong ±${fmt(REST)}`) : tr(`${shown} weights, one block`, `${shown} trọng số, một khối`)} />
     </Frame>
   );
 }
@@ -103,7 +104,7 @@ function beat2(p: number) {
   const slot = 18.5;
   return (
     <Frame beat={2} data={{ round, survivors: TREE[round].length, winner: TREE[TREE.length - 1][0] }}>
-      <text x={LX0} y={18} fontSize="12" style={{ fill: 'var(--ink-2)' }}>a max reduction over |v|: neighbours compare, the larger goes on</text>
+      <text x={LX0} y={18} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('a max reduction over |v|: neighbours compare, the larger goes on', 'một phép rút gọn (reduction) max trên |v|: các cặp kề nhau so sánh, giá trị lớn hơn đi tiếp')}</text>
       {TREE.slice(0, round + 1).map((lvl, l) => {
         const span = 32 / lvl.length;
         return (
@@ -117,7 +118,7 @@ function beat2(p: number) {
         );
       })}
       <Line y={190}><Dots y={190} dots={V.map((v, i) => ({ u: v, i, faded: !alive.has(i), hot: i === AT && round === TREE.length - 1 }))} /></Line>
-      <Headline text={round === 0 ? '32 candidates' : round < TREE.length - 1 ? `round ${round}: ${TREE[round].length} left` : `after ${round} rounds: ${fmt(B.amax)}, element ${B.amaxAt}`} />
+      <Headline text={round === 0 ? tr('32 candidates', '32 ứng viên') : round < TREE.length - 1 ? tr(`round ${round}: ${TREE[round].length} left`, `vòng ${round}: còn ${TREE[round].length}`) : tr(`after ${round} rounds: ${fmt(B.amax)}, element ${B.amaxAt}`, `sau ${round} vòng: ${fmt(B.amax)}, phần tử ${B.amaxAt}`)} />
     </Frame>
   );
 }
@@ -125,24 +126,24 @@ function beat2(p: number) {
 function beat3(p: number) {
   const k = binade(B.amax);
   const lines = [
-    `largest magnitude: ${fmt(B.amax)}`,
-    `log2 ${fmt(B.amax)} = ${Math.log2(B.amax).toFixed(3)}, rounded down: ${k}`,
-    `largest exponent of E2M1: ${emax(E2M1)}  (6 = 1.5 × 2^${emax(E2M1)})`,
-    `shared exponent: ${k} − ${emax(E2M1)} = ${B.scaleExp}`,
-    `scale X = 2^${B.scaleExp} = ${fmt(X)}`,
-    `stored as UE8M0: ${B.scaleExp} + 127 = ${B.scaleCode}`,
+    tr(`largest magnitude: ${fmt(B.amax)}`, `độ lớn lớn nhất: ${fmt(B.amax)}`),
+    tr(`log2 ${fmt(B.amax)} = ${Math.log2(B.amax).toFixed(3)}, rounded down: ${k}`, `log2 ${fmt(B.amax)} = ${Math.log2(B.amax).toFixed(3)}, làm tròn xuống: ${k}`),
+    tr(`largest exponent of E2M1: ${emax(E2M1)}  (6 = 1.5 × 2^${emax(E2M1)})`, `số mũ lớn nhất của E2M1: ${emax(E2M1)}  (6 = 1.5 × 2^${emax(E2M1)})`),
+    tr(`shared exponent: ${k} − ${emax(E2M1)} = ${B.scaleExp}`, `số mũ dùng chung: ${k} − ${emax(E2M1)} = ${B.scaleExp}`),
+    tr(`scale X = 2^${B.scaleExp} = ${fmt(X)}`, `hệ số tỉ lệ X = 2^${B.scaleExp} = ${fmt(X)}`),
+    tr(`stored as UE8M0: ${B.scaleExp} + 127 = ${B.scaleCode}`, `lưu dưới dạng UE8M0: ${B.scaleExp} + 127 = ${B.scaleCode}`),
   ];
   const n = Math.min(lines.length, Math.floor(ramp(p, 0.02, 0.8) * (lines.length + 0.99)));
   const bits = B.scaleCode.toString(2).padStart(8, '0');
   return (
     <Frame beat={3} data={{ lines: n, exp: B.scaleExp!, scale: X, code: B.scaleCode }}>
-      <text x={LX0} y={36} fontSize="12" style={{ fill: 'var(--ink-2)' }}>the OCP rule (MX v1.1 §6.3)</text>
+      <text x={LX0} y={36} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('the OCP rule (MX v1.1 §6.3)', 'quy tắc OCP (MX v1.1 §6.3)')}</text>
       {lines.slice(0, n).map((t, i) => (
         <text key={i} x={LX0} y={70 + i * 30} fontSize="15" fontWeight={i === 4 ? 650 : 450}>{t}</text>
       ))}
       {n >= lines.length ? (
         <g>
-          <text x={500} y={226} fontSize="11" style={{ fill: 'var(--ink-2)' }}>one byte per block</text>
+          <text x={500} y={226} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{tr('one byte per block', 'một byte mỗi khối')}</text>
           {bits.split('').map((b, i) => (
             <g key={i}>
               <rect x={500 + i * 22} y={234} width={20} height={26} rx="2" fill="var(--cell)" stroke="var(--ink)" />
@@ -151,7 +152,7 @@ function beat3(p: number) {
           ))}
         </g>
       ) : null}
-      <Headline text={n >= 5 ? `X = ${fmt(X)}: every weight in the block is stored as a multiple of it` : 'choosing the shared scale'} />
+      <Headline text={n >= 5 ? tr(`X = ${fmt(X)}: every weight in the block is stored as a multiple of it`, `X = ${fmt(X)}: mọi trọng số trong khối được lưu dưới dạng bội của nó`) : tr('choosing the shared scale', 'chọn hệ số tỉ lệ dùng chung')} />
     </Frame>
   );
 }
@@ -169,7 +170,7 @@ function beat4(p: number) {
   const gridLines = [...GRID, ...GRID.slice(1).map((x) => -x)].filter((x) => x >= U0 && x <= U1);
   return (
     <Frame beat={4} data={{ divided: t1.toFixed(2), snapped: t2.toFixed(2), zeroed: done ? Q32.zeroed : 0, top: Q32.scaled[AT] }}>
-      <text x={LX0} y={40} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{t1 > 0 ? `each weight divided by X = ${fmt(X)}` : 'the weights'}</text>
+      <text x={LX0} y={40} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{t1 > 0 ? tr(`each weight divided by X = ${fmt(X)}`, `mỗi trọng số chia cho X = ${fmt(X)}`) : tr('the weights', 'các trọng số')}</text>
       {g > 0 ? (
         <g opacity={g}>
           {gridLines.map((x) => (
@@ -178,16 +179,16 @@ function beat4(p: number) {
               {x >= 0 ? <text x={ux(x)} y={90} fontSize="10.5" textAnchor="middle">{fmt(x, 1)}</text> : null}
             </g>
           ))}
-          <text x={ux(6) + 8} y={104} fontSize="10.5">largest E2M1 value</text>
+          <text x={ux(6) + 8} y={104} fontSize="10.5">{tr('largest E2M1 value', 'giá trị E2M1 lớn nhất')}</text>
         </g>
       ) : null}
       <Line y={150}><Dots y={150} dots={dots} /></Line>
       <Headline
         text={
-          done ? `${Q32.zeroed} of 31 small weights snap to 0; the outlier lands on ${fmt(Q32.scaled[AT])}`
-            : t2 > 0 ? 'each one snaps to its nearest grid point'
-              : g > 0 ? 'the E2M1 grid: 0, 0.5, 1, 1.5, 2, 3, 4, 6'
-                : `dividing by ${fmt(X)}`
+          done ? tr(`${Q32.zeroed} of 31 small weights snap to 0; the outlier lands on ${fmt(Q32.scaled[AT])}`, `${Q32.zeroed} trên 31 trọng số nhỏ bị kéo về 0; giá trị ngoại lai rơi vào ${fmt(Q32.scaled[AT])}`)
+            : t2 > 0 ? tr('each one snaps to its nearest grid point', 'mỗi giá trị bị kéo về điểm lưới gần nhất')
+              : g > 0 ? tr('the E2M1 grid: 0, 0.5, 1, 1.5, 2, 3, 4, 6', 'lưới E2M1: 0, 0.5, 1, 1.5, 2, 3, 4, 6')
+                : tr(`dividing by ${fmt(X)}`, `chia cho ${fmt(X)}`)
         }
       />
     </Frame>
@@ -203,7 +204,7 @@ function beat5(p: number) {
   const hex = (b: number) => b.toString(16).padStart(2, '0');
   return (
     <Frame beat={5} data={{ mx, bf, shownMx, shownBf, scaleByte: hex(B.scaleCode) }}>
-      <text x={LX0} y={36} fontSize="12" style={{ fill: 'var(--ink-2)' }}>MXFP4: 16 bytes of codes (two 4-bit codes per byte) and one scale byte</text>
+      <text x={LX0} y={36} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('MXFP4: 16 bytes of codes (two 4-bit codes per byte) and one scale byte', 'MXFP4: 16 byte mã (hai mã 4 bit mỗi byte) và một byte hệ số tỉ lệ')}</text>
       {Array.from({ length: shownMx }, (_, j) => {
         const isScale = j === 16;
         return (
@@ -215,17 +216,17 @@ function beat5(p: number) {
           </g>
         );
       })}
-      {shownMx === mx ? <text x={LX0} y={100} fontSize="13">{mx} bytes for 32 weights: {(mx * 8) / 32} bits per weight</text> : null}
+      {shownMx === mx ? <text x={LX0} y={100} fontSize="13"><Translated vi={<>{mx} byte cho 32 trọng số: {(mx * 8) / 32} bit mỗi trọng số</>}>{mx} bytes for 32 weights: {(mx * 8) / 32} bits per weight</Translated></text> : null}
       {shownBf > 0 ? (
         <g>
-          <text x={LX0} y={146} fontSize="12" style={{ fill: 'var(--ink-2)' }}>the same 32 weights in BF16</text>
+          <text x={LX0} y={146} fontSize="12" style={{ fill: 'var(--ink-2)' }}>{tr('the same 32 weights in BF16', 'cũng 32 trọng số đó ở BF16')}</text>
           {Array.from({ length: shownBf }, (_, j) => (
             <rect key={j} x={LX0 + (j % 32) * 20} y={156 + Math.floor(j / 32) * 22} width={18} height={18} rx="2" fill="var(--global-wash)" stroke="var(--global)" strokeWidth="0.8" />
           ))}
-          {shownBf === bf ? <text x={LX0} y={222} fontSize="13">{bf} bytes: 16 bits per weight</text> : null}
+          {shownBf === bf ? <text x={LX0} y={222} fontSize="13"><Translated vi={<>{bf} byte: 16 bit mỗi trọng số</>}>{bf} bytes: 16 bits per weight</Translated></text> : null}
         </g>
       ) : null}
-      <Headline text={shownBf === bf ? `${mx} bytes against ${bf}: ${fmt(bf / mx, 2)} times fewer bytes to read` : `${shownMx} bytes`} />
+      <Headline text={shownBf === bf ? tr(`${mx} bytes against ${bf}: ${fmt(bf / mx, 2)} times fewer bytes to read`, `${mx} byte so với ${bf}: số byte phải đọc ít hơn ${fmt(bf / mx, 2)} lần`) : tr(`${shownMx} bytes`, `${shownMx} byte`)} />
     </Frame>
   );
 }
@@ -244,7 +245,9 @@ function beat6(p: number) {
   return (
     <Frame beat={6} data={{ k: q.opts.k, zeroed: lost, blocks: q.blocks.length, exps: q.blocks.map((b) => b.scaleExp).join(',') }}>
       <text x={LX0} y={30} fontSize="12" style={{ fill: 'var(--ink-2)' }}>
-        each weight (open circle) and what decodes back (dot); the bar between them is the error
+        <Translated vi="mỗi trọng số (vòng tròn rỗng) và giá trị giải mã lại được (chấm); thanh nối giữa chúng là sai số">
+          each weight (open circle) and what decodes back (dot); the bar between them is the error
+        </Translated>
       </text>
       <line x1={CX0 - 10} x2={CX0 + 32 * cw} y1={Y0} y2={Y0} stroke="var(--rule)" />
       <text x={CX0 - 14} y={Y0 + 4} fontSize="10" textAnchor="end">0</text>
@@ -262,31 +265,31 @@ function beat6(p: number) {
           </g>
         );
       })}
-      <text x={CX0 + AT * cw + cw / 2} y={top - 8} fontSize="10.5" textAnchor="middle">{fmt(V[AT])} → {fmt(q.decoded[AT])}, off the scale</text>
+      <text x={CX0 + AT * cw + cw / 2} y={top - 8} fontSize="10.5" textAnchor="middle"><Translated vi={<>{fmt(V[AT])} → {fmt(q.decoded[AT])}, vượt khỏi thang đo</>}>{fmt(V[AT])} → {fmt(q.decoded[AT])}, off the scale</Translated></text>
       {q.blocks.map((b, j) => (
         <g key={j}>
           {j > 0 ? <line x1={CX0 + b.start * cw} x2={CX0 + b.start * cw} y1={48} y2={286} stroke="var(--ink)" strokeWidth="2" /> : null}
-          <text x={CX0 + b.start * cw + 4} y={300} fontSize="11">block {j + 1}: X = 2^{b.scaleExp}, {b.zeroed} lost</text>
+          <text x={CX0 + b.start * cw + 4} y={300} fontSize="11"><Translated vi={<>khối {j + 1}: X = 2^{b.scaleExp}, mất {b.zeroed}</>}>block {j + 1}: X = 2^{b.scaleExp}, {b.zeroed} lost</Translated></text>
         </g>
       ))}
       <Headline
         text={split
-          ? `two blocks of 16: the half without the outlier loses ${q.blocks[1].zeroed}`
-          : `one block of 32: ${lost} of 31 small weights decode to 0`}
+          ? tr(`two blocks of 16: the half without the outlier loses ${q.blocks[1].zeroed}`, `hai khối 16: nửa không có giá trị ngoại lai mất ${q.blocks[1].zeroed}`)
+          : tr(`one block of 32: ${lost} of 31 small weights decode to 0`, `một khối 32: ${lost} trên 31 trọng số nhỏ giải mã thành 0`)}
       />
     </Frame>
   );
 }
 
 const beats: Beat[] = [
-  { clip: 'mx-block-1', label: 'Thirty-two weights', draw: beat1 },
-  { clip: 'mx-block-2', label: 'Find the largest', draw: beat2 },
-  { clip: 'mx-block-3', label: 'Choose the scale', draw: beat3 },
-  { clip: 'mx-block-4', label: 'Divide and snap', draw: beat4 },
-  { clip: 'mx-block-5', label: 'Store', draw: beat5 },
-  { clip: 'mx-block-6', label: 'Decode', draw: beat6 },
+  { clip: 'mx-block-1', get label() { return tr('Thirty-two weights', 'Ba mươi hai trọng số'); }, draw: beat1 },
+  { clip: 'mx-block-2', get label() { return tr('Find the largest', 'Tìm giá trị lớn nhất'); }, draw: beat2 },
+  { clip: 'mx-block-3', get label() { return tr('Choose the scale', 'Chọn hệ số tỉ lệ'); }, draw: beat3 },
+  { clip: 'mx-block-4', get label() { return tr('Divide and snap', 'Chia và kéo về lưới'); }, draw: beat4 },
+  { clip: 'mx-block-5', get label() { return tr('Store', 'Lưu'); }, draw: beat5 },
+  { clip: 'mx-block-6', get label() { return tr('Decode', 'Giải mã'); }, draw: beat6 },
 ];
 
 export function MxBlockScene() {
-  return <Scene chapter="appA" title="Quantising one block" beats={beats} />;
+  return <Scene chapter="appA" title={tr('Quantising one block', 'Lượng tử hóa một khối')} beats={beats} />;
 }

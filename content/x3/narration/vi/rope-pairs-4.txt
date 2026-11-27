@@ -1,0 +1,1 @@
+Lấy các trọng số được huấn luyện cho cách chia đôi và chạy chúng qua một kernel ghép cặp liên tiếp. Mọi phép xoay vẫn diễn ra, nên các con số trông có vẻ hợp lý. Nhưng điểm số giữa query này và các key trước đó lại ra khác với bản tham chiếu. [short pause] Không có lỗi nào và không có cảnh báo nào. Chỉ một phép so sánh mới bắt được nó.

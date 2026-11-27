@@ -1,0 +1,1 @@
+Với key, phép hoán vị được thực hiện một lần cho mỗi head của key và value, không phải một lần cho mỗi head của query. Một mô hình grouped query có ít head key hơn, nên trình chuyển đổi cần số head của cache. Nếu nhóm các hàng theo số head của query, các hàng sai sẽ bị ghép cặp với nhau. Mốc M10 kiểm tra đúng đẳng thức này.

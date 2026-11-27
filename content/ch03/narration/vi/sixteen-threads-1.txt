@@ -1,0 +1,1 @@
+P là một ma trận 4 nhân 4. Chia nó thành 4 khối, mỗi khối rộng 2 luồng và cao 2 luồng. Tức là 16 luồng, mỗi luồng trên một phần tử. Mỗi luồng tìm hàng của nó từ y của khối và y của chính nó, và tìm cột từ hai giá trị x. Đây chính là những phép cộng bạn đã dùng cho điểm ảnh.

@@ -1,0 +1,1 @@
+Tiếp theo, một phép scan loại trừ trên các số đếm, từ chương 11. Nó cho mỗi expert vị trí bắt đầu của các token của nó: 0, rồi 6, rồi 11 cho expert 2, và lại 11 cho expert 3, vì expert 2 không chứa gì. [short pause] Thêm tổng, 16, vào cuối, và bạn có đúng mảng con trỏ hàng của định dạng CSR.

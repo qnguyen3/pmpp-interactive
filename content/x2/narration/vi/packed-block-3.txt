@@ -1,0 +1,1 @@
+Giờ các mã ghép thành cặp. Trọng số j vào nửa thấp của byte j, và trọng số j cộng 16 vào nửa cao. Vậy trọng số 5 và 21 dùng chung byte 5. Mười sáu byte mã đi sau một hệ số tỉ lệ 2 byte: 18 byte cho cả khối, trong khi float32 cần 128.

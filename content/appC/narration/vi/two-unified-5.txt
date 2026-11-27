@@ -1,0 +1,1 @@
+Apple silicon là một thứ khác mang cùng cái tên. Chỉ có một bộ nhớ. CPU ghi vào một buffer dùng chung, và GPU đọc chính những trang đó tại chỗ. Không có gì di chuyển, ở bất kỳ bước nào. Việc duy nhất còn lại là chờ command buffer xong rồi mới đọc kết quả.

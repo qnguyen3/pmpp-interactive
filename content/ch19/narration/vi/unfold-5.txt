@@ -1,0 +1,1 @@
+Nhân hàng 0 của F với cột 0 của B: 12 tích, và tổng là 14, đúng con số như trước. Làm vậy cho mọi hàng và mọi cột, và tích F nhân B chính là 2 bản đồ đầu ra, mỗi bản đồ đã được sắp xếp theo từng hàng. Không cần xáo trộn lại gì sau đó.

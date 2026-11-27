@@ -1,0 +1,1 @@
+Cuối cùng, nhiệt độ 0.8 chia logits của ba token còn lại, làm chúng sắc nét hơn: token 2 giờ giữ 77 phần trăm. Xếp nối đuôi nhau, chúng lấp đầy một thanh từ 0 đến 1. Philox, với seed 0, hàng 0 và bước 0, cho ra số u, 0.399. Nó rơi vào đoạn của token 2, và token 2 được ghi ra.

@@ -1,0 +1,1 @@
+Để dùng device, dữ liệu phải nằm trong bộ nhớ của nó. Ba vùng cấp phát xuất hiện ở đó. Không ai xóa chúng, nên nội dung của chúng là không xác định. Giờ host giữ ba địa chỉ, mỗi mảng một địa chỉ. Nó có thể trao chúng cho runtime và cho một kernel. Nó không tự đọc qua chúng được.

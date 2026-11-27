@@ -1,0 +1,1 @@
+Bước mười chín thì khác. Hai logit cao nhất của nó chỉ cách nhau sáu phần triệu, nhỏ hơn nhiều so với chênh lệch làm tròn. Trên GPU, logit về nhì lại vươn lên đứng đầu, và giải mã greedy chọn nó. Không kernel nào có lỗi cả. Bước đó đơn giản là quá sát để phân định.

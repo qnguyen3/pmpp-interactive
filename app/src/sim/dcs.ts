@@ -30,6 +30,7 @@
 //     modelled as all landing, as on the course's CPU emulator; a GPU may lose some.
 
 import { runs, warpAccess, type WarpAccess } from './coalesce';
+import { tr } from '../lib/locale.ts';
 
 const f = Math.fround;
 
@@ -161,11 +162,11 @@ export interface KernelInfo {
 }
 
 export const KERNELS: Record<KernelId, KernelInfo> = {
-  scatter: { id: 'scatter', label: 'scatter', fig: 'Fig. 21.5', coarsened: false, index: 'n = (blockIdx.x*blockDim.x + threadIdx.x)*4' },
-  gather: { id: 'gather', label: 'gather', fig: 'Fig. 21.6', coarsened: false, index: 'i = blockIdx.x*blockDim.x + threadIdx.x' },
-  printed: { id: 'printed', label: 'coarsened, line 05 as printed', fig: 'Fig. 21.8 as printed', coarsened: true, index: 'i = blockIdx.x*blockDim.x*F + threadIdx.x; writes i, i+1, …' },
-  adjacent: { id: 'adjacent', label: 'coarsened, adjacent (corrected)', fig: 'Fig. 21.8 corrected', coarsened: true, index: 'i = (blockIdx.x*blockDim.x + threadIdx.x)*F; writes i, i+1, …' },
-  strided: { id: 'strided', label: 'coarsened, blockDim.x stride', fig: 'Fig. 21.10', coarsened: true, index: 'i = blockIdx.x*blockDim.x*F + threadIdx.x; writes i, i+blockDim.x, …' },
+  scatter: { id: 'scatter', get label() { return tr('scatter', 'scatter'); }, fig: 'Fig. 21.5', coarsened: false, index: 'n = (blockIdx.x*blockDim.x + threadIdx.x)*4' },
+  gather: { id: 'gather', get label() { return tr('gather', 'gather'); }, fig: 'Fig. 21.6', coarsened: false, index: 'i = blockIdx.x*blockDim.x + threadIdx.x' },
+  printed: { id: 'printed', get label() { return tr('coarsened, line 05 as printed', 'đã gộp việc, dòng 05 như bản in'); }, get fig() { return tr('Fig. 21.8 as printed', 'Fig. 21.8 như bản in'); }, coarsened: true, index: 'i = blockIdx.x*blockDim.x*F + threadIdx.x; writes i, i+1, …' },
+  adjacent: { id: 'adjacent', get label() { return tr('coarsened, adjacent (corrected)', 'đã gộp việc, liền kề (đã sửa)'); }, get fig() { return tr('Fig. 21.8 corrected', 'Fig. 21.8 đã sửa'); }, coarsened: true, index: 'i = (blockIdx.x*blockDim.x + threadIdx.x)*F; writes i, i+1, …' },
+  strided: { id: 'strided', get label() { return tr('coarsened, blockDim.x stride', 'đã gộp việc, bước nhảy blockDim.x'); }, fig: 'Fig. 21.10', coarsened: true, index: 'i = blockIdx.x*blockDim.x*F + threadIdx.x; writes i, i+blockDim.x, …' },
 };
 export const KERNEL_ORDER: KernelId[] = ['scatter', 'gather', 'printed', 'adjacent', 'strided'];
 

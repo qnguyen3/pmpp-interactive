@@ -1,0 +1,1 @@
+Đích nằm ở mức 26. Hãy đi ngược lại: bước sang bất kỳ ô bên cạnh nào thấp hơn một mức, cho đến khi tới nguồn. Đường đó là một sợi dây ngắn nhất, dài 27 ô. Tại 9 ô trên đường đi, có hai ô bên cạnh cùng thấp hơn một mức, và quy tắc cố định của mô hình đã chọn một. Các bộ định tuyến dùng sự tự do đó cho những sợi dây còn phải đi tiếp.

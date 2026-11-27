@@ -29,6 +29,7 @@
 //
 // Erasable TypeScript only (the browser checks import this file through the app's module server).
 import { SEGMENT_MODELS, warpAccess, type SegmentModelId, type WarpAccess } from './coalesce';
+import { tr } from '../lib/locale.ts';
 
 const id = (x: number) => x;
 export const f32 = Math.fround;
@@ -60,9 +61,15 @@ export function appendToken(counts: readonly number[], token: number): number[] 
 export type RepRule = 'llama' | 'hf' | 'ctrl';
 export const REP_RULES: RepRule[] = ['llama', 'hf', 'ctrl'];
 export const REP_RULE_LABEL: Record<RepRule, string> = {
-  llama: 'llama.cpp: multiply when logit ≤ 0',
-  hf: 'transformers, mlx-lm: multiply when logit < 0',
-  ctrl: 'CTRL paper: always divide',
+  get llama() {
+    return tr('llama.cpp: multiply when logit ≤ 0', 'llama.cpp: nhân khi logit ≤ 0');
+  },
+  get hf() {
+    return tr('transformers, mlx-lm: multiply when logit < 0', 'transformers, mlx-lm: nhân khi logit < 0');
+  },
+  get ctrl() {
+    return tr('CTRL paper: always divide', 'bài báo CTRL: luôn chia');
+  },
 };
 export const REP_RULE_FACT: Record<RepRule, string> = {
   llama: 'x1-facts D2',
@@ -90,8 +97,12 @@ export function frequencyPresence(logit: number, count: number, freq: number, pr
 
 export type PenaltyOrder = 'repeat-first' | 'subtract-first';
 export const PENALTY_ORDER_LABEL: Record<PenaltyOrder, string> = {
-  'repeat-first': 'repetition, then subtract (llama.cpp)',
-  'subtract-first': 'subtract, then repetition',
+  get 'repeat-first'() {
+    return tr('repetition, then subtract (llama.cpp)', 'phạt lặp lại, rồi trừ (llama.cpp)');
+  },
+  get 'subtract-first'() {
+    return tr('subtract, then repetition', 'trừ, rồi phạt lặp lại');
+  },
 };
 
 export interface PenaltySettings {
@@ -169,9 +180,15 @@ export const bytesPerLogit = (passes: number) => passes * (4 + 4 + 4);
 export type Mapping = 'element' | 'row' | 'block';
 export const MAPPINGS: Mapping[] = ['element', 'block', 'row'];
 export const MAPPING_LABEL: Record<Mapping, string> = {
-  element: 'one thread per element (flattened)',
-  block: 'one block per row, strided loop',
-  row: 'one thread per row, looping over the vocabulary',
+  get element() {
+    return tr('one thread per element (flattened)', 'mỗi phần tử một luồng (làm phẳng)');
+  },
+  get block() {
+    return tr('one block per row, strided loop', 'mỗi hàng một khối, vòng lặp theo bước nhảy');
+  },
+  get row() {
+    return tr('one thread per row, looping over the vocabulary', 'mỗi hàng một luồng, lặp qua toàn bộ từ vựng');
+  },
 };
 
 export interface MappingParams {

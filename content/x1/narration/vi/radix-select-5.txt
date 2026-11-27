@@ -1,0 +1,1 @@
+Lượt 3 và lượt 4 lặp lại bước này trên byte thứ ba và byte thứ tư, mỗi lần trên ít khóa hơn. Sau byte thứ tư, tiền tố là cả một khóa, khóa lớn thứ mười hai. Mười khóa nằm hẳn phía trên nó. Ba khóa bằng nó, và ta chỉ cần 2 trong số đó.

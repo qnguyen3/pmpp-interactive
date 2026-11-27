@@ -14,6 +14,7 @@
 // written as short decimals, not bf16 bit patterns.
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
+import { tr } from '../lib/locale.ts';
 import { byValue, networkSort, type Item } from './sortnet';
 
 export type Dir = 'asc' | 'desc';
@@ -49,9 +50,27 @@ export function sortCandidates(items: Item[], kind: SortKind, byIndex: boolean):
 export const CANDIDATE_TOKENS = [3, 8, 15, 21, 40, 52, 77, 90];
 const cands = (ps: number[]): Item[] => ps.map((key, i) => ({ key, id: CANDIDATE_TOKENS[i] }));
 export const CANDIDATE_PRESETS: { id: string; label: string; items: Item[] }[] = [
-  { id: 'two', label: 'ties at two values', items: cands([0.15, 0.2, 0.15, 0.05, 0.2, 0.15, 0.08, 0.02]) },
-  { id: 'equal', label: 'all equal', items: cands([0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125]) },
-  { id: 'none', label: 'no ties', items: cands([0.3, 0.05, 0.12, 0.2, 0.08, 0.15, 0.03, 0.07]) },
+  {
+    id: 'two',
+    get label() {
+      return tr('ties at two values', 'trùng nhau ở hai giá trị');
+    },
+    items: cands([0.15, 0.2, 0.15, 0.05, 0.2, 0.15, 0.08, 0.02]),
+  },
+  {
+    id: 'equal',
+    get label() {
+      return tr('all equal', 'tất cả bằng nhau');
+    },
+    items: cands([0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125, 0.125]),
+  },
+  {
+    id: 'none',
+    get label() {
+      return tr('no ties', 'không có giá trị trùng');
+    },
+    items: cands([0.3, 0.05, 0.12, 0.2, 0.08, 0.15, 0.03, 0.07]),
+  },
 ];
 
 // ---------------------------------------------------------------- the cascade

@@ -1,0 +1,1 @@
+Đây là một hàng gồm 64 logits, và ta muốn 12 giá trị lớn nhất. Mỗi logit trở thành một khóa 32 bit, theo phép biến đổi từ lab 14.3, nên khóa lớn hơn nghĩa là logit lớn hơn. Byte cao nhất của mỗi khóa được in đậm. Ta không cần thứ tự giữa các khóa khác, chỉ cần biết khóa lớn thứ mười hai nằm ở đâu.

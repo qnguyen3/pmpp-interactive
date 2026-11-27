@@ -1,0 +1,1 @@
+Giờ vị trí tăng dần, từ 0 đến 3. Mọi mũi tên xoay một góc bằng vị trí nhân với tần số riêng của nó. Cặp đầu tiên xoay nhanh nhất, trọn một radian mỗi bước. Mỗi cặp sau đó chậm hơn mười lần ở đây, nên mũi tên cuối cùng hầu như không nhúc nhích. Độ dài không bao giờ thay đổi. Chỉ có các góc thay đổi.

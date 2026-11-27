@@ -123,12 +123,12 @@ export function run(program: Stmt[]): Timeline {
   return { program, host, grids, device, hostEnd: t, end };
 }
 
-export type GridState = 'not launched' | 'queued' | 'running' | 'finished';
+export type GridState = 'not launched' | 'queued' | 'running' | 'finished'; // i18n-ignore: identifier also shown to the reader
 
 /** The state of a grid at a moment in time. */
 export function gridStateAt(tl: Timeline, grid: string, time: number): GridState {
   const g = tl.grids.find((x) => x.grid === grid);
-  if (!g || time < g.enqueued) return 'not launched';
+  if (!g || time < g.enqueued) return 'not launched'; // i18n-ignore: identifier also shown to the reader
   if (time < g.start) return 'queued';
   if (time < g.end) return 'running';
   return 'finished';
@@ -185,8 +185,8 @@ export function readOutcomes(tl: Timeline, stmt: number): { grid: string; outcom
       outcome: hostCanRead(tl, g.grid, stmt)
         ? ('guaranteed' as const)
         : gridStateAt(tl, g.grid, time) === 'finished'
-          ? ('finished by timing only' as const)
-          : ('not finished' as const),
+          ? ('finished by timing only' as const) // i18n-ignore: identifier, translated by its consumer
+          : ('not finished' as const), // i18n-ignore: identifier, translated by its consumer
     }));
 }
 
@@ -251,7 +251,7 @@ export function stmtText(s: Stmt, backend: Backend, waitsFor: string[] = []): st
   if (s.kind === 'host') return '/* host work */';
   if (s.kind === 'read') return '/* host reads the results */';
   if (s.kind === 'launch')
-    return backend === 'metal' ? `[cmd${s.grid} commit];` : `Kernel${s.grid}<<<nBlk, nTid>>>(args);`;
+    return backend === 'metal' ? `[cmd${s.grid} commit];` : `Kernel${s.grid}<<<nBlk, nTid>>>(args);`; // i18n-ignore: source code
   if (backend === 'metal') return waitsFor.map((g) => `[cmd${g} waitUntilCompleted];`).join(' ');
   return WAIT_CALL[backend] + '();';
 }

@@ -1,0 +1,1 @@
+Giờ là hệ thứ hai của sách. Hàng đầu tiên của nó là 0, 5, 2, 16: nó hoàn toàn không có X. Luồng 0 chia cho 0. Hàng của nó thành vô cùng, và 0 chia 0 không phải là một số. [short pause] Ở lần trừ kế tiếp, giá trị không phải số lan sang mọi hàng, dù hệ vẫn có nghiệm 1, 2, 3.

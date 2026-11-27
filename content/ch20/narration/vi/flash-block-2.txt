@@ -1,0 +1,1 @@
+Ô 0. Cả tám luồng sao chép bốn hàng của K vào bộ nhớ chia sẻ, xoay nằm nghiêng, để mỗi khóa trở thành một cột. Chúng sao chép cùng bốn hàng đó của V. Rồi đến một rào chắn khối: không warp nào được đọc các ô cho đến khi mọi luồng đã ghi xong chúng.

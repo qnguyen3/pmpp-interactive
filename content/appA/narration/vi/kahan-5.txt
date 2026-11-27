@@ -1,0 +1,1 @@
+Giờ chạy cả 4096 giá trị. Tổng có bù tăng một bước sau mỗi bốn giá trị, tính trung bình, và dừng đúng ở tổng thật, 1 cộng 2 mũ âm 13. Tổng thông thường vẫn là 1, tức là thiếu 1024 đơn vị ở vị trí cuối. Sai số của Kahan bằng không.

@@ -1,0 +1,1 @@
+Giờ là hai vòng lặp tiếp theo. Hàng 3 chỉ có một phần tử, nên luồng 3 không còn gì để làm sau vòng đầu. Các luồng 0 và 2 dừng sau hai vòng. Chỉ luồng 1 chạy lần thứ ba. Các lane màu xám phải chờ trong khi một lane bên cạnh làm việc. Sự chờ đợi đó đến từ độ dài hàng, và đó là phân kỳ luồng.

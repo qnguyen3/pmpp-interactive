@@ -26,6 +26,7 @@
 //     model: an interior block, every load and store going to DRAM.
 //   - The segment counts assume one instruction at a time and no cache.
 
+import { tr } from '../lib/locale.ts';
 import { warpAccess, type WarpAccess } from './coalesce';
 import type { Schedule } from './tiled';
 
@@ -440,7 +441,7 @@ export function runTiledBlock(cfg: ConvConfig, prob: ConvProblem, bx: number, by
   const violations: ConvViolation[] = [];
   const stores: ConvTrace['stores'] = [];
   const rand = mulberry(seed);
-  const name = (t: number) => `thread (tx ${t % IN}, ty ${Math.floor(t / IN)})`;
+  const name = (t: number) => tr(`thread (tx ${t % IN}, ty ${Math.floor(t / IN)})`, `luồng (tx ${t % IN}, ty ${Math.floor(t / IN)})`);
 
   const exec = (t: number) => {
     const ti = info[t];
@@ -476,13 +477,19 @@ export function runTiledBlock(cfg: ConvConfig, prob: ConvProblem, bx: number, by
               kind: 'read-before-write',
               step: s.index,
               thread: t,
-              message: `${name(t)} read N_s[${sr}][${sc}] before ${owner === t ? 'it' : name(owner)} had loaded it`,
+              message: tr(
+                `${name(t)} read N_s[${sr}][${sc}] before ${owner === t ? 'it' : name(owner)} had loaded it`,
+                `${name(t)} đọc N_s[${sr}][${sc}] trước khi ${owner === t ? 'chính nó' : name(owner)} nạp giá trị vào đó`,
+              ),
             }
           : {
               kind: 'unwritten-slot',
               step: s.index,
               thread: t,
-              message: `${name(t)} read N_s[${sr}][${sc}], a ghost cell that nobody set to 0, so it holds whatever was there before`,
+              message: tr(
+                `${name(t)} read N_s[${sr}][${sc}], a ghost cell that nobody set to 0, so it holds whatever was there before`,
+                `${name(t)} đọc N_s[${sr}][${sc}], một ô ma không ai đặt về 0, nên nó chứa bất cứ giá trị nào có ở đó từ trước`,
+              ),
             };
         s.violation = v;
         violations.push(v);

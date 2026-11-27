@@ -44,6 +44,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Policy = 'bulk' | 'migrate' | 'map' | 'replicate' | 'one';
 export type Proc = 'cpu' | 'gpu';
 export type Dir = 'h2d' | 'd2h';
@@ -52,11 +54,11 @@ export type BufKind = 'managed' | 'host' | 'device';
 export type Loc = 'none' | 'cpu' | 'gpu' | 'both' | 'one';
 
 export const POLICY_NAME: Record<Policy, string> = {
-  bulk: 'bulk at launch',
-  migrate: 'fault and migrate',
-  map: 'map on access',
+  get bulk() { return tr('bulk at launch', 'chuyển hết khi khởi chạy'); },
+  get migrate() { return tr('fault and migrate', 'lỗi trang rồi di chuyển'); },
+  get map() { return tr('map on access', 'ánh xạ khi truy cập'); },
   replicate: 'read-mostly',
-  one: 'one memory',
+  get one() { return tr('one memory', 'một bộ nhớ'); },
 };
 
 export type Op =
@@ -190,10 +192,10 @@ export const pagesFrom = range;
 /** "page 3", "pages 0–7", "pages 0, 2 and 5". */
 export function pageList(ps: number[]): string {
   const s = [...new Set(ps)].sort((a, b) => a - b);
-  if (s.length === 0) return 'no pages';
-  if (s.length === 1) return `page ${s[0]}`;
-  if (s[s.length - 1] - s[0] === s.length - 1) return `pages ${s[0]}–${s[s.length - 1]}`;
-  return `pages ${s.slice(0, -1).join(', ')} and ${s[s.length - 1]}`;
+  if (s.length === 0) return tr('no pages', 'không có trang nào');
+  if (s.length === 1) return tr(`page ${s[0]}`, `trang ${s[0]}`);
+  if (s[s.length - 1] - s[0] === s.length - 1) return tr(`pages ${s[0]}–${s[s.length - 1]}`, `các trang ${s[0]}–${s[s.length - 1]}`);
+  return tr(`pages ${s.slice(0, -1).join(', ')} and ${s[s.length - 1]}`, `các trang ${s.slice(0, -1).join(', ')} và ${s[s.length - 1]}`);
 }
 
 /** Runs a program under a policy and records every event. Pure and deterministic. */
@@ -261,7 +263,7 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
         emit({ e: 'unmap', buf: v.name, page: v.i, proc: 'gpu' });
         counters.d2h++;
         set(v.p, 'cpu', false, false);
-        emit({ e: 'move', buf: v.name, page: v.i, dir: 'd2h', why: 'evict' });
+        emit({ e: 'move', buf: v.name, page: v.i, dir: 'd2h', why: 'evict' }); // i18n-ignore: union member compared by the chapter
         set(v.p, 'cpu', true, false);
       }
     }
@@ -411,7 +413,10 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
           let managed = op.pages;
           for (const b of bufs.values()) if (b.kind === 'managed' && !b.freed) managed += b.pages.length;
           if (managed > capacity) {
-            raise('oversubscribed', op.buf, [], `cudaMallocManaged fails: ${managed} managed pages do not fit in ${capacity} pages of GPU memory, and limited systems cannot allocate more managed memory than the GPU's physical memory`);
+            raise('oversubscribed', op.buf, [], tr(
+              `cudaMallocManaged fails: ${managed} managed pages do not fit in ${capacity} pages of GPU memory, and limited systems cannot allocate more managed memory than the GPU's physical memory`,
+              `cudaMallocManaged thất bại: ${managed} trang managed không vừa ${capacity} trang bộ nhớ GPU, và hệ thống hạn chế không thể cấp phát bộ nhớ managed nhiều hơn bộ nhớ vật lý của GPU`,
+            ));
             crashed = true;
             break;
           }
@@ -430,7 +435,7 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
         const b = buf(op.buf);
         if (b.kind === 'managed' && active) {
           if (policy === 'bulk') {
-            raise('segfault', op.buf, op.pages, 'segmentation fault: the CPU touched managed memory while a kernel was active, which limited systems do not allow');
+            raise('segfault', op.buf, op.pages, tr('segmentation fault: the CPU touched managed memory while a kernel was active, which limited systems do not allow', 'segmentation fault: CPU chạm vào bộ nhớ managed khi một kernel đang hoạt động, điều mà hệ thống hạn chế không cho phép'));
             crashed = true;
             break;
           }
@@ -439,8 +444,8 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
           if (hit.length)
             raise(policy === 'one' ? 'ordering' : 'race', op.buf, hit,
               policy === 'one'
-                ? `the CPU uses ${pageList(hit)} before waiting for the command buffer that uses ${hit.length === 1 ? 'it' : 'them'}`
-                : `the CPU touches ${pageList(hit)} while the kernel that uses ${hit.length === 1 ? 'it' : 'them'} may still be running: nothing orders the two`);
+                ? tr(`the CPU uses ${pageList(hit)} before waiting for the command buffer that uses ${hit.length === 1 ? 'it' : 'them'}`, `CPU dùng ${pageList(hit)} trước khi chờ command buffer đang dùng ${hit.length === 1 ? 'trang đó' : 'các trang đó'}`)
+                : tr(`the CPU touches ${pageList(hit)} while the kernel that uses ${hit.length === 1 ? 'it' : 'them'} may still be running: nothing orders the two`, `CPU chạm vào ${pageList(hit)} trong khi kernel dùng ${hit.length === 1 ? 'trang đó' : 'các trang đó'} có thể vẫn đang chạy: không gì xếp thứ tự giữa hai bên`));
         }
         for (const i of op.pages) cpuTouch(op.buf, i, op.write);
         break;
@@ -454,7 +459,7 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
               counters.h2d++;
               set(p, 'gpu', false, true);
               p.lastGpu = ++clock;
-              emit({ e: 'move', buf: name, page: i, dir: 'h2d', why: 'bulk' });
+              emit({ e: 'move', buf: name, page: i, dir: 'h2d', why: 'bulk' }); // i18n-ignore: union member compared by the chapter
             });
           }
         const writes = new Set(op.writes);
@@ -483,7 +488,7 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
             counters[dir]++;
             if (dir === 'h2d') set(p, 'gpu', false, true);
             else set(p, 'cpu', true, false);
-            emit({ e: 'move', buf: op.dst, page: i, dir, why: 'copy' });
+            emit({ e: 'move', buf: op.dst, page: i, dir, why: 'copy' }); // i18n-ignore: union member compared by the chapter
           }
         });
         break;
@@ -509,16 +514,16 @@ export function simulate(policy: Policy, ops: Op[], opts: SimOptions = {}): Run 
 
 export type Program = 'cpu' | 'explicit' | 'managed';
 export const PROGRAM_NAME: Record<Program, string> = {
-  cpu: 'CPU original',
-  explicit: 'explicit copies',
-  managed: 'managed (Fig. C.1)',
+  get cpu() { return tr('CPU original', 'bản CPU gốc'); },
+  get explicit() { return tr('explicit copies', 'sao chép tường minh'); },
+  get managed() { return tr('managed (Fig. C.1)', 'bản managed (Fig. C.1)'); },
 };
 export const PROGRAM_FILE: Record<Program, string> = {
   cpu: 'c6_sortfile_cpu.cu',
   explicit: 'c6_sortfile_explicit.cu',
   managed: 'c6_sortfile_managed.cu',
 };
-export const FIG_HEAD = 'void sortfile(FILE *fp, int N) {';
+export const FIG_HEAD = 'void sortfile(FILE *fp, int N) {'; // i18n-ignore: CUDA source shown as code
 export const FIG_PAGES = 8;
 
 export type LineRole = 'decl' | 'alloc' | 'read-file' | 'copy-in' | 'sort' | 'sync' | 'copy-out' | 'use' | 'free' | 'blank';
@@ -547,31 +552,31 @@ export function figLines(program: Program, o: FigOptions = {}): FigLine[] {
   const L = (text: string, role: LineRole, op: Op | null, changed = false, deleted = false): FigLine => ({ text, role, op, changed, deleted });
   if (program === 'cpu')
     return [
-      L('    char *data;', 'decl', null),
+      L('    char *data;', 'decl', null), // i18n-ignore: CUDA source shown as code
       L('    data = (char *)malloc(N);', 'alloc', { op: 'alloc', buf: 'data', kind: 'host', pages: n }),
-      L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }),
-      L('    qsort_char(data, N, 1);', 'sort', { op: 'cpu', buf: 'data', write: true, pages: touched }),
+      L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }), // i18n-ignore: CUDA source shown as code
+      L('    qsort_char(data, N, 1);', 'sort', { op: 'cpu', buf: 'data', write: true, pages: touched }), // i18n-ignore: CUDA source shown as code
       L('', 'blank', null),
       L('    use_data(data);', 'use', { op: 'cpu', buf: 'data', write: false, pages: all }),
       L('    free(data);', 'free', { op: 'free', buf: 'data' }),
     ];
   if (program === 'explicit')
     return [
-      L('    char *data, *d_data;', 'decl', null, true),
+      L('    char *data, *d_data;', 'decl', null, true), // i18n-ignore: CUDA source shown as code
       L('    data = (char *)malloc(N);', 'alloc', { op: 'alloc', buf: 'data', kind: 'host', pages: n }),
-      L('    cudaMalloc(&d_data, N);', 'alloc', { op: 'alloc', buf: 'd_data', kind: 'device', pages: n }, true),
-      L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }),
-      L('    cudaMemcpy(d_data, data, N, cudaMemcpyHostToDevice);', 'copy-in', { op: 'memcpy', dst: 'd_data', src: 'data' }, true),
+      L('    cudaMalloc(&d_data, N);', 'alloc', { op: 'alloc', buf: 'd_data', kind: 'device', pages: n }, true), // i18n-ignore: CUDA source shown as code
+      L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }), // i18n-ignore: CUDA source shown as code
+      L('    cudaMemcpy(d_data, data, N, cudaMemcpyHostToDevice);', 'copy-in', { op: 'memcpy', dst: 'd_data', src: 'data' }, true), // i18n-ignore: CUDA source shown as code
       L('    qsort_char<<<grid, block>>>(d_data, N, 1);', 'sort', { op: 'launch', buf: 'd_data', reads: touched, writes: touched }, true),
-      L('    cudaMemcpy(data, d_data, N, cudaMemcpyDeviceToHost);', 'copy-out', { op: 'memcpy', dst: 'data', src: 'd_data' }, true),
+      L('    cudaMemcpy(data, d_data, N, cudaMemcpyDeviceToHost);', 'copy-out', { op: 'memcpy', dst: 'data', src: 'd_data' }, true), // i18n-ignore: CUDA source shown as code
       L('    use_data(data);', 'use', { op: 'cpu', buf: 'data', write: false, pages: all }),
       L('    cudaFree(d_data);', 'free', { op: 'free', buf: 'd_data' }, true),
       L('    free(data);', 'free', { op: 'free', buf: 'data' }),
     ];
   return [
-    L('    char *data;', 'decl', null),
-    L('    cudaMallocManaged(&data, N);', 'alloc', { op: 'alloc', buf: 'data', kind: 'managed', pages: n }, true),
-    L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }),
+    L('    char *data;', 'decl', null), // i18n-ignore: CUDA source shown as code
+    L('    cudaMallocManaged(&data, N);', 'alloc', { op: 'alloc', buf: 'data', kind: 'managed', pages: n }, true), // i18n-ignore: CUDA source shown as code
+    L('    fread(data, 1, N, fp);', 'read-file', { op: 'cpu', buf: 'data', write: true, pages: all }), // i18n-ignore: CUDA source shown as code
     L('    qsort_char<<<grid, block>>>(data, N, 1);', 'sort', { op: 'launch', buf: 'data', reads: touched, writes: touched }, true),
     L('    cudaDeviceSynchronize();', 'sync', o.noSync ? null : { op: 'sync' }, true, !!o.noSync),
     L('    use_data(data);', 'use', { op: 'cpu', buf: 'data', write: false, pages: all }),
@@ -612,13 +617,13 @@ export const EXPLORE_PAGES = 16;
 export const EXPLORE_POLICIES: Policy[] = ['bulk', 'migrate', 'map', 'replicate'];
 
 export function scriptLabel(s: ScriptOp): string {
-  const ps = s.from === s.to ? `page ${s.from}` : `pages ${s.from}–${s.to}`;
+  const ps = s.from === s.to ? tr(`page ${s.from}`, `trang ${s.from}`) : tr(`pages ${s.from}–${s.to}`, `các trang ${s.from}–${s.to}`);
   switch (s.kind) {
-    case 'cpu-write': return `CPU writes ${ps}`;
-    case 'cpu-read': return `CPU reads ${ps}`;
-    case 'kernel-read': return `kernel reads ${ps}`;
-    case 'kernel-write': return `kernel writes ${ps}`;
-    case 'sync': return 'synchronise';
+    case 'cpu-write': return tr(`CPU writes ${ps}`, `CPU ghi ${ps}`);
+    case 'cpu-read': return tr(`CPU reads ${ps}`, `CPU đọc ${ps}`);
+    case 'kernel-read': return tr(`kernel reads ${ps}`, `kernel đọc ${ps}`);
+    case 'kernel-write': return tr(`kernel writes ${ps}`, `kernel ghi ${ps}`);
+    case 'sync': return tr('synchronise', 'đồng bộ hóa');
   }
 }
 
@@ -643,15 +648,15 @@ export type PresetId = 'figC1' | 'one-page' | 'ping-pong' | 'decode';
 export const DECODE_TOKENS = 6;
 export const PRESETS: { id: PresetId; label: string; script: ScriptOp[] }[] = [
   { id: 'figC1', label: 'Fig. C.1', script: [S('cpu-write', 0, 15), S('kernel-write', 0, 15), S('sync'), S('cpu-read', 0, 15)] },
-  { id: 'one-page', label: 'kernel touches 1 page of 16', script: [S('cpu-write', 0, 15), S('kernel-read', 5), S('sync')] },
+  { id: 'one-page', get label() { return tr('kernel touches 1 page of 16', 'kernel chạm 1 trang trong 16'); }, script: [S('cpu-write', 0, 15), S('kernel-read', 5), S('sync')] },
   {
     id: 'ping-pong',
-    label: 'CPU and GPU take turns on one counter page',
+    get label() { return tr('CPU and GPU take turns on one counter page', 'CPU và GPU lần lượt dùng một trang bộ đếm'); },
     script: [S('cpu-write', 0, 15), ...repeat(4, [S('kernel-write', 0), S('sync'), S('cpu-write', 0)])],
   },
   {
     id: 'decode',
-    label: 'decode loop re-reading all pages',
+    get label() { return tr('decode loop re-reading all pages', 'vòng lặp decode đọc lại mọi trang'); },
     // Pages 0–13 are weights, page 15 the logits; the CPU samples from the logits each token.
     script: [S('cpu-write', 0, 15), ...repeat(DECODE_TOKENS, [S('kernel-read', 0, 13), S('kernel-write', 15), S('sync'), S('cpu-read', 15)])],
   },

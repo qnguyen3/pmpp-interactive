@@ -36,7 +36,7 @@ export function tilePair(m: number, n: number, k: number, bytes = 4): TilePair {
   pos(m, 'm');
   pos(n, 'n');
   pos(k, 'k');
-  pos(bytes, 'bytes per element');
+  pos(bytes, 'bytes per element'); // i18n-ignore: developer error text for an invalid argument
   const ops = 2 * m * n * k;
   const traffic = bytes * k * (m + n);
   return { m, n, k, bytes, ops, traffic, intensity: ops / traffic };

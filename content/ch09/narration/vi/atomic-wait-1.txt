@@ -1,0 +1,1 @@
+Tám luồng, mỗi luồng nạp một giá trị từ một địa chỉ khác nhau. Các yêu cầu được gửi đi lần lượt, cách nhau vài chu kỳ, rồi tất cả cùng chờ đồng thời. Vậy cả 8 lần nạp đều trở về ngay sau một khoảng độ trễ bộ nhớ. Bộ nhớ theo kịp vì nhiều yêu cầu đang trên đường cùng lúc.

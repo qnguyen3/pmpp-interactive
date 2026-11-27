@@ -1,0 +1,1 @@
+Rồi chính trang đó đi qua đường kết nối vào bộ nhớ GPU. Đây là phần tốn kém. NVIDIA lưu ý rằng khối lượng công việc tỉ lệ với kích thước trang, và GPU của họ ưa trang lớn. Trang lớn hơn nghĩa là ít lỗi trang hơn, nhưng mỗi lỗi lại tốn nhiều byte hơn.

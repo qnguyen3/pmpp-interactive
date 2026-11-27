@@ -1,0 +1,1 @@
+Giờ hãy đếm. 32 lần nạp, nhưng chỉ có 16 phần tử khác nhau. Mỗi phần tử bị nạp hai lần, bởi hai luồng khác nhau. [short pause] Với một khối rộng 32 luồng, mỗi phần tử sẽ bị nạp 32 lần. Các luồng đều đang xin cùng một dữ liệu.

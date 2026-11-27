@@ -1,0 +1,1 @@
+Bộ nhớ chia sẻ được chia thành 32 bank, mỗi bank rộng 4 byte, và các word liên tiếp nằm ở các bank liên tiếp. Với các hàng dài 32 word, mọi phần tử của một cột đều cách điểm đầu một bội số của 32 word. Vì vậy mọi lane đều cần bank 0, và bank đó phục vụ từng lane một. 32 lượt, trong khi 31 bank ngồi không.

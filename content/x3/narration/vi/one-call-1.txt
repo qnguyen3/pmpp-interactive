@@ -1,0 +1,1 @@
+Đây là phần đầu của một lớp Llama, theo cách llama.cpp dựng nó. Sau phép tra cứu embedding là một nút RMS norm, rồi một phép nhân với trọng số của norm, rồi phép nhân ma trận đầu tiên. Mỗi nút chỉ là một số hiệu op trong một đồ thị. Chưa có gì chạy cả.

@@ -1,0 +1,1 @@
+Vậy phép thử không phải là các luồng có đọc cùng phần tử hay không. Ở vòng 1 chúng có đọc, và vẫn ổn. Phép thử là có luồng nào đọc thứ mà một luồng khác ghi hay không. Vòng 2 không qua phép thử đó. Chương 11 tính cùng tổng lũy kế này bằng một thuật toán khác, một thuật toán qua được phép thử.

@@ -28,6 +28,8 @@
 
 // ------------------------------------------------------------------ the small problem
 
+import { tr } from '../lib/locale.ts';
+
 export type MatName = 'X' | 'Q' | 'K' | 'V' | 'S' | 'P' | 'O';
 export const MAT_NAMES: MatName[] = ['X', 'Q', 'K', 'V', 'S', 'P', 'O'];
 
@@ -279,10 +281,10 @@ function point(key: AIPoint['key'], label: string, m: number, k: number, n: numb
  */
 export function aiPoints(n: number, d: number, p: number): AIPoint[] {
   return [
-    point('prefill-proj', 'prefill: X W (GEMM)', n, d, d, p),
-    point('prefill-qk', 'prefill: Q Kᵀ (GEMM)', n, d, n, p),
-    point('decode-proj', "decode: x′ W (GEMV)", 1, d, d, p),
-    point('decode-qk', "decode: q′ Kᵀ (GEMV)", 1, d, n, p),
+    point('prefill-proj', 'prefill: X W (GEMM)', n, d, d, p), // i18n-ignore: formula with glossary-kept terms, identical in Vietnamese
+    point('prefill-qk', 'prefill: Q Kᵀ (GEMM)', n, d, n, p), // i18n-ignore: formula with glossary-kept terms, identical in Vietnamese
+    point('decode-proj', "decode: x′ W (GEMV)", 1, d, d, p), // i18n-ignore: formula with glossary-kept terms, identical in Vietnamese
+    point('decode-qk', "decode: q′ Kᵀ (GEMV)", 1, d, n, p), // i18n-ignore: formula with glossary-kept terms, identical in Vietnamese
   ];
 }
 
@@ -321,10 +323,10 @@ export interface Phase {
 export function decodePhases(n: number, h: number, d: number, p: number): Phase[] {
   const D = h * d;
   return [
-    { key: 'proj', label: 'projections', bytesRead: p * (D + 3 * D * D), bytesWritten: p * D, flops: 3 * 2 * D * D },
-    { key: 'append', label: 'append k′, v′', bytesRead: 0, bytesWritten: p * 2 * D, flops: 0 },
+    { key: 'proj', label: tr('projections', 'các phép chiếu'), bytesRead: p * (D + 3 * D * D), bytesWritten: p * D, flops: 3 * 2 * D * D },
+    { key: 'append', label: tr('append k′, v′', 'nối thêm k′, v′'), bytesRead: 0, bytesWritten: p * 2 * D, flops: 0 },
     { key: 'scores', label: 'q′ Kᵀ', bytesRead: p * n * D, bytesWritten: 0, flops: 2 * n * D },
-    { key: 'softmax', label: 'softmax', bytesRead: 0, bytesWritten: 0, flops: 0 },
+    { key: 'softmax', label: tr('softmax', 'softmax'), bytesRead: 0, bytesWritten: 0, flops: 0 },
     { key: 'values', label: 'p′ V', bytesRead: p * n * D, bytesWritten: p * D, flops: 2 * n * D },
   ];
 }

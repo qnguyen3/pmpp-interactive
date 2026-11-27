@@ -1,0 +1,1 @@
+MLX trên CUDA đọc hàng theo từng đoạn 4 phần tử và giữ một giá trị lớn nhất đang chạy cùng một tổng đang chạy. Khi một đoạn làm giá trị lớn nhất tăng lên, tổng tính đến lúc đó được nhân với hàm mũ của giá trị lớn nhất cũ trừ giá trị lớn nhất mới. Ở đây điều đó xảy ra hai lần: tại 3.1, với hệ số khoảng 0.33, và tại 4, với hệ số khoảng 0.41.

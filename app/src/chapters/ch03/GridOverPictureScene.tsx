@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { BOOK, CHANNELS, blockInfo, bookLabel, latticeOf, layout, regions, threadAt } from '../../sim/mapping';
 
 // "A grid over a picture": the book's 62 x 76 example (pp. 49-55) built up in six
@@ -66,7 +67,7 @@ function Stage(f: Frame) {
   const gone = u > 0 ? Array.from({ length: BOOK.height }, (_, k) => q(k)) : [];
   const markX = SX + T.row * ROW_W;
   return (
-    <svg viewBox="0 0 720 416" role="img" aria-label="Animation: blocks of threads laid over a 62 by 76 picture"
+    <svg viewBox="0 0 720 416" role="img" aria-label={tr('Animation: blocks of threads laid over a 62 by 76 picture', 'Hoạt hình: các khối luồng đặt phủ lên một bức ảnh 62 × 76')}
       style={{ width: '100%', maxWidth: 720, display: 'block' }}>
       <defs>
         <pattern id="gop-pix" width={C} height={C} patternUnits="userSpaceOnUse">
@@ -110,9 +111,9 @@ function Stage(f: Frame) {
       {/* the picture's size */}
       {f.dims ? (
         <g opacity={f.dims} fontSize="11.5">
-          <text x={LX + PW / 2} y={LY - 26} textAnchor="middle">{BOOK.width} columns</text>
+          <text x={LX + PW / 2} y={LY - 26} textAnchor="middle"><Translated vi={<>{BOOK.width} cột</>}>{BOOK.width} columns</Translated></text>
           <path d={`M${LX} ${LY - 20} h${PW} M${LX} ${LY - 24} v8 M${LX + PW} ${LY - 24} v8`} stroke="var(--ink-2)" fill="none" />
-          <text x={LX - 24} y={LY + PH / 2} textAnchor="middle" transform={`rotate(-90 ${LX - 24} ${LY + PH / 2})`}>{BOOK.height} rows</text>
+          <text x={LX - 24} y={LY + PH / 2} textAnchor="middle" transform={`rotate(-90 ${LX - 24} ${LY + PH / 2})`}><Translated vi={<>{BOOK.height} hàng</>}>{BOOK.height} rows</Translated></text>
           <path d={`M${LX - 16} ${LY} v${PH} M${LX - 20} ${LY} h8 M${LX - 20} ${LY + PH} h8`} stroke="var(--ink-2)" fill="none" />
         </g>
       ) : null}
@@ -133,7 +134,7 @@ function Stage(f: Frame) {
           <circle cx={LX + T.col * C + C / 2} cy={LY + T.row * C + C / 2} r="7" fill="none" stroke="var(--reg)" strokeWidth="2" />
           <rect x={LX + T.col * C} y={LY + T.row * C} width={C} height={C} fill="var(--reg)" />
           <text x={LX + T.col * C + 14} y={LY + T.row * C - 5} fontSize="11.5" fontWeight="650" style={{ fill: 'var(--reg)' }}>
-            row {T.row}, col {T.col}
+            <Translated vi={<>hàng {T.row}, cột {T.col}</>}>row {T.row}, col {T.col}</Translated>
           </text>
         </g>
       ) : null}
@@ -142,7 +143,7 @@ function Stage(f: Frame) {
       {u > 0 ? (
         <g>
           <text x={SX} y={SY - 6} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>
-            Pout, one flat array of {L.pixels} bytes
+            <Translated vi={<>Pout, một mảng phẳng gồm {L.pixels} byte</>}>Pout, one flat array of {L.pixels} bytes</Translated>
           </text>
           <rect x={SX} y={SY} width={SW} height={SH} fill="none" stroke="var(--rule)" />
           {gone.map((g, k) => {
@@ -161,14 +162,14 @@ function Stage(f: Frame) {
         <g opacity={f.mark}>
           <path d={`M${markX} ${SY - 3} v${SH + 6}`} stroke="var(--ink)" strokeWidth="1.6" />
           <text x={markX + 5} y={SY + SH + 13} fontSize="11.5" fontWeight="650">
-            row {T.row} starts at {T.row} × {BOOK.width} = {T.grayOffset}
+            <Translated vi={<>hàng {T.row} bắt đầu tại {T.row} × {BOOK.width} = {T.grayOffset}</>}>row {T.row} starts at {T.row} × {BOOK.width} = {T.grayOffset}</Translated>
           </text>
         </g>
       ) : null}
       {f.pin ? (
         <g opacity={f.pin}>
           <text x={SX} y={SY2 - 6} fontSize="11.5" fontWeight="600" style={{ fill: 'var(--global)' }}>
-            Pin, {CHANNELS} bytes per pixel, {L.pixels * CHANNELS} bytes
+            <Translated vi={<>Pin, {CHANNELS} byte mỗi điểm ảnh, {L.pixels * CHANNELS} byte</>}>Pin, {CHANNELS} bytes per pixel, {L.pixels * CHANNELS} bytes</Translated>
           </text>
           <rect x={SX} y={SY2} width={SW} height={SH} fill="var(--global-wash)" stroke="var(--global)" strokeWidth="0.6" />
           <path d={`M${markX} ${SY2 - 3} v${SH + 6}`} stroke="var(--ink)" strokeWidth="1.6" />
@@ -202,8 +203,8 @@ function Stage(f: Frame) {
 
 const all = L.blocks;
 const sumLines = (p: number, a: number, b: number): Line[] => [
-  { text: `Thread ${bookLabel(T.threadIdx)} of Block ${bookLabel(T.blockIdx)}`, show: 1, tone: 'strong' },
-  { text: 'labels are (y, x): one block down, none across', show: 1, tone: 'muted' },
+  { text: tr(`Thread ${bookLabel(T.threadIdx)} of Block ${bookLabel(T.blockIdx)}`, `Luồng ${bookLabel(T.threadIdx)} của Khối ${bookLabel(T.blockIdx)}`), show: 1, tone: 'strong' },
+  { text: tr('labels are (y, x): one block down, none across', 'nhãn ghi (y, x): xuống một khối, không sang ngang khối nào'), show: 1, tone: 'muted' },
   { text: 'row = blockIdx.y × blockDim.y + threadIdx.y', show: ramp(p, a, a + 0.1), mono: true },
   { text: `    = ${T.blockIdx.y} × ${T.blockDim.y} + ${T.threadIdx.y} = ${T.row}`, show: ramp(p, a + 0.08, a + 0.18), tone: 'reg', mono: true },
   { text: 'col = blockIdx.x × blockDim.x + threadIdx.x', show: ramp(p, b, b + 0.1), mono: true },
@@ -213,66 +214,76 @@ const sumLines = (p: number, a: number, b: number): Line[] => [
 const beats: Beat[] = [
   {
     clip: 'grid-over-picture-1',
-    label: 'The picture',
+    get label() {
+      return tr('The picture', 'Bức ảnh');
+    },
     draw: (p) => (
       <Stage pic={mix(0.35, 1, ramp(p, 0, 0.2))} dims={ramp(p, 0.1, 0.3)}
         lines={[
-          { text: `${BOOK.height} rows × ${BOOK.width} columns`, show: ramp(p, 0.15, 0.3) },
-          { text: `= ${L.pixels} pixels`, show: ramp(p, 0.36, 0.48), tone: 'strong' },
-          { text: 'one thread for each pixel', show: ramp(p, 0.52, 0.64) },
-          { text: 'threads come in blocks', show: ramp(p, 0.68, 0.8), tone: 'muted' },
+          { text: tr(`${BOOK.height} rows × ${BOOK.width} columns`, `${BOOK.height} hàng × ${BOOK.width} cột`), show: ramp(p, 0.15, 0.3) },
+          { text: tr(`= ${L.pixels} pixels`, `= ${L.pixels} điểm ảnh`), show: ramp(p, 0.36, 0.48), tone: 'strong' },
+          { text: tr('one thread for each pixel', 'mỗi điểm ảnh một luồng'), show: ramp(p, 0.52, 0.64) },
+          { text: tr('threads come in blocks', 'các luồng đi theo khối'), show: ramp(p, 0.68, 0.8), tone: 'muted' },
         ]} />
     ),
   },
   {
     clip: 'grid-over-picture-2',
-    label: 'Blocks',
+    get label() {
+      return tr('Blocks', 'Các khối');
+    },
     draw: (p) => {
       const n = Math.ceil(ramp(p, 0.14, 0.74) * all);
       const firstRow = Math.min(n, L.gridX);
       return (
         <Stage pic={1} dims={1} laid={n}
           lines={[
-            { text: `blocks of ${BOOK.blockW} × ${BOOK.blockH} = ${BOOK.blockW * BOOK.blockH} threads`, show: 1 },
-            { text: `across: ${firstRow} × ${BOOK.blockW} = ${firstRow * BOOK.blockW}${firstRow === L.gridX ? ` covers ${BOOK.width}` : ''}`, show: n > 0 ? 1 : 0 },
-            { text: `down: ${Math.ceil(n / L.gridX)} × ${BOOK.blockH} = ${Math.ceil(n / L.gridX) * BOOK.blockH}${n === all ? ` covers ${BOOK.height}` : ''}`, show: n > 0 ? 1 : 0 },
+            { text: tr(`blocks of ${BOOK.blockW} × ${BOOK.blockH} = ${BOOK.blockW * BOOK.blockH} threads`, `khối ${BOOK.blockW} × ${BOOK.blockH} = ${BOOK.blockW * BOOK.blockH} luồng`), show: 1 },
+            { text: tr(`across: ${firstRow} × ${BOOK.blockW} = ${firstRow * BOOK.blockW}${firstRow === L.gridX ? ` covers ${BOOK.width}` : ''}`, `ngang: ${firstRow} × ${BOOK.blockW} = ${firstRow * BOOK.blockW}${firstRow === L.gridX ? ` phủ ${BOOK.width}` : ''}`), show: n > 0 ? 1 : 0 },
+            { text: tr(`down: ${Math.ceil(n / L.gridX)} × ${BOOK.blockH} = ${Math.ceil(n / L.gridX) * BOOK.blockH}${n === all ? ` covers ${BOOK.height}` : ''}`, `dọc: ${Math.ceil(n / L.gridX)} × ${BOOK.blockH} = ${Math.ceil(n / L.gridX) * BOOK.blockH}${n === all ? ` phủ ${BOOK.height}` : ''}`), show: n > 0 ? 1 : 0 },
             { text: '', show: 0 },
-            { text: `blocks: ${n}`, show: 1, tone: 'strong' },
-            { text: `threads: ${n} × ${BOOK.blockW * BOOK.blockH} = ${n * BOOK.blockW * BOOK.blockH}`, show: 1, tone: 'strong' },
-            { text: `pixels: ${L.pixels}`, show: ramp(p, 0.8, 0.9), tone: 'muted' },
+            { text: tr(`blocks: ${n}`, `số khối: ${n}`), show: 1, tone: 'strong' },
+            { text: tr(`threads: ${n} × ${BOOK.blockW * BOOK.blockH} = ${n * BOOK.blockW * BOOK.blockH}`, `số luồng: ${n} × ${BOOK.blockW * BOOK.blockH} = ${n * BOOK.blockW * BOOK.blockH}`), show: 1, tone: 'strong' },
+            { text: tr(`pixels: ${L.pixels}`, `số điểm ảnh: ${L.pixels}`), show: ramp(p, 0.8, 0.9), tone: 'muted' },
           ]} />
       );
     },
   },
   {
     clip: 'grid-over-picture-3',
-    label: 'The overhang',
+    get label() {
+      return tr('The overhang', 'Phần thừa ra');
+    },
     draw: (p) => (
       <Stage pic={1} dims={1} laid={all} overhang={ramp(p, 0.04, 0.18)} off={ramp(p, 0.72, 0.92)}
         lines={[
-          { text: `right: ${RIGHT} columns × ${L.threadsY} rows = ${RIGHT * L.threadsY}`, show: ramp(p, 0.12, 0.24) },
-          { text: `bottom: ${BELOW} rows × ${L.threadsX} columns = ${BELOW * L.threadsX}`, show: ramp(p, 0.3, 0.42) },
-          { text: `the corner counted twice: ${RIGHT} × ${BELOW} = ${RIGHT * BELOW}`, show: ramp(p, 0.42, 0.52), tone: 'muted' },
-          { text: `${L.surplus} threads with no pixel`, show: ramp(p, 0.5, 0.6), tone: 'strong' },
+          { text: tr(`right: ${RIGHT} columns × ${L.threadsY} rows = ${RIGHT * L.threadsY}`, `bên phải: ${RIGHT} cột × ${L.threadsY} hàng = ${RIGHT * L.threadsY}`), show: ramp(p, 0.12, 0.24) },
+          { text: tr(`bottom: ${BELOW} rows × ${L.threadsX} columns = ${BELOW * L.threadsX}`, `bên dưới: ${BELOW} hàng × ${L.threadsX} cột = ${BELOW * L.threadsX}`), show: ramp(p, 0.3, 0.42) },
+          { text: tr(`the corner counted twice: ${RIGHT} × ${BELOW} = ${RIGHT * BELOW}`, `góc bị đếm hai lần: ${RIGHT} × ${BELOW} = ${RIGHT * BELOW}`), show: ramp(p, 0.42, 0.52), tone: 'muted' },
+          { text: tr(`${L.surplus} threads with no pixel`, `${L.surplus} luồng không có điểm ảnh nào`), show: ramp(p, 0.5, 0.6), tone: 'strong' },
           { text: '', show: 0 },
           { text: 'if (col < width && row < height)', show: ramp(p, 0.66, 0.78), mono: true },
-          { text: `false for those ${L.surplus}: they stop`, show: ramp(p, 0.8, 0.92) },
+          { text: tr(`false for those ${L.surplus}: they stop`, `sai với ${L.surplus} luồng đó: chúng dừng lại`), show: ramp(p, 0.8, 0.92) },
         ]} />
     ),
   },
   {
     clip: 'grid-over-picture-4',
-    label: 'One thread',
+    get label() {
+      return tr('One thread', 'Một luồng');
+    },
     draw: (p) => <Stage pic={1} dims={1} laid={all} off={1} quiet={0.6} thread={ramp(p, 0.04, 0.16)} lines={sumLines(p, 0.42, 0.74)} />,
   },
   {
     clip: 'grid-over-picture-5',
-    label: 'Into one strip',
+    get label() {
+      return tr('Into one strip', 'Trải thành một dải');
+    },
     draw: (p) => (
       <Stage pic={1} laid={all} off={1} quiet={1} thread={1} unroll={ramp(p, 0.06, 0.5)} mark={ramp(p, 0.5, 0.58)} pin={ramp(p, 0.72, 0.82)}
         lines={[
-          { text: `Thread ${bookLabel(T.threadIdx)} of Block ${bookLabel(T.blockIdx)}: row ${T.row}, col ${T.col}`, show: 1, tone: 'strong' },
-          { text: 'rows go into memory one after another', show: ramp(p, 0.06, 0.16) },
+          { text: tr(`Thread ${bookLabel(T.threadIdx)} of Block ${bookLabel(T.blockIdx)}: row ${T.row}, col ${T.col}`, `Luồng ${bookLabel(T.threadIdx)} của Khối ${bookLabel(T.blockIdx)}: hàng ${T.row}, cột ${T.col}`), show: 1, tone: 'strong' },
+          { text: tr('rows go into memory one after another', 'các hàng nằm nối tiếp nhau trong bộ nhớ'), show: ramp(p, 0.06, 0.16) },
           { text: '', show: 0 },
           { text: 'grayOffset = row × width + col', show: ramp(p, 0.44, 0.54), mono: true },
           { text: `           = ${T.row} × ${BOOK.width} + ${T.col} = ${T.grayOffset}`, show: ramp(p, 0.52, 0.62), tone: 'global', mono: true },
@@ -283,22 +294,24 @@ const beats: Beat[] = [
   },
   {
     clip: 'grid-over-picture-6',
-    label: 'Four kinds of block',
+    get label() {
+      return tr('Four kinds of block', 'Bốn loại khối');
+    },
     draw: (p) => (
       <Stage pic={1} dims={1} laid={all} shade={ramp(p, 0.03, 0.14)}
         lines={[
-          { text: 'threads that work, block by block', show: 1, tone: 'strong' },
+          { text: tr('threads that work, block by block', 'số luồng làm việc, theo từng khối'), show: 1, tone: 'strong' },
           ...REG.map((r, i): Line => ({
             text: `${String(r.blocks).padStart(2, ' ')} × ${r.working} = ${r.total}`, show: ramp(p, 0.14 + i * 0.14, 0.22 + i * 0.14), mono: true,
           })),
-          { text: `sum ${REG.reduce((s, r) => s + r.total, 0)} = ${BOOK.height} × ${BOOK.width}`, show: ramp(p, 0.68, 0.76), tone: 'strong', mono: true },
-          { text: 'every pixel exactly once', show: ramp(p, 0.74, 0.82) },
-          { text: 'chapter 4 returns to these four kinds', show: ramp(p, 0.86, 0.94), tone: 'muted' },
+          { text: tr(`sum ${REG.reduce((s, r) => s + r.total, 0)} = ${BOOK.height} × ${BOOK.width}`, `tổng ${REG.reduce((s, r) => s + r.total, 0)} = ${BOOK.height} × ${BOOK.width}`), show: ramp(p, 0.68, 0.76), tone: 'strong', mono: true },
+          { text: tr('every pixel exactly once', 'mỗi điểm ảnh đúng một lần'), show: ramp(p, 0.74, 0.82) },
+          { text: tr('chapter 4 returns to these four kinds', 'chương 4 quay lại bốn loại này'), show: ramp(p, 0.86, 0.94), tone: 'muted' },
         ]} />
     ),
   },
 ];
 
 export function GridOverPictureScene() {
-  return <Scene chapter="ch03" title="A grid over a picture" beats={beats} />;
+  return <Scene chapter="ch03" title={tr('A grid over a picture', 'Một lưới phủ lên bức ảnh')} beats={beats} />;
 }

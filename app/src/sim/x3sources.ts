@@ -7,6 +7,8 @@
 // master on the same day. They are linked by their facts item and their master URL, never
 // with invented line numbers at the pinned commit (see FactsRef in backendmap.ts).
 
+import { tr } from '../lib/locale.ts';
+
 export const FACTS_FILE = 'notes/today/x3-facts.md';
 export const READ_ON = '2026-11-20';
 
@@ -42,35 +44,35 @@ export const PINNED: PinnedProject[] = [
   {
     id: 'llama.cpp', name: 'llama.cpp', repo: 'ggml-org/llama.cpp', branch: 'master',
     commit: '919794500475862f6768c353255469dc661cb734', date: '2026-11-20',
-    licence: 'MIT', copyright: 'Copyright (c) 2023-2026 The ggml authors',
+    licence: 'MIT', copyright: 'Copyright (c) 2023-2026 The ggml authors', // i18n-ignore: copyright notice, verbatim
   },
   {
     id: 'mlx', name: 'MLX', repo: 'ml-explore/mlx', branch: 'main',
     commit: 'bd2d1fb43e9819164f7d04098ddbb4fdb95fe64a', date: '2026-11-20',
-    licence: 'MIT', copyright: 'Copyright © 2023 Apple Inc.',
+    licence: 'MIT', copyright: 'Copyright © 2023 Apple Inc.', // i18n-ignore: copyright notice, verbatim
   },
   {
     id: 'pytorch', name: 'PyTorch', repo: 'pytorch/pytorch', branch: 'main',
     commit: 'a6ec1fa444f247690030fe73106156341c95fcc3', date: '2026-11-20',
-    licence: 'BSD-style three clause', copyright: null,
+    licence: 'BSD-style three clause', copyright: null, // i18n-ignore: licence as the facts header gives it, verbatim
   },
   {
-    id: 'mlx-lm', name: 'mlx-lm', repo: 'ml-explore/mlx-lm', branch: 'main',
+    id: 'mlx-lm', name: 'mlx-lm', repo: 'ml-explore/mlx-lm', branch: 'main', // i18n-ignore: project name
     commit: '2d4df8d94a80c0f9f8794e54fafee08728b04fc6', date: '2026-11-19',
     licence: 'MIT', copyright: null,
   },
   {
-    id: 'transformers', name: 'transformers', repo: 'huggingface/transformers', branch: 'main',
+    id: 'transformers', name: 'transformers', repo: 'huggingface/transformers', branch: 'main', // i18n-ignore: project name
     commit: '4d9ef623e3b0a1fb6c12891a907e0e50d41f0af8', date: '2026-11-20',
     licence: 'Apache-2.0', copyright: null,
   },
   {
-    id: 'safetensors', name: 'safetensors', repo: 'huggingface/safetensors', branch: 'main',
+    id: 'safetensors', name: 'safetensors', repo: 'huggingface/safetensors', branch: 'main', // i18n-ignore: project name
     commit: '11319d360db5170565db914601fbf375762bf8eb', date: '2026-11-20',
     licence: 'Apache-2.0', copyright: null,
   },
   {
-    id: 'ggml', name: 'ggml (GGUF spec)', repo: 'ggml-org/ggml', branch: 'master',
+    id: 'ggml', name: 'ggml (GGUF spec)', repo: 'ggml-org/ggml', branch: 'master', // i18n-ignore: project name
     commit: 'd9fe7bff3d2bf4d077e25c654486d02c321734aa', date: null,
     licence: 'MIT', copyright: null,
   },
@@ -98,8 +100,8 @@ export type Lines = number | [number, number];
 /** Text for a line range: "line 154", "lines 116 to 127". */
 export function linesText(lines: Lines | null | undefined): string {
   if (lines == null) return '';
-  if (typeof lines === 'number') return `line ${lines}`;
-  return lines[0] === lines[1] ? `line ${lines[0]}` : `lines ${lines[0]} to ${lines[1]}`;
+  if (typeof lines === 'number') return tr(`line ${lines}`, `dòng ${lines}`);
+  return lines[0] === lines[1] ? tr(`line ${lines[0]}`, `dòng ${lines[0]}`) : tr(`lines ${lines[0]} to ${lines[1]}`, `dòng ${lines[0]} đến ${lines[1]}`);
 }
 
 /**
@@ -119,7 +121,10 @@ export function permalink(project: ProjectId, path: string, lines?: Lines | null
 export function attribution(project: ProjectId): string {
   const p = pinned(project);
   if (project === 'pytorch')
-    return 'PyTorch, BSD-style three-clause licence (GitHub reports NOASSERTION); notice in its LICENSE file';
+    return tr(
+      'PyTorch, BSD-style three-clause licence (GitHub reports NOASSERTION); notice in its LICENSE file',
+      'PyTorch, giấy phép kiểu BSD ba điều khoản (GitHub báo NOASSERTION); thông báo nằm trong tệp LICENSE của nó',
+    );
   return p.copyright ? `${p.name}, ${p.licence}, ${p.copyright}` : `${p.name}, ${p.licence}`;
 }
 

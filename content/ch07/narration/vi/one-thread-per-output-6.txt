@@ -1,0 +1,1 @@
+Hãy thu nhỏ ra một ảnh 1024 nhân 1024 với các khối 32 nhân 32. Giờ một warp là một hàng của một khối. Chỉ các warp ở mép trái và mép phải bị phân kỳ, khoảng 6 phần trăm trong số chúng. Ở mép trên và mép dưới, mọi lane bỏ qua cùng các điểm lọc. Phân kỳ không phải là giới hạn thật sự. Lưu lượng bộ nhớ mới là giới hạn, và đó là phần tiếp theo.

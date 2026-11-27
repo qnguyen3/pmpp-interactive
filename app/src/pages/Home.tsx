@@ -3,10 +3,12 @@ import { href } from '../lib/router';
 import { useProgress } from '../lib/progress';
 import { dueCount } from '../lib/review';
 import { useReports } from '../lib/reports';
+import { localized, tr, useI18n } from '../lib/i18n';
 
 export function Home() {
   const { progress } = useProgress();
   const { reports } = useReports();
+  const { t } = useI18n();
   const chapters = useAllChapters();
   const due = dueCount(progress.review);
   const backends = Object.entries(reports);
@@ -15,15 +17,11 @@ export function Home() {
     <article className="page" data-ready={chapters ? '' : undefined}>
       <header className="section-head">
         <span className="num" />
-        <h1>From tensors to kernels</h1>
-        <p className="lede">
-          A working copy of <i>Programming Massively Parallel Processors</i> (5th edition) for one reader: you know
-          what <code>torch.matmul</code> computes, and this is about what the GPU does to compute it, and how to write
-          that yourself on CUDA, HIP and Metal.
-        </p>
+        <h1>{t.home.title}</h1>
+        <p className="lede">{t.home.lede}</p>
       </header>
       <div className="prose">
-        <h2 style={{ marginTop: 0 }}>Where you are</h2>
+        <h2 style={{ marginTop: 0 }}>{t.home.whereYouAre}</h2>
         <ul>
           {PLAN.filter((r) => r.id && built.has(r.id)).map((r) => {
             const ch = built.get(r.id!)!;
@@ -31,81 +29,72 @@ export function Home() {
             return (
               <li key={ch.id}>
                 <a href={href(ch.id, ch.sections[0].id)}>
-                  {/^\d/.test(ch.num) ? 'Chapter ' : ch.num.startsWith('X') ? 'Module ' : 'Appendix '}
-                  {ch.num}: {ch.title}
+                  {t.common.chapterWord(ch.num)}
+                  {ch.num}: {localized(ch.title, ch.vi?.title)}
                 </a>{' '}
-                <span className="ui muted">
-                  {done} of {ch.sections.length} sections done
-                </span>
+                <span className="ui muted">{t.home.sectionsDone(done, ch.sections.length)}</span>
               </li>
             );
           })}
           <li>
-            <a href={href('review')}>Review</a>{' '}
-            <span className="ui muted">{due ? `${due} due today` : 'nothing due today'}</span>
+            <a href={href('review')}>{t.home.review}</a>{' '}
+            <span className="ui muted">{due ? t.home.dueToday(due) : t.home.nothingDue}</span>
           </li>
         </ul>
 
-        <h2>Your devices</h2>
+        <h2>{t.home.devices}</h2>
         {backends.length ? (
           <table className="data wide" style={{ maxWidth: '52rem' }}>
             <thead>
               <tr>
-                <th>Backend</th>
-                <th>Device, as it reports itself</th>
-                <th>Last run</th>
+                <th>{t.home.backend}</th>
+                <th>{t.home.device}</th>
+                <th>{t.home.lastRun}</th>
               </tr>
             </thead>
             <tbody>
               {backends.map(([name, run]) => (
                 <tr key={name}>
                   <td>{name}</td>
-                  <td>{String(run.device.name ?? 'unknown')}</td>
+                  <td>{String(run.device.name ?? t.home.unknownDevice)}</td>
                   <td>{run.generated.replace('T', ' ')}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         ) : (
-          <p>
-            No lab results on this machine yet. Run <code>./verify.sh</code> in the repository root; lessons that compare
-            against your own measurements will pick them up.
-          </p>
+          <p>{t.home.noResults}</p>
         )}
-        <p className="status-line">
-          Nothing in the lessons assumes a particular GPU. Where the book works an example on a specific device, the
-          lesson says so and puts your own measured numbers beside it.
-        </p>
+        <p className="status-line">{t.home.noAssumption}</p>
 
-        <h2>The whole course</h2>
-        <p>
-          Depth follows your goals: matmul, attention, quantised operations and sampling for LLM inference, on more than
-          one backend. Three modules are ours because the book does not cover them.
-        </p>
+        <h2>{t.home.course}</h2>
+        <p>{t.home.courseLede}</p>
         <table className="data wide">
           <thead>
             <tr>
-              <th>Ch.</th>
-              <th>Title</th>
-              <th>Book pp.</th>
-              <th>Depth</th>
-              <th>Why</th>
-              <th>Project step</th>
-              <th>Status</th>
+              <th>{t.home.cols.num}</th>
+              <th>{t.home.cols.title}</th>
+              <th>{t.home.cols.pages}</th>
+              <th>{t.home.cols.depth}</th>
+              <th>{t.home.cols.why}</th>
+              <th>{t.home.cols.step}</th>
+              <th>{t.home.cols.status}</th>
             </tr>
           </thead>
           <tbody>
             {PLAN.map((r) => {
               const ch = r.id ? built.get(r.id) : undefined;
+              const title = localized(r.title, r.vi?.title);
               return (
                 <tr key={r.num}>
                   <td>{r.num}</td>
-                  <td>{ch ? <a href={href(ch.id, ch.sections[0].id)}>{r.title}</a> : r.title}</td>
-                  <td className="nowrap">{r.pages}</td>
-                  <td>{r.tier}</td>
-                  <td>{r.why}</td>
-                  <td>{r.milestone ?? ''}</td>
-                  <td className="nowrap">{ch ? 'Ready' : r.tier === 'Skipped' ? 'Not planned' : 'Planned'}</td>
+                  <td>{ch ? <a href={href(ch.id, ch.sections[0].id)}>{title}</a> : title}</td>
+                  {/* Our own modules have no book pages; their row says so in words. */}
+                  <td className="nowrap">{r.ours ? tr(r.pages, 'không có trong sách') : r.pages}</td>
+                  <td>{t.home.tier[r.tier]}</td>
+                  <td>{localized(r.why, r.vi?.why)}</td>
+                  <td>{r.milestone ? localized(r.milestone, r.vi?.milestone) : ''}</td>
+                  <td className="nowrap">{ch ? t.home.ready : r.tier === 'Skipped' ? t.home.notPlanned : t.home.planned}</td>
                 </tr>
               );
             })}

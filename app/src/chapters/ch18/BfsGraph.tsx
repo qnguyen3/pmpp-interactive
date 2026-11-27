@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { Tier } from '../../components/notes';
 import type { Graph, Role } from '../../sim/bfs';
+import { tr } from '../../lib/i18n';
 
 // The drawing of a small directed graph that chapter 18's interactives share: vertices as
 // circles, edges as arrows (a pair of opposite edges drawn side by side), optional level
@@ -161,9 +162,9 @@ export function BfsGraph({
 
 /** The legend for thread glyphs. */
 export function GlyphLegend({
-  idle = 'launched, stops at the first check',
-  iterates = 'loops, labels nothing',
-  labels = 'loops and labels',
+  idle = tr('launched, stops at the first check', 'được khởi chạy, dừng ở phép kiểm tra đầu tiên'),
+  iterates = tr('loops, labels nothing', 'lặp, không gán nhãn gì'),
+  labels = tr('loops and labels', 'lặp và gán nhãn'),
 }: { idle?: string; iterates?: string; labels?: string }) {
   const text: Record<Role, string> = { idle, iterates, labels, surplus: '' };
   const one = (role: Role) => {

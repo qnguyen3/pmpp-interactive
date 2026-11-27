@@ -39,6 +39,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Version = 'mpi' | 'streams' | 'nccl' | 'nvshmem';
 export type Priority = 'equal' | 'higher';
 export type Issue = 'boundary-first' | 'internal-first';
@@ -82,19 +84,19 @@ export interface LoopInput extends Durations {
 }
 
 export const VERSIONS: Record<Version, { label: string; fig: string; pages: string }> = {
-  mpi: { label: 'MPI, no overlap', fig: 'Fig. 23.7', pages: '548–549' },
-  streams: { label: 'MPI with streams', fig: 'Fig. 23.14', pages: '556–562' },
+  mpi: { get label() { return tr('MPI, no overlap', 'MPI, không chồng lấp'); }, fig: 'Fig. 23.7', pages: '548–549' },
+  streams: { get label() { return tr('MPI with streams', 'MPI với stream'); }, fig: 'Fig. 23.14', pages: '556–562' },
   nccl: { label: 'NCCL', fig: 'Fig. 23.20', pages: '563–568' },
   nvshmem: { label: 'NVSHMEM', fig: 'Fig. 23.25', pages: '568–574' },
 };
 
 export const DEFECTS: Record<Exclude<Defect, 'none'>, { label: string; where: string; versions: Version[] }> = {
-  'reset-waits': { label: 'drop the two waits on resetL2', where: 'lines 06–07', versions: ['streams', 'nccl'] },
-  'compute-waits': { label: 'drop the waits on computeTop and computeBottom', where: 'lines 19–20', versions: ['streams', 'nccl'] },
-  'sync-top': { label: 'drop the host sync before the top exchange', where: 'Fig. 23.14 line 27', versions: ['streams'] },
-  'exchange-waits': { label: 'drop the waits on exchangeTop and exchangeBottom', where: 'Fig. 23.20 lines 43–44', versions: ['nccl'] },
-  barrier: { label: 'drop nvshmemx_barrier_all_on_stream', where: 'Fig. 23.25 line 18', versions: ['nvshmem'] },
-  pageable: { label: 'allocate l2norm_h with malloc (pageable)', where: 'p. 562', versions: ['streams', 'nccl', 'nvshmem'] },
+  'reset-waits': { get label() { return tr('drop the two waits on resetL2', 'bỏ hai lần chờ trên resetL2'); }, get where() { return tr('lines 06–07', 'dòng 06–07'); }, versions: ['streams', 'nccl'] },
+  'compute-waits': { get label() { return tr('drop the waits on computeTop and computeBottom', 'bỏ các lần chờ trên computeTop và computeBottom'); }, get where() { return tr('lines 19–20', 'dòng 19–20'); }, versions: ['streams', 'nccl'] },
+  'sync-top': { get label() { return tr('drop the host sync before the top exchange', 'bỏ lần đồng bộ của host trước trao đổi phía trên'); }, get where() { return tr('Fig. 23.14 line 27', 'Fig. 23.14 dòng 27'); }, versions: ['streams'] },
+  'exchange-waits': { get label() { return tr('drop the waits on exchangeTop and exchangeBottom', 'bỏ các lần chờ trên exchangeTop và exchangeBottom'); }, get where() { return tr('Fig. 23.20 lines 43–44', 'Fig. 23.20 dòng 43–44'); }, versions: ['nccl'] },
+  barrier: { get label() { return tr('drop nvshmemx_barrier_all_on_stream', 'bỏ nvshmemx_barrier_all_on_stream'); }, get where() { return tr('Fig. 23.25 line 18', 'Fig. 23.25 dòng 18'); }, versions: ['nvshmem'] },
+  pageable: { get label() { return tr('allocate l2norm_h with malloc (pageable)', 'cấp phát l2norm_h bằng malloc (pageable)'); }, where: 'p. 562', versions: ['streams', 'nccl', 'nvshmem'] },
 };
 
 export function defectsFor(v: Version): Defect[] {
@@ -141,18 +143,18 @@ export function program(v: Version, issue: Issue = 'boundary-first', defect: Def
       op('04', 'cudaMemset', 'internal', { k: 'memset' }),
       op('07', 'launch_jacobi_kernel', 'internal', { k: 'kernel', part: 'whole' }),
       { line: '08', label: 'cudaDeviceSynchronize', cost: 1, act: { k: 'devsync' } },
-      { line: '13–15', label: 'MPI_Sendrecv (top)', cost: 1, act: { k: 'sendrecv', which: 'top' } },
-      { line: '16–18', label: 'MPI_Sendrecv (bottom)', cost: 1, act: { k: 'sendrecv', which: 'bottom' } },
+      { line: '13–15', label: 'MPI_Sendrecv (top)', cost: 1, act: { k: 'sendrecv', which: 'top' } }, // i18n-ignore: identifier also shown to the reader
+      { line: '16–18', label: 'MPI_Sendrecv (bottom)', cost: 1, act: { k: 'sendrecv', which: 'bottom' } }, // i18n-ignore: identifier also shown to the reader
       op('21', 'cudaMemcpy', 'internal', { k: 'copy' }, 1, true),
-      { line: '24', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } },
+      { line: '24', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } }, // i18n-ignore: API name
     ];
   if (v === 'nvshmem')
     return [
       op('04', 'cudaMemsetAsync', 'internal', { k: 'memset' }),
-      op('09', 'launch_jacobi_kernel (computes and puts)', 'internal', { k: 'kernel', part: 'whole' }),
+      op('09', tr('launch_jacobi_kernel (computes and puts)', 'launch_jacobi_kernel (tính toán và put)'), 'internal', { k: 'kernel', part: 'whole' }),
       op('12–13', 'cudaMemcpyAsync', 'internal', { k: 'copy' }, 1, d === 'pageable'),
       { line: '14', label: 'cudaStreamSynchronize(stream)', cost: 1, act: { k: 'sync', stream: 'internal' } },
-      { line: '15', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } },
+      { line: '15', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } }, // i18n-ignore: API name
       ...(d === 'barrier' ? [] : [op('18', 'nvshmemx_barrier_all_on_stream', 'internal', { k: 'barrier' })]),
     ];
   // Figs. 23.14 and 23.20 share lines 04-22.
@@ -167,12 +169,12 @@ export function program(v: Version, issue: Issue = 'boundary-first', defect: Def
         ]),
   ];
   const boundary = [
-    op('10', 'launch top kernel', 'top', { k: 'kernel', part: 'top' }),
+    op('10', tr('launch top kernel', 'khởi chạy kernel phía trên'), 'top', { k: 'kernel', part: 'top' }),
     op('11', 'cudaEventRecord(computeTop)', 'top', { k: 'record', ev: 'computeTop' }),
-    op('12–13', 'launch bottom kernel', 'bottom', { k: 'kernel', part: 'bottom' }),
+    op('12–13', tr('launch bottom kernel', 'khởi chạy kernel phía dưới'), 'bottom', { k: 'kernel', part: 'bottom' }),
     op('14', 'cudaEventRecord(computeBottom)', 'bottom', { k: 'record', ev: 'computeBottom' }),
   ];
-  const internal = [op('15–16', 'launch internal kernel', 'internal', { k: 'kernel', part: 'internal' })];
+  const internal = [op('15–16', tr('launch internal kernel', 'khởi chạy kernel bên trong'), 'internal', { k: 'kernel', part: 'internal' })];
   const copy = [
     ...(d === 'compute-waits'
       ? []
@@ -187,20 +189,20 @@ export function program(v: Version, issue: Issue = 'boundary-first', defect: Def
     return [
       ...head,
       ...(d === 'sync-top' ? [] : [{ line: '27', label: 'cudaStreamSynchronize(topStream)', cost: 1, act: { k: 'sync', stream: 'top' } } as CallSpec]),
-      { line: '28–30', label: 'MPI_Sendrecv (top)', cost: 1, act: { k: 'sendrecv', which: 'top' } },
+      { line: '28–30', label: 'MPI_Sendrecv (top)', cost: 1, act: { k: 'sendrecv', which: 'top' } }, // i18n-ignore: identifier also shown to the reader
       { line: '31', label: 'cudaStreamSynchronize(bottomStream)', cost: 1, act: { k: 'sync', stream: 'bottom' } },
-      { line: '32–34', label: 'MPI_Sendrecv (bottom)', cost: 1, act: { k: 'sendrecv', which: 'bottom' } },
+      { line: '32–34', label: 'MPI_Sendrecv (bottom)', cost: 1, act: { k: 'sendrecv', which: 'bottom' } }, // i18n-ignore: identifier also shown to the reader
       { line: '37', label: 'cudaStreamSynchronize(internalStream)', cost: 1, act: { k: 'sync', stream: 'internal' } },
-      { line: '38', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } },
+      { line: '38', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } }, // i18n-ignore: API name
     ];
   return [
     ...head,
-    op('27–30', 'ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (top)', 'top', { k: 'exchange', which: 'top' }, 4),
+    op('27–30', tr('ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (top)', 'ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (phía trên)'), 'top', { k: 'exchange', which: 'top' }, 4),
     op('31', 'cudaEventRecord(exchangeTop)', 'top', { k: 'record', ev: 'exchangeTop' }),
-    op('32–35', 'ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (bottom)', 'bottom', { k: 'exchange', which: 'bottom' }, 4),
+    op('32–35', tr('ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (bottom)', 'ncclGroupStart, ncclSend, ncclRecv, ncclGroupEnd (phía dưới)'), 'bottom', { k: 'exchange', which: 'bottom' }, 4),
     op('36', 'cudaEventRecord(exchangeBottom)', 'bottom', { k: 'record', ev: 'exchangeBottom' }),
     { line: '39', label: 'cudaStreamSynchronize(internalStream)', cost: 1, act: { k: 'sync', stream: 'internal' } },
-    { line: '40', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } },
+    { line: '40', label: 'MPI_Allreduce', cost: 1, act: { k: 'allreduce' } }, // i18n-ignore: API name
     ...(d === 'exchange-waits'
       ? []
       : [
@@ -616,7 +618,7 @@ export function simulate(inp: LoopInput): LoopResult {
   for (const x of xchs)
     segs.push({
       lane: x.which === 'top' ? 'linkTop' : 'linkBottom', kind: 'exchange', iter: x.iter, start: x.start, end: x.end,
-      line: '', label: x.which === 'top' ? 'top exchange' : 'bottom exchange',
+      line: '', label: x.which === 'top' ? tr('top exchange', 'trao đổi phía trên') : tr('bottom exchange', 'trao đổi phía dưới'),
     });
   const blocks: BlockRun[] = allBlocks.map((b) => ({
     slot: b.slot, start: b.start as number, end: b.end as number, part: b.part, iter: b.op.iter, whole: b.op.spec.k === 'kernel' && b.op.spec.part === 'whole',
@@ -661,7 +663,7 @@ export function simulate(inp: LoopInput): LoopResult {
 
   // ---------------------------------------------------------------- what went wrong
   const violations: Violation[] = [];
-  const PART_NAME: Record<Part, string> = { top: 'top', bottom: 'bottom', internal: 'internal' };
+  const PART_NAME: Record<Part, string> = { top: tr('top', 'phía trên'), bottom: tr('bottom', 'phía dưới'), internal: tr('internal', 'bên trong') };
   for (const it of iters) {
     const i = it.iter;
     for (const k of kernelsOf(i)) {
@@ -672,16 +674,22 @@ export function simulate(inp: LoopInput): LoopResult {
         const first = early.reduce((a, b) => ((a.end as number) <= (b.end as number) ? a : b));
         const p = first.part;
         violations.push({
-          kind: 'reset', iter: i, edge: `reset-${p}` as EdgeId, lane: k.stream, at: first.end as number, until: it.memset.end,
-          text: `Iteration ${i}: a block of the ${PART_NAME[p]} ${part === 'whole' ? 'rows' : 'kernel'} adds its squared residues to the norm at ${r2(first.end as number)}, but the memset zeroes it only at ${r2(it.memset.end)}. That part is lost: the norm comes out too small.`,
+          kind: 'reset', iter: i, edge: `reset-${p}` as EdgeId, lane: k.stream, at: first.end as number, until: it.memset.end, // i18n-ignore: edge id
+          text: tr(
+            `Iteration ${i}: a block of the ${PART_NAME[p]} ${part === 'whole' ? 'rows' : 'kernel'} adds its squared residues to the norm at ${r2(first.end as number)}, but the memset zeroes it only at ${r2(it.memset.end)}. That part is lost: the norm comes out too small.`,
+            `Vòng lặp ${i}: một khối của ${part === 'whole' ? 'các hàng' : 'kernel'} ${PART_NAME[p]} cộng các phần dư bình phương của nó vào chuẩn tại ${r2(first.end as number)}, nhưng memset chỉ đặt chuẩn về 0 tại ${r2(it.memset.end)}. Phần đó bị mất: chuẩn tính ra nhỏ hơn thực tế.`,
+          ),
         });
       }
       // Every kernel has added its part before the copy reads the norm.
       if (it.copy.start < (k.end as number) - EPS) {
         const p = part === 'whole' ? 'internal' : part;
         violations.push({
-          kind: 'copy', iter: i, edge: `${p}-copy` as EdgeId, lane: 'internal', at: it.copy.start, until: k.end as number,
-          text: `Iteration ${i}: the norm is copied to the host at ${r2(it.copy.start)}, but the ${PART_NAME[p]} kernel adds its last part only at ${r2(k.end as number)}. The host reduces a norm that is missing it.`,
+          kind: 'copy', iter: i, edge: `${p}-copy` as EdgeId, lane: 'internal', at: it.copy.start, until: k.end as number, // i18n-ignore: edge id
+          text: tr(
+            `Iteration ${i}: the norm is copied to the host at ${r2(it.copy.start)}, but the ${PART_NAME[p]} kernel adds its last part only at ${r2(k.end as number)}. The host reduces a norm that is missing it.`,
+            `Vòng lặp ${i}: chuẩn được sao chép về host tại ${r2(it.copy.start)}, nhưng kernel ${PART_NAME[p]} chỉ cộng phần cuối của nó tại ${r2(k.end as number)}. Host rút gọn một chuẩn còn thiếu phần đó.`,
+          ),
         });
       }
     }
@@ -691,8 +699,11 @@ export function simulate(inp: LoopInput): LoopResult {
       const rows = w === 'top' ? it.top : it.bottom;
       if (x.start < rows.end - EPS)
         violations.push({
-          kind: 'send', iter: i, edge: `${w}-exchange` as EdgeId, lane: w === 'top' ? 'linkTop' : 'linkBottom', at: x.start, until: rows.end,
-          text: `Iteration ${i}: the ${w} exchange starts sending at ${r2(x.start)}, but the ${w} kernel finishes the row only at ${r2(rows.end)}. The neighbour receives a row that is not yet computed.`,
+          kind: 'send', iter: i, edge: `${w}-exchange` as EdgeId, lane: w === 'top' ? 'linkTop' : 'linkBottom', at: x.start, until: rows.end, // i18n-ignore: edge id
+          text: tr(
+            `Iteration ${i}: the ${w} exchange starts sending at ${r2(x.start)}, but the ${w} kernel finishes the row only at ${r2(rows.end)}. The neighbour receives a row that is not yet computed.`,
+            `Vòng lặp ${i}: trao đổi ${w === 'top' ? 'phía trên' : 'phía dưới'} bắt đầu gửi tại ${r2(x.start)}, nhưng kernel ${w === 'top' ? 'phía trên' : 'phía dưới'} chỉ tính xong hàng đó tại ${r2(rows.end)}. Bên láng giềng nhận một hàng chưa được tính.`,
+          ),
         });
     }
     // The halos of iteration i-1 have arrived before iteration i reads them. The top halo
@@ -707,21 +718,30 @@ export function simulate(inp: LoopInput): LoopResult {
         if (rows.start < arrive.end - EPS)
           violations.push({
             kind: 'halo', iter: i, edge: 'exchange-next', lane: one ? 'internal' : w, at: rows.start, until: arrive.end,
-            text: `Iteration ${i}: the ${w} ${one ? 'rows start' : 'kernel starts'} at ${r2(rows.start)} and read${one ? '' : 's'} the ${w} halo, which arrives only at ${r2(arrive.end)} (with the ${w === 'top' ? 'bottom' : 'top'} exchange of iteration ${i - 1}). ${one ? 'They read' : 'It reads'} stale values.`,
+            text: tr(
+              `Iteration ${i}: the ${w} ${one ? 'rows start' : 'kernel starts'} at ${r2(rows.start)} and read${one ? '' : 's'} the ${w} halo, which arrives only at ${r2(arrive.end)} (with the ${w === 'top' ? 'bottom' : 'top'} exchange of iteration ${i - 1}). ${one ? 'They read' : 'It reads'} stale values.`,
+              `Vòng lặp ${i}: ${one ? 'các hàng' : 'kernel'} ${w === 'top' ? 'phía trên' : 'phía dưới'} bắt đầu tại ${r2(rows.start)} và đọc vùng biên (halo) ${w === 'top' ? 'phía trên' : 'phía dưới'}, vốn chỉ đến tại ${r2(arrive.end)} (qua trao đổi ${w === 'top' ? 'phía dưới' : 'phía trên'} của vòng lặp ${i - 1}). ${one ? 'Chúng đọc' : 'Nó đọc'} giá trị cũ.`,
+            ),
           });
     }
     // The copy is done before the host reduces the norm.
     if (it.allreduce.start < it.copy.end - EPS)
       violations.push({
         kind: 'copy', iter: i, edge: 'copy-allreduce', lane: 'host', at: it.allreduce.start, until: it.copy.end,
-        text: `Iteration ${i}: MPI_Allreduce starts at ${r2(it.allreduce.start)}, before the copy of the norm ends at ${r2(it.copy.end)}.`,
+        text: tr(
+          `Iteration ${i}: MPI_Allreduce starts at ${r2(it.allreduce.start)}, before the copy of the norm ends at ${r2(it.copy.end)}.`,
+          `Vòng lặp ${i}: MPI_Allreduce bắt đầu tại ${r2(it.allreduce.start)}, trước khi lần sao chép chuẩn kết thúc tại ${r2(it.copy.end)}.`,
+        ),
       });
     // A pageable host buffer turns the asynchronous copy into a wait.
     if (defect === 'pageable') {
       const h = done.find((x) => x.iter === i && x.spec.act.k === 'op' && x.spec.act.op.k === 'copy') as HostCall;
       violations.push({
         kind: 'stall', iter: i, edge: null, lane: 'host', at: h.start, until: h.end as number,
-        text: `Iteration ${i}: cudaMemcpyAsync into pageable memory is synchronous: the host waits in it from ${r2(h.start)} to ${r2(h.end as number)}, and nothing after it can be issued until then.`,
+        text: tr(
+          `Iteration ${i}: cudaMemcpyAsync into pageable memory is synchronous: the host waits in it from ${r2(h.start)} to ${r2(h.end as number)}, and nothing after it can be issued until then.`,
+          `Vòng lặp ${i}: cudaMemcpyAsync vào bộ nhớ phân trang (pageable) là đồng bộ: host chờ trong lời gọi đó từ ${r2(h.start)} đến ${r2(h.end as number)}, và không lệnh nào sau nó được phát cho tới lúc đó.`,
+        ),
       });
     }
   }
@@ -785,16 +805,36 @@ export const EDGE_IDS: EdgeId[] = [
 ];
 
 const WHAT: Record<EdgeId, [string, string]> = {
-  'reset-top': ['the norm is zeroed', 'the top kernel adds to it'],
-  'reset-bottom': ['the norm is zeroed', 'the bottom kernel adds to it'],
-  'reset-internal': ['the norm is zeroed', 'the internal kernel adds to it'],
-  'top-copy': ['the top kernel has added its part', 'the norm is copied to the host'],
-  'bottom-copy': ['the bottom kernel has added its part', 'the norm is copied to the host'],
-  'internal-copy': ['the internal kernel has added its part', 'the norm is copied to the host'],
-  'top-exchange': ['the top kernel has computed row 1', 'the top exchange sends it'],
-  'bottom-exchange': ['the bottom kernel has computed row ny − 2', 'the bottom exchange sends it'],
-  'copy-allreduce': ['the copy of the norm has landed in l2norm_h', 'MPI_Allreduce reads it'],
-  'exchange-next': ['both exchanges have delivered their halos', "the next iteration's kernels read them"],
+  get 'reset-top'(): [string, string] {
+    return [tr('the norm is zeroed', 'chuẩn được đặt về 0'), tr('the top kernel adds to it', 'kernel phía trên cộng vào nó')];
+  },
+  get 'reset-bottom'(): [string, string] {
+    return [tr('the norm is zeroed', 'chuẩn được đặt về 0'), tr('the bottom kernel adds to it', 'kernel phía dưới cộng vào nó')];
+  },
+  get 'reset-internal'(): [string, string] {
+    return [tr('the norm is zeroed', 'chuẩn được đặt về 0'), tr('the internal kernel adds to it', 'kernel bên trong cộng vào nó')];
+  },
+  get 'top-copy'(): [string, string] {
+    return [tr('the top kernel has added its part', 'kernel phía trên đã cộng phần của nó'), tr('the norm is copied to the host', 'chuẩn được sao chép về host')];
+  },
+  get 'bottom-copy'(): [string, string] {
+    return [tr('the bottom kernel has added its part', 'kernel phía dưới đã cộng phần của nó'), tr('the norm is copied to the host', 'chuẩn được sao chép về host')];
+  },
+  get 'internal-copy'(): [string, string] {
+    return [tr('the internal kernel has added its part', 'kernel bên trong đã cộng phần của nó'), tr('the norm is copied to the host', 'chuẩn được sao chép về host')];
+  },
+  get 'top-exchange'(): [string, string] {
+    return [tr('the top kernel has computed row 1', 'kernel phía trên đã tính hàng 1'), tr('the top exchange sends it', 'trao đổi phía trên gửi hàng đó đi')];
+  },
+  get 'bottom-exchange'(): [string, string] {
+    return [tr('the bottom kernel has computed row ny − 2', 'kernel phía dưới đã tính hàng ny − 2'), tr('the bottom exchange sends it', 'trao đổi phía dưới gửi hàng đó đi')];
+  },
+  get 'copy-allreduce'(): [string, string] {
+    return [tr('the copy of the norm has landed in l2norm_h', 'lần sao chép chuẩn đã về tới l2norm_h'), tr('MPI_Allreduce reads it', 'MPI_Allreduce đọc nó')];
+  },
+  get 'exchange-next'(): [string, string] {
+    return [tr('both exchanges have delivered their halos', 'cả hai trao đổi đã chuyển giao vùng biên (halo) của chúng'), tr("the next iteration's kernels read them", 'các kernel của vòng lặp kế tiếp đọc chúng')];
+  },
 };
 
 const HOW: Record<Version, Record<EdgeId, [Mechanism, string]>> = {

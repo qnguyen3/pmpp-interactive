@@ -1,0 +1,1 @@
+Giai đoạn 1 dùng lại chính những vị trí đó cho ô tiếp theo. Đó là lý do có rào chắn thứ hai: không ai được ghi đè một vị trí cho đến khi mọi luồng đã đọc xong nó. [short pause] Nạp. Chờ. Tính. Chờ. Sau giai đoạn cuối, mỗi luồng ghi tổng của mình.

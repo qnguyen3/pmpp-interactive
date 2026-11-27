@@ -1,0 +1,1 @@
+Rào chắn thứ hai đảm bảo mọi lần cập nhật trong khối đã hoàn tất. Rồi mỗi bin có một luồng đọc số đếm của khối mình. Nếu số đếm khác 0, luồng đó cộng nó vào bin công khai bằng một phép toán nguyên tử phạm vi device. Giờ một bin công khai có nhiều nhất 3 bên tranh chấp: mỗi khối một bên.

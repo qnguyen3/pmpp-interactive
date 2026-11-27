@@ -1,0 +1,1 @@
+Phần cứng không nạp 32 số float riêng lẻ. Nó phục vụ warp bằng những mảnh bộ nhớ được căn chỉnh. Trên GPU NVIDIA, mỗi mảnh là một sector 32 byte, và bốn sector tạo thành một dòng cache 128 byte. 32 số float này lấp vừa đúng 4 sector của một dòng. Bốn giao dịch phục vụ cả warp, và mọi byte được nạp đều được dùng.

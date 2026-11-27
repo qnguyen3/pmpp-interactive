@@ -1,0 +1,1 @@
+Giờ mỗi luồng trong 2 luồng tìm trong ô 4 đầu ra của riêng mình và trộn chúng. Luồng 0 lấy 3 từ A và 1 từ B. Luồng 1 lấy 2 và 2. Cùng nhau, chúng dùng 5 phần tử của A và 3 của B. 8 phần tử đã nạp còn lại không bao giờ được chạm tới.

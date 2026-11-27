@@ -27,6 +27,8 @@
 // Erasable TypeScript only, and no value imports: the browser checks import this
 // file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- float32 helpers
 export const f32 = Math.fround;
 
@@ -246,8 +248,12 @@ export function blockSums(values: ArrayLike<number>, block: number, coarse = 1):
 // ---------------------------------------------------------------- 10.9: commits
 export type Design = 'atomic' | 'two-pass';
 export const DESIGN_LABEL: Record<Design, string> = {
-  atomic: 'atomic commit (Fig. 10.18)',
-  'two-pass': 'partials, then a fixed second pass',
+  get atomic() {
+    return tr('atomic commit (Fig. 10.18)', 'ghi kết quả bằng phép toán nguyên tử (Fig. 10.18)');
+  },
+  get 'two-pass'() {
+    return tr('partials, then a fixed second pass', 'tổng từng phần, rồi một lượt thứ hai cố định');
+  },
 };
 
 export interface CommitTrace {
@@ -423,8 +429,8 @@ export const CH6_DEVICE_R = 264;
  */
 export const VOCABS = [
   { name: 'GPT-2', size: 50257 },
-  { name: 'Qwen3-8B', size: 151936 },
-  { name: 'gpt-oss-20b', size: 201088 },
+  { name: 'Qwen3-8B', size: 151936 }, // i18n-ignore: model name
+  { name: 'gpt-oss-20b', size: 201088 }, // i18n-ignore: model name
 ] as const;
 
 /** The softmax presets' row length: Qwen3-8B's vocabulary. */

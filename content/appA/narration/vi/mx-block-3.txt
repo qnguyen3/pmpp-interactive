@@ -1,0 +1,1 @@
+Giờ đến hệ số tỉ lệ dùng chung. Độ lớn lớn nhất là 12, và logarit cơ số 2 của 12, làm tròn xuống, là 3. Số mũ lớn nhất của định dạng 4 bit là 2. Trừ nó đi, và hệ số tỉ lệ là 2 mũ 1, tức là 2. Nó được lưu trong một byte.

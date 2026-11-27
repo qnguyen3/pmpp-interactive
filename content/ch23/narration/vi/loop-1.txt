@@ -1,0 +1,1 @@
+Hãy xem host trước. Trong khoảng một phần tư đơn vị thời gian, nó xếp hàng 12 thao tác: một memset, một lần ghi event, hai lần chờ, ba lần khởi chạy kernel, hai lần ghi nữa, hai lần chờ nữa, và lần sao chép giá trị chuẩn. Mỗi lời gọi trả về ngay khi thao tác của nó đã nằm trong một stream. Không có gì phải xong trước.

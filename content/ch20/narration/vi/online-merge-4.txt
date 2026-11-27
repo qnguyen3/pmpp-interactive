@@ -1,0 +1,1 @@
+Điểm số lớn nhất của ô ba là 2.1, thấp hơn giá trị lớn nhất đang chạy. Giá trị lớn nhất không dịch chuyển, nên hệ số áp lên phần đã giữ đúng bằng 1. Bốn số hạng của ô được đo so với 2.9 và chỉ việc cộng thêm vào. Không có gì đã làm phải làm lại, bất kể ô nào tình cờ chứa giá trị lớn nhất.

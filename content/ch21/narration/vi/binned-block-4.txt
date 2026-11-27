@@ -1,0 +1,1 @@
+Một rào chắn thứ hai, để không ai ghi đè ngăn trong khi những luồng khác vẫn đang đọc nó, và khối chuyển sang độ lệch tiếp theo. Vòng lặp lặp lại xuống theo danh sách trong khi số phép kiểm tra và số nguyên tử được chấp nhận tăng dần. Các ngăn ở rìa đường tròn chủ yếu mang lại các lần từ chối.

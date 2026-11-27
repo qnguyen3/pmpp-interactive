@@ -1,0 +1,1 @@
+Những gì được lưu: 32 mã, mỗi mã 4 bit, tức là 16 byte, cùng một byte hệ số tỉ lệ. Tổng cộng 17 byte, hay 4 và một phần tư bit cho mỗi trọng số. Cũng 32 trọng số đó ở dạng BF16 chiếm 64 byte. Dự án llama C P P lưu các khối MXFP4 của nó theo đúng dạng này.

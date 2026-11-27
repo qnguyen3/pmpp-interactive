@@ -1,0 +1,1 @@
+Đây là online softmax của chương 20, áp dụng cho một hàng thay vì cho điểm số attention. Nó tiết kiệm một lần đọc hàng và trả thêm một phép tính hàm mũ cho mỗi đoạn, ngay cả khi giá trị lớn nhất không tăng. Và mỗi backend của MLX chọn hàm mũ riêng của mình: một hàm nhanh trên Metal, và một intrinsic độ chính xác thấp trên CUDA.

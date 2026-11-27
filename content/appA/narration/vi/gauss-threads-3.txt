@@ -1,0 +1,1 @@
+Bước 2. Luồng 1 và 2 lấy hàng của mình trừ đi hàng của luồng 0, và hệ số đầu tiên của mỗi hàng thành 0. Luồng 0 không còn gì để làm cho đến cuối, nên nó rảnh. [short pause] Lại một rào chắn. Từ đây, mỗi lần trừ lại cho thêm một luồng nghỉ.

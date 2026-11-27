@@ -1,0 +1,1 @@
+Sau một lần khởi chạy, runtime giữ một danh sách mọi khối chưa bắt đầu. Ở đây, danh sách dài 8 khối. Một khối chỉ bắt đầu được khi có một SM còn chỗ trống cho tất cả các luồng của nó. Vậy một câu hỏi quyết định mọi thứ sau đó. Thiết bị có bao nhiêu chỗ?

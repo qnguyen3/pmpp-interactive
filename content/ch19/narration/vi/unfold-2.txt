@@ -1,0 +1,1 @@
+Giờ hãy nhìn các bộ lọc như cách chúng được lưu. Mảng có kích thước M nhân C nhân K nhân K, theo thứ tự hàng. Đọc nó từng hàng một và nó đã là một ma trận F, 2 hàng nhân 12 cột: mỗi hàng ứng với một bản đồ đầu ra, chứa lần lượt 3 bộ lọc của bản đồ đó. Không có gì di chuyển trong bộ nhớ. Chỉ cách đánh chỉ số thay đổi.

@@ -1,0 +1,1 @@
+Hai kernel, một mô hình. Bên trái, 30 chu kỳ tính toán giữa các lần nạp. 2 warp đủ giữ đơn vị luôn bận. Bên phải, cứ cách một lệnh lại có một lần nạp. Kernel đó cần 16 warp. [short pause] Decode từng token một trông giống kernel bên phải. Ít tính toán cho mỗi lần nạp, nên nó cần cả một SM đầy warp.

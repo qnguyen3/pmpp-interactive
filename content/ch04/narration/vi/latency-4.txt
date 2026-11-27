@@ -1,0 +1,1 @@
+Vì sao chuyển đổi lại không tốn gì? Mỗi warp thường trú giữ bộ đếm chương trình và các thanh ghi của mình ngay trên chip, suốt cả vòng đời. Bộ lập lịch chỉ chọn lệnh tiếp theo sẽ đến từ đâu. Một CPU khi chuyển luồng phải lưu trạng thái của một luồng ra bộ nhớ, rồi nạp trạng thái của luồng khác. Ở đây, không có gì phải lưu, và không có gì phải khôi phục.

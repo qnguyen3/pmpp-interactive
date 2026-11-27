@@ -34,6 +34,7 @@
 // (our choice, the labs' rule), so the vector patterns fall back to scalar stores then.
 
 import { warpAccess, type WarpAccess } from './coalesce';
+import { tr } from '../lib/locale.ts';
 
 /** The book's running example (notes, "Running example"). */
 export const BM = 128;
@@ -202,9 +203,37 @@ export interface PatternInfo {
 }
 
 export const PATTERNS: Record<StorePattern, PatternInfo> = {
-  scalar8x8: { id: 'scalar8x8', label: '8 × 8 tiles, scalar stores', layout: 'coarse', vector: false, book: '§15.3, Fig. 15.7' },
-  'float4-8x8': { id: 'float4-8x8', label: '8 × 8 tiles, float4 stores', layout: 'coarse', vector: true, book: 'Exercise 2' },
-  remap4x4: { id: 'remap4x4', label: 'four 4 × 4 sub-tiles, float4 stores', layout: 'remap', vector: true, book: '§15.5, Exercise 3' },
+  scalar8x8: {
+    id: 'scalar8x8',
+    get label() {
+      return tr('8 × 8 tiles, scalar stores', 'ô 8 × 8, ghi vô hướng');
+    },
+    layout: 'coarse',
+    vector: false,
+    book: '§15.3, Fig. 15.7',
+  },
+  'float4-8x8': {
+    id: 'float4-8x8',
+    get label() {
+      return tr('8 × 8 tiles, float4 stores', 'ô 8 × 8, ghi float4');
+    },
+    layout: 'coarse',
+    vector: true,
+    get book() {
+      return tr('Exercise 2', 'Bài tập 2');
+    },
+  },
+  remap4x4: {
+    id: 'remap4x4',
+    get label() {
+      return tr('four 4 × 4 sub-tiles, float4 stores', 'bốn ô con 4 × 4, ghi float4');
+    },
+    layout: 'remap',
+    vector: true,
+    get book() {
+      return tr('§15.5, Exercise 3', '§15.5, Bài tập 3');
+    },
+  },
 };
 export const PATTERN_ORDER: StorePattern[] = ['scalar8x8', 'float4-8x8', 'remap4x4'];
 

@@ -1,0 +1,1 @@
+Đây là cách thường dùng để mở rộng một buffer. Nó chứa 4 token, và giờ nó đã đầy. Vậy bạn cấp phát một buffer mới lớn gấp đôi, ở một chỗ khác, chép cả 4 token sang, rồi giải phóng buffer cũ. Trong một khoảnh khắc, cả hai buffer cùng tồn tại: đủ chỗ cho 12 token, nhưng chỉ chứa 4.

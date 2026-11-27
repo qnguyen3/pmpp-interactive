@@ -1,0 +1,1 @@
+Quy tắc giống nhau ở cả ba dự án. Bắt đầu từ chỗ op trở thành một lời gọi backend: switch của llama.cpp, phương thức eval GPU của MLX, bảng dispatch của PyTorch. Lần theo một cái tên từ đó. Và trên Metal, lần theo chuỗi mà host dựng nên. Cùng ba bước đó tìm ra mọi op trong chuyến tham quan.

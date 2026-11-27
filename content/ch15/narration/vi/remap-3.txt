@@ -1,0 +1,1 @@
+Cách sửa bắt đầu từ một cấp cao hơn. Chia ô của khối cho 8 warp của nó, thành 2 hàng, mỗi hàng 4 ô warp. Mỗi ô warp có 64 hàng và 32 cột. Warp 6 sở hữu ô này, thứ ba từ trái sang ở hàng dưới cùng. Hãy phóng to vào nó.

@@ -37,6 +37,7 @@
 //
 // Erasable TypeScript only (the browser checks import this module through the app's server).
 
+import { tr as trText } from '../lib/locale.ts';
 import { rng, rounder } from './fpsum';
 import { quantizeQ4_0, quantizeQ8_0 } from './quant';
 
@@ -139,8 +140,8 @@ export function normals(n: number, seed: number): number[] {
 
 export type ActDist = 'normal' | 'outliers';
 export const ACT_DIST: { id: ActDist; label: string }[] = [
-  { id: 'normal', label: 'normal' },
-  { id: 'outliers', label: 'normal, with a few large channels' },
+  { id: 'normal', get label() { return trText('normal', 'chuẩn tắc'); } },
+  { id: 'outliers', get label() { return trText('normal, with a few large channels', 'chuẩn tắc, với vài kênh lớn'); } },
 ];
 /** Where the large channels sit in a row of n: one in every 128, at a fixed place in each (our construction, not a measured model). */
 export const OUTLIER_EVERY = 128;
@@ -219,9 +220,9 @@ export const qsHalfword = (b: Q4Block, k: number) => b.qs[2 * k] | (b.qs[2 * k +
 // ---------------------------------------------------------------- three paths, traced
 export type Path = 'A' | 'B' | 'C';
 export const PATH_LABEL: Record<Path, string> = {
-  A: 'A. dequantise, then multiply',
-  B: 'B. float, offset folded out',
-  C: 'C. integer, activations to int8',
+  get A() { return trText('A. dequantise, then multiply', 'A. giải lượng tử hóa, rồi nhân'); },
+  get B() { return trText('B. float, offset folded out', 'B. số thực, offset được tách ra ngoài'); },
+  get C() { return trText('C. integer, activations to int8', 'C. số nguyên, activation về int8'); },
 };
 export interface Counts {
   /** float multiplies (an FMA counts one) */
@@ -573,18 +574,18 @@ export type Outer = 'fp16' | 'fp32';
 export type Pairing = 'q8q8' | 'q4q8';
 export type DataSet = 'realistic' | 'worst';
 export const INNER: { id: Inner; label: string }[] = [
-  { id: 'int16', label: 'int16 (short)' },
-  { id: 'int32', label: 'int32' },
-  { id: 'fp16', label: 'FP16 (half)' },
-  { id: 'fp32', label: 'FP32 (float)' },
+  { id: 'int16', label: 'int16 (short)' }, // i18n-ignore: type names
+  { id: 'int32', label: 'int32' }, // i18n-ignore: type names
+  { id: 'fp16', label: 'FP16 (half)' }, // i18n-ignore: type names
+  { id: 'fp32', label: 'FP32 (float)' }, // i18n-ignore: type names
 ];
 export const OUTER: { id: Outer; label: string }[] = [
-  { id: 'fp16', label: 'FP16 (half)' },
-  { id: 'fp32', label: 'FP32 (float)' },
+  { id: 'fp16', label: 'FP16 (half)' }, // i18n-ignore: type names
+  { id: 'fp32', label: 'FP32 (float)' }, // i18n-ignore: type names
 ];
 export const PAIRING: { id: Pairing; label: string }[] = [
-  { id: 'q8q8', label: 'Q8_0 weights × Q8_1 activations' },
-  { id: 'q4q8', label: 'Q4_0 nibbles (0..15) × Q8_1 activations' },
+  { id: 'q8q8', get label() { return trText('Q8_0 weights × Q8_1 activations', 'trọng số Q8_0 × activation Q8_1'); } },
+  { id: 'q4q8', get label() { return trText('Q4_0 nibbles (0..15) × Q8_1 activations', 'nibble Q4_0 (0..15) × activation Q8_1'); } },
 ];
 /** The largest magnitude an inner accumulator type holds, and the largest integer up to which it is exact. */
 export const INNER_LIMIT: Record<Inner, { max: number; exactTo: number }> = {
@@ -767,10 +768,10 @@ export const FRAG_N = 4096;
  * that adds into it; qdot.snippets.test.ts checks both against the file.
  */
 export const FRAGMENT_MODEL: Record<FragmentId, { decl: string; op: string; inner: 'half-dot4' | 'half2-row' | 'int16' | 'int32'; outer: 'fp32' }> = {
-  'metal-half-dot': { decl: 'float sumf', op: 'dot(w, half4(', inner: 'half-dot4', outer: 'fp32' },
-  'cuda-hfma2': { decl: '__half2 acc', op: '__hfma2(', inner: 'half2-row', outer: 'fp32' },
-  'short-sum': { decl: 'short sumi', op: 'dot4(', inner: 'int16', outer: 'fp32' },
-  'int-then-float': { decl: 'int sumi', op: 'dot4(', inner: 'int32', outer: 'fp32' },
+  'metal-half-dot': { decl: 'float sumf', op: 'dot(w, half4(', inner: 'half-dot4', outer: 'fp32' }, // i18n-ignore: code shown as written
+  'cuda-hfma2': { decl: '__half2 acc', op: '__hfma2(', inner: 'half2-row', outer: 'fp32' }, // i18n-ignore: code shown as written
+  'short-sum': { decl: 'short sumi', op: 'dot4(', inner: 'int16', outer: 'fp32' }, // i18n-ignore: code shown as written
+  'int-then-float': { decl: 'int sumi', op: 'dot4(', inner: 'int32', outer: 'fp32' }, // i18n-ignore: code shown as written
 };
 export interface FragmentText { id: string; title: string; lang: string; code: string }
 /** The fragments of labs/x2/snippets/accumulators.md: one "## id" heading, a Title and Language line and one fenced block each. */

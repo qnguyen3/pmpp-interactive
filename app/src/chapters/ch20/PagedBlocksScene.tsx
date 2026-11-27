@@ -1,5 +1,6 @@
 import { Scene, type Beat } from '../../components/Scene';
 import { firstReuse, isScattered, peakLive, simulate, type PagedRun, type SideFrame } from '../../sim/paged';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Paging the KV cache" (section 20.7). A small stream from src/sim/paged.ts: a pool of
 // 256 token slots, blocks of 32 tokens, max_seq 128, 10 requests, seed 12. Every drawing is
@@ -34,13 +35,13 @@ export function ContiguousPool({ run, side, x, y, w, h }: { run: PagedRun; side:
             <rect x={x} y={yy} width={w} height={rowH - 3} fill="var(--global-wash)" stroke="var(--global)" strokeWidth="0.8" />
             <rect x={x} y={yy} width={(r.len / maxSeq) * w} height={rowH - 3} fill="var(--global)" />
             {rowH > 11 ? (
-              <text x={x + w - 4} y={yy + rowH - 7} fontSize={Math.min(10.5, rowH - 5)} textAnchor="end">r{r.id}: {r.len} of {maxSeq} used</text>
+              <text x={x + w - 4} y={yy + rowH - 7} fontSize={Math.min(10.5, rowH - 5)} textAnchor="end"><Translated vi={<>r{r.id}: dùng {r.len} / {maxSeq}</>}>r{r.id}: {r.len} of {maxSeq} used</Translated></text>
             ) : null}
           </g>
         );
       })}
       {leftover > 0 ? (
-        <text x={x} y={y + run.slots * rowH + 10} fontSize="9.5" style={{ fill: 'var(--ink-2)' }}>{leftover} tokens left over: too few for another slot</text>
+        <text x={x} y={y + run.slots * rowH + 10} fontSize="9.5" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>còn thừa {leftover} token: quá ít cho một slot nữa</>}>{leftover} tokens left over: too few for another slot</Translated></text>
       ) : null}
     </g>
   );
@@ -84,7 +85,7 @@ function Counters({ side, x, y, label }: { side: SideFrame; x: number; y: number
   return (
     <text x={x} y={y} fontSize="10.5">
       <tspan fontWeight="600">{label}</tspan>
-      <tspan>{`  reserved ${side.reserved}, used ${side.used}, wasted ${side.wasted} · running ${side.live.length}, waiting ${side.waiting.length}, done ${side.done}`}</tspan>
+      <tspan>{tr(`  reserved ${side.reserved}, used ${side.used}, wasted ${side.wasted} · running ${side.live.length}, waiting ${side.waiting.length}, done ${side.done}`, `  giữ chỗ ${side.reserved}, dùng ${side.used}, lãng phí ${side.wasted} · đang chạy ${side.live.length}, đang chờ ${side.waiting.length}, xong ${side.done}`)}</tspan>
     </text>
   );
 }
@@ -94,22 +95,22 @@ function Stage({ f, headline, show, hot, tables }: { f: number; headline: string
   const dimC = show === 'paged' ? 0.3 : 1;
   const dimP = show === 'contiguous' ? 0.3 : 1;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Contiguous and paged KV-cache pools" style={{ width: '100%', maxWidth: W, display: 'block' }} data-frame={frame.step}>
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Contiguous and paged KV-cache pools', 'Vùng KV cache liên tục và vùng KV cache phân trang')} style={{ width: '100%', maxWidth: W, display: 'block' }} data-frame={frame.step}>
       <text x={12} y={24} fontSize="14.5" fontWeight="600" data-headline="">{headline}</text>
-      <text x={W - 12} y={24} fontSize="11" textAnchor="end" style={{ fill: 'var(--ink-2)' }}>step {frame.step}</text>
+      <text x={W - 12} y={24} fontSize="11" textAnchor="end" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>bước {frame.step}</>}>step {frame.step}</Translated></text>
       <g opacity={dimC}>
-        <text x={12} y={52} fontSize="12" fontWeight="600">contiguous: a max_seq slot per request</text>
+        <text x={12} y={52} fontSize="12" fontWeight="600"><Translated vi="liên tục: mỗi yêu cầu một slot max_seq">contiguous: a max_seq slot per request</Translated></text>
         <ContiguousPool run={SCENE_RUN} side={frame.contiguous} x={12} y={60} w={420} h={50} />
-        <Counters side={frame.contiguous} x={12} y={124} label="contiguous" />
+        <Counters side={frame.contiguous} x={12} y={124} label={tr('contiguous', 'liên tục')} />
       </g>
       <g opacity={dimP}>
-        <text x={12} y={156} fontSize="12" fontWeight="600">paged: blocks of {SCENE_CFG.block} tokens from a free list</text>
+        <text x={12} y={156} fontSize="12" fontWeight="600"><Translated vi={<>phân trang: các khối {SCENE_CFG.block} token lấy từ danh sách trống</>}>paged: blocks of {SCENE_CFG.block} tokens from a free list</Translated></text>
         <PagedPool run={SCENE_RUN} side={frame.paged} x={12} y={164} w={420} h={60} hot={hot} />
-        <Counters side={frame.paged} x={12} y={242} label="paged" />
+        <Counters side={frame.paged} x={12} y={242} label={tr('paged', 'phân trang')} />
       </g>
       {tables ? (
         <g data-tables="">
-          <text x={460} y={156} fontSize="12" fontWeight="600">block tables</text>
+          <text x={460} y={156} fontSize="12" fontWeight="600"><Translated vi="bảng khối">block tables</Translated></text>
           {frame.paged.live.slice(0, 9).map((r, i) => (
             <text key={r.id} x={460} y={174 + i * 15} fontSize="11" fontWeight={r.id === hot ? 700 : 400}>
               r{r.id}: [{r.blocks!.join(', ')}]
@@ -117,12 +118,14 @@ function Stage({ f, headline, show, hot, tables }: { f: number; headline: string
           ))}
         </g>
       ) : null}
-      <text x={460} y={52} fontSize="12" fontWeight="600">queue</text>
-      <text x={460} y={70} fontSize="11">contiguous: {frame.contiguous.waiting.map((id) => 'r' + id).join(' ') || 'empty'}</text>
-      <text x={460} y={86} fontSize="11">paged: {frame.paged.waiting.map((id) => 'r' + id).join(' ') || 'empty'}</text>
+      <text x={460} y={52} fontSize="12" fontWeight="600"><Translated vi="hàng đợi">queue</Translated></text>
+      <text x={460} y={70} fontSize="11"><Translated vi={<>liên tục: {frame.contiguous.waiting.map((id) => 'r' + id).join(' ') || 'trống'}</>}>contiguous: {frame.contiguous.waiting.map((id) => 'r' + id).join(' ') || 'empty'}</Translated></text>
+      <text x={460} y={86} fontSize="11"><Translated vi={<>phân trang: {frame.paged.waiting.map((id) => 'r' + id).join(' ') || 'trống'}</>}>paged: {frame.paged.waiting.map((id) => 'r' + id).join(' ') || 'empty'}</Translated></text>
       {frame.paged.events.length || frame.contiguous.events.length ? (
         <text x={12} y={300} fontSize="11.5" data-events="">
-          this step, paged: {frame.paged.events.join(', ') || 'nothing'}; contiguous: {frame.contiguous.events.join(', ') || 'nothing'}
+          <Translated vi={<>bước này, phân trang: {frame.paged.events.map((e) => e.replace(/ swapped back in$/, ' được đưa vào lại').replace(/ swapped out$/, ' bị đẩy ra').replace(/ admitted$/, ' được nhận').replace(/ finished$/, ' đã xong')).join(', ') || 'không có gì'}; liên tục: {frame.contiguous.events.map((e) => e.replace(/ admitted$/, ' được nhận').replace(/ finished$/, ' đã xong')).join(', ') || 'không có gì'}</>}>
+            this step, paged: {frame.paged.events.join(', ') || 'nothing'}; contiguous: {frame.contiguous.events.join(', ') || 'nothing'}
+          </Translated>
         </text>
       ) : null}
     </svg>
@@ -144,9 +147,9 @@ function Summary({ p }: { p: number }) {
   const peak = peakLive(SCENE_RUN);
   const { contiguous: fc, paged: fp } = SCENE_RUN.finishedAt;
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Wasted cache slots over time, contiguous and paged" style={{ width: '100%', maxWidth: W, display: 'block' }}
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('Wasted cache slots over time, contiguous and paged', 'Số slot cache lãng phí theo thời gian, liên tục và phân trang')} style={{ width: '100%', maxWidth: W, display: 'block' }}
       data-finished-contiguous={fc ?? ''} data-finished-paged={fp ?? ''} data-peak-contiguous={peak.contiguous} data-peak-paged={peak.paged}>
-      <text x={12} y={24} fontSize="14.5" fontWeight="600" data-headline="">Wasted slots over the run: reservations against blocks</text>
+      <text x={12} y={24} fontSize="14.5" fontWeight="600" data-headline=""><Translated vi="Slot lãng phí trong suốt lượt chạy: giữ chỗ so với khối">Wasted slots over the run: reservations against blocks</Translated></text>
       <rect x={x0} y={y1} width={x1 - x0} height={y0 - y1} fill="var(--page)" stroke="var(--rule)" />
       {[0, 0.5, 1].map((k) => (
         <g key={k}>
@@ -154,16 +157,18 @@ function Summary({ p }: { p: number }) {
           <text x={x0 - 6} y={Y(k * SCENE_CFG.pool) + 4} fontSize="10" textAnchor="end">{k * SCENE_CFG.pool}</text>
         </g>
       ))}
-      <text x={(x0 + x1) / 2} y={y0 + 18} fontSize="11" textAnchor="middle">step</text>
-      <text x={x0 - 40} y={y1 - 10} fontSize="11">wasted slots</text>
+      <text x={(x0 + x1) / 2} y={y0 + 18} fontSize="11" textAnchor="middle"><Translated vi="bước">step</Translated></text>
+      <text x={x0 - 40} y={y1 - 10} fontSize="11"><Translated vi="slot lãng phí">wasted slots</Translated></text>
       <polyline points={line((f) => f.contiguous.wasted)} fill="none" stroke="var(--global)" strokeWidth="2.2" />
       <polyline points={line((f) => f.paged.wasted)} fill="none" stroke="var(--ink)" strokeWidth="2.2" strokeDasharray="5 3" />
       <line x1={x0} x2={x0 + 28} y1={y0 + 40} y2={y0 + 40} stroke="var(--global)" strokeWidth="2.2" />
-      <text x={x0 + 36} y={y0 + 44} fontSize="11">contiguous: reserved at max_seq, so most of each slot is wasted</text>
+      <text x={x0 + 36} y={y0 + 44} fontSize="11"><Translated vi="liên tục: giữ chỗ theo max_seq, nên phần lớn mỗi slot bị lãng phí">contiguous: reserved at max_seq, so most of each slot is wasted</Translated></text>
       <line x1={x0} x2={x0 + 28} y1={y0 + 58} y2={y0 + 58} stroke="var(--ink)" strokeWidth="2.2" strokeDasharray="5 3" />
-      <text x={x0 + 36} y={y0 + 62} fontSize="11">paged: never more than {SCENE_CFG.block - 1} slots per running request</text>
+      <text x={x0 + 36} y={y0 + 62} fontSize="11"><Translated vi={<>phân trang: không bao giờ quá {SCENE_CFG.block - 1} slot cho mỗi yêu cầu đang chạy</>}>paged: never more than {SCENE_CFG.block - 1} slots per running request</Translated></text>
       <text x={12} y={318} fontSize="11.5">
-        all {SCENE_CFG.requests} requests done: contiguous after {fc} steps, paged after {fp}; at most {peak.contiguous} running at once against {peak.paged}
+        <Translated vi={<>cả {SCENE_CFG.requests} yêu cầu đã xong: liên tục sau {fc} bước, phân trang sau {fp}; tối đa {peak.contiguous} yêu cầu chạy cùng lúc so với {peak.paged}</>}>
+          all {SCENE_CFG.requests} requests done: contiguous after {fc} steps, paged after {fp}; at most {peak.contiguous} running at once against {peak.paged}
+        </Translated>
       </text>
     </svg>
   );
@@ -179,33 +184,41 @@ const GROW_END = Math.min(SCENE_RUN.frames.length - 1, reuse + 26);
 const beats: Beat[] = [
   {
     clip: 'paged-blocks-1',
-    label: 'Contiguous',
-    draw: (p) => <Stage f={Math.round(ramp(p, 0.05, 0.9) * (reuse + 2))} headline="Contiguous: each request reserves max_seq on arrival" show="contiguous" />,
+    get label() {
+      return tr('Contiguous', 'Liên tục');
+    },
+    draw: (p) => <Stage f={Math.round(ramp(p, 0.05, 0.9) * (reuse + 2))} headline={tr('Contiguous: each request reserves max_seq on arrival', 'Liên tục: mỗi yêu cầu giữ chỗ max_seq ngay khi đến')} show="contiguous" />, // i18n-ignore: show is a mode value
   },
   {
     clip: 'paged-blocks-2',
-    label: 'Blocks',
+    get label() {
+      return tr('Blocks', 'Khối');
+    },
     draw: (p) => {
       const f = Math.max(1, Math.round(ramp(p, 0.1, 0.8) * 3));
-      return <Stage f={f} headline="Paged: fixed-size blocks and a block table per request" show="paged" hot={hotIn(f)} tables />;
+      return <Stage f={f} headline={tr('Paged: fixed-size blocks and a block table per request', 'Phân trang: các khối kích thước cố định và một bảng khối cho mỗi yêu cầu')} show="paged" hot={hotIn(f)} tables />; // i18n-ignore: show is a mode value
     },
   },
   {
     clip: 'paged-blocks-3',
-    label: 'Finish and reuse',
-    draw: (p) => <Stage f={p < 0.35 ? reuse - 1 : reuse} headline={p < 0.35 ? 'A request is about to finish…' : '…its block returns to the free list and a waiting request starts'} show="both" tables />,
+    get label() {
+      return tr('Finish and reuse', 'Xong và tái sử dụng');
+    },
+    draw: (p) => <Stage f={p < 0.35 ? reuse - 1 : reuse} headline={p < 0.35 ? tr('A request is about to finish…', 'Một yêu cầu sắp xong…') : tr('…its block returns to the free list and a waiting request starts', '…khối của nó trở về danh sách trống và một yêu cầu đang chờ bắt đầu')} show="both" tables />, // i18n-ignore: show is a mode value
   },
   {
     clip: 'paged-blocks-4',
-    label: 'Growing',
+    get label() {
+      return tr('Growing', 'Lớn dần');
+    },
     draw: (p) => {
       const f = reuse + 1 + Math.round(ramp(p, 0.05, 0.95) * (GROW_END - reuse - 1));
-      return <Stage f={f} headline="New blocks come from the free list; the tables keep the order" show="paged" hot={hotIn(f)} tables />;
+      return <Stage f={f} headline={tr('New blocks come from the free list; the tables keep the order', 'Khối mới lấy từ danh sách trống; các bảng giữ thứ tự')} show="paged" hot={hotIn(f)} tables />; // i18n-ignore: show is a mode value
     },
   },
-  { clip: 'paged-blocks-5', label: 'Side by side', draw: (p) => <Summary p={p} /> },
+  { clip: 'paged-blocks-5', get label() { return tr('Side by side', 'Đặt cạnh nhau'); }, draw: (p) => <Summary p={p} /> },
 ];
 
 export function PagedBlocksScene() {
-  return <Scene chapter="ch20" title="Paging the KV cache" beats={beats} />;
+  return <Scene chapter="ch20" title={tr('Paging the KV cache', 'Phân trang KV cache')} beats={beats} />;
 }

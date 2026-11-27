@@ -1,0 +1,1 @@
+Giờ hãy làm mỗi lần nạp dài gấp 3 lần phần tính toán. Sự chồng lấp chỉ có thể che giấu pha ngắn hơn, nên làn bộ nhớ quyết định nhịp độ. Bốn ô mất 13 đơn vị thay vì 16. Trong mô hình này, mỗi lúc chỉ có một lần nạp chạy. Trên phần cứng thật, nhiều lần nạp có thể cùng chờ một lúc, nên các thư viện giữ nhiều tầng nạp đang chạy cùng lúc.

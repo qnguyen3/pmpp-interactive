@@ -1,0 +1,1 @@
+Đây là 16 ô, được đánh số theo thứ tự các mặt sóng (front) của chúng. Mỗi ô cần ô phía trên và ô bên trái nó. Vì vậy các ô trên cùng một đường chéo phụ không bao giờ cần nhau, và chúng có thể chạy cùng lúc. Bên cạnh là 2 lane, mỗi lane cho một streaming multiprocessor của chiếc GPU nhỏ trong ví dụ của sách.

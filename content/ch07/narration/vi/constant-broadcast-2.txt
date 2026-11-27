@@ -1,0 +1,1 @@
+Giờ vòng lặp đi tiếp, từng điểm lọc một, qua một bộ lọc 5 nhân 5. Ở mỗi điểm lọc, các lane vẫn thống nhất về địa chỉ, vì chỉ số không phụ thuộc vào luồng nào đang hỏi. Vậy mỗi điểm lọc tốn một câu trả lời, và cả bộ lọc tốn warp này 25 câu trả lời, dù warp rộng bao nhiêu.

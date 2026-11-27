@@ -26,13 +26,15 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Resource = 'global' | 'shared' | 'compute' | 'barrier';
 export const RESOURCES: readonly Resource[] = ['global', 'shared', 'compute', 'barrier'];
 export const RESOURCE_NAME: Record<Resource, string> = {
-  global: 'Global memory',
-  shared: 'Shared memory',
-  compute: 'Arithmetic and instructions',
-  barrier: 'Waiting at barriers',
+  get global() { return tr('Global memory', 'Bộ nhớ toàn cục'); },
+  get shared() { return tr('Shared memory', 'Bộ nhớ chia sẻ'); },
+  get compute() { return tr('Arithmetic and instructions', 'Số học và lệnh'); },
+  get barrier() { return tr('Waiting at barriers', 'Chờ ở rào chắn'); },
 };
 
 /** The made-up SM every toy kernel runs on. */
@@ -142,43 +144,43 @@ export interface Op {
 export const OPS: readonly Op[] = [
   {
     id: 'tile',
-    label: 'Tiling',
-    effect: 're-read global traffic halved; shared memory per block doubled (a first tile adds shared traffic and barriers)',
+    get label() { return tr('Tiling', 'Phân ô (tiling)'); },
+    get effect() { return tr('re-read global traffic halved; shared memory per block doubled (a first tile adds shared traffic and barriers)', 'lưu lượng toàn cục đọc lại giảm một nửa; bộ nhớ chia sẻ mỗi khối tăng gấp đôi (ô đầu tiên thêm lưu lượng chia sẻ và rào chắn)'); },
     page: 'p. 153',
     max: 3,
   },
   {
     id: 'pad',
-    label: 'Padding',
-    effect: 'bank conflicts gone; shared memory per block up by 1/32; a little more index arithmetic',
+    get label() { return tr('Padding', 'Đệm thêm (padding)'); },
+    get effect() { return tr('bank conflicts gone; shared memory per block up by 1/32; a little more index arithmetic', 'hết xung đột bank; bộ nhớ chia sẻ mỗi khối tăng 1/32; thêm một chút số học chỉ số'); },
     page: 'pp. 140–141',
     max: 1,
   },
   {
     id: 'vector',
-    label: 'Vector loads',
-    effect: 'four floats per load instruction, so four times the bytes in flight and a quarter of the load instructions; registers up by a quarter',
-    page: 'p. 139; facts A11',
+    get label() { return tr('Vector loads', 'Load vector'); },
+    get effect() { return tr('four floats per load instruction, so four times the bytes in flight and a quarter of the load instructions; registers up by a quarter', 'bốn float mỗi lệnh load, nên số byte đang truyền gấp bốn và số lệnh load còn một phần tư; thanh ghi tăng một phần tư'); },
+    page: 'p. 139; facts A11', // i18n-ignore: citation
     max: 1,
   },
   {
     id: 'double-buffer',
-    label: 'Double buffering',
-    effect: 'barrier waiting halved (one barrier instead of two); shared memory per block doubled',
+    get label() { return tr('Double buffering', 'Double buffering (hai buffer)'); },
+    get effect() { return tr('barrier waiting halved (one barrier instead of two); shared memory per block doubled', 'thời gian chờ rào chắn giảm một nửa (một rào chắn thay vì hai); bộ nhớ chia sẻ mỗi khối tăng gấp đôi'); },
     page: 'p. 147',
     max: 1,
   },
   {
     id: 'coarsen',
-    label: 'Coarsening ×2',
-    effect: 're-read global traffic cut by a quarter; index arithmetic cut by a quarter; registers up by a quarter; half as many blocks',
+    get label() { return tr('Coarsening ×2', 'Gộp việc cho luồng (coarsening) ×2'); },
+    get effect() { return tr('re-read global traffic cut by a quarter; index arithmetic cut by a quarter; registers up by a quarter; half as many blocks', 'lưu lượng toàn cục đọc lại giảm một phần tư; số học chỉ số giảm một phần tư; thanh ghi tăng một phần tư; số khối còn một nửa'); },
     page: 'pp. 142–143',
     max: 3,
   },
   {
     id: 'unroll',
-    label: 'Unrolling',
-    effect: 'loop branches gone; two independent loads in flight per warp',
+    get label() { return tr('Unrolling', 'Trải vòng lặp (unrolling)'); },
+    get effect() { return tr('loop branches gone; two independent loads in flight per warp', 'hết các nhánh vòng lặp; hai lần load độc lập đang truyền mỗi warp'); },
     page: 'pp. 144–145',
     max: 1,
   },
@@ -191,9 +193,9 @@ export const FIRST_TILE = { sharedPerBlock: 10, sharedWork: 20, barrierWork: 8 }
 export function canApply(k: ToyKernel, op: OpId): { ok: boolean; why?: string } {
   const n = k.applied[op] ?? 0;
   const o = opById(op);
-  if (n >= o.max) return { ok: false, why: o.max === 1 ? 'already applied' : `applied ${n} times already (the limit here)` };
-  if (op === 'pad' && k.sharedPerBlock === 0) return { ok: false, why: 'no shared memory to pad' };
-  if (op === 'double-buffer' && k.barrierWork === 0) return { ok: false, why: 'no barriers to remove' };
+  if (n >= o.max) return { ok: false, why: o.max === 1 ? tr('already applied', 'đã áp dụng rồi') : tr(`applied ${n} times already (the limit here)`, `đã áp dụng ${n} lần (giới hạn ở đây)`) };
+  if (op === 'pad' && k.sharedPerBlock === 0) return { ok: false, why: tr('no shared memory to pad', 'không có bộ nhớ chia sẻ để đệm') };
+  if (op === 'double-buffer' && k.barrierWork === 0) return { ok: false, why: tr('no barriers to remove', 'không có rào chắn để bỏ') };
   return { ok: true };
 }
 
@@ -286,8 +288,8 @@ export interface Preset {
 export const PRESETS: readonly Preset[] = [
   {
     id: 'naive',
-    label: 'Naive matmul',
-    about: 'One thread per output, no shared memory, full occupancy. Most of its global traffic re-reads inputs other threads also load.',
+    get label() { return tr('Naive matmul', 'Matmul ngây thơ'); },
+    get about() { return tr('One thread per output, no shared memory, full occupancy. Most of its global traffic re-reads inputs other threads also load.', 'Một luồng cho mỗi đầu ra, không dùng bộ nhớ chia sẻ, occupancy đầy đủ. Phần lớn lưu lượng toàn cục của nó là đọc lại các đầu vào mà luồng khác cũng load.'); },
     kernel: base({
       uniqueBytes: 10, reuseBytes: 70, sharedWork: 0, flops: 24, loadInstr: 12, branchWork: 6, indexWork: 6,
       barrierWork: 0, sharedPerBlock: 0, regsPerBlock: 10, gridBlocks: 256,
@@ -295,8 +297,8 @@ export const PRESETS: readonly Preset[] = [
   },
   {
     id: 'shared-limited',
-    label: 'Tiled, limited by shared memory',
-    about: 'A tiled kernel whose shared memory allows only 3 of 8 block slots. Too few requests in flight: global memory is latency-bound.',
+    get label() { return tr('Tiled, limited by shared memory', 'Phân ô, bị giới hạn bởi bộ nhớ chia sẻ'); },
+    get about() { return tr('A tiled kernel whose shared memory allows only 3 of 8 block slots. Too few requests in flight: global memory is latency-bound.', 'Một kernel phân ô có bộ nhớ chia sẻ chỉ cho phép 3 trên 8 chỗ khối. Quá ít yêu cầu đang truyền: bộ nhớ toàn cục bị giới hạn bởi độ trễ.'); },
     kernel: base({
       uniqueBytes: 10, reuseBytes: 20, sharedWork: 24, flops: 18, loadInstr: 6, branchWork: 4, indexWork: 2,
       barrierWork: 10, sharedPerBlock: 30, regsPerBlock: 10, gridBlocks: 96,
@@ -304,8 +306,8 @@ export const PRESETS: readonly Preset[] = [
   },
   {
     id: 'unpadded',
-    label: 'Corner-turned, unpadded',
-    about: 'A tiled kernel whose corner-turned store conflicts on the banks: on average 4 passes per shared request.',
+    get label() { return tr('Corner-turned, unpadded', 'Corner-turned, không đệm'); },
+    get about() { return tr('A tiled kernel whose corner-turned store conflicts on the banks: on average 4 passes per shared request.', 'Một kernel phân ô có lần store corner-turned bị xung đột bank: trung bình 4 lượt cho mỗi yêu cầu chia sẻ.'); },
     kernel: base({
       uniqueBytes: 10, reuseBytes: 15, sharedWork: 20, conflict: 4, flops: 18, loadInstr: 6, branchWork: 4,
       indexWork: 2, barrierWork: 10, sharedPerBlock: 16, regsPerBlock: 10, gridBlocks: 192,
@@ -313,8 +315,8 @@ export const PRESETS: readonly Preset[] = [
   },
   {
     id: 'vecadd',
-    label: 'Vector addition',
-    about: 'One add per 12 bytes, nothing reused, full occupancy, bandwidth-bound. Its grid fills four waves.',
+    get label() { return tr('Vector addition', 'Cộng vector'); },
+    get about() { return tr('One add per 12 bytes, nothing reused, full occupancy, bandwidth-bound. Its grid fills four waves.', 'Một phép cộng cho mỗi 12 byte, không tái sử dụng gì, occupancy đầy đủ, bị giới hạn bởi băng thông. Lưới của nó lấp đầy bốn đợt (wave).'); },
     kernel: base({
       uniqueBytes: 60, reuseBytes: 0, sharedWork: 0, flops: 6, loadInstr: 12, branchWork: 0, indexWork: 2,
       barrierWork: 0, sharedPerBlock: 0, regsPerBlock: 8, gridBlocks: 128,
@@ -322,8 +324,8 @@ export const PRESETS: readonly Preset[] = [
   },
   {
     id: 'exchange',
-    label: 'Neighbour exchange, two barriers',
-    about: 'Section 6.7’s loop: read a neighbour’s value from a shared buffer, write your own, two barriers per iteration.',
+    get label() { return tr('Neighbour exchange, two barriers', 'Trao đổi với hàng xóm, hai rào chắn'); },
+    get about() { return tr('Section 6.7’s loop: read a neighbour’s value from a shared buffer, write your own, two barriers per iteration.', 'Vòng lặp của mục 6.7: đọc giá trị của hàng xóm từ một buffer chia sẻ, ghi giá trị của mình, hai rào chắn mỗi vòng lặp.'); },
     kernel: base({
       uniqueBytes: 20, reuseBytes: 10, sharedWork: 25, flops: 10, loadInstr: 4, branchWork: 4, indexWork: 2,
       barrierWork: 50, sharedPerBlock: 10, regsPerBlock: 10, gridBlocks: 128,
@@ -437,21 +439,21 @@ export function placeRow(lab: string, row: Record<string, unknown>): LabPoint | 
   const gf = pos(row.gflops);
   const seconds = pos(row.seconds) ?? (gf ? flop / (gf * 1e9) : undefined);
   if (!seconds) return null;
-  const size = B ? `batch ${b}` : `width ${b.toLocaleString('en-US')}`;
-  return { lab: num, label: `${label}, ${size}, tile ${T}`, kind: 'gemm', flop, bytes, seconds, batch: B, tile: T };
+  const size = B ? tr(`batch ${b}`, `batch ${b}`) : tr(`width ${b.toLocaleString('en-US')}`, `chiều rộng ${b.toLocaleString('en-US')}`);
+  return { lab: num, label: tr(`${label}, ${size}, tile ${T}`, `${label}, ${size}, ô ${T}`), kind: 'gemm', flop, bytes, seconds, batch: B, tile: T };
 }
 
 /** The labs the stopping-rule panel reads, by id prefix, and which of their rows it keeps. */
 export const STOP_LABS: readonly { prefix: string; keep: (p: LabPoint) => boolean; why: string }[] = [
-  { prefix: 'ch05/lab2_', keep: (p) => p.tile === 16, why: "chapter 5's tiled kernel at tile 16, this chapter's starting point" },
-  { prefix: 'ch05/lab3_', keep: (p) => p.batch === 1 || p.batch === 256, why: 'the linear layer before this chapter, at batch 1 and 256' },
-  { prefix: 'ch06/lab2_', keep: () => true, why: 'vector addition with 16-byte loads' },
+  { prefix: 'ch05/lab2_', keep: (p) => p.tile === 16, get why() { return tr("chapter 5's tiled kernel at tile 16, this chapter's starting point", 'kernel phân ô của chương 5 với ô 16, điểm xuất phát của chương này'); } },
+  { prefix: 'ch05/lab3_', keep: (p) => p.batch === 1 || p.batch === 256, get why() { return tr('the linear layer before this chapter, at batch 1 and 256', 'lớp tuyến tính trước chương này, ở batch 1 và 256'); } },
+  { prefix: 'ch06/lab2_', keep: () => true, get why() { return tr('vector addition with 16-byte loads', 'cộng vector với các lần load 16 byte'); } },
   {
     prefix: 'ch06/lab4_',
     keep: (p) => p.tile === 16 && (p.batch === 1 || p.batch === 256),
-    why: 'the linear layer in the framework layout, baseline and corner-turned, at batch 1 and 256, tile 16',
+    get why() { return tr('the linear layer in the framework layout, baseline and corner-turned, at batch 1 and 256, tile 16', 'lớp tuyến tính theo bố cục của framework, bản cơ sở và bản corner-turned, ở batch 1 và 256, ô 16'); },
   },
-  { prefix: 'ch06/lab5_', keep: () => true, why: 'tiled matmul with two barriers and double-buffered' },
+  { prefix: 'ch06/lab5_', keep: () => true, get why() { return tr('tiled matmul with two barriers and double-buffered', 'matmul phân ô với hai rào chắn và bản double-buffered'); } },
 ];
 
 /** Every placeable row of the stopping-rule labs, from (lab id, row) pairs. */

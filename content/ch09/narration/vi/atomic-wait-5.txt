@@ -1,0 +1,1 @@
+Các GPU hiện đại thực hiện những phép toán nguyên tử này trong bộ nhớ đệm cấp cuối, nơi mọi multiprocessor dùng chung. Sách ước tính con số đó là vài chục chu kỳ, thay vì vài trăm. Mỗi mắt xích trong chuỗi co lại, còn hình dạng vẫn giữ nguyên. Theo lời sách, thông lượng của phép toán nguyên tử cải thiện ít nhất một bậc độ lớn.

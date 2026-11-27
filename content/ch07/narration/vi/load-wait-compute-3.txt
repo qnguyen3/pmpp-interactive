@@ -1,0 +1,1 @@
+Sau đó là một rào chắn. Các luồng nạp xong sớm dừng ở đây và chờ cho đến khi cả 64 vị trí được lấp đầy. Một rào chắn là đủ. Ở chương 5, rào chắn thứ hai ngăn ô kế tiếp ghi đè lên các giá trị vẫn đang được đọc. Ở đây ô được nạp một lần và không bao giờ bị ghi đè, nên không còn gì khác cần bảo vệ.

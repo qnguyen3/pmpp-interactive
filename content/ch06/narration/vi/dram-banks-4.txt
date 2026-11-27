@@ -1,0 +1,1 @@
+Cứ thêm bank, mỗi bank bắt đầu sau bank trước một khoảng bằng một loạt truyền. Với 21 bank, tức là R cộng 1, các loạt truyền phủ kín bus mà không có khoảng trống nào. Bus bận 100 phần trăm thời gian. [short pause] Ít bank hơn thì để lại khoảng trống. Nhiều bank hơn cũng không nâng được thêm nữa.

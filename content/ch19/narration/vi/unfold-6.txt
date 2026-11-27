@@ -1,0 +1,1 @@
+Giờ hãy tăng kích thước. Khi các bản đồ đầu vào lớn lên, tỉ lệ giữa B và X tăng dần về K bình phương: giới hạn là 4 cho ví dụ này, và 25 cho lớp đầu tiên của LeNet, vốn đã ở khoảng 19. Và việc dựng B không miễn phí. Đó là thêm một lượt qua bộ nhớ toàn cục, ghi vào rồi đọc lại.

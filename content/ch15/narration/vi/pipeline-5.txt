@@ -1,0 +1,1 @@
+Hãy theo dõi các buffer. Ở vòng lặp 0, buffer 0 đang được dùng và buffer 1 đang được nạp. Ở vòng lặp 1, chúng đổi vai. Rào chắn duy nhất ở cuối mỗi vòng lặp làm hai việc. Nó bảo đảm ô tiếp theo đã đầy đủ trước khi ai đó dùng nó, và nó không cho luồng nào nạp vào một buffer mà một luồng chậm hơn vẫn đang đọc.

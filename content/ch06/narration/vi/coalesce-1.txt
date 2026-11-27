@@ -1,0 +1,1 @@
+Một lệnh nạp, một warp, 32 lane. Ở bước k bằng 0, mỗi lane tự tính địa chỉ của nó trong N, vốn được lưu theo từng hàng. Lane 0 muốn phần tử 0, lane 1 muốn phần tử 1, và cứ thế đến lane 31. Trên dải bộ nhớ bên dưới, 32 địa chỉ nằm sát cạnh nhau, không có khoảng trống.

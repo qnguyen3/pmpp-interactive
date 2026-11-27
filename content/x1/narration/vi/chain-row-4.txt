@@ -1,0 +1,1 @@
+Top-p ở 0.9. Một điểm đánh dấu đi dọc theo, mang khối xác suất xếp hạng trước mỗi token. Token 2 bắt đầu ở 0, token 7 ở 0.62, token 5 ở 0.78, và token 9 ở 0.89. Tất cả đều dưới 0.9, nên tất cả ở lại, kể cả token 9, token có phần riêng đẩy tổng vượt quá 0.9. Token 3 bắt đầu ở 0.95, và tắt đi.

@@ -36,6 +36,8 @@
 //
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- timeline
 export interface Timeline {
   /** When the last thread arrives and all are released. */
@@ -88,8 +90,12 @@ export interface Program {
 /** The two readings of "who must be at the barrier". */
 export type Rule = 'all-arrive' | 'exited-excluded';
 export const RULE_LABEL: Record<Rule, string> = {
-  'all-arrive': 'every thread of the block must arrive',
-  'exited-excluded': 'threads that have ended do not block',
+  get 'all-arrive'() {
+    return tr('every thread of the block must arrive', 'mọi luồng của khối phải đến');
+  },
+  get 'exited-excluded'() {
+    return tr('threads that have ended do not block', 'các luồng đã kết thúc không làm rào chắn phải chờ');
+  },
 };
 export type Order = 'ascending' | 'descending';
 

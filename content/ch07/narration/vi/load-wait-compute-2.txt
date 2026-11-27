@@ -1,0 +1,1 @@
+Đầu tiên là pha nạp. Mỗi luồng chép phần tử của chính nó từ bộ nhớ toàn cục vào ô chia sẻ. Trong 64 luồng, 15 luồng thấy phần tử của mình nằm ngoài ảnh. Chúng không bỏ qua lệnh ghi. Thay vào đó, chúng ghi một số 0. Vậy các ô ma đã nằm sẵn đúng chỗ trước khi có ai đọc chúng.

@@ -1,0 +1,1 @@
+Giờ hãy đặt hai cách cạnh nhau, trên toàn bộ lượt chạy. Các chỗ giữ liền mạch lãng phí phần lớn những gì chúng chiếm. Phân trang lãng phí nhiều nhất một khối đầy một phần cho mỗi yêu cầu, nên nhiều yêu cầu hơn hẳn chạy cùng lúc, và dòng 10 yêu cầu này hoàn tất với số bước ít hơn hẳn một nửa.

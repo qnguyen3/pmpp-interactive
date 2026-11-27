@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr } from '../../lib/i18n';
 import { IMPLICIT_SCENE, type PhaseRecord } from '../../sim/implicitgemm';
 import { BOOK_F, BOOK_X } from '../../sim/unfold';
 
@@ -74,11 +75,11 @@ function Stage(f: Frame) {
   for (const g of gathered) hits.set(g.idx!, (hits.get(g.idx!) ?? 0) + 1);
   const fCols = P ? [P.ph * T, P.ph * T + 1] : [];
   return (
-    <svg viewBox="0 0 720 372" role="img" aria-label="Animation: implicit unfolding, one tile at a time" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
-      <Label x={20} y={16}>X: stays as it is (global memory)</Label>
+    <svg viewBox="0 0 720 372" role="img" aria-label={tr('Animation: implicit unfolding, one tile at a time', 'Hoạt ảnh: unfold ngầm, mỗi lần một ô')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+      <Label x={20} y={16}><Translated vi="X: giữ nguyên (bộ nhớ toàn cục)">X: stays as it is (global memory)</Translated></Label>
       {[0, 1, 2].map((c) => (
         <g key={c}>
-          <text x={XX(c)} y={XY - 6} fontSize="11" style={{ fill: 'var(--ink-2)' }}>map {c}</text>
+          <text x={XX(c)} y={XY - 6} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>map {c}</>}>map {c}</Translated></text>
           {Array.from({ length: 9 }, (_, i) => {
             const flat = c * 9 + i;
             const { x, y } = xAt(c, Math.floor(i / 3), i % 3);
@@ -93,7 +94,7 @@ function Stage(f: Frame) {
         </g>
       ))}
 
-      <Label x={FX} y={FY - 12}>F: 2 × 12 (global memory)</Label>
+      <Label x={FX} y={FY - 12}><Translated vi="F: 2 × 12 (bộ nhớ toàn cục)">F: 2 × 12 (global memory)</Translated></Label>
       {BOOK_F.map((v, i) => {
         const m = Math.floor(i / 12);
         const k = i % 12;
@@ -102,15 +103,15 @@ function Stage(f: Frame) {
       })}
       {P ? <rect x={FX + fCols[0] * C_F - 2} y={FY - 2} width={2 * C_F + 4} height={2 * C_F + 4} fill="none" stroke="var(--ink)" strokeWidth="2" /> : null}
 
-      <Label x={BX} y={16}>B: never stored</Label>
-      <text x={BX} y={30} fontSize="11" style={{ fill: 'var(--ink-2)' }}>12 × 4, an outline only</text>
+      <Label x={BX} y={16}><Translated vi="B: không bao giờ được lưu">B: never stored</Translated></Label>
+      <text x={BX} y={30} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="12 × 4, chỉ là đường viền">12 × 4, an outline only</Translated></text>
       {Array.from({ length: 48 }, (_, i) => (
         <Cell key={i} x={BX + (i % 4) * C_F} y={BY + Math.floor(i / 4) * C_F} size={C_F} dashed />
       ))}
       {P ? <rect x={BX - 2} y={BY + P.ph * T * C_F - 2} width={2 * C_F + 4} height={2 * C_F + 4} fill="none" stroke="var(--ink)" strokeWidth="2" /> : null}
       {[4, 8].map((u) => <line key={u} x1={BX - 2} x2={BX + 4 * C_F + 2} y1={BY + u * C_F} y2={BY + u * C_F} stroke="var(--ink-3)" />)}
 
-      <Label x={YX} y={16}>Y (global memory)</Label>
+      <Label x={YX} y={16}><Translated vi="Y (bộ nhớ toàn cục)">Y (global memory)</Translated></Label>
       {SC.finals.length
         ? [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
             const r = Math.floor(i / 4);
@@ -121,10 +122,10 @@ function Stage(f: Frame) {
           })
         : null}
       <rect x={YX - 2} y={YY - 2} width={2 * C_Y + 4} height={2 * C_Y + 4} fill="none" stroke="var(--ink)" strokeWidth="2" />
-      <text x={YX} y={YY + 2 * C_Y + 16} fontSize="11" style={{ fill: 'var(--ink-2)' }}>this block: maps 0 and 1, pixels 0 and 1</text>
+      <text x={YX} y={YY + 2 * C_Y + 16} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi="khối này: map 0 và 1, pixel 0 và 1">this block: maps 0 and 1, pixels 0 and 1</Translated></text>
 
       <Label x={SH_X} y={SH_Y - 8} tier="shared">Fds</Label>
-      <Label x={SH_X + 86} y={SH_Y - 8} tier="shared">Bds (shared, this block)</Label>
+      <Label x={SH_X + 86} y={SH_Y - 8} tier="shared"><Translated vi="Bds (chia sẻ, khối này)">Bds (shared, this block)</Translated></Label>
       {fds.map((v, i) => <Cell key={'f' + i} x={SH_X + (i % 2) * C_Y} y={SH_Y + Math.floor(i / 2) * C_Y} size={C_Y} value={v} tier="shared" hot={f.hotShared} wash={!f.hotShared && v != null} />)}
       {bds.map((v, i) => <Cell key={'b' + i} x={SH_X + 86 + (i % 2) * C_Y} y={SH_Y + Math.floor(i / 2) * C_Y} size={C_Y} value={v} tier="shared" hot={f.hotShared} wash={!f.hotShared && v != null} />)}
 
@@ -147,7 +148,7 @@ function Stage(f: Frame) {
 
       {f.sums ? (
         <g>
-          <Label x={SH_X} y={RG_Y - 8} tier="reg">running sums (registers)</Label>
+          <Label x={SH_X} y={RG_Y - 8} tier="reg"><Translated vi="tổng tích lũy (thanh ghi)">running sums (registers)</Translated></Label>
           {f.sums.map((v, i) => (
             <g key={i}>
               <rect x={SH_X + i * 54} y={RG_Y} width={48} height={28} rx="2" fill="var(--reg-wash)" stroke="var(--reg)" />
@@ -168,7 +169,7 @@ const sumsAfter = (ph: number) => (ph < 0 ? zero : blk.phases[ph].sums);
 /** One phase in a beat: [barrier 2 of the previous phase], loads, barrier 1, products. */
 function phaseFrame(ph: number, p: number, opts: { lead?: boolean } = {}): Omit<Frame, 'headline'> {
   const a = opts.lead ? 0.18 : 0; // time spent on the previous phase's second barrier
-  if (p < a) return { ph: ph - 1, barrier: 'barrier 2: nobody overwrites a tile still being read', sums: sumsAfter(ph - 1), hotShared: false };
+  if (p < a) return { ph: ph - 1, barrier: tr('barrier 2: nobody overwrites a tile still being read', 'rào chắn 2: không ai ghi đè một ô vẫn đang được đọc'), sums: sumsAfter(ph - 1), hotShared: false };
   const fLoaded = Math.min(4, Math.floor(ramp(p, a + 0.02, a + 0.2) * 4.99));
   const bLoaded = Math.min(4, Math.floor(ramp(p, a + 0.22, a + 0.5) * 4.99));
   const computing = p >= a + 0.68;
@@ -178,7 +179,7 @@ function phaseFrame(ph: number, p: number, opts: { lead?: boolean } = {}): Omit<
     bLoaded,
     lines: p < a + 0.66,
     twice: true,
-    barrier: p >= a + 0.52 && p < a + 0.66 ? 'barrier 1: every slot written before anyone reads' : null,
+    barrier: p >= a + 0.52 && p < a + 0.66 ? tr('barrier 1: every slot written before anyone reads', 'rào chắn 1: mọi ô nhớ được ghi trước khi ai đó đọc') : null,
     hotShared: computing,
     sums: computing ? sumsAfter(ph) : sumsAfter(ph - 1),
   };
@@ -187,41 +188,51 @@ function phaseFrame(ph: number, p: number, opts: { lead?: boolean } = {}): Omit<
 const beats: Beat[] = [
   {
     clip: 'implicit-tiles-1',
-    label: 'The block',
-    draw: () => <Stage ph={null} sums={zero} headline="block (0, 0) owns 14, 20 (map 0) and 12, 24 (map 1); B is only an outline" />,
+    get label() {
+      return tr('The block', 'Khối');
+    },
+    draw: () => <Stage ph={null} sums={zero} headline={tr('block (0, 0) owns 14, 20 (map 0) and 12, 24 (map 1); B is only an outline', 'khối (0, 0) sở hữu 14, 20 (map 0) và 12, 24 (map 1); B chỉ là đường viền')} />,
   },
   {
     clip: 'implicit-tiles-2',
-    label: 'Phase 0 loads',
+    get label() {
+      return tr('Phase 0 loads', 'Pha 0 nạp');
+    },
     draw: (p) => {
       const fLoaded = Math.min(4, Math.floor(ramp(p, 0.05, 0.35) * 4.99));
       const bLoaded = Math.min(4, Math.floor(ramp(p, 0.4, 0.85) * 4.99));
       return (
         <Stage ph={0} fLoaded={fLoaded} bLoaded={bLoaded} lines twice sums={zero}
-          headline={bLoaded < 4 ? 'F tile: as in any tiled GEMM. B tile: gathered from X with Eq. 19.5' : '3 input pixels fill 4 slots: X[n, 0, 0, 1] (outlined) lands in two'} />
+          headline={bLoaded < 4 ? tr('F tile: as in any tiled GEMM. B tile: gathered from X with Eq. 19.5', 'Ô F: như mọi GEMM phân ô. Ô B: gom từ X theo Eq. 19.5') : tr('3 input pixels fill 4 slots: X[n, 0, 0, 1] (outlined) lands in two', '3 pixel đầu vào lấp 4 ô nhớ: X[n, 0, 0, 1] (có viền) nằm ở hai ô')} />
       );
     },
   },
   {
     clip: 'implicit-tiles-3',
-    label: 'Barrier, then multiply',
+    get label() {
+      return tr('Barrier, then multiply', 'Rào chắn, rồi nhân');
+    },
     draw: (p) => {
       const computing = p >= 0.35;
       return (
-        <Stage ph={0} lines={false} barrier={computing ? null : 'barrier 1: every slot written before anyone reads'} hotShared={computing}
+        <Stage ph={0} lines={false} barrier={computing ? null : tr('barrier 1: every slot written before anyone reads', 'rào chắn 1: mọi ô nhớ được ghi trước khi ai đó đọc')} hotShared={computing}
           sums={computing ? sumsAfter(0) : zero}
-          headline={computing ? 'each thread: 2 products from shared memory into its register' : 'wait until the whole block has loaded'} />
+          headline={computing ? tr('each thread: 2 products from shared memory into its register', 'mỗi luồng: 2 tích từ bộ nhớ chia sẻ vào thanh ghi của nó') : tr('wait until the whole block has loaded', 'chờ đến khi cả khối nạp xong')} />
       );
     },
   },
   {
     clip: 'implicit-tiles-4',
-    label: 'Phase 1',
-    draw: (p) => <Stage {...phaseFrame(1, p, { lead: true })} headline="phase 1: F columns 2–3, B from the middle row of map 0, the same slots" />,
+    get label() {
+      return tr('Phase 1', 'Pha 1');
+    },
+    draw: (p) => <Stage {...phaseFrame(1, p, { lead: true })} headline={tr('phase 1: F columns 2–3, B from the middle row of map 0, the same slots', 'pha 1: cột 2–3 của F, B từ hàng giữa của map 0, cùng những ô nhớ đó')} />,
   },
   {
     clip: 'implicit-tiles-5',
-    label: 'Phases 2 to 5',
+    get label() {
+      return tr('Phases 2 to 5', 'Pha 2 đến 5');
+    },
     draw: (p) => {
       const ph = 2 + Math.min(3, Math.floor(ramp(p, 0, 0.84) * 4));
       const q = ramp(p, (ph - 2) * 0.21, (ph - 1) * 0.21);
@@ -229,13 +240,15 @@ const beats: Beat[] = [
       const done = p >= 0.86;
       return (
         <Stage {...fr} {...(done ? { ph: 5, sums: sumsAfter(5), stored: true, barrier: null, lines: false, hotShared: false } : {})}
-          headline={done ? `after phase 5: ${sumsAfter(5).join(', ')}, stored to Y` : `phase ${ph}: map ${blk.phases[ph].b[0].c} of the input`} />
+          headline={done ? tr(`after phase 5: ${sumsAfter(5).join(', ')}, stored to Y`, `sau pha 5: ${sumsAfter(5).join(', ')}, ghi vào Y`) : tr(`phase ${ph}: map ${blk.phases[ph].b[0].c} of the input`, `pha ${ph}: map ${blk.phases[ph].b[0].c} của đầu vào`)} />
       );
     },
   },
   {
     clip: 'implicit-tiles-6',
-    label: 'The count',
+    get label() {
+      return tr('The count', 'Phép đếm');
+    },
     draw: (p) => {
       const t = SC.traffic;
       const grow = ramp(p, 0.08, 0.6);
@@ -248,23 +261,23 @@ const beats: Beat[] = [
         </g>
       );
       return (
-        <svg viewBox="0 0 720 372" role="img" aria-label="Global accesses of the three methods" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
-          <text x={40} y={30} fontSize="13" fontWeight="600" style={{ fill: 'var(--ink)' }}>accesses to X and B in global memory, the whole toy (2 blocks)</text>
-          <text x={40} y={66} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>direct kernel (Fig. 19.7)</text>
-          {bar(90, t.direct.x, 'reads of X', 'global')}
-          <text x={40} y={140} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>explicit unrolling, then a tiled GEMM</text>
-          {bar(164, t.explicit.unfoldReadsX, 'reads of X to build B', 'global')}
-          {bar(200, t.explicit.writesB, 'writes of B', 'global')}
-          {bar(236, t.explicit.gemmReadsB, 'reads of B by the GEMM', 'global')}
-          <text x={40} y={286} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}>implicit unrolling (Fig. 19.11)</text>
-          {bar(310, t.implicit.gathersX, 'gathers from X; copies only in shared memory', 'global')}
+        <svg viewBox="0 0 720 372" role="img" aria-label={tr('Global accesses of the three methods', 'Số truy cập bộ nhớ toàn cục của ba phương pháp')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+          <text x={40} y={30} fontSize="13" fontWeight="600" style={{ fill: 'var(--ink)' }}><Translated vi="truy cập X và B trong bộ nhớ toàn cục, cả ví dụ nhỏ (2 khối)">accesses to X and B in global memory, the whole toy (2 blocks)</Translated></text>
+          <text x={40} y={66} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}><Translated vi="kernel trực tiếp (Fig. 19.7)">direct kernel (Fig. 19.7)</Translated></text>
+          {bar(90, t.direct.x, tr('reads of X', 'lần đọc X'), 'global')}
+          <text x={40} y={140} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}><Translated vi="unroll tường minh, rồi một GEMM phân ô">explicit unrolling, then a tiled GEMM</Translated></text>
+          {bar(164, t.explicit.unfoldReadsX, tr('reads of X to build B', 'lần đọc X để dựng B'), 'global')}
+          {bar(200, t.explicit.writesB, tr('writes of B', 'lần ghi B'), 'global')}
+          {bar(236, t.explicit.gemmReadsB, tr('reads of B by the GEMM', 'lần GEMM đọc B'), 'global')}
+          <text x={40} y={286} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink-2)' }}><Translated vi="unroll ngầm (Fig. 19.11)">implicit unrolling (Fig. 19.11)</Translated></text>
+          {bar(310, t.implicit.gathersX, tr('gathers from X; copies only in shared memory', 'lần gom từ X; bản sao chỉ nằm trong bộ nhớ chia sẻ'), 'global')}
           {p > 0.7 ? (
             <text x={430} y={330} fontSize="12" fontWeight="600" style={{ fill: 'var(--ink)' }}>
-              the price: a divide and a remainder per gather
+              <Translated vi="cái giá: một phép chia và một phép lấy dư cho mỗi lần gom">the price: a divide and a remainder per gather</Translated>
             </text>
           ) : null}
-          <text x={430} y={90} fontSize="11" style={{ fill: 'var(--ink-2)' }}>F: {t.direct.f} reads direct,</text>
-          <text x={430} y={105} fontSize="11" style={{ fill: 'var(--ink-2)' }}>{t.implicit.f} with 2 × 2 tiles</text>
+          <text x={430} y={90} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>F: {t.direct.f} lần đọc với kernel trực tiếp,</>}>F: {t.direct.f} reads direct,</Translated></text>
+          <text x={430} y={105} fontSize="11" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>{t.implicit.f} với ô 2 × 2</>}>{t.implicit.f} with 2 × 2 tiles</Translated></text>
         </svg>
       );
     },
@@ -272,5 +285,5 @@ const beats: Beat[] = [
 ];
 
 export function ImplicitTilesScene() {
-  return <Scene chapter="ch19" title="Implicit unfolding, one tile at a time" beats={beats} />;
+  return <Scene chapter="ch19" title={tr('Implicit unfolding, one tile at a time', 'Unfold ngầm, mỗi lần một ô')} beats={beats} />;
 }

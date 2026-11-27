@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
+import { Translated, tr as trText } from '../../lib/i18n';
 import { blockOrder, makeProblem, threadFor, trace, type YX } from '../../sim/naivemm';
 
 // "One kernel, sixteen threads": the 4 x 4 multiplication of book Figs. 3.12 and
@@ -113,7 +114,7 @@ function Strip({ y, values, name, hot, wash }: { y: number; values: number[]; na
 function Stage(f: Frame) {
   const linesY = f.linesY ?? 252;
   return (
-    <svg viewBox="0 0 760 372" role="img" aria-label="Animation of sixteen threads multiplying two 4 by 4 matrices"
+    <svg viewBox="0 0 760 372" role="img" aria-label={trText('Animation of sixteen threads multiplying two 4 by 4 matrices', 'Hoạt hình mười sáu luồng nhân hai ma trận 4 × 4')}
       style={{ width: '100%', maxWidth: 760, display: 'block' }}>
       <Grid x={MX} y={MY} values={prob.M} name="M" hot={f.hotM} wash={f.washM} />
       <Grid x={NX} y={NY} values={prob.N} name="N" hot={f.hotN} wash={f.washN} />
@@ -131,7 +132,7 @@ function Stage(f: Frame) {
                     <rect x={PX + b.x * BW * C + C - 31} y={PY + b.y * BW * C + C - 9} width={60} height={16} rx="3"
                       fill="var(--page)" stroke="var(--rule)" />
                     <text x={PX + b.x * BW * C + C - 1} y={PY + b.y * BW * C + C + 3} fontSize="9.5" textAnchor="middle">
-                      Block {label(b)}
+                      <Translated vi={<>Khối {label(b)}</>}>Block {label(b)}</Translated>
                     </text>
                   </g>
                 ) : null}
@@ -149,14 +150,14 @@ function Stage(f: Frame) {
         : null}
       {f.strips ? (
         <g opacity={f.strips}>
-          <Strip y={48} values={prob.M} name="M as stored: 16 floats, row after row" hot={f.hotM} wash={f.washM} />
-          <Strip y={118} values={prob.N} name="N as stored" hot={f.hotN} wash={f.washN} />
+          <Strip y={48} values={prob.M} name={trText('M as stored: 16 floats, row after row', 'M khi lưu: 16 float, hết hàng này đến hàng khác')} hot={f.hotM} wash={f.washM} />
+          <Strip y={118} values={prob.N} name={trText('N as stored', 'N khi lưu')} hot={f.hotN} wash={f.washN} />
         </g>
       ) : null}
       {f.sums ? (
         <g>
           <text x={RX} y={186} fontSize="12" fontWeight="600" style={{ fill: 'var(--reg)' }}>
-            {f.sums.length > 1 ? 'Pvalue: one register per thread' : 'Pvalue: a register of this thread'}
+            {f.sums.length > 1 ? trText('Pvalue: one register per thread', 'Pvalue: mỗi luồng một thanh ghi (register)') : trText('Pvalue: a register of this thread', 'Pvalue: một thanh ghi (register) của luồng này')}
           </text>
           {f.sums.map((s, i) => (
             <g key={i}>
@@ -212,7 +213,7 @@ function beats(loopLine: string): Beat[] {
   return [
     {
       clip: 'sixteen-threads-1',
-      label: 'Sixteen threads',
+      label: trText('Sixteen threads', 'Mười sáu luồng'),
       draw: (p) => {
         const n = Math.min(16, Math.floor(ramp(p, 0.24, 0.9) * 16.999));
         const t = n > 0 ? THREADS[n - 1] : null;
@@ -221,20 +222,20 @@ function beats(loopLine: string): Beat[] {
             lines={
               t
                 ? [
-                    `Thread ${label(t.thread)} of Block ${label(t.block)}`,
+                    trText(`Thread ${label(t.thread)} of Block ${label(t.block)}`, `Luồng ${label(t.thread)} của Khối ${label(t.block)}`),
                     `row = ${t.block.y}·${BW} + ${t.thread.y} = ${t.row}`,
                     `col = ${t.block.x}·${BW} + ${t.thread.x} = ${t.col}`,
-                    `it owns P[${t.row}][${t.col}]`,
+                    trText(`it owns P[${t.row}][${t.col}]`, `nó sở hữu P[${t.row}][${t.col}]`),
                   ]
-                : ['P is 4 by 4. BLOCK_WIDTH is 2.', '4 blocks of 2 × 2 threads.']
+                : [trText('P is 4 by 4. BLOCK_WIDTH is 2.', 'P có kích thước 4 × 4. BLOCK_WIDTH là 2.'), trText('4 blocks of 2 × 2 threads.', '4 khối, mỗi khối 2 × 2 luồng.')]
             }
-            headline={`${n} of 16 threads placed, one per element of P`} />
+            headline={trText(`${n} of 16 threads placed, one per element of P`, `đã đặt ${n} trên 16 luồng, mỗi phần tử của P một luồng`)} />
         );
       },
     },
     {
       clip: 'sixteen-threads-2',
-      label: 'One thread',
+      label: trText('One thread', 'Một luồng'),
       draw: (p) => {
         const started = p >= 0.28;
         const kf = ramp(p, 0.28, 0.94) * W;
@@ -250,19 +251,19 @@ function beats(loopLine: string): Beat[] {
             lines={
               started
                 ? [
-                    'Thread (0,0) of Block (0,0): row 0 of M, column 0 of N',
+                    trText('Thread (0,0) of Block (0,0): row 0 of M, column 0 of N', 'Luồng (0,0) của Khối (0,0): hàng 0 của M, cột 0 của N'),
                     `k = ${k}:  Pvalue += M[0][${k}] × N[${k}][0]`,
                     `${s.sum - s.product} + ${s.mValue} × ${s.nValue} = ${s.sum}`,
                   ]
-                : ['Thread (0,0) of Block (0,0): row 0 of M, column 0 of N', 'Pvalue starts at 0']
+                : [trText('Thread (0,0) of Block (0,0): row 0 of M, column 0 of N', 'Luồng (0,0) của Khối (0,0): hàng 0 của M, cột 0 của N'), trText('Pvalue starts at 0', 'Pvalue bắt đầu từ 0')]
             }
-            headline={kf >= W ? `after 4 steps, Pvalue = ${tr.store!.value}` : 'one multiply and one add per step'} />
+            headline={kf >= W ? trText(`after 4 steps, Pvalue = ${tr.store!.value}`, `sau 4 bước, Pvalue = ${tr.store!.value}`) : trText('one multiply and one add per step', 'mỗi bước một phép nhân và một phép cộng')} />
         );
       },
     },
     {
       clip: 'sixteen-threads-3',
-      label: 'In memory',
+      label: trText('In memory', 'Trong bộ nhớ'),
       draw: (p) => {
         const started = p >= 0.3;
         const kf = ramp(p, 0.3, 0.9) * W;
@@ -277,19 +278,19 @@ function beats(loopLine: string): Beat[] {
             lines={
               started
                 ? [`k = ${k}`, `M[row·4 + k] = M[0·4 + ${k}] = M[${s.mIndex}]`, `N[k·4 + col] = N[${k}·4 + 0] = N[${s.nIndex}]`]
-                : ['The same thread, the same loop.', 'Now watch the index, not the row and column.']
+                : [trText('The same thread, the same loop.', 'Cùng luồng đó, cùng vòng lặp đó.'), trText('Now watch the index, not the row and column.', 'Giờ hãy nhìn chỉ số, không phải hàng và cột.')]
             }
             headline={
               kf >= W
                 ? `M: ${tr.steps.map((x) => x.mIndex).join(', ')}.  N: ${tr.steps.map((x) => x.nIndex).join(', ')}.`
-                : 'M moves 1 slot per step; N moves a whole row'
+                : trText('M moves 1 slot per step; N moves a whole row', 'M dịch 1 ô mỗi bước; N dịch trọn một hàng')
             } />
         );
       },
     },
     {
       clip: 'sixteen-threads-4',
-      label: 'One block',
+      label: trText('One block', 'Một khối'),
       draw: (p) => {
         const kf = ramp(p, 0.22, 0.8) * W;
         const f = marching(B00, kf);
@@ -297,16 +298,16 @@ function beats(loopLine: string): Beat[] {
         return (
           <Stage blocks={1} strips={1} {...f} hotP={storing ? undefined : f.hotP} stored={storing ? new Set(cellsOfBlock(B00)) : undefined}
             lines={[
-              'Block (0,0): 4 threads at the same k',
-              f.done ? 'the loop is over: each thread stores its sum' : `k = ${f.k}: rows 0 and 1 of M, columns 0 and 1 of N`,
+              trText('Block (0,0): 4 threads at the same k', 'Khối (0,0): 4 luồng ở cùng một k'),
+              f.done ? trText('the loop is over: each thread stores its sum', 'vòng lặp kết thúc: mỗi luồng ghi tổng của nó') : trText(`k = ${f.k}: rows 0 and 1 of M, columns 0 and 1 of N`, `k = ${f.k}: hàng 0 và 1 của M, cột 0 và 1 của N`),
             ]}
-            headline={storing ? '4 elements of P written, one per thread' : '2 rows of M and 2 columns of N in use'} />
+            headline={storing ? trText('4 elements of P written, one per thread', 'đã ghi 4 phần tử của P, mỗi luồng một phần tử') : trText('2 rows of M and 2 columns of N in use', 'đang dùng 2 hàng của M và 2 cột của N')} />
         );
       },
     },
     {
       clip: 'sixteen-threads-5',
-      label: 'Any order',
+      label: trText('Any order', 'Thứ tự bất kỳ'),
       draw: (p) => {
         const SEG = 0.22;
         const START = 0.1;
@@ -325,20 +326,20 @@ function beats(loopLine: string): Beat[] {
           <Stage blocks={1} strips={1} stored={stored} hotM={r?.hotM} hotN={r?.hotN} washM={r?.washM} washN={r?.washN}
             hotP={r?.hotP} sums={r?.sums} activeBlock={r?.activeBlock}
             lines={[
-              `Block order here: ${LATER.map(label).join(', ')}`,
-              r ? `Block ${label(r.activeBlock!)} is running, k = ${r.k}` : ran.length === LATER.length ? 'all four blocks have finished' : 'Block (0,0) has finished',
+              trText(`Block order here: ${LATER.map(label).join(', ')}`, `Thứ tự khối ở đây: ${LATER.map(label).join(', ')}`),
+              r ? trText(`Block ${label(r.activeBlock!)} is running, k = ${r.k}`, `Khối ${label(r.activeBlock!)} đang chạy, k = ${r.k}`) : ran.length === LATER.length ? trText('all four blocks have finished', 'cả bốn khối đã xong') : trText('Block (0,0) has finished', 'Khối (0,0) đã xong'),
             ]}
-            headline={p > 0.8 ? 'no thread waited for another' : `${stored.size} of 16 elements of P stored`} />
+            headline={p > 0.8 ? trText('no thread waited for another', 'không luồng nào phải chờ luồng khác') : trText(`${stored.size} of 16 elements of P stored`, `đã ghi ${stored.size} trên 16 phần tử của P`)} />
         );
       },
     },
     {
       clip: 'sixteen-threads-6',
-      label: 'The kernel',
+      label: trText('The kernel', 'Kernel'),
       draw: (p) => (
         <Stage blocks={1} strips={1} stored={ALL_P} code={loopLine}
-          lines={['16 threads, each on its own element of P', `${W} multiply-adds and 1 store per thread`]}
-          headline={p > 0.55 ? 'Chapter 5 asks: how often was each input fetched?' : 'the whole kernel is this loop, once per thread'} />
+          lines={[trText('16 threads, each on its own element of P', '16 luồng, mỗi luồng lo một phần tử riêng của P'), trText(`${W} multiply-adds and 1 store per thread`, `mỗi luồng ${W} phép nhân-cộng và 1 lần ghi`)]}
+          headline={p > 0.55 ? trText('Chapter 5 asks: how often was each input fetched?', 'Chương 5 hỏi: mỗi đầu vào đã được nạp bao nhiêu lần?') : trText('the whole kernel is this loop, once per thread', 'toàn bộ kernel là vòng lặp này, mỗi luồng chạy một lần')} />
       ),
     },
   ];
@@ -346,5 +347,5 @@ function beats(loopLine: string): Beat[] {
 
 /** `loopLine` is line 08 of the kernel as the section shows it, so the scene cannot drift from the listing. */
 export function SixteenThreadsScene({ loopLine }: { loopLine: string }) {
-  return <Scene chapter="ch03" title="One kernel, sixteen threads" beats={beats(loopLine)} />;
+  return <Scene chapter="ch03" title={trText('One kernel, sixteen threads', 'Một kernel, mười sáu luồng')} beats={beats(loopLine)} />;
 }

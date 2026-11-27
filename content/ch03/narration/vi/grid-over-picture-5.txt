@@ -1,0 +1,1 @@
+Bộ nhớ là một đường thẳng phẳng, nên các hàng của bức ảnh được xếp vào đó lần lượt từng hàng. [short pause] Hàng 16 bắt đầu sau 16 hàng đầy đủ, mỗi hàng 76 phần tử. Nên luồng của ta ghi phần tử 1216. Ảnh màu đầu vào có 3 byte cho mỗi điểm ảnh, nên byte màu đỏ của nó nằm ở vị trí gấp 3 lần: 3648.

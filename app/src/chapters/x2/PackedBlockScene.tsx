@@ -13,6 +13,7 @@ import {
   sceneActivations,
   unpackTrace,
 } from '../../sim/quant';
+import { Translated, tr } from '../../lib/i18n';
 
 // "One block, packed, shipped and unpacked": the seeded block the X2.2 stepper and the X2.3
 // explorers use, through llama.cpp's Q4_0 reference rule (quant.ts). Six beats, one script
@@ -62,11 +63,11 @@ function Line({ p, showScale }: { p: number; showScale: boolean }) {
         <circle key={i} cx={X(v)} cy={100 - (i % 4) * 9} r={i === OUTLIER_AT && hot ? 6 : 3.5}
           fill={i === OUTLIER_AT && hot ? 'var(--ink)' : 'var(--page)'} stroke="var(--ink)" />
       ))}
-      {hot ? <text x={X(SCENE_BLOCK[OUTLIER_AT])} y={60} fontSize="11" textAnchor="middle">weight {OUTLIER_AT}: {SCENE_BLOCK[OUTLIER_AT].toFixed(2)}</text> : null}
+      {hot ? <text x={X(SCENE_BLOCK[OUTLIER_AT])} y={60} fontSize="11" textAnchor="middle"><Translated vi={<>trọng số {OUTLIER_AT}: {SCENE_BLOCK[OUTLIER_AT].toFixed(2)}</>}>weight {OUTLIER_AT}: {SCENE_BLOCK[OUTLIER_AT].toFixed(2)}</Translated></text> : null}
       {showScale ? (
         <g opacity={ramp(p, 0.55, 0.75)}>
           <text x={20} y={200} fontSize="14">d = {SCENE_BLOCK[OUTLIER_AT].toFixed(1)} / −8 = {block.d.toPrecision(3)}</text>
-          <text x={20} y={224} fontSize="14" style={{ fill: 'var(--global)' }}>stored as FP16: {d16.toPrecision(6)}</text>
+          <text x={20} y={224} fontSize="14" style={{ fill: 'var(--global)' }}><Translated vi={<>lưu dưới dạng FP16: {d16.toPrecision(6)}</>}>stored as FP16: {d16.toPrecision(6)}</Translated></text>
         </g>
       ) : null}
     </g>
@@ -85,7 +86,7 @@ function Codes({ p }: { p: number }) {
         </g>
       ))}
       <text x={LX(16)} y={230} fontSize="10" textAnchor="middle" style={{ fill: 'var(--fail)' }}>16?</text>
-      <text x={20} y={250} fontSize="11" style={{ fill: 'var(--global)' }}>codes: value = (code − 8) × d</text>
+      <text x={20} y={250} fontSize="11" style={{ fill: 'var(--global)' }}><Translated vi="mã: giá trị = (mã − 8) × d">codes: value = (code − 8) × d</Translated></text>
       {SCENE_BLOCK.map((v, i) => {
         const done = i < n;
         const bad = trace.clipped[i] && p > 0.75;
@@ -101,7 +102,9 @@ function Codes({ p }: { p: number }) {
       })}
       {n > MIRROR_AT ? (
         <text x={W - 20} y={24} fontSize="11" textAnchor="end" style={{ fill: 'var(--fail)' }}>
-          weight {MIRROR_AT}: 0.8 × 10 + 8.5 = 16.5 → 16 → {p > 0.75 ? 'clipped to 15' : '?'}
+          <Translated vi={<>trọng số {MIRROR_AT}: 0.8 × 10 + 8.5 = 16.5 → 16 → {p > 0.75 ? tr('clipped to 15', 'bị chặn về 15') : '?'}</>}>
+            weight {MIRROR_AT}: 0.8 × 10 + 8.5 = 16.5 → 16 → {p > 0.75 ? tr('clipped to 15', 'bị chặn về 15') : '?'}
+          </Translated>
         </text>
       ) : null}
     </g>
@@ -114,7 +117,7 @@ function Pack({ p }: { p: number }) {
   const x0 = 40;
   return (
     <g>
-      <text x={x0} y={30} fontSize="11">codes of weights 0 to 15 (low halves) and 16 to 31 (high halves)</text>
+      <text x={x0} y={30} fontSize="11"><Translated vi="mã của các trọng số 0 đến 15 (nửa thấp) và 16 đến 31 (nửa cao)">codes of weights 0 to 15 (low halves) and 16 to 31 (high halves)</Translated></text>
       {block.codes.map((c, i) => {
         const j = i % 16;
         const hi = i >= 16;
@@ -136,14 +139,14 @@ function Pack({ p }: { p: number }) {
           {block.bytes.slice(2).map((b, j) => (
             <text key={j} x={x0 + j * C + 18} y={202} fontSize="10" textAnchor="middle" style={{ fill: 'var(--global)' }}>0x{hex2(b)}</text>
           ))}
-          <text x={x0} y={222} fontSize="10.5">byte j = code j | code (j + 16) &lt;&lt; 4; byte {OUTLIER_AT} holds weights {OUTLIER_AT} and {MIRROR_AT}</text>
+          <text x={x0} y={222} fontSize="10.5"><Translated vi={<>byte j = mã j | mã (j + 16) &lt;&lt; 4; byte {OUTLIER_AT} chứa các trọng số {OUTLIER_AT} và {MIRROR_AT}</>}>byte j = code j | code (j + 16) &lt;&lt; 4; byte {OUTLIER_AT} holds weights {OUTLIER_AT} and {MIRROR_AT}</Translated></text>
         </g>
       ) : null}
       <g opacity={ramp(p, 0.72, 0.9)}>
         <rect x={x0} y={248} width={18 * 4} height={16} fill="var(--global)" />
-        <text x={x0 + 18 * 4 + 8} y={261} fontSize="11">Q4_0: 2-byte scale + 16 bytes = 18 bytes</text>
+        <text x={x0 + 18 * 4 + 8} y={261} fontSize="11"><Translated vi="Q4_0: hệ số tỉ lệ 2 byte + 16 byte = 18 byte">Q4_0: 2-byte scale + 16 bytes = 18 bytes</Translated></text>
         <rect x={x0} y={274} width={128 * 4} height={16} fill="var(--global-wash)" stroke="var(--global)" />
-        <text x={x0 + 8} y={287} fontSize="11">float32: 32 × 4 = 128 bytes</text>
+        <text x={x0 + 8} y={287} fontSize="11"><Translated vi="float32: 32 × 4 = 128 byte">float32: 32 × 4 = 128 bytes</Translated></text>
       </g>
     </g>
   );
@@ -157,7 +160,7 @@ function Strip({ p }: { p: number }) {
   const halves = ramp(p, 0.7, 0.9);
   return (
     <g>
-      <text x={x0} y={40} fontSize="11">four blocks end to end, 18 bytes each; ticks every 4 bytes</text>
+      <text x={x0} y={40} fontSize="11"><Translated vi="bốn khối nối tiếp nhau, mỗi khối 18 byte; vạch chia mỗi 4 byte">four blocks end to end, 18 bytes each; ticks every 4 bytes</Translated></text>
       {Array.from({ length: 73 }, (_, a) => (a % 4 === 0 ? <line key={a} x1={x0 + a * B} x2={x0 + a * B} y1={56} y2={110} stroke="var(--rule)" /> : null))}
       {blocks.map((i) => {
         const a = blockAddress(i);
@@ -166,7 +169,7 @@ function Strip({ p }: { p: number }) {
           <g key={i} data-block={i}>
             <rect x={x0 + a.d * B} y={66} width={2 * B} height={30} fill="var(--global)" />
             <rect x={x0 + a.qs * B} y={66} width={16 * B} height={30} fill="var(--global-wash)" stroke="var(--global)" />
-            <text x={x0 + a.start * B + 9 * B} y={86} fontSize="10" textAnchor="middle">block {i}</text>
+            <text x={x0 + a.start * B + 9 * B} y={86} fontSize="10" textAnchor="middle"><Translated vi={<>khối {i}</>}>block {i}</Translated></text>
             <text x={x0 + a.qs * B} y={126} fontSize="10" textAnchor="middle" style={{ fill: ok ? 'var(--ok)' : 'var(--fail)' }}>{a.qs}</text>
             {loads > 0 ? (
               <g opacity={loads}>
@@ -185,8 +188,8 @@ function Strip({ p }: { p: number }) {
           </g>
         );
       })}
-      {loads > 0 ? <text x={x0} y={166} fontSize="11" opacity={loads}>4-byte loads of the codes: aligned only where the codes start on a multiple of 4</text> : null}
-      {halves > 0 ? <text x={x0} y={208} fontSize="11" opacity={halves}>16-bit loads: always aligned, because every block starts on an even address</text> : null}
+      {loads > 0 ? <text x={x0} y={166} fontSize="11" opacity={loads}><Translated vi="các lần nạp 4 byte của mã: chỉ căn chỉnh khi mã bắt đầu tại một bội số của 4">4-byte loads of the codes: aligned only where the codes start on a multiple of 4</Translated></text> : null}
+      {halves > 0 ? <text x={x0} y={208} fontSize="11" opacity={halves}><Translated vi="các lần nạp 16 bit: luôn căn chỉnh, vì mọi khối đều bắt đầu tại một địa chỉ chẵn">16-bit loads: always aligned, because every block starts on an even address</Translated></text> : null}
     </g>
   );
 }
@@ -199,7 +202,7 @@ function Word({ p }: { p: number }) {
   const div = [1, 256, 16, 4096];
   return (
     <g>
-      <text x={40} y={34} fontSize="11">16-bit word {SCENE_WORD} = bytes {2 * SCENE_WORD} and {2 * SCENE_WORD + 1}: 0x{u.toString(16).toUpperCase().padStart(4, '0')}</text>
+      <text x={40} y={34} fontSize="11"><Translated vi={<>word 16 bit {SCENE_WORD} = các byte {2 * SCENE_WORD} và {2 * SCENE_WORD + 1}: 0x{u.toString(16).toUpperCase().padStart(4, '0')}</>}>16-bit word {SCENE_WORD} = bytes {2 * SCENE_WORD} and {2 * SCENE_WORD + 1}: 0x{u.toString(16).toUpperCase().padStart(4, '0')}</Translated></text>
       {Array.from({ length: 16 }, (_, bit) => {
         const f = fields.find((x) => bit >= x.lo && bit <= x.hi)!;
         const active = k > 0 && fields.indexOf(f) < k && fields.indexOf(f) === k - 1;
@@ -217,7 +220,7 @@ function Word({ p }: { p: number }) {
       {word.slice(1, 5).map((s, i) =>
         i < k ? (
           <text key={i} x={40} y={140 + i * 26} fontSize="12.5" data-masked={s.out[0].value}>
-            <tspan style={{ fill: 'var(--reg)' }}>u &amp; {MASKS[i]}</tspan>
+            <tspan style={{ fill: 'var(--reg)' }}>u &amp; {MASKS[i]}</tspan>{/* i18n-ignore: a code expression */}
             {` = ${s.out[0].value} = ${fields[i].value} × ${div[i]};   × y[${fields[i].weight}] / ${div[i]}  →  ${word[5].out[i].value.toPrecision(4)}`}
           </text>
         ) : null,
@@ -239,32 +242,32 @@ function Sum({ p }: { p: number }) {
         <text x={40} y={96}>d × ({dot.sumQY.toFixed(3)}) − 8 × d × ({dot.sumY.toFixed(3)}) = <tspan fontWeight="650" style={{ fill: 'var(--reg)' }}>{dot.folded.toFixed(4)}</tspan></text>
       </g>
       <g opacity={b}>
-        <text x={40} y={140}>dot with the dequantised weights: <tspan fontWeight="650">{dot.dequantised.toFixed(4)}</tspan>  (the same, to rounding)</text>
+        <text x={40} y={140}><Translated vi={<>tích vô hướng với các trọng số đã giải lượng tử hóa: <tspan fontWeight="650">{dot.dequantised.toFixed(4)}</tspan>  (như nhau, sai khác do làm tròn)</>}>dot with the dequantised weights: <tspan fontWeight="650">{dot.dequantised.toFixed(4)}</tspan>  (the same, to rounding)</Translated></text>
       </g>
       <g opacity={c}>
-        <text x={40} y={184}>dot with the float32 weights: <tspan fontWeight="650">{dot.exact.toFixed(4)}</tspan></text>
-        <text x={40} y={212} style={{ fill: 'var(--fail)' }}>difference {(dot.dequantised - dot.exact).toFixed(4)}: the quantisation error, not the kernel's</text>
+        <text x={40} y={184}><Translated vi={<>tích vô hướng với các trọng số float32: <tspan fontWeight="650">{dot.exact.toFixed(4)}</tspan></>}>dot with the float32 weights: <tspan fontWeight="650">{dot.exact.toFixed(4)}</tspan></Translated></text>
+        <text x={40} y={212} style={{ fill: 'var(--fail)' }}><Translated vi={<>chênh lệch {(dot.dequantised - dot.exact).toFixed(4)}: sai số lượng tử hóa, không phải lỗi của kernel</>}>difference {(dot.dequantised - dot.exact).toFixed(4)}: the quantisation error, not the kernel's</Translated></text>
       </g>
     </g>
   );
 }
 
 const svg = (body: ReactNode, head: ReactNode) => (
-  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="One Q4_0 block, quantised, packed, stored and unpacked" style={{ width: '100%', maxWidth: W, display: 'block' }}>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={tr('One Q4_0 block, quantised, packed, stored and unpacked', 'Một khối Q4_0: lượng tử hóa, đóng gói, lưu trữ và giải nén')} style={{ width: '100%', maxWidth: W, display: 'block' }}>
     {body}
     <Head>{head}</Head>
   </svg>
 );
 
 const beats: Beat[] = [
-  { clip: 'packed-block-1', label: 'The scale', draw: (p) => svg(<Line p={p} showScale />, 'find the signed extreme; d = extreme / −8') },
-  { clip: 'packed-block-2', label: 'The codes', draw: (p) => svg(<Codes p={p} />, 'add 8.5, truncate, clip to 15') },
-  { clip: 'packed-block-3', label: 'Two per byte', draw: (p) => svg(<Pack p={p} />, 'byte j: weight j low, weight j + 16 high') },
-  { clip: 'packed-block-4', label: 'In memory', draw: (p) => svg(<Strip p={p} />, 'every other block is 2 bytes off a 4-byte boundary') },
-  { clip: 'packed-block-5', label: 'Unpack a word', draw: (p) => svg(<Word p={p} />, 'four masks, no shifts, activations pre-divided') },
-  { clip: 'packed-block-6', label: 'The block sum', draw: (p) => svg(<Sum p={p} />, 'the 8 comes off once per block') },
+  { clip: 'packed-block-1', get label() { return tr('The scale', 'Hệ số tỉ lệ'); }, draw: (p) => svg(<Line p={p} showScale />, tr('find the signed extreme; d = extreme / −8', 'tìm giá trị cực trị có dấu; d = cực trị / −8')) },
+  { clip: 'packed-block-2', get label() { return tr('The codes', 'Các mã'); }, draw: (p) => svg(<Codes p={p} />, tr('add 8.5, truncate, clip to 15', 'cộng 8.5, cắt phần lẻ, chặn về 15')) },
+  { clip: 'packed-block-3', get label() { return tr('Two per byte', 'Hai mã mỗi byte'); }, draw: (p) => svg(<Pack p={p} />, tr('byte j: weight j low, weight j + 16 high', 'byte j: trọng số j ở nửa thấp, trọng số j + 16 ở nửa cao')) },
+  { clip: 'packed-block-4', get label() { return tr('In memory', 'Trong bộ nhớ'); }, draw: (p) => svg(<Strip p={p} />, tr('every other block is 2 bytes off a 4-byte boundary', 'cứ cách một khối lại có một khối lệch 2 byte so với ranh giới 4 byte')) },
+  { clip: 'packed-block-5', get label() { return tr('Unpack a word', 'Giải nén một word'); }, draw: (p) => svg(<Word p={p} />, tr('four masks, no shifts, activations pre-divided', 'bốn mặt nạ, không dịch bit, activation được chia trước')) },
+  { clip: 'packed-block-6', get label() { return tr('The block sum', 'Tổng của khối'); }, draw: (p) => svg(<Sum p={p} />, tr('the 8 comes off once per block', 'số 8 được trừ đi một lần cho mỗi khối')) },
 ];
 
 export function PackedBlockScene() {
-  return <Scene chapter="x2" title="One block, packed, shipped and unpacked" beats={beats} />;
+  return <Scene chapter="x2" title={tr('One block, packed, shipped and unpacked', 'Một khối: đóng gói, vận chuyển và giải nén')} beats={beats} />;
 }

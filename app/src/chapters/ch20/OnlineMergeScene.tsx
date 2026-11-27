@@ -10,6 +10,7 @@ import {
   type TileStep,
 } from '../../sim/onlinesoftmax';
 import { fv } from './OnlineSoftmaxStepper';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Merging softmax one tile at a time" (section 20.5): the scene row of the stepper, tiles
 // of 4, merged left to right in the code's deferred form. Every number drawn comes from
@@ -59,8 +60,8 @@ interface Frame {
 function Stage(f: Frame) {
   const mY = f.m == null ? null : Y0 - f.m * SY;
   return (
-    <svg viewBox="0 0 720 330" role="img" aria-label="Animation of the online softmax merging tiles" style={{ width: '100%', maxWidth: 720, display: 'block' }}>
-      <text x={34} y={18} fontSize="12" fontWeight="600">one row of scores, in tiles of 4</text>
+    <svg viewBox="0 0 720 330" role="img" aria-label={tr('Animation of the online softmax merging tiles', 'Hoạt hình online softmax trộn các ô')} style={{ width: '100%', maxWidth: 720, display: 'block' }}>
+      <text x={34} y={18} fontSize="12" fontWeight="600"><Translated vi="một hàng điểm số, chia thành các ô 4 phần tử">one row of scores, in tiles of 4</Translated></text>
       <line x1={26} x2={430} y1={Y0} y2={Y0} stroke="var(--rule)" />
       {DEMO_SCORES.map((s, j) => {
         const h = s * SY;
@@ -84,12 +85,12 @@ function Stage(f: Frame) {
         )),
       )}
       {[0, 1, 2].map((t) => (
-        <text key={t} x={barX(t * 4) + 2 * (BW + 6) - 3} y={Y0 + 100} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>tile {t + 1}</text>
+        <text key={t} x={barX(t * 4) + 2 * (BW + 6) - 3} y={Y0 + 100} fontSize="10.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}><Translated vi={<>ô {t + 1}</>}>tile {t + 1}</Translated></text>
       ))}
       {f.bracket ? (
         <g opacity={f.bracket}>
           <path d={`M ${barX(0)} 32 v -6 H ${barX(11) + BW} v 6`} fill="none" stroke="var(--ink)" strokeWidth="1.4" />
-          <text x={(barX(0) + barX(11) + BW) / 2} y={22} fontSize="11" textAnchor="middle">max and sum of all twelve, before any probability</text>
+          <text x={(barX(0) + barX(11) + BW) / 2} y={22} fontSize="11" textAnchor="middle"><Translated vi="giá trị lớn nhất và tổng của cả mười hai, trước khi có bất kỳ xác suất nào">max and sum of all twelve, before any probability</Translated></text>
         </g>
       ) : null}
       {mY != null && f.mFrom != null && f.mTo != null && Number.isFinite(mY) ? (
@@ -109,7 +110,7 @@ function Stage(f: Frame) {
 
       {/* running state; in the last beat it gives way to the two-block picture */}
       <g opacity={f.split ? 1 - f.split : 1}>
-      <text x={DX - 20} y={38} fontSize="12" fontWeight="600">running state</text>
+      <text x={DX - 20} y={38} fontSize="12" fontWeight="600"><Translated vi="trạng thái đang chạy">running state</Translated></text>
       <text x={DX - 20} y={64} fontSize="11.5">D</text>
       <rect x={DX} y={54} width={Math.max(0, (f.D ?? 0) * DS)} height={14} fill="var(--ink-3)" />
       <text x={DX + Math.max(0, (f.D ?? 0) * DS) + 6} y={65} fontSize="11">{f.D == null ? '0' : fv(f.D)}</text>
@@ -135,7 +136,7 @@ function Stage(f: Frame) {
         </g>
       ) : null}
       {f.exact ? (
-        <text x={DX - 20} y={214} fontSize="11" style={{ fill: 'var(--ok)' }}>dashed: exact (float64); off by {fv(SCENE.diff)}</text>
+        <text x={DX - 20} y={214} fontSize="11" style={{ fill: 'var(--ok)' }}><Translated vi={<>nét đứt: chính xác (float64); lệch {fv(SCENE.diff)}</>}>dashed: exact (float64); off by {fv(SCENE.diff)}</Translated></text>
       ) : null}
       </g>
 
@@ -143,8 +144,8 @@ function Stage(f: Frame) {
         <g opacity={f.split}>
           {(
             [
-              ['block 1: columns 0 to 7', SPLIT.A, 30],
-              ['block 2: columns 8 to 11', SPLIT.B, 102],
+              [tr('block 1: columns 0 to 7', 'khối 1: cột 0 đến 7'), SPLIT.A, 30],
+              [tr('block 2: columns 8 to 11', 'khối 2: cột 8 đến 11'), SPLIT.B, 102],
             ] as const
           ).map(([label, s, y]) => (
             <g key={label}>
@@ -155,9 +156,9 @@ function Stage(f: Frame) {
             </g>
           ))}
           <path d="M 588 160 V 184" fill="none" stroke="var(--ink-2)" />
-          <text x={596} y={177} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}>Eq. 20.4, and 20.6 on Õ</text>
+          <text x={596} y={177} fontSize="10.5" style={{ fill: 'var(--ink-2)' }}><Translated vi="Eq. 20.4, và 20.6 trên Õ">Eq. 20.4, and 20.6 on Õ</Translated></text>
           <rect x={466} y={184} width={244} height={58} rx="4" fill="var(--page)" stroke="var(--ink)" strokeWidth="1.5" />
-          <text x={476} y={202} fontSize="11.5" fontWeight="600">merged</text>
+          <text x={476} y={202} fontSize="11.5" fontWeight="600"><Translated vi="đã trộn">merged</Translated></text>
           <text x={476} y={220} fontSize="11">m = {fv(MERGED.m)}, D = {fv(MERGED.D)}</text>
           <text x={476} y={235} fontSize="11">Õ / D = ({MERGED.O.map((x) => fv(x / MERGED.D)).join(', ')})</text>
         </g>
@@ -200,46 +201,58 @@ function mergeFrame(k: number, p: number, headline: ReactNode): Frame {
 const beats: Beat[] = [
   {
     clip: 'online-merge-1',
-    label: 'The row',
-    draw: (p) => <Stage bracket={ramp(p, 0.2, 0.45)} headline="an ordinary softmax needs the whole row first" />,
+    get label() {
+      return tr('The row', 'Hàng');
+    },
+    draw: (p) => <Stage bracket={ramp(p, 0.2, 0.45)} headline={tr('an ordinary softmax needs the whole row first', 'một softmax thông thường cần cả hàng trước đã')} />,
   },
   {
     clip: 'online-merge-2',
-    label: 'Tile 1',
-    draw: (p) => <Stage {...mergeFrame(0, p, `tile 1: its own max ${fv(SCENE.steps[0].mB)}, nothing kept yet to rescale`)} />,
+    get label() {
+      return tr('Tile 1', 'Ô 1');
+    },
+    draw: (p) => <Stage {...mergeFrame(0, p, tr(`tile 1: its own max ${fv(SCENE.steps[0].mB)}, nothing kept yet to rescale`, `ô 1: giá trị lớn nhất riêng ${fv(SCENE.steps[0].mB)}, chưa giữ gì để co giãn lại`))} />,
   },
   {
     clip: 'online-merge-3',
-    label: 'A larger max',
-    draw: (p) => <Stage {...mergeFrame(1, p, p < 0.5 ? `the max rises to ${fv(SCENE.steps[1].mNew)}: D and Õ shrink first` : 'then tile 2’s terms add on')} />,
+    get label() {
+      return tr('A larger max', 'Giá trị lớn nhất lớn hơn');
+    },
+    draw: (p) => <Stage {...mergeFrame(1, p, p < 0.5 ? tr(`the max rises to ${fv(SCENE.steps[1].mNew)}: D and Õ shrink first`, `giá trị lớn nhất tăng lên ${fv(SCENE.steps[1].mNew)}: D và Õ co lại trước`) : tr('then tile 2’s terms add on', 'rồi các số hạng của ô 2 được cộng vào'))} />,
   },
   {
     clip: 'online-merge-4',
-    label: 'Factor 1',
-    draw: (p) => <Stage {...mergeFrame(2, p, `tile 3’s max ${fv(SCENE.steps[2].mB)} is lower: the factor is exactly 1`)} />,
+    get label() {
+      return tr('Factor 1', 'Hệ số 1');
+    },
+    draw: (p) => <Stage {...mergeFrame(2, p, tr(`tile 3’s max ${fv(SCENE.steps[2].mB)} is lower: the factor is exactly 1`, `giá trị lớn nhất của ô 3 là ${fv(SCENE.steps[2].mB)}, thấp hơn: hệ số đúng bằng 1`))} />,
   },
   {
     clip: 'online-merge-5',
-    label: 'One division',
+    get label() {
+      return tr('One division', 'Một phép chia');
+    },
     draw: (p) => {
       const t = ramp(p, 0.15, 0.5);
       const last = SCENE.steps[2];
       return (
         <Stage done={upTo(2)} m={last.mNew} mFrom={0} mTo={11} D={last.D}
           O={t < 1 ? last.O.map((o, c) => lerp(o, last.out[c], t)) : null} out={t >= 1 ? last.out : null}
-          exact={p > 0.55} headline="divide once at the end; it matches exact attention" />
+          exact={p > 0.55} headline={tr('divide once at the end; it matches exact attention', 'chia một lần ở cuối; kết quả khớp với attention chính xác')} />
       );
     },
   },
   {
     clip: 'online-merge-6',
-    label: 'Why it matters',
+    get label() {
+      return tr('Why it matters', 'Vì sao điều này quan trọng');
+    },
     draw: (p) => (
-      <Stage done={upTo(2)} m={SCENE.steps[2].mNew} mFrom={0} mTo={11} D={SCENE.steps[2].D} out={SCENE.final} split={ramp(p, 0.25, 0.5)} headline={p < 0.25 ? 'no row of N scores ever existed' : 'two numbers per row let separate blocks merge'} />
+      <Stage done={upTo(2)} m={SCENE.steps[2].mNew} mFrom={0} mTo={11} D={SCENE.steps[2].D} out={SCENE.final} split={ramp(p, 0.25, 0.5)} headline={p < 0.25 ? tr('no row of N scores ever existed', 'chưa từng có một hàng N điểm số nào tồn tại') : tr('two numbers per row let separate blocks merge', 'hai con số mỗi hàng cho phép các khối riêng rẽ trộn với nhau')} />
     ),
   },
 ];
 
 export function OnlineMergeScene() {
-  return <Scene chapter="ch20" title="Merging softmax one tile at a time" beats={beats} />;
+  return <Scene chapter="ch20" title={tr('Merging softmax one tile at a time', 'Trộn softmax từng ô một')} beats={beats} />;
 }

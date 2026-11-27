@@ -1,0 +1,1 @@
+Một phép tích vô hướng byte bốn chiều nhân 4 mã với 4 byte activation và cộng cả bốn tích vào một số nguyên. Khối cần 8 phép như vậy. Hãy xem tổng đang chạy ở bên phải. Nó được vẽ so với phạm vi của một số nguyên 32 bit, và nó không bao giờ tiến gần đến mép. Mọi tích ở đây đều chính xác.

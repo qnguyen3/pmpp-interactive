@@ -1,0 +1,1 @@
+Giờ là cách còn lại. Trước tiên, hãy giữ trước một dải địa chỉ đủ lớn cho mọi thứ mà buffer sẽ từng chứa, ở đây là 8 phần, mỗi phần 4 token. Chưa có gì nằm sau các địa chỉ đó. Giữ trước chỉ tốn địa chỉ, không tốn bộ nhớ, và một không gian địa chỉ 64 bit thì còn dư rất nhiều.

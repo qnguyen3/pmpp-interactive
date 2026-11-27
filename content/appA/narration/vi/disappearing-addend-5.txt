@@ -1,0 +1,1 @@
+Qua 1024, khoảng cách là 1, và 0.3 nhỏ hơn nửa bước. Giờ mỗi phép cộng đều làm tròn ngược về đúng chỗ cũ. Tổng đang chạy kẹt ở 1024, trong khi tổng chính xác vẫn tiếp tục tăng. Không có lỗi nào được báo, không có tín hiệu nào. Số hạng cộng đơn giản là biến mất.

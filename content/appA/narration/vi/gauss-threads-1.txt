@@ -1,0 +1,1 @@
+Hệ 3 phương trình của sách, viết dưới dạng ma trận mở rộng. Mỗi hàng chứa 3 hệ số và một vế phải. Mỗi luồng giữ một hàng, và cả 3 hàng nằm trong bộ nhớ chia sẻ của một khối. Luồng 0 có hàng 3, 5, 2, 19. Luồng 1 và 2 có hai hàng còn lại.

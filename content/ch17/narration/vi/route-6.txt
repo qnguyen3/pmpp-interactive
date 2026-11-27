@@ -1,0 +1,1 @@
+Cuối cùng, đặt mọi thứ trở lại. Hoán vị ngược gửi đầu ra của mỗi expert về vị trí của token tương ứng, và mỗi token kết hợp 2 đầu ra của nó. Hoán vị ngược đó chính là mảng hàng của định dạng JDS. [short pause] MLX LM làm điều tương tự bằng một phép arg sort và nghịch đảo của nó, khi có từ 64 phần tử trở lên.

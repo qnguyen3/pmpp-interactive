@@ -1,0 +1,1 @@
+Phần 3. Host yêu cầu lấy C về. Lần sao chép đó xếp hàng sau kernel, nên host phải chờ, trước hết là chờ kernel, rồi chờ thêm 32 byte đi qua. Rồi ba mảng trên device được giải phóng. Bên gọi chỉ thấy C của chính nó, đã được lấp đầy.

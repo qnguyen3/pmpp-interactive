@@ -1,0 +1,1 @@
+Núm điều chỉnh là giới hạn số chỗ. Tăng nó lên, batch lớn dần, và số token mỗi giây cũng tăng theo, cho đến khi bước vượt qua điểm gãy từ hoạt ảnh trước. Qua điểm đó, mọi người dùng phải chờ lâu hơn cho mỗi token mà thông lượng tăng thêm chẳng bao nhiêu. Máy chủ nào cũng có một giới hạn như thế, và việc đặt nó là sự đánh đổi của phần này.

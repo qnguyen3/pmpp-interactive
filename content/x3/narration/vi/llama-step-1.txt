@@ -1,0 +1,1 @@
+Một token id đi vào bước này. Phép gather embedding từ lab 22.2 sao chép hàng của token đó trong bảng embedding vào trạng thái ẩn, mỗi luồng một giá trị. Chưa có gì được tính cả. Đó là một phép tra cứu, và chi phí của nó là một hàng trọng số, rất nhỏ so với những gì theo sau.

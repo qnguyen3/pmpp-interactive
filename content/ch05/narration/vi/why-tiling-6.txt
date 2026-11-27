@@ -1,0 +1,1 @@
+Kết quả vẫn như cũ. Lưu lượng thì không. Mỗi phần tử chỉ đến từ bộ nhớ toàn cục một lần cho cả khối, thay vì một lần cho mỗi luồng cần nó. Với ô rộng T, lưu lượng giảm đi T lần. [short pause] Cái giá là hai rào chắn mỗi giai đoạn, và vài byte bộ nhớ chia sẻ cho mỗi luồng.

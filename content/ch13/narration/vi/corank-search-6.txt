@@ -1,0 +1,1 @@
+Tại sao một phép kiểm tra là nghiêm ngặt còn phép kia thì không? Gắn nhãn mảng cho mỗi khóa bằng nhau, rồi hoán đổi hai phép kiểm tra. Các lát dịch chuyển: số 10 đầu tiên của B đứng trước số 10 của A, ở ranh giới giữa luồng 1 và luồng 2. [short pause] Các khóa vẫn được sắp xếp, nhưng phép trộn không còn ổn định. Khi bằng nhau, phải ưu tiên A, như trong phép trộn tuần tự.

@@ -1,0 +1,1 @@
+Đây là một mảng 12 khóa, được lọc tại chỗ bởi 3 khối, mỗi khối 4 khóa. Mỗi mũi tên chỉ nơi một khóa được giữ sẽ rơi vào. Các mũi tên đỏ rơi vào một vị trí mà một khối trước đó vẫn còn phải đọc. 5 trong 7 mũi tên là màu đỏ, nên phải có gì đó khiến những lần đọc ấy diễn ra trước.

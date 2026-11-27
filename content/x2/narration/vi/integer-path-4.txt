@@ -1,0 +1,1 @@
+Phép hiệu chỉnh diễn ra một lần cho mỗi khối. Nhân tổng số nguyên với hệ số tỉ lệ của activation. Trừ đi 8 lần s. Điều đó loại bỏ số 8 mà mọi mã không dấu mang theo. Rồi nhân với hệ số tỉ lệ của trọng số. Ba phép nhân số thực và một phép trừ, và khối đã xong. Đó là toàn bộ phần việc dấu phẩy động mà nó cần.

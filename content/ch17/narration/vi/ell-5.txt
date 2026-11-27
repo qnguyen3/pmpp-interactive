@@ -1,0 +1,1 @@
+Chạy lại cùng bốn luồng đó. Ở mỗi vòng lặp, các lần đọc của chúng rơi vào một dải liên tiếp: ô 0 đến 3, rồi 4 đến 7, rồi 8 đến 11. Đó là sự hợp nhất truy cập bộ nhớ mà CSR thiếu. Nhưng vòng lặp vẫn dừng ở độ dài của từng hàng, nên chính những lane đó vẫn rảnh như trước. Phân kỳ luồng vẫn còn.

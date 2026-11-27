@@ -1,0 +1,1 @@
+Đây là lưới. 3 khối, mỗi khối 8 luồng. Mọi luồng sẽ chạy cùng ba dòng mã. Điều khác nhau là cặp số mà mỗi luồng mang theo. Chỉ số khối của nó, và chỉ số của chính nó trong khối đó.

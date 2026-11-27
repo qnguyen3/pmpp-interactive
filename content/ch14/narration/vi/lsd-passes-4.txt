@@ -1,0 +1,1 @@
+Lượt 3 và lượt 4 làm điều tương tự với bit 2 và bit 3. Sau lượt 3, danh sách có thứ tự theo 3 bit thấp nhất. Lượt 4 chia các khóa theo bit cao nhất, với 7 số không đứng trước 9 số một. Sau 4 lượt ổn định, cả danh sách đã được sắp xếp.

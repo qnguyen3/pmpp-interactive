@@ -1,0 +1,1 @@
+Cách này chỉ hoạt động nếu mọi khối đều thường trú cùng lúc. Ở đây lưới có nhiều khối hơn số chỗ. Các khối thường trú chờ ở rào chắn cho những khối không bao giờ bắt đầu được. Vậy hãy đặt kích thước lưới bằng số multiprocessor nhân số khối trên mỗi multiprocessor, lấy từ truy vấn occupancy. Trên CUDA và HIP, một lưới cooperative quá lớn sẽ bị từ chối ngay lúc khởi chạy.

@@ -1,0 +1,1 @@
+ELL bắt đầu bằng việc đệm thêm. Các phần tử của mỗi hàng trượt sang trái, vào một hình chữ nhật rộng bằng hàng dài nhất: ở đây là 4 hàng, mỗi hàng 3 ô. Các ô trống nhận dấu đệm, cột trừ 1 và giá trị 0. Hãy đếm: 4 ô đệm, để chứa 8 phần tử khác không.

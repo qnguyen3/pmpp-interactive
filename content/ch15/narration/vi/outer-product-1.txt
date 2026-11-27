@@ -1,0 +1,1 @@
+Đây là phần việc của một luồng trên một cặp ô. Mảng C của nó, 8 nhân 8, nằm trong thanh ghi. Nó cần 8 hàng của ô A và 8 cột của ô B, cả hai đều nằm trong bộ nhớ chia sẻ. Ở phiên bản đầu tiên, đầu ra ở góc trên bên trái đọc 8 giá trị của A và 8 giá trị của B: 16 lần đọc.

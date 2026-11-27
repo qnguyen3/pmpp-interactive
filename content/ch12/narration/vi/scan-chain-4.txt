@@ -1,0 +1,1 @@
+Một bước sau, số 1 thấy cờ, công bố cờ của chính nó, và ghi. Đến lúc đó mọi lần đọc của số 0 đã xong. Số 0 kết thúc và giải phóng chỗ của nó, nên khối chỉ số 0 bắt đầu và nhận số 2. Nó thấy cờ của số 1 đã được bật sẵn. Kết quả là bộ lọc ổn định, và không khóa nào bị ghi đè trước khi được đọc.

@@ -1,0 +1,1 @@
+Các yêu cầu tiếp tục lớn lên với tốc độ khác nhau. Khi một yêu cầu lấp đầy khối cuối cùng, nó lấy bất cứ khối nào danh sách trống đưa ra, thường là một khối mà yêu cầu khác vừa trả lại, nên các khối của nó rốt cuộc nằm rải rác khắp vùng nhớ. Bảng khối giữ thứ tự logic, và kernel attention đi theo nó tới mọi key và value.

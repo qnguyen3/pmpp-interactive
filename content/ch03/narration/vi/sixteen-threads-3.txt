@@ -1,0 +1,1 @@
+Giờ vẫn vòng lặp đó, nhưng theo cách bộ nhớ lưu trữ. Cả hai ma trận là mảng phẳng, lưu lần lượt từng hàng. Trong M, luồng dịch 1 ô mỗi bước: 0, 1, 2, 3. Trong N, nó nhảy cả một hàng mỗi bước: 0, 4, 8, 12. [short pause] Một vòng lặp, hai bước nhảy khác nhau.

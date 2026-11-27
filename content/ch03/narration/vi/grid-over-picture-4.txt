@@ -1,0 +1,1 @@
+Giờ hãy theo dõi một luồng: luồng 0, 0 của khối 1, 0. Sách viết chỉ số dọc trước, nên khối này ở một bậc xuống dưới và không bậc nào sang ngang. Hàng của nó là chỉ số khối nhân 16, cộng chỉ số luồng. Tức là hàng 16. Cột của nó, tính theo cùng cách, là cột 0.

@@ -43,6 +43,8 @@
 // Erasable TypeScript only, and no imports: the browser checks import this file
 // directly in Node.
 
+import { tr } from '../lib/locale.ts';
+
 export type Src = 'A' | 'B';
 /** One element with its origin, so that ties stay visible (A1 is A[1]). */
 export interface Item {
@@ -392,21 +394,27 @@ export interface Preset {
 // A tile and the printed line 48 would read 6 slots left over from iteration 0.
 export const PRESETS: Record<'uneven' | 'allFromA' | 'shortTileEarly', Preset> = {
   uneven: {
-    label: 'uneven interleaving',
+    get label() {
+      return tr('uneven interleaving', 'xen kẽ không đều');
+    },
     ...fromPattern('AABABAAB' + 'BABBBABB' + 'AAABAAAA' + 'BBABBABB'),
     blocks: 1,
     tile: 8,
     threads: 2,
   },
   allFromA: {
-    label: 'worst case: whole tiles from A',
+    get label() {
+      return tr('worst case: whole tiles from A', 'trường hợp xấu nhất: các ô lấy trọn từ A');
+    },
     ...fromPattern('A'.repeat(16) + 'B'.repeat(8)),
     blocks: 1,
     tile: 8,
     threads: 2,
   },
   shortTileEarly: {
-    label: 'A runs out early',
+    get label() {
+      return tr('A runs out early', 'A hết sớm');
+    },
     ...fromPattern('A'.repeat(10) + 'B'.repeat(30), 0),
     blocks: 1,
     tile: 8,

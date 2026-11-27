@@ -1,0 +1,1 @@
+Giờ tăng lên 1024 giá trị. Bước đầu cần 512 bộ cộng, rồi 256, rồi 128, giảm dần đến một bộ cộng duy nhất ở bước 10. Trung bình chỉ khoảng 102 bộ cộng bận. Phần cứng được thiết kế cho lúc đỉnh thì phần lớn thời gian ngồi không. Các kernel trong phần còn lại của chương này sẽ liên tục gặp phải điều đó.

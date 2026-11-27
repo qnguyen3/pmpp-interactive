@@ -15,6 +15,8 @@
 //     device it holds whatever was there before, which is often harmless.
 //   - No timing, no caches, no memory bandwidth.
 
+import { tr as trText } from '../lib/locale.ts';
+
 export interface Config {
   /** Square matrices of this width, row-major. */
   width: number;
@@ -50,10 +52,18 @@ export const CORRECT: Omit<Config, 'width' | 'tile'> = {
 export type Schedule = 'lockstep' | 'in-order' | 'reversed' | 'shuffled';
 
 export const SCHEDULE_LABEL: Record<Schedule, string> = {
-  lockstep: 'all threads in lockstep',
-  'in-order': 'each thread runs as far as it can, thread 0 first',
-  reversed: 'each thread runs as far as it can, last thread first',
-  shuffled: 'random interleaving',
+  get lockstep() {
+    return trText('all threads in lockstep', 'mọi luồng chạy đồng bộ (lockstep)');
+  },
+  get 'in-order'() {
+    return trText('each thread runs as far as it can, thread 0 first', 'mỗi luồng chạy xa nhất có thể, luồng 0 trước');
+  },
+  get reversed() {
+    return trText('each thread runs as far as it can, last thread first', 'mỗi luồng chạy xa nhất có thể, luồng cuối trước');
+  },
+  get shuffled() {
+    return trText('random interleaving', 'xen kẽ ngẫu nhiên');
+  },
 };
 
 export interface Problem {
@@ -187,7 +197,7 @@ export function runBlock(cfg: Config, prob: Problem, bx: number, by: number, sch
   const stores: BlockTrace['stores'] = [];
   const rand = mulberry(seed);
   // The book writes threads as (row, column); spell out tx and ty so there is no doubt.
-  const name = (t: number) => `thread (tx ${t % T}, ty ${Math.floor(t / T)})`;
+  const name = (t: number) => trText(`thread (tx ${t % T}, ty ${Math.floor(t / T)})`, `luồng (tx ${t % T}, ty ${Math.floor(t / T)})`);
 
   const flag = (s: Step, kind: ViolationKind, message: string) => {
     const v: Violation = { kind, step: s.index, thread: s.thread, message };
@@ -247,8 +257,12 @@ export function runBlock(cfg: Config, prob: Problem, bx: number, by: number, sch
         s.global = { array: isM ? 'M' : 'N', row, col, index: li, access: 'wrap' };
         s.write = { ...ref, value: slot.value, phase: p.ph };
         flag(s, 'wrong-element',
-          `${name(t)} asked for ${isM ? 'M' : 'N'}[${row}][${col}], which does not exist, and got ` +
-            `${isM ? 'M' : 'N'}[${Math.floor(li / W)}][${li % W}] instead`);
+          trText(
+            `${name(t)} asked for ${isM ? 'M' : 'N'}[${row}][${col}], which does not exist, and got ` +
+              `${isM ? 'M' : 'N'}[${Math.floor(li / W)}][${li % W}] instead`,
+            `${name(t)} yêu cầu ${isM ? 'M' : 'N'}[${row}][${col}], phần tử không tồn tại, và lại nhận về ` +
+              `${isM ? 'M' : 'N'}[${Math.floor(li / W)}][${li % W}]`,
+          ));
       } else {
         slot.value = NaN;
         slot.phase = p.ph;
@@ -256,7 +270,10 @@ export function runBlock(cfg: Config, prob: Problem, bx: number, by: number, sch
         s.global = { array: isM ? 'M' : 'N', row, col, index: li, access: 'outside' };
         s.write = { ...ref, value: NaN, phase: p.ph };
         flag(s, 'outside-read',
-          `${name(t)} read ${isM ? 'M' : 'N'}[${row}][${col}], which is beyond the end of the array`);
+          trText(
+            `${name(t)} read ${isM ? 'M' : 'N'}[${row}][${col}], which is beyond the end of the array`,
+            `${name(t)} đọc ${isM ? 'M' : 'N'}[${row}][${col}], nằm ngoài cuối mảng`,
+          ));
       }
     } else if (p.op === 'mul') {
       const k = p.k!;
@@ -272,13 +289,22 @@ export function runBlock(cfg: Config, prob: Problem, bx: number, by: number, sch
         const owner = name(r.r * T + r.c);
         if (slot.phase < p.ph)
           flag(s, 'read-before-write',
-            `${name(t)} read ${at} in phase ${p.ph} before ${owner} had loaded this phase's value into it`);
+            trText(
+              `${name(t)} read ${at} in phase ${p.ph} before ${owner} had loaded this phase's value into it`,
+              `${name(t)} đọc ${at} ở pha ${p.ph} trước khi ${owner} nạp giá trị của pha này vào đó`,
+            ));
         else if (slot.phase > p.ph)
           flag(s, 'overwritten-before-read',
-            `${name(t)} still needed phase ${p.ph}'s value in ${at}, but ${owner} had already overwritten it for phase ${slot.phase}`);
+            trText(
+              `${name(t)} still needed phase ${p.ph}'s value in ${at}, but ${owner} had already overwritten it for phase ${slot.phase}`,
+              `${name(t)} vẫn cần giá trị của pha ${p.ph} trong ${at}, nhưng ${owner} đã ghi đè nó cho pha ${slot.phase}`,
+            ));
         else if (slot.unfilled)
           flag(s, 'unfilled',
-            `${name(t)} used ${at}, which no load filled this phase (its element is out of range and nothing wrote a 0)`);
+            trText(
+              `${name(t)} used ${at}, which no load filled this phase (its element is out of range and nothing wrote a 0)`,
+              `${name(t)} dùng ${at}, ô mà không lần nạp nào điền trong pha này (phần tử của nó nằm ngoài phạm vi và không có gì ghi số 0)`,
+            ));
       }
       pvalue[t] += a.value * b.value;
     } else if (p.op === 'store') {
@@ -293,10 +319,13 @@ export function runBlock(cfg: Config, prob: Problem, bx: number, by: number, sch
         stores.push({ index: li, value: pvalue[t], thread: t });
         s.global = { array: 'P', row: Row, col: Col, index: li, access: 'wrap' };
         flag(s, 'bad-store',
-          `${name(t)} owns no element of P but stored to P[${Row}][${Col}], which lands on P[${Math.floor(li / W)}][${li % W}]`);
+          trText(
+            `${name(t)} owns no element of P but stored to P[${Row}][${Col}], which lands on P[${Math.floor(li / W)}][${li % W}]`,
+            `${name(t)} không sở hữu phần tử nào của P nhưng đã ghi vào P[${Row}][${Col}], vị trí rơi vào P[${Math.floor(li / W)}][${li % W}]`,
+          ));
       } else {
         s.global = { array: 'P', row: Row, col: Col, index: li, access: 'outside' };
-        flag(s, 'bad-store', `${name(t)} stored to P[${Row}][${Col}], beyond the end of the array`);
+        flag(s, 'bad-store', trText(`${name(t)} stored to P[${Row}][${Col}], beyond the end of the array`, `${name(t)} đã ghi vào P[${Row}][${Col}], ngoài cuối mảng`));
       }
     }
     s.pvalue = pvalue[t];

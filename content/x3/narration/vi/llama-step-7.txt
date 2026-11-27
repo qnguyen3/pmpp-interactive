@@ -1,0 +1,1 @@
+Đây là các con số tổng cho mô hình này: số lần khởi chạy cho mỗi token, và số byte trọng số mà mỗi token đọc. Gần đầu một chuỗi, các phép nhân ma trận chiếm phần lớn. Khi pos tăng, attention đọc nhiều cache hơn ở mỗi bước, và phần lưu lượng của nó cứ tăng dần, trong khi các trọng số vẫn giữ nguyên.

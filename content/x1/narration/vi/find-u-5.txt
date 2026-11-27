@@ -1,0 +1,1 @@
+Gần một ranh giới, việc làm tròn quyết định. Ở đây cùng những token còn lại được cộng theo hai thứ tự: từ trái sang phải, và theo thứ tự của kernel. Hai tổng khác nhau ở bit cuối cùng, và cùng một mục tiêu chọn ra hai token kề nhau. Một phép kiểm thử phải chấp nhận token nào cũng được cho một lần rút gần đến vậy.

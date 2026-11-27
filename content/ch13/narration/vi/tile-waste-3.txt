@@ -1,0 +1,1 @@
+Ô tiếp theo bắt đầu ngay sau phần đã dùng, ở phần tử 5 của A và phần tử 3 của B. Vậy 3 phần tử của A và 5 của B chưa được dùng lại bị nạp lần nữa. Lần này, các đầu ra dùng 2 của A và 6 của B. Trên toàn bộ phép trộn, khối nạp 55 phần tử để ghi 32.

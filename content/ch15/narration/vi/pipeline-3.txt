@@ -1,0 +1,1 @@
+Cho cặp ô tiếp theo một buffer thứ hai, và phụ thuộc giả biến mất, nên rào chắn của nó cũng được bỏ đi. Nhưng hãy nhìn các làn. Lần nạp cặp tiếp theo vẫn nằm ở vòng lặp sau, sau phần tính toán này, nên hai làn vẫn thay phiên nhau. Bốn cặp vẫn mất 8 đơn vị thời gian.

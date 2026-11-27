@@ -11,6 +11,8 @@
 //                      slots, numbered by a counter or by blockIdx: progress or a starving spin;
 // plus the related patterns of §12.8 (dedupFlags, moveByIndex, blockDependencies).
 
+import { tr } from '../lib/locale.ts';
+
 // ---------------------------------------------------------------- shared helpers
 
 /** Exclusive prefix sum: out[i] = xs[0] + ... + xs[i-1], out[0] = 0. */
@@ -46,11 +48,11 @@ export type Direction = 'remove' | 'insert';
  */
 export type WriteKind = 'own' | 'same' | 'earlier' | 'later' | 'fresh';
 export const KIND_LABEL: Record<WriteKind, string> = {
-  own: 'own slot',
-  same: 'same block: barrier',
-  earlier: 'earlier block: scan chain',
-  later: 'later block: chain runs backwards',
-  fresh: 'empty slot: nothing to protect',
+  get own() { return tr('own slot', 'ô của chính nó'); },
+  get same() { return tr('same block: barrier', 'cùng khối: rào chắn'); },
+  get earlier() { return tr('earlier block: scan chain', 'khối trước: chuỗi scan'); },
+  get later() { return tr('later block: chain runs backwards', 'khối sau: chuỗi chạy ngược'); },
+  get fresh() { return tr('empty slot: nothing to protect', 'ô trống: không có gì cần bảo vệ'); },
 };
 
 export interface Write {
@@ -193,36 +195,36 @@ export interface Verdict {
  */
 export function orderingVerdict(cfg: PuzzleConfig, reader: Who, writer: Who): Verdict {
   const links: Link[] = [];
-  const readName = reader === 'leader' ? "block i's leader reads slot s" : 'another thread of block i reads slot s';
+  const readName = reader === 'leader' ? tr("block i's leader reads slot s", 'luồng dẫn đầu của khối i đọc ô s') : tr('another thread of block i reads slot s', 'một luồng khác của khối i đọc ô s');
   if (reader === 'leader')
-    links.push({ from: readName, to: "block i's leader stores the flag", why: 'sequenced before: same thread, program order', ok: true });
+    links.push({ from: readName, to: tr("block i's leader stores the flag", 'luồng dẫn đầu của khối i store cờ'), why: tr('sequenced before: same thread, program order', 'sequenced before: cùng một luồng, theo thứ tự chương trình'), ok: true });
   else
     links.push(
       cfg.barrierI
-        ? { from: readName, to: "block i's leader stores the flag", why: 'the barrier in block i: every read before it happens before the store after it', ok: true }
-        : { from: readName, to: "block i's leader stores the flag", why: 'no barrier in block i: nothing orders another thread\'s read before the leader\'s store', ok: false },
+        ? { from: readName, to: tr("block i's leader stores the flag", 'luồng dẫn đầu của khối i store cờ'), why: tr('the barrier in block i: every read before it happens before the store after it', 'rào chắn trong khối i: mọi lần đọc trước nó happens-before lần store sau nó'), ok: true }
+        : { from: readName, to: tr("block i's leader stores the flag", 'luồng dẫn đầu của khối i store cờ'), why: tr('no barrier in block i: nothing orders another thread\'s read before the leader\'s store', 'khối i không có rào chắn: không gì xếp lần đọc của luồng khác trước lần store của luồng dẫn đầu'), ok: false },
     );
   const sync = cfg.publish === 'release' && cfg.observe === 'acquire';
   links.push({
-    from: "block i's leader stores the flag",
-    to: "block j's leader loads the flag and sees it set",
+    from: tr("block i's leader stores the flag", 'luồng dẫn đầu của khối i store cờ'),
+    to: tr("block j's leader loads the flag and sees it set", 'luồng dẫn đầu của khối j load cờ và thấy cờ đã được đặt'),
     why: sync
-      ? 'synchronizes with: a release store read by an acquire load'
+      ? tr('synchronizes with: a release store read by an acquire load', 'synchronizes with: một store release được một load acquire đọc')
       : cfg.publish === 'relaxed' && cfg.observe === 'relaxed'
-        ? 'no synchronization: both the store and the load are relaxed'
+        ? tr('no synchronization: both the store and the load are relaxed', 'không đồng bộ hóa: cả store lẫn load đều relaxed')
         : cfg.publish === 'relaxed'
-          ? 'no synchronization: a relaxed store releases nothing, even to an acquire load'
-          : 'no synchronization: a relaxed load acquires nothing, even from a release store',
+          ? tr('no synchronization: a relaxed store releases nothing, even to an acquire load', 'không đồng bộ hóa: store relaxed không release gì cả, kể cả cho một load acquire')
+          : tr('no synchronization: a relaxed load acquires nothing, even from a release store', 'không đồng bộ hóa: load relaxed không acquire gì cả, kể cả từ một store release'),
     ok: sync,
   });
-  const writeName = writer === 'leader' ? "block j's leader writes slot s" : 'another thread of block j writes slot s';
+  const writeName = writer === 'leader' ? tr("block j's leader writes slot s", 'luồng dẫn đầu của khối j ghi ô s') : tr('another thread of block j writes slot s', 'một luồng khác của khối j ghi ô s');
   if (writer === 'leader')
-    links.push({ from: "block j's leader loads the flag and sees it set", to: writeName, why: 'sequenced before: same thread, program order', ok: true });
+    links.push({ from: tr("block j's leader loads the flag and sees it set", 'luồng dẫn đầu của khối j load cờ và thấy cờ đã được đặt'), to: writeName, why: tr('sequenced before: same thread, program order', 'sequenced before: cùng một luồng, theo thứ tự chương trình'), ok: true });
   else
     links.push(
       cfg.barrierJ
-        ? { from: "block j's leader loads the flag and sees it set", to: writeName, why: 'the barrier in block j: the load before it happens before every write after it', ok: true }
-        : { from: "block j's leader loads the flag and sees it set", to: writeName, why: 'no barrier in block j: the other threads may write before the leader has seen the flag', ok: false },
+        ? { from: tr("block j's leader loads the flag and sees it set", 'luồng dẫn đầu của khối j load cờ và thấy cờ đã được đặt'), to: writeName, why: tr('the barrier in block j: the load before it happens before every write after it', 'rào chắn trong khối j: lần load trước nó happens-before mọi lần ghi sau nó'), ok: true }
+        : { from: tr("block j's leader loads the flag and sees it set", 'luồng dẫn đầu của khối j load cờ và thấy cờ đã được đặt'), to: writeName, why: tr('no barrier in block j: the other threads may write before the leader has seen the flag', 'khối j không có rào chắn: các luồng khác có thể ghi trước khi luồng dẫn đầu thấy cờ'), ok: false },
     );
   const bad = links.find((l) => !l.ok);
   return { ordered: !bad, links, missing: bad ? bad.why : null };
@@ -310,7 +312,7 @@ export function chainTimeline(o: ChainOptions): ChainRun {
   const frames: ChainFrame[] = [];
   const snap = (step: number, events: string[]) =>
     frames.push({ step, blocks: blocks.map((b) => ({ ...b })), counter, flagAt: [...flagAt], array: [...array], events });
-  snap(0, ['nothing has started']);
+  snap(0, [tr('nothing has started', 'chưa có gì bắt đầu')]);
   const range = (num: number) => {
     const out: number[] = [];
     for (let s = num * o.perBlock; s < Math.min(n, (num + 1) * o.perBlock); s++) out.push(s);
@@ -327,7 +329,7 @@ export function chainTimeline(o: ChainOptions): ChainRun {
       if (b.phase === 'write') {
         b.phase = 'done';
         free.push(b.slot!);
-        events.push(`number ${b.num} is done`);
+        events.push(tr(`number ${b.num} is done`, `số ${b.num} xong`));
         b.slot = null;
       }
     const used = new Set(blocks.filter((b) => b.slot != null).map((b) => b.slot!));
@@ -342,11 +344,11 @@ export function chainTimeline(o: ChainOptions): ChainRun {
           b.phase = 'read';
           held.set(num, range(num).map((s) => array[s]));
           for (const s of range(num)) readDone[s] = true;
-          events.push(`number ${num} reads slots ${range(num)[0]} to ${range(num)[range(num).length - 1]}`);
+          events.push(tr(`number ${num} reads slots ${range(num)[0]} to ${range(num)[range(num).length - 1]}`, `số ${num} đọc các ô ${range(num)[0]} đến ${range(num)[range(num).length - 1]}`));
           break;
         case 'read':
           b.phase = 'scan';
-          events.push(`number ${num} counts its kept keys`);
+          events.push(tr(`number ${num} counts its kept keys`, `số ${num} đếm các khóa nó giữ lại`));
           break;
         case 'scan':
         case 'wait': {
@@ -359,11 +361,11 @@ export function chainTimeline(o: ChainOptions): ChainRun {
             b.phase = 'publish';
             b.waitsOn = null;
             flagAt[num] = step;
-            events.push(num === 0 ? 'number 0 publishes its total (release)' : `number ${num} sees number ${num - 1}'s flag (acquire) and publishes its own (release)`);
+            events.push(num === 0 ? tr('number 0 publishes its total (release)', 'số 0 công bố tổng của nó (release)') : tr(`number ${num} sees number ${num - 1}'s flag (acquire) and publishes its own (release)`, `số ${num} thấy cờ của số ${num - 1} (acquire) và công bố cờ của nó (release)`));
           } else {
             b.phase = 'wait';
             b.waitsOn = num - 1;
-            events.push(`number ${num} waits for number ${num - 1}'s flag`);
+            events.push(tr(`number ${num} waits for number ${num - 1}'s flag`, `số ${num} chờ cờ của số ${num - 1}`));
           }
           break;
         }
@@ -380,7 +382,7 @@ export function chainTimeline(o: ChainOptions): ChainRun {
       b.slot = s;
       b.phase = 'index';
       b.num = o.numbering === 'dynamic' ? counter++ : hw;
-      events.push(o.numbering === 'dynamic' ? `blockIdx ${hw} starts and takes number ${b.num}` : `blockIdx ${hw} starts as number ${b.num}`);
+      events.push(o.numbering === 'dynamic' ? tr(`blockIdx ${hw} starts and takes number ${b.num}`, `blockIdx ${hw} bắt đầu và lấy số ${b.num}`) : tr(`blockIdx ${hw} starts as number ${b.num}`, `blockIdx ${hw} bắt đầu với số ${b.num}`));
     }
     if (blocks.every((b) => b.phase === 'done')) {
       snap(step, events);
@@ -405,7 +407,7 @@ export function chainTimeline(o: ChainOptions): ChainRun {
       if (!readDone[to]) hazards++;
       array[to] = vals[k];
     });
-    events.push(`number ${num} writes its kept keys`);
+    events.push(tr(`number ${num} writes its kept keys`, `số ${num} ghi các khóa nó giữ lại`));
   }
   const count = offset[n - 1] + (o.keep[n - 1] ? 1 : 0);
   const last = frames[frames.length - 1];
@@ -479,7 +481,7 @@ export function moveByIndex(p: MatrixPattern): Moved {
     for (let r = 0; r < R; r++)
       for (let c = 0; c < C; c++) {
         const src = r * C + c;
-        if (rm.includes(r)) moves.push({ src, dest: null, r, c, formula: `row ${r} is removed` });
+        if (rm.includes(r)) moves.push({ src, dest: null, r, c, formula: tr(`row ${r} is removed`, `hàng ${r} bị xóa`) });
         else {
           const nr = r - below(rm, r);
           moves.push({ src, dest: nr * C + c, r, c, formula: `(${r} − ${below(rm, r)}) × ${C} + ${c} = ${nr * C + c}` });
@@ -493,7 +495,7 @@ export function moveByIndex(p: MatrixPattern): Moved {
     for (let r = 0; r < R; r++)
       for (let c = 0; c < C; c++) {
         const src = r * C + c;
-        if (rm.includes(c)) moves.push({ src, dest: null, r, c, formula: `column ${c} is removed` });
+        if (rm.includes(c)) moves.push({ src, dest: null, r, c, formula: tr(`column ${c} is removed`, `cột ${c} bị xóa`) });
         else {
           const nc = c - below(rm, c);
           moves.push({ src, dest: r * W + nc, r, c, formula: `${r} × ${W} + (${c} − ${below(rm, c)}) = ${r * W + nc}` });
@@ -518,7 +520,7 @@ export function dedupMoves(sorted: number[]): Move[] {
     dest: d.keep[i] ? d.offset[i] : null,
     r: 0,
     c: i,
-    formula: d.keep[i] ? `offset[${i}] = ${d.offset[i]} (exclusive scan of the keep flags)` : `same as key ${i - 1}: dropped`,
+    formula: d.keep[i] ? tr(`offset[${i}] = ${d.offset[i]} (exclusive scan of the keep flags)`, `offset[${i}] = ${d.offset[i]} (scan loại trừ của các cờ giữ lại)`) : tr(`same as key ${i - 1}: dropped`, `giống khóa ${i - 1}: bị bỏ`),
   }));
 }
 

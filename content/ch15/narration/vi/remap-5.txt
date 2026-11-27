@@ -1,0 +1,1 @@
+Giờ hãy chạy lại lệnh ghi. Mỗi lane ghi một hàng của một hình vuông: 16 byte. 4 lane trong một hàng lane nằm cạnh nhau, nên cùng nhau chúng ghi 64 byte liên tục. 8 hàng lane tạo thành 16 sector, và mọi byte warp di chuyển đều là byte nó đã yêu cầu.

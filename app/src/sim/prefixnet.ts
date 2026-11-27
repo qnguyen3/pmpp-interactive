@@ -38,9 +38,13 @@
 // Erasable TypeScript only: the browser checks import this file directly in Node.
 
 // ---------------------------------------------------------------- networks
+import { tr } from '../lib/locale.ts';
+
 export type NetId = 'sequential' | 'kogge-stone' | 'brent-kung';
 export const NET_LABEL: Record<NetId, string> = {
-  sequential: 'sequential loop',
+  get sequential() {
+    return tr('sequential loop', 'vòng lặp tuần tự');
+  },
   'kogge-stone': 'Kogge-Stone',
   'brent-kung': 'Brent-Kung',
 };
@@ -217,8 +221,8 @@ export function closedForm(id: NetId | 'naive', n: number): number {
 export const CLOSED_FORM_TEXT: Record<NetId | 'naive', string> = {
   sequential: 'N − 1',
   naive: 'N(N − 1)/2',
-  'kogge-stone': 'N·log₂N − (N − 1)',
-  'brent-kung': '2N − 2 − log₂N',
+  'kogge-stone': 'N·log₂N − (N − 1)', // i18n-ignore: closed-form formula
+  'brent-kung': '2N − 2 − log₂N', // i18n-ignore: closed-form formula
 };
 
 /**
@@ -256,9 +260,15 @@ export const threadsOf = (id: NetId, n: number) => (id === 'sequential' ? 1 : id
 
 export type Charge = 'adds' | 'warps' | 'threads';
 export const CHARGE_LABEL: Record<Charge, string> = {
-  adds: 'its additions',
-  warps: 'whole warps',
-  threads: 'every thread (the book)',
+  get adds() {
+    return tr('its additions', 'các phép cộng thực có của nó');
+  },
+  get warps() {
+    return tr('whole warps', 'trọn warp');
+  },
+  get threads() {
+    return tr('every thread (the book)', 'mọi luồng (theo sách)');
+  },
 };
 
 /** Lane slots one step is charged under a rule. */
@@ -371,10 +381,10 @@ export function reverseLevels(n: number): ReverseLevel[] {
   const net = brentKung(n);
   const all = ranges(net);
   const up = upSteps(net);
-  const rows: ReverseLevel[] = [{ label: 'Initial', step: up, ranges: all[up], needs: needs(all[up]), changed: [] }];
+  const rows: ReverseLevel[] = [{ get label() { return tr('Initial', 'Ban đầu'); }, step: up, ranges: all[up], needs: needs(all[up]), changed: [] }];
   for (let k = up; k < net.steps.length; k++)
     rows.push({
-      label: `Level ${net.steps[k].level}`,
+      label: tr(`Level ${net.steps[k].level}`, `Mức ${net.steps[k].level}`),
       step: k + 1,
       ranges: all[k + 1],
       needs: needs(all[k + 1]),

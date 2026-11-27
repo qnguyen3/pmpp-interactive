@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Scene, type Beat } from '../../components/Scene';
 import { SCENE, sceneModel } from '../../sim/decompose';
+import { Translated, tr } from '../../lib/i18n';
 
 // "Gather and scatter, in time": a valid 1-D convolution of 8 inputs into 6 outputs, each
 // the sum of 3 neighbours, cut both ways. Every number drawn (arrows, writer counts, the
@@ -68,9 +69,9 @@ function Thread({ x, label, hot }: { x: number; label: string; hot?: boolean }) 
 function Labels({ outs = true, threads = true }: { outs?: boolean; threads?: boolean }) {
   return (
     <g>
-      <text x={14} y={IN_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>in</text>
-      {threads ? <text x={14} y={TH_Y + 4} fontSize="12" style={{ fill: 'var(--ink-2)' }}>threads</text> : null}
-      {outs ? <text x={14} y={OUT_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>out</text> : null}
+      <text x={14} y={IN_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="vào">in</Translated></text>
+      {threads ? <text x={14} y={TH_Y + 4} fontSize="12" style={{ fill: 'var(--ink-2)' }}><Translated vi="luồng">threads</Translated></text> : null}
+      {outs ? <text x={14} y={OUT_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="ra">out</Translated></text> : null}
     </g>
   );
 }
@@ -96,7 +97,7 @@ function Headline({ children }: { children: ReactNode }) {
 
 function Stage({ beat, children }: { beat: number; children: ReactNode }) {
   return (
-    <svg viewBox={`0 0 ${W} 360`} role="img" aria-label="Gather and scatter on a small convolution" style={{ width: '100%', maxWidth: W, display: 'block', margin: '0 auto' }}>
+    <svg viewBox={`0 0 ${W} 360`} role="img" aria-label={tr('Gather and scatter on a small convolution', 'Gather và scatter trên một phép tích chập nhỏ')} style={{ width: '100%', maxWidth: W, display: 'block', margin: '0 auto' }}>
       <g data-beat={beat}>{children}</g>
     </svg>
   );
@@ -108,7 +109,7 @@ function Graph({ p }: { p: number }) {
   return (
     <Stage beat={1}>
       <Labels threads={false} />
-      <Inputs counts={(i) => (p > 0.6 ? `feeds ${M.fanOut[i]}` : null)} />
+      <Inputs counts={(i) => (p > 0.6 ? tr(`feeds ${M.fanOut[i]}`, `cấp cho ${M.fanOut[i]}`) : null)} />
       {M.p.edges.slice(0, shown).map((e, k) => (
         <Arrow key={k} x1={inC(e.i)} y1={IN_Y + CH} x2={outC(e.o)} y2={OUT_Y - 2} color="var(--ink-3)" />
       ))}
@@ -116,7 +117,7 @@ function Graph({ p }: { p: number }) {
         {Array.from({ length: NO }, (_, o) => <Cell key={o} x={outX(o)} y={OUT_Y} v="" />)}
       </g>
       <g data-edges={shown} data-fanout={M.fanOut.join(' ')} />
-      <Headline>{p > 0.6 ? `${NI} inputs, ${NO} outputs: every input feeds up to ${Math.max(...M.fanOut)} outputs` : `each output is the sum of ${SCENE.w} neighbouring inputs`}</Headline>
+      <Headline>{p > 0.6 ? tr(`${NI} inputs, ${NO} outputs: every input feeds up to ${Math.max(...M.fanOut)} outputs`, `${NI} đầu vào, ${NO} đầu ra: mỗi đầu vào cấp cho tối đa ${Math.max(...M.fanOut)} đầu ra`) : tr(`each output is the sum of ${SCENE.w} neighbouring inputs`, `mỗi đầu ra là tổng của ${SCENE.w} đầu vào lân cận`)}</Headline>
     </Stage>
   );
 }
@@ -149,8 +150,8 @@ function Gather({ p }: { p: number }) {
           <Cell key={o} x={outX(o)} y={OUT_Y} v={written ? s : ''} stroke={written ? 'var(--ok)' : 'var(--rule)'} fill={written ? 'var(--ok-wash)' : 'var(--cell)'} />
         ))}
       </g>
-      <text x={W - 14} y={TH_Y + 40} fontSize="11" textAnchor="end" style={{ fill: 'var(--reg)' }}>running sum: a register</text>
-      <Headline>{written ? `tick 1: ${NO} writes, ${NO} different cells, no atomics` : `${M.gather.metrics.threads} threads, one per output, each adds its ${SCENE.w} inputs in a register`}</Headline>
+      <text x={W - 14} y={TH_Y + 40} fontSize="11" textAnchor="end" style={{ fill: 'var(--reg)' }}><Translated vi="tổng tích lũy: một thanh ghi">running sum: a register</Translated></text>
+      <Headline>{written ? tr(`tick 1: ${NO} writes, ${NO} different cells, no atomics`, `nhịp 1: ${NO} lần ghi, ${NO} ô khác nhau, không cần atomic`) : tr(`${M.gather.metrics.threads} threads, one per output, each adds its ${SCENE.w} inputs in a register`, `${M.gather.metrics.threads} luồng, mỗi luồng một đầu ra, mỗi luồng cộng ${SCENE.w} đầu vào của nó trong một thanh ghi`)}</Headline>
     </Stage>
   );
 }
@@ -185,12 +186,12 @@ function Scatter({ p }: { p: number }) {
           <g key={o}>
             <Cell x={outX(o)} y={OUT_Y} v="" stroke={flash && n > 1 ? 'var(--fail)' : 'var(--rule)'} fill={flash && n > 1 ? 'var(--fail-wash)' : 'var(--cell)'} />
             {flash ? (
-              <text x={outC(o)} y={OUT_Y + CH + 16} fontSize="11.5" fontWeight="600" textAnchor="middle" style={{ fill: 'var(--fail)' }}>{n} writers</text>
+              <text x={outC(o)} y={OUT_Y + CH + 16} fontSize="11.5" fontWeight="600" textAnchor="middle" style={{ fill: 'var(--fail)' }}><Translated vi={<>{n} luồng ghi</>}>{n} writers</Translated></text>
             ) : null}
           </g>
         ))}
       </g>
-      <Headline>{flash ? `${M.scatter.metrics.outputsNeedingAtomics} outputs, ${M.scatter.metrics.worstWriters} writers each: ${M.scatter.metrics.atomicUpdates} atomic updates` : `${M.scatter.metrics.threads} threads, one per input, each pushes into up to ${M.scatter.metrics.worstWriters} outputs`}</Headline>
+      <Headline>{flash ? tr(`${M.scatter.metrics.outputsNeedingAtomics} outputs, ${M.scatter.metrics.worstWriters} writers each: ${M.scatter.metrics.atomicUpdates} atomic updates`, `${M.scatter.metrics.outputsNeedingAtomics} đầu ra, mỗi đầu ra ${M.scatter.metrics.worstWriters} luồng ghi: ${M.scatter.metrics.atomicUpdates} lần cập nhật atomic`) : tr(`${M.scatter.metrics.threads} threads, one per input, each pushes into up to ${M.scatter.metrics.worstWriters} outputs`, `${M.scatter.metrics.threads} luồng, mỗi luồng một đầu vào, mỗi luồng đẩy vào tối đa ${M.scatter.metrics.worstWriters} đầu ra`)}</Headline>
     </Stage>
   );
 }
@@ -222,12 +223,14 @@ function Queue({ p }: { p: number }) {
       </g>
       <g>
         <rect x={W - 210} y={OUT_Y + CH + 8} width={196} height={46} rx="3" fill="var(--page)" stroke="var(--rule)" />
-        <text x={W - 200} y={OUT_Y + CH + 27} fontSize="12" fontWeight="600" data-scatter-tick={tick}>scatter: tick {tick} of {TICKS}</text>
+        <text x={W - 200} y={OUT_Y + CH + 27} fontSize="12" fontWeight="600" data-scatter-tick={tick}><Translated vi={<>scatter: nhịp {tick} trên {TICKS}</>}>scatter: tick {tick} of {TICKS}</Translated></text>
         <text x={W - 200} y={OUT_Y + CH + 45} fontSize="12" style={{ fill: 'var(--ink-2)' }} data-gather-done={M.gatherTicks.ticks[0].served.length}>
-          gather: {M.gatherTicks.ticks[0].served.length} of {NO} written at tick 1
+          <Translated vi={<>gather: {M.gatherTicks.ticks[0].served.length} trên {NO} đã ghi ở nhịp 1</>}>
+            gather: {M.gatherTicks.ticks[0].served.length} of {NO} written at tick 1
+          </Translated>
         </text>
       </g>
-      <Headline>{tick < TICKS ? 'one address serves one update per tick' : `${TICKS} ticks to drain ${M.scatter.metrics.atomicUpdates} updates; gather needed 1`}</Headline>
+      <Headline>{tick < TICKS ? tr('one address serves one update per tick', 'một địa chỉ phục vụ một lần cập nhật mỗi nhịp') : tr(`${TICKS} ticks to drain ${M.scatter.metrics.atomicUpdates} updates; gather needed 1`, `${TICKS} nhịp để xử lý hết ${M.scatter.metrics.atomicUpdates} lần cập nhật; gather chỉ cần 1`)}</Headline>
     </Stage>
   );
 }
@@ -243,7 +246,7 @@ function NotFree({ p }: { p: number }) {
         <Labels outs={false} />
         <Inputs
           wash={(i) => (show > 0 && M.reads[i] > 1 ? 'var(--shared-wash)' : undefined)}
-          counts={(i) => (show > 0 ? `read ${M.reads[i]}×` : null)}
+          counts={(i) => (show > 0 ? tr(`read ${M.reads[i]}×`, `đọc ${M.reads[i]}×`) : null)}
           countColor="var(--shared)"
         />
         {M.gather.workers.map((w) => (
@@ -257,12 +260,14 @@ function NotFree({ p }: { p: number }) {
             <g>
               <rect x={inX(0) - 6} y={IN_Y - 26} width={inX(NI - 1) + CW + 12 - (inX(0) - 6)} height={CH + 32} rx="5" fill="none" stroke="var(--shared)" strokeWidth="2" strokeDasharray="5 4" />
               <text x={W / 2} y={OUT_Y + 8} fontSize="12.5" textAnchor="middle" style={{ fill: 'var(--shared)' }}>
-                {total} reads of {NI} inputs: a block could load the {NI} once into shared memory
+                <Translated vi={<>{total} lần đọc {NI} đầu vào: một khối có thể nạp {NI} đầu vào đó một lần vào bộ nhớ chia sẻ</>}>
+                  {total} reads of {NI} inputs: a block could load the {NI} once into shared memory
+                </Translated>
               </text>
             </g>
           ) : null}
         </g>
-        <Headline>gather shares inputs between threads</Headline>
+        <Headline><Translated vi="gather chia sẻ đầu vào giữa các luồng">gather shares inputs between threads</Translated></Headline>
       </Stage>
     );
   }
@@ -274,7 +279,7 @@ function NotFree({ p }: { p: number }) {
   const found = hp.values.slice(0, cursor).filter((v) => v === bin).length;
   return (
     <Stage beat={5}>
-      <text x={14} y={IN_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}>in: bin</text>
+      <text x={14} y={IN_Y + CH / 2 + 4} fontSize="12" fontWeight="600" style={{ fill: 'var(--global)' }}><Translated vi="vào: bin">in: bin</Translated></text>
       <g data-row="hist" data-values={hp.values.join(' ')} data-inspected={cursor} data-found={found} data-inspects={w.inspects}>
         {hp.values.map((v, i) => {
           const seen = i < cursor;
@@ -282,7 +287,7 @@ function NotFree({ p }: { p: number }) {
           return (
             <g key={i}>
               <Cell x={inX(i)} y={IN_Y} v={v} fill={mine ? 'var(--global)' : seen ? 'var(--global-wash)' : 'var(--cell)'} stroke="var(--global)" ink={mine ? 'var(--page)' : 'var(--ink)'} />
-              {seen ? <text x={inC(i)} y={IN_Y - 8} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{mine ? 'mine' : 'no'}</text> : null}
+              {seen ? <text x={inC(i)} y={IN_Y - 8} fontSize="11" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>{mine ? tr('mine', 'của tôi') : tr('no', 'không')}</text> : null}
             </g>
           );
         })}
@@ -294,50 +299,63 @@ function NotFree({ p }: { p: number }) {
       <rect x={W / 2 + 20} y={TH_Y - 11} width={30} height={22} rx="2" fill="var(--reg-wash)" stroke="var(--reg)" />
       <text x={W / 2 + 35} y={TH_Y + 4} fontSize="11.5" textAnchor="middle" style={{ fill: 'var(--reg)' }}>{found}</text>
       <text x={W / 2} y={OUT_Y - 30} fontSize="12.5" textAnchor="middle" style={{ fill: 'var(--ink-2)' }}>
-        A histogram, one thread per bin: {SCENE.histBins} bins of {hp.nIn} inputs (each input's value mod {SCENE.histBins}).
+        <Translated vi={<>Một histogram, mỗi bin một luồng: {SCENE.histBins} bin trên {hp.nIn} đầu vào (giá trị của mỗi đầu vào mod {SCENE.histBins}).</>}>
+          A histogram, one thread per bin: {SCENE.histBins} bins of {hp.nIn} inputs (each input's value mod {SCENE.histBins}).
+        </Translated>
       </text>
-      <Headline>{`inspected ${cursor} of ${w.inspects} inputs, found ${found} of its ${w.useful.length}`}</Headline>
+      <Headline>{tr(`inspected ${cursor} of ${w.inspects} inputs, found ${found} of its ${w.useful.length}`, `đã xem ${cursor} trên ${w.inspects} đầu vào, tìm thấy ${found} trên ${w.useful.length} của nó`)}</Headline>
     </Stage>
   );
 }
 
 // ---------------------------------------------------------------- beat 6: the questions
-const QUESTIONS = ['Who writes each output?', 'Who reads each input?', 'How many threads does the cut expose?', 'How much work does each thread get?'];
-const CRITERIA = ['gather or scatter: are atomics needed?', 'the parallelism exposed', 'how easily a thread finds its inputs', 'load balance', 'others that depend on the application'];
+const QUESTIONS = () => [
+  tr('Who writes each output?', 'Ai ghi mỗi đầu ra?'),
+  tr('Who reads each input?', 'Ai đọc mỗi đầu vào?'),
+  tr('How many threads does the cut expose?', 'Cách cắt này lộ ra bao nhiêu luồng?'),
+  tr('How much work does each thread get?', 'Mỗi luồng nhận bao nhiêu việc?'),
+];
+const CRITERIA = () => [
+  tr('gather or scatter: are atomics needed?', 'gather hay scatter: có cần atomic không?'),
+  tr('the parallelism exposed', 'mức song song được lộ ra'),
+  tr('how easily a thread finds its inputs', 'một luồng tìm đầu vào của nó dễ đến đâu'),
+  tr('load balance', 'cân bằng tải'),
+  tr('others that depend on the application', 'các tiêu chí khác tùy ứng dụng'),
+];
 
 function Summary({ p }: { p: number }) {
-  const q = Math.ceil(ramp(p, 0.05, 0.6) * QUESTIONS.length);
-  const c = Math.ceil(ramp(p, 0.55, 0.9) * CRITERIA.length);
+  const q = Math.ceil(ramp(p, 0.05, 0.6) * QUESTIONS().length);
+  const c = Math.ceil(ramp(p, 0.55, 0.9) * CRITERIA().length);
   return (
     <Stage beat={6}>
       <rect x={24} y={24} width={W - 48} height={290} rx="6" fill="var(--page)" stroke="var(--rule)" />
-      <text x={48} y={60} fontSize="14" fontWeight="600">Before writing a kernel, ask</text>
+      <text x={48} y={60} fontSize="14" fontWeight="600"><Translated vi="Trước khi viết một kernel, hãy hỏi">Before writing a kernel, ask</Translated></text>
       <g data-questions={q}>
-        {QUESTIONS.slice(0, q).map((s, k) => (
+        {QUESTIONS().slice(0, q).map((s, k) => (
           <text key={k} x={48} y={98 + k * 34} fontSize="14">{k + 1}. {s}</text>
         ))}
       </g>
       <line x1={W / 2 + 10} x2={W / 2 + 10} y1={44} y2={294} stroke="var(--rule)" />
-      <text x={W / 2 + 32} y={60} fontSize="14" fontWeight="600">The book's criteria (p. 533)</text>
+      <text x={W / 2 + 32} y={60} fontSize="14" fontWeight="600"><Translated vi="Các tiêu chí của sách (p. 533)">The book's criteria (p. 533)</Translated></text>
       <g data-criteria={c}>
-        {CRITERIA.slice(0, c).map((s, k) => (
+        {CRITERIA().slice(0, c).map((s, k) => (
           <text key={k} x={W / 2 + 32} y={98 + k * 34} fontSize="13.5">{s}</text>
         ))}
       </g>
-      <Headline>atomics are one question of several</Headline>
+      <Headline><Translated vi="atomic chỉ là một trong nhiều câu hỏi">atomics are one question of several</Translated></Headline>
     </Stage>
   );
 }
 
 const beats: Beat[] = [
-  { clip: 'gather-scatter-1', label: 'Two ways to cut', draw: (p) => <Graph p={p} /> },
-  { clip: 'gather-scatter-2', label: 'Gather', draw: (p) => <Gather p={p} /> },
-  { clip: 'gather-scatter-3', label: 'Scatter', draw: (p) => <Scatter p={p} /> },
-  { clip: 'gather-scatter-4', label: 'The queue', draw: (p) => <Queue p={p} /> },
-  { clip: 'gather-scatter-5', label: 'Gather is not free', draw: (p) => <NotFree p={p} /> },
-  { clip: 'gather-scatter-6', label: 'Four questions', draw: (p) => <Summary p={p} /> },
+  { clip: 'gather-scatter-1', get label() { return tr('Two ways to cut', 'Hai cách cắt'); }, draw: (p) => <Graph p={p} /> },
+  { clip: 'gather-scatter-2', get label() { return tr('Gather', 'Gather'); }, draw: (p) => <Gather p={p} /> },
+  { clip: 'gather-scatter-3', get label() { return tr('Scatter', 'Scatter'); }, draw: (p) => <Scatter p={p} /> },
+  { clip: 'gather-scatter-4', get label() { return tr('The queue', 'Hàng đợi'); }, draw: (p) => <Queue p={p} /> },
+  { clip: 'gather-scatter-5', get label() { return tr('Gather is not free', 'Gather không miễn phí'); }, draw: (p) => <NotFree p={p} /> },
+  { clip: 'gather-scatter-6', get label() { return tr('Four questions', 'Bốn câu hỏi'); }, draw: (p) => <Summary p={p} /> },
 ];
 
 export function GatherScatterScene() {
-  return <Scene chapter="ch22" title="Gather and scatter, in time" beats={beats} />;
+  return <Scene chapter="ch22" title={tr('Gather and scatter, in time', 'Gather và scatter, theo thời gian')} beats={beats} />;
 }

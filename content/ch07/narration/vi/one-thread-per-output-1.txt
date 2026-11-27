@@ -1,0 +1,1 @@
+Đây là ví dụ đồ chơi của sách: một ảnh 16 nhân 16, được cắt thành 16 khối, mỗi khối 4 nhân 4 luồng. Mỗi luồng sở hữu đúng một đầu ra. Không có hai luồng nào chia nhau công việc, và không luồng nào phải chờ luồng khác. Sự độc lập đó là điều khiến tích chập hợp với GPU một cách dễ dàng như vậy.

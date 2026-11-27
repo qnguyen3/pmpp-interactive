@@ -1,0 +1,1 @@
+Với hai buffer, mỗi luồng đọc từ một buffer và ghi vào buffer kia. Luồng 0 có thể chạy trước và ghi, mà luồng bên cạnh chậm hơn vẫn đọc được giá trị cũ, không bị ảnh hưởng. Còn lại một rào chắn, sau lần ghi, cho sự phụ thuộc thật. Rồi mỗi luồng hoán đổi hai con trỏ của riêng nó, để vòng lặp kế tiếp đọc đúng những gì vừa được ghi.

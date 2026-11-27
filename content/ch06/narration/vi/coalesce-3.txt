@@ -1,0 +1,1 @@
+Giờ k tăng lên. Mỗi bước đọc 32 số float từ hàng tiếp theo của N. Đó là thêm một đoạn 128 byte, cách xa thêm 4 kilobyte. Lại 4 sector, và lại không lãng phí gì. Hãy xem hai bộ đếm ở phía dưới: số byte được nạp, và số byte warp thực sự cần. Chúng cùng tăng, hết bước này đến bước khác.

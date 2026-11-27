@@ -1,0 +1,1 @@
+Hai vòng lặp còn lại của sách, với cùng thời lượng. Một lần lặp mất khoảng 9 rưỡi đơn vị với MPI và stream, và khoảng 7 rưỡi với NCCL hoặc NVSHMEM, khi cả hai bước trao đổi được ẩn sau kernel bên trong. Ở cả ba cách, host bị chặn trong phần lớn mỗi lần lặp. Điều thay đổi là ai chờ ai.

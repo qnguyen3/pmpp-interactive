@@ -1,0 +1,1 @@
+Mọi trọng số được chia cho 2. Lưới giá trị của định dạng 4 bit trượt vào: 0, một nửa, 1, một rưỡi, 2, 3, 4 và 6. Mỗi chấm bám vào điểm lưới gần nhất. Giá trị ngoại lai rơi đúng vào 6, giá trị lớn nhất. Gần như mọi trọng số khác giờ gần 0 hơn là gần một nửa.

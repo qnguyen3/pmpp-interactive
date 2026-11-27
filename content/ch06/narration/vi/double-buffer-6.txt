@@ -1,0 +1,1 @@
+Kernel phân ô của chương 5 cũng có cặp như vậy. Rào chắn 1 bảo vệ một sự phụ thuộc thật. Rào chắn 2 chỉ ngăn giai đoạn kế tiếp ghi đè lên các ô vẫn đang được đọc: một sự phụ thuộc giả. Hai cặp ô loại bỏ nó, với cái giá là gấp đôi bộ nhớ chia sẻ. Lab 6.5 yêu cầu bạn làm đúng điều đó, với trình phát hiện race condition theo dõi.

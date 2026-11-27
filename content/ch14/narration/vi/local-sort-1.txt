@@ -1,0 +1,1 @@
+Đây là phép phân tán trực tiếp của mục 14.5. Bốn luồng của khối 0 ghi vào bucket số không, rồi bucket số một, rồi số không, rồi số một, cách xa nhau. Trong một warp 32 luồng, các số không tạo thành một dải và các số một tạo thành dải khác. Hai dải đó tốn từ 4 đến 7 sector 32 byte, trong khi một lần ghi được hợp nhất chỉ tốn 4.

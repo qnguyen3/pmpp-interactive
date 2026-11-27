@@ -1,0 +1,1 @@
+Phân tán trước. Mỗi luồng trong 4 luồng giữ một nguyên tử, và các luồng chạy đồng bộ từng bước. Ở bước đầu tiên, cả 4 tính phần đóng góp của mình vào điểm 0 và cộng vào cùng một lúc. Tất cả chúng đều nhắm vào một địa chỉ, nên 4 lần cập nhật nguyên tử xếp hàng và được thực hiện lần lượt từng cái một.

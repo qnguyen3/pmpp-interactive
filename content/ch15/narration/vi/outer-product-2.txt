@@ -1,0 +1,1 @@
+Đầu ra tiếp theo, lệch một cột sang phải, cần đúng 8 giá trị đó của A, và đọc lại từng giá trị một lần nữa. Mỗi giá trị của A được nạp một lần cho mỗi cột trong 8 cột, mỗi giá trị của B được nạp một lần cho mỗi hàng trong 8 hàng. Khi mảng đầu ra xong, con số là 1024 lần đọc cho 512 phép nhân cộng.

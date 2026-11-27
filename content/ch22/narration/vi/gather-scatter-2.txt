@@ -1,0 +1,1 @@
+Đầu tiên, mỗi đầu ra một luồng. Mỗi luồng kéo vào 3 đầu vào của nó và cộng chúng lại trong một thanh ghi mà chỉ nó nhìn thấy. Rồi nó ghi tổng của mình một lần. Cả 6 lần ghi rơi vào các ô khác nhau trong cùng một lúc. Không có hai luồng nào ghi vào cùng một chỗ, nên không cần phép toán nguyên tử nào.

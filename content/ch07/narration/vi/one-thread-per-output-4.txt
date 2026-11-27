@@ -1,0 +1,1 @@
+Giờ là luồng ở góc trên bên trái, luồng 0, 0 của khối 0, 0. Mảng của nó chìa ra 2 hàng phía trên và 2 cột phía trái. 16 trong 25 điểm lọc của nó rơi vào ô ma. Phép kiểm tra biên bỏ qua chúng, và điều đó cho cùng một tổng như khi nhân với 0.

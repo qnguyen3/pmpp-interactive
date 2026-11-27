@@ -1,0 +1,1 @@
+Trong ví dụ đồ chơi này, mỗi khối giữ 4 khóa cho 8 luồng: ít hơn một khóa cho mỗi luồng. Đó là lúc CUB bỏ qua vùng đệm và ghi rải trực tiếp. Nó chỉ dùng vùng đệm khi một ô giữ nhiều khóa hơn số luồng nó có. Lab 12.3 đo thời gian ghi rải trực tiếp và ghi rải qua vùng đệm trên thiết bị của bạn.

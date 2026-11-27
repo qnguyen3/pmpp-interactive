@@ -21,8 +21,10 @@
 //     publisher's page) with those of the 5th by title. The pairing is our
 //     inference (notes/today/ch01-facts.md, A15 and its addendum).
 //
-// No imports and no syntax that needs compiling away beyond types, so the
-// browser checks can load this file directly.
+// It imports only lib/locale.ts and uses no syntax that needs compiling away
+// beyond types, so the browser checks can load this file directly.
+
+import { tr } from '../lib/locale.ts';
 
 export type Part = 'I' | 'II' | 'III';
 export type Tier = 'Deep' | 'Standard' | 'Condensed';
@@ -44,41 +46,45 @@ export interface ChapterInfo {
   tier: Tier;
 }
 
-const ch = (n: number, title: string, short: string, pages: string, tier: Tier): ChapterInfo => ({
+const ch = (n: number, title: () => string, short: () => string, pages: string, tier: Tier): ChapterInfo => ({
   n,
   id: 'ch' + String(n).padStart(2, '0'),
-  title,
-  short,
+  get title() {
+    return title();
+  },
+  get short() {
+    return short();
+  },
   part: n >= 2 && n <= 6 ? 'I' : n >= 7 && n <= 15 ? 'II' : n >= 16 && n <= 23 ? 'III' : null,
   pages,
   tier,
 });
 
 export const CHAPTERS: ChapterInfo[] = [
-  ch(1, 'Introduction', 'Introduction', '1–20', 'Condensed'),
-  ch(2, 'Heterogeneous data-parallel computing', 'Data-parallel computing', '21–44', 'Deep'),
-  ch(3, 'Multidimensional grids and data', 'Grids and data', '45–66', 'Deep'),
-  ch(4, 'Compute architecture and scheduling', 'Architecture, scheduling', '67–92', 'Deep'),
-  ch(5, 'Memory architecture and data locality', 'Memory, data locality', '93–121', 'Deep'),
-  ch(6, 'Performance considerations', 'Performance checklist', '123–155', 'Deep'),
-  ch(7, 'Convolution', 'Convolution', '159–181', 'Standard'),
-  ch(8, 'Stencil computation', 'Stencil', '183–199', 'Condensed'),
-  ch(9, 'Histogram', 'Histogram', '201–220', 'Standard'),
-  ch(10, 'Reduction', 'Reduction', '221–250', 'Deep'),
-  ch(11, 'Scan', 'Scan', '251–287', 'Deep'),
-  ch(12, 'Filter', 'Filter', '289–302', 'Deep'),
-  ch(13, 'Merge', 'Merge', '303–328', 'Condensed'),
-  ch(14, 'Sorting', 'Sorting', '329–348', 'Standard'),
-  ch(15, 'Advanced optimizations for matrix multiplication', 'Advanced matmul', '349–370', 'Deep'),
-  ch(16, 'Dynamic programming and wavefront parallelism', 'Wavefront parallelism', '373–400', 'Condensed'),
-  ch(17, 'Sparse matrix computation', 'Sparse matrices', '401–423', 'Condensed'),
-  ch(18, 'Graph traversal', 'Graph traversal', '425–451', 'Condensed'),
-  ch(19, 'Convolutional neural networks', 'Convolutional networks', '453–475', 'Standard'),
-  ch(20, 'Large language models', 'Language models', '477–512', 'Deep'),
-  ch(21, 'Electrostatic potential map', 'Electrostatic map', '513–528', 'Condensed'),
-  ch(22, 'Algorithm selection and problem formulation', 'Algorithm selection', '529–540', 'Standard'),
-  ch(23, 'Multi-GPU programming', 'Multi-GPU', '541–576', 'Condensed'),
-  ch(24, 'Conclusion and future outlook', 'Conclusion', '577–580', 'Condensed'),
+  ch(1, () => tr('Introduction', 'Giới thiệu'), () => tr('Introduction', 'Giới thiệu'), '1–20', 'Condensed'),
+  ch(2, () => tr('Heterogeneous data-parallel computing', 'Tính toán song song dữ liệu trên hệ thống không đồng nhất'), () => tr('Data-parallel computing', 'Song song dữ liệu'), '21–44', 'Deep'),
+  ch(3, () => tr('Multidimensional grids and data', 'Lưới đa chiều và dữ liệu'), () => tr('Grids and data', 'Lưới và dữ liệu'), '45–66', 'Deep'),
+  ch(4, () => tr('Compute architecture and scheduling', 'Kiến trúc tính toán và lập lịch'), () => tr('Architecture, scheduling', 'Kiến trúc, lập lịch'), '67–92', 'Deep'),
+  ch(5, () => tr('Memory architecture and data locality', 'Kiến trúc bộ nhớ và tính cục bộ dữ liệu'), () => tr('Memory, data locality', 'Bộ nhớ, tính cục bộ'), '93–121', 'Deep'),
+  ch(6, () => tr('Performance considerations', 'Các cân nhắc về hiệu năng'), () => tr('Performance checklist', 'Danh sách kiểm tra hiệu năng'), '123–155', 'Deep'),
+  ch(7, () => tr('Convolution', 'Tích chập'), () => tr('Convolution', 'Tích chập'), '159–181', 'Standard'),
+  ch(8, () => tr('Stencil computation', 'Tính toán stencil'), () => tr('Stencil', 'Stencil'), '183–199', 'Condensed'),
+  ch(9, () => tr('Histogram', 'Histogram'), () => tr('Histogram', 'Histogram'), '201–220', 'Standard'),
+  ch(10, () => tr('Reduction', 'Phép rút gọn (reduction)'), () => tr('Reduction', 'Phép rút gọn'), '221–250', 'Deep'),
+  ch(11, () => tr('Scan', 'Scan (tổng tiền tố)'), () => tr('Scan', 'Scan'), '251–287', 'Deep'),
+  ch(12, () => tr('Filter', 'Lọc (filter)'), () => tr('Filter', 'Lọc'), '289–302', 'Deep'),
+  ch(13, () => tr('Merge', 'Trộn (merge)'), () => tr('Merge', 'Trộn'), '303–328', 'Condensed'),
+  ch(14, () => tr('Sorting', 'Sắp xếp'), () => tr('Sorting', 'Sắp xếp'), '329–348', 'Standard'),
+  ch(15, () => tr('Advanced optimizations for matrix multiplication', 'Tối ưu hóa nâng cao cho phép nhân ma trận'), () => tr('Advanced matmul', 'Nhân ma trận nâng cao'), '349–370', 'Deep'),
+  ch(16, () => tr('Dynamic programming and wavefront parallelism', 'Quy hoạch động và song song theo wavefront'), () => tr('Wavefront parallelism', 'Song song theo wavefront'), '373–400', 'Condensed'),
+  ch(17, () => tr('Sparse matrix computation', 'Tính toán ma trận thưa'), () => tr('Sparse matrices', 'Ma trận thưa'), '401–423', 'Condensed'),
+  ch(18, () => tr('Graph traversal', 'Duyệt đồ thị'), () => tr('Graph traversal', 'Duyệt đồ thị'), '425–451', 'Condensed'),
+  ch(19, () => tr('Convolutional neural networks', 'Mạng nơ-ron tích chập'), () => tr('Convolutional networks', 'Mạng tích chập'), '453–475', 'Standard'),
+  ch(20, () => tr('Large language models', 'Mô hình ngôn ngữ lớn'), () => tr('Language models', 'Mô hình ngôn ngữ'), '477–512', 'Deep'),
+  ch(21, () => tr('Electrostatic potential map', 'Bản đồ thế tĩnh điện'), () => tr('Electrostatic map', 'Bản đồ tĩnh điện'), '513–528', 'Condensed'),
+  ch(22, () => tr('Algorithm selection and problem formulation', 'Lựa chọn thuật toán và phát biểu bài toán'), () => tr('Algorithm selection', 'Chọn thuật toán'), '529–540', 'Standard'),
+  ch(23, () => tr('Multi-GPU programming', 'Lập trình đa GPU'), () => tr('Multi-GPU', 'Đa GPU'), '541–576', 'Condensed'),
+  ch(24, () => tr('Conclusion and future outlook', 'Kết luận và triển vọng'), () => tr('Conclusion', 'Kết luận'), '577–580', 'Condensed'),
 ];
 
 export const chapter = (n: number): ChapterInfo => {
@@ -235,11 +241,11 @@ export interface ExtraInfo {
   tier: Tier;
 }
 export const EXTRAS: ExtraInfo[] = [
-  { id: 'appA', num: 'A', title: 'Numerical considerations', short: 'Numerics', pages: '583–600', tier: 'Standard' },
-  { id: 'appC', num: 'C', title: 'CUDA memories, address spaces, and pointers', short: 'CUDA memory models', pages: '623–629', tier: 'Standard' },
-  { id: 'x1', num: 'X1', title: 'Sampling kernels', short: 'Sampling kernels', pages: null, tier: 'Deep' },
-  { id: 'x2', num: 'X2', title: 'Quantised kernels', short: 'Quantised kernels', pages: null, tier: 'Deep' },
-  { id: 'x3', num: 'X3', title: 'Reading real backends', short: 'Reading real backends', pages: null, tier: 'Standard' },
+  { id: 'appA', num: 'A', get title() { return tr('Numerical considerations', 'Các cân nhắc về số học'); }, get short() { return tr('Numerics', 'Số học'); }, pages: '583–600', tier: 'Standard' },
+  { id: 'appC', num: 'C', get title() { return tr('CUDA memories, address spaces, and pointers', 'Bộ nhớ, không gian địa chỉ và con trỏ trong CUDA'); }, get short() { return tr('CUDA memory models', 'Mô hình bộ nhớ CUDA'); }, pages: '623–629', tier: 'Standard' },
+  { id: 'x1', num: 'X1', get title() { return tr('Sampling kernels', 'Kernel lấy mẫu'); }, get short() { return tr('Sampling kernels', 'Kernel lấy mẫu'); }, pages: null, tier: 'Deep' },
+  { id: 'x2', num: 'X2', get title() { return tr('Quantised kernels', 'Kernel lượng tử hóa'); }, get short() { return tr('Quantised kernels', 'Kernel lượng tử hóa'); }, pages: null, tier: 'Deep' },
+  { id: 'x3', num: 'X3', get title() { return tr('Reading real backends', 'Đọc các backend thực tế'); }, get short() { return tr('Reading real backends', 'Đọc các backend thực tế'); }, pages: null, tier: 'Standard' },
 ];
 export const extra = (id: ExtraId): ExtraInfo => EXTRAS.find((x) => x.id === id)!;
 
@@ -257,11 +263,11 @@ export interface Goal {
 }
 /** Which chapters each of the reader's goals ends at. Ours, from PLAN.md sections 2 and 3. */
 export const GOALS: Goal[] = [
-  { id: 'matmul', label: 'Fast matmul', chapters: [15], extras: [] },
-  { id: 'attention', label: 'Attention', chapters: [20], extras: [] },
-  { id: 'sampling', label: 'Sampling', chapters: [10, 11, 12, 14], extras: ['x1'] },
-  { id: 'quantised', label: 'Quantised kernels', chapters: [15], extras: ['appA', 'x2'] },
-  { id: 'backends', label: 'Reading real backends', chapters: [], extras: ['x3'] },
+  { id: 'matmul', get label() { return tr('Fast matmul', 'Nhân ma trận nhanh'); }, chapters: [15], extras: [] },
+  { id: 'attention', get label() { return tr('Attention', 'Attention'); }, chapters: [20], extras: [] },
+  { id: 'sampling', get label() { return tr('Sampling', 'Lấy mẫu'); }, chapters: [10, 11, 12, 14], extras: ['x1'] },
+  { id: 'quantised', get label() { return tr('Quantised kernels', 'Kernel lượng tử hóa'); }, chapters: [15], extras: ['appA', 'x2'] },
+  { id: 'backends', get label() { return tr('Reading real backends', 'Đọc các backend thực tế'); }, chapters: [], extras: ['x3'] },
 ];
 export const goal = (id: GoalId): Goal => GOALS.find((g) => g.id === id)!;
 
@@ -280,15 +286,15 @@ export interface Stage {
  * reader is in it) and chapter 5 sits with the other foundations.
  */
 export const COURSE_STAGES: Stage[] = [
-  { name: 'Where you are', items: [1], placedHere: [1] },
-  { name: 'Foundations', items: [2, 3, 4, 5, 6], placedHere: [5] },
-  { name: 'Matrix multiplication', items: [15] },
-  { name: 'Sampling', items: [10, 11, 12, 14, 9, 'x1'] },
-  { name: 'Attention and batching', items: [20, 22] },
-  { name: 'Quantisation', items: ['appA', 'x2'] },
-  { name: 'Convolution, CNNs and memory models', items: [7, 19, 'appC'] },
-  { name: 'Reading real backends', items: ['x3'] },
-  { name: 'Condensed chapters', items: [8, 13, 16, 17, 18, 21, 23, 24] },
+  { get name() { return tr('Where you are', 'Bạn đang ở đây'); }, items: [1], placedHere: [1] },
+  { get name() { return tr('Foundations', 'Nền tảng'); }, items: [2, 3, 4, 5, 6], placedHere: [5] },
+  { get name() { return tr('Matrix multiplication', 'Phép nhân ma trận'); }, items: [15] },
+  { get name() { return tr('Sampling', 'Lấy mẫu'); }, items: [10, 11, 12, 14, 9, 'x1'] },
+  { get name() { return tr('Attention and batching', 'Attention và batching'); }, items: [20, 22] },
+  { get name() { return tr('Quantisation', 'Lượng tử hóa'); }, items: ['appA', 'x2'] },
+  { get name() { return tr('Convolution, CNNs and memory models', 'Tích chập, CNN và mô hình bộ nhớ'); }, items: [7, 19, 'appC'] },
+  { get name() { return tr('Reading real backends', 'Đọc các backend thực tế'); }, items: ['x3'] },
+  { get name() { return tr('Condensed chapters', 'Các chương rút gọn'); }, items: [8, 13, 16, 17, 18, 21, 23, 24] },
 ];
 
 /**
@@ -332,13 +338,13 @@ export interface CourseLink {
 }
 /** Prerequisites this course adds to the book's arrows. Ours. */
 export const COURSE_LINKS: CourseLink[] = [
-  { from: 10, to: 20, source: 'notes/ch20.md, pp. 488 and 497–501; notes/ch10.md, §10.7' },
-  { from: 10, to: 'x1', source: 'PLAN.md section 3' },
-  { from: 11, to: 'x1', source: 'PLAN.md section 3' },
-  { from: 12, to: 'x1', source: 'PLAN.md section 3' },
-  { from: 14, to: 'x1', source: 'PLAN.md section 3' },
-  { from: 'appA', to: 'x2', source: 'PLAN.md section 3' },
-  { from: 15, to: 'x2', source: 'PLAN.md section 3' },
+  { from: 10, to: 20, get source() { return tr('notes/ch20.md, pp. 488 and 497–501; notes/ch10.md, §10.7', 'notes/ch20.md, pp. 488 và 497–501; notes/ch10.md, §10.7'); } },
+  { from: 10, to: 'x1', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
+  { from: 11, to: 'x1', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
+  { from: 12, to: 'x1', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
+  { from: 14, to: 'x1', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
+  { from: 'appA', to: 'x2', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
+  { from: 15, to: 'x2', get source() { return tr('PLAN.md section 3', 'PLAN.md mục 3'); } },
 ];
 
 export interface CoursePath {
@@ -411,41 +417,47 @@ const same: Fate = { kind: 'same' };
 const moved = (to: number): Fate => ({ kind: 'moved', to });
 
 export const FOURTH_TO_FIFTH: FourthChapter[] = [
-  { n: 1, title: 'Introduction', fate: same },
-  { n: 2, title: 'Heterogeneous data parallel computing', fate: same },
-  { n: 3, title: 'Multidimensional grids and data', fate: same },
-  { n: 4, title: 'Compute architecture and scheduling', fate: same },
-  { n: 5, title: 'Memory architecture and data locality', fate: same },
-  { n: 6, title: 'Performance considerations', fate: same },
-  { n: 7, title: 'Convolution', fate: same },
-  { n: 8, title: 'Stencil', fate: same },
-  { n: 9, title: 'Parallel histogram', fate: same },
-  { n: 10, title: 'Reduction', fate: same },
-  { n: 11, title: 'Prefix sum (scan)', fate: same },
-  { n: 12, title: 'Merge', fate: moved(13) },
-  { n: 13, title: 'Sorting', fate: moved(14) },
-  { n: 14, title: 'Sparse matrix computation', fate: moved(17) },
-  { n: 15, title: 'Graph traversal', fate: moved(18) },
-  { n: 16, title: 'Deep learning', fate: moved(19) },
+  { n: 1, get title() { return tr('Introduction', 'Giới thiệu'); }, fate: same },
+  { n: 2, get title() { return tr('Heterogeneous data parallel computing', 'Tính toán song song dữ liệu trên hệ thống không đồng nhất'); }, fate: same },
+  { n: 3, get title() { return tr('Multidimensional grids and data', 'Lưới đa chiều và dữ liệu'); }, fate: same },
+  { n: 4, get title() { return tr('Compute architecture and scheduling', 'Kiến trúc tính toán và lập lịch'); }, fate: same },
+  { n: 5, get title() { return tr('Memory architecture and data locality', 'Kiến trúc bộ nhớ và tính cục bộ dữ liệu'); }, fate: same },
+  { n: 6, get title() { return tr('Performance considerations', 'Các cân nhắc về hiệu năng'); }, fate: same },
+  { n: 7, get title() { return tr('Convolution', 'Tích chập'); }, fate: same },
+  { n: 8, get title() { return tr('Stencil', 'Stencil'); }, fate: same },
+  { n: 9, get title() { return tr('Parallel histogram', 'Histogram song song'); }, fate: same },
+  { n: 10, get title() { return tr('Reduction', 'Phép rút gọn'); }, fate: same },
+  { n: 11, get title() { return tr('Prefix sum (scan)', 'Tổng tiền tố (scan)'); }, fate: same },
+  { n: 12, get title() { return tr('Merge', 'Trộn (merge)'); }, fate: moved(13) },
+  { n: 13, get title() { return tr('Sorting', 'Sắp xếp'); }, fate: moved(14) },
+  { n: 14, get title() { return tr('Sparse matrix computation', 'Tính toán ma trận thưa'); }, fate: moved(17) },
+  { n: 15, get title() { return tr('Graph traversal', 'Duyệt đồ thị'); }, fate: moved(18) },
+  { n: 16, get title() { return tr('Deep learning', 'Học sâu'); }, fate: moved(19) },
   {
     n: 17,
-    title: 'Iterative magnetic resonance imaging reconstruction',
-    fate: { kind: 'removed', note: 'Its scatter-versus-gather lesson duplicated the electrostatic potential map chapter, which took over some of its fundamentals.', foldedInto: 21 },
+    get title() {
+      return tr('Iterative magnetic resonance imaging reconstruction', 'Tái tạo ảnh cộng hưởng từ theo phương pháp lặp');
+    },
+    fate: { kind: 'removed', get note() { return tr('Its scatter-versus-gather lesson duplicated the electrostatic potential map chapter, which took over some of its fundamentals.', 'Bài học scatter so với gather của nó trùng với chương bản đồ thế tĩnh điện, và chương đó đã tiếp nhận một phần kiến thức nền tảng của nó.'); }, foldedInto: 21 },
   },
-  { n: 18, title: 'Electrostatic potential map', fate: moved(21) },
-  { n: 19, title: 'Parallel programming and computational thinking', fate: moved(22) },
-  { n: 20, title: 'Programming a heterogeneous computing cluster', fate: moved(23) },
+  { n: 18, get title() { return tr('Electrostatic potential map', 'Bản đồ thế tĩnh điện'); }, fate: moved(21) },
+  { n: 19, get title() { return tr('Parallel programming and computational thinking', 'Lập trình song song và tư duy tính toán'); }, fate: moved(22) },
+  { n: 20, get title() { return tr('Programming a heterogeneous computing cluster', 'Lập trình một cụm máy tính không đồng nhất'); }, fate: moved(23) },
   {
     n: 21,
-    title: 'CUDA dynamic parallelism',
-    fate: { kind: 'removed', note: 'Dropped because the feature saw little adoption. The Preface points to the CUDA programming guide and to older editions.' },
+    get title() {
+      return tr('CUDA dynamic parallelism', 'Song song động trong CUDA');
+    },
+    fate: { kind: 'removed', get note() { return tr('Dropped because the feature saw little adoption. The Preface points to the CUDA programming guide and to older editions.', 'Bị bỏ vì tính năng này ít được dùng. Lời nói đầu chỉ đến CUDA programming guide và các ấn bản cũ hơn.'); } },
   },
   {
     n: 22,
-    title: 'Advanced practices and future evolution',
-    fate: { kind: 'removed', note: 'Cooperative groups and thread block clusters are now used in the regular chapters. The history of the CUDA memory model moved to an appendix.', appendix: 'C' },
+    get title() {
+      return tr('Advanced practices and future evolution', 'Các kỹ thuật nâng cao và hướng phát triển tương lai');
+    },
+    fate: { kind: 'removed', get note() { return tr('Cooperative groups and thread block clusters are now used in the regular chapters. The history of the CUDA memory model moved to an appendix.', 'Cooperative groups và cụm khối luồng (thread block cluster) giờ được dùng trong các chương chính. Lịch sử của mô hình bộ nhớ CUDA đã chuyển sang một phụ lục.'); }, appendix: 'C' },
   },
-  { n: 23, title: 'Conclusion and outlook', fate: moved(24) },
+  { n: 23, get title() { return tr('Conclusion and outlook', 'Kết luận và triển vọng'); }, fate: moved(24) },
 ];
 
 /** 5th-edition chapters with no counterpart in the 4th. */

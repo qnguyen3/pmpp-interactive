@@ -21,6 +21,8 @@
 //     number and converting it to a byte is undefined behaviour.
 //   - One channel, tiny pictures, no timing.
 
+import { tr } from '../lib/locale.ts';
+
 export interface Picture {
   w: number;
   h: number;
@@ -170,9 +172,15 @@ export function trace(pic: Picture, row: number, col: number, r: number): Trace 
 export type Order = 'forward' | 'reversed' | 'shuffled';
 export const ORDERS: Order[] = ['forward', 'reversed', 'shuffled'];
 export const ORDER_LABEL: Record<Order, string> = {
-  forward: 'in order',
-  reversed: 'reversed',
-  shuffled: 'shuffled',
+  get forward() {
+    return tr('in order', 'theo thứ tự');
+  },
+  get reversed() {
+    return tr('reversed', 'đảo ngược');
+  },
+  get shuffled() {
+    return tr('shuffled', 'xáo trộn');
+  },
 };
 
 export interface BlurOptions {
@@ -380,13 +388,27 @@ export function tally(accesses: BadAccess[]) {
 export type Defect = Clause | 'area' | 'outer' | 'inPlace';
 export const DEFECTS: Defect[] = ['rowLo', 'rowHi', 'colLo', 'colHi', 'area', 'outer', 'inPlace'];
 export const DEFECT_LABEL: Record<Defect, string> = {
-  rowLo: 'curRow >= 0 is missing',
-  rowHi: 'curRow < h is missing',
-  colLo: 'curCol >= 0 is missing',
-  colHi: 'curCol < w is missing',
-  area: 'the divisor is the patch area',
-  outer: 'the outer guard (line 05) is missing',
-  inPlace: 'out is the same buffer as in',
+  get rowLo() {
+    return tr('curRow >= 0 is missing', 'thiếu curRow >= 0');
+  },
+  get rowHi() {
+    return tr('curRow < h is missing', 'thiếu curRow < h');
+  },
+  get colLo() {
+    return tr('curCol >= 0 is missing', 'thiếu curCol >= 0');
+  },
+  get colHi() {
+    return tr('curCol < w is missing', 'thiếu curCol < w');
+  },
+  get area() {
+    return tr('the divisor is the patch area', 'số chia là diện tích vùng');
+  },
+  get outer() {
+    return tr('the outer guard (line 05) is missing', 'thiếu phép kiểm tra ngoài (dòng 05)');
+  },
+  get inPlace() {
+    return tr('out is the same buffer as in', 'out và in là cùng một buffer');
+  },
 };
 
 /** The correct kernel with exactly one thing wrong. */

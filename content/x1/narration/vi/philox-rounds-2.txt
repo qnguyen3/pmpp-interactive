@@ -1,0 +1,1 @@
+Một vòng. Từ không và từ hai được nhân với hai hằng số Philox cố định. Mỗi tích sáu mươi tư bit tách thành nửa cao và nửa thấp. Các nửa cao được trộn với hai từ còn lại và khóa bằng phép hoặc loại trừ. Rồi bốn từ đổi chỗ cho nhau, sẵn sàng cho vòng tiếp theo.

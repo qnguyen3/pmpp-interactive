@@ -1,0 +1,1 @@
+Vòng 1, luồng 0 chạy trước. Mỗi luồng đọc hai phần tử lân cận trong x, cộng chúng lại, và ghi một phần tử của y. Không ai ghi vào x cả. Nên mọi luồng đều thấy những con số ban đầu, bất kể nó chạy lúc nào.
